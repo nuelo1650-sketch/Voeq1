@@ -1,0 +1,98 @@
+/*
+ * Voeq design tokens — PROVISIONAL (Doc 05 B.1 / B.2).
+ *
+ * CONTRACT (enforced by QC principle, Doc 05 after C):
+ *   - Every visual value used by the product lives HERE as a `--role-*` token.
+ *   - Components read `var(--role-*)`. They NEVER hardcode hex, spacing, or radii.
+ *   - To retune the brand (palette / type), edit only this file. Zero component edits.
+ *   - Hex values below are PROVISIONAL and adjustable in real composition — not locked.
+ *
+ * ENVIRONMENTS (Doc 05 A.3, Doc 06 §2):
+ *   - Two environments, ONE world. Cream is the default environment.
+ *   - Deep overrides ONLY color-role tokens (forest arrival); structure/spacing/grid are shared.
+ *   - Flip = set `data-env="deep"` (or "cream") on the <html> element. No second stylesheet.
+ */
+
+:root,
+:root[data-env="cream"] {
+  /* ---- Color roles: Cream environment (default) ---- */
+  --role-bg: #f7f4ec;            /* cream canvas */
+  --role-surface: #ffffff;        /* card / panel */
+  --role-surface-sunken: #efe9dc; /* inset / hover */
+  --role-text: #1f2a22;           /* near-black green-ink */
+  --role-text-muted: #5c6b5f;
+  --role-border: #ddd5c4;
+  --role-accent: #2f6b3f;         /* forest green */
+  --role-accent-strong: #1f4d2c;  /* deepest green — focus ring / strong CTA */
+  --role-gold: #b8893b;           /* restrained gold — accents only, never body text */
+  --role-danger: #9c3b2e;
+  --role-on-accent: #f7f4ec;
+
+  /* ---- Typography roles (PROVISIONAL pairing: Fraunces display + Hanken Grotesk UI, B.2) ---- */
+  --role-font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --role-font-ui: var(--font-hanken), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --role-font-mono: ui-monospace, "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+
+  /* ---- Spacing scale: 8pt base (B.3) ---- */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 48px;
+  --space-6: 64px;
+  --space-8: 96px;
+
+  /* ---- Grid (B.4): 12 columns, container rule ---- */
+  --grid-cols: 12;
+  --grid-gap: var(--space-2);
+  --container-max: 1200px;
+  --container-pad: var(--space-2);
+
+  /* ---- Radius / shadow foundations ---- */
+  --radius: 4px;
+  --radius-lg: 12px;
+  --shadow-1: 0 1px 2px rgba(31, 42, 34, 0.08);
+  --shadow-2: 0 4px 12px rgba(31, 42, 34, 0.10);
+
+  /* ---- Motion budget (D.7 / D.8) ---- */
+  --motion-fast: 160ms;
+  --motion-med: 320ms;
+  --motion-ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  color-scheme: light;
+}
+
+:root[data-env="deep"] {
+  /* ---- Color roles: Deep environment (forest arrival) — overrides color ONLY ---- */
+  --role-bg: #10231a;            /* deep forest */
+  --role-surface: #173025;
+  --role-surface-sunken: #0c1b13;
+  --role-text: #eef3ec;
+  --role-text-muted: #9fb3a4;
+  --role-border: #2a463a;
+  --role-accent: #6fcf97;        /* brighter green for dark ground */
+  --role-accent-strong: #8fe3b0;
+  --role-gold: #e0b964;          /* gold reads on forest */
+  --role-danger: #e08a7a;
+  --role-on-accent: #10231a;
+
+  color-scheme: dark;
+}
+
+/* Reduced motion: disable non-essential transitions/animations (D.8 LOCKED) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accessible focus ring (B.8 LOCKED): 2px accent-strong, keyboard only */
+:focus-visible {
+  outline: 2px solid var(--role-accent-strong);
+  outline-offset: 2px;
+}

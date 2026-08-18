@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq — The Campus Broadsheet (Direction A)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4EFE2; --paper-2:#EDE6D4; --ink:#1E3A29; --ink-soft:#33493B;
+    --gold:#9C7A2E; --rule:#C9BE9E; --line:#D8CFB4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  .folio{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft)}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+  /* masthead */
+  .masthead{border-bottom:2px solid var(--ink);padding:14px 0 10px}
+  .masthead .wrap{display:flex;justify-content:space-between;align-items:flex-end}
+  .mast-l{display:flex;flex-direction:column;gap:4px}
+  .wordmark{font-family:Fraunces,serif;font-weight:600;font-size:34px;letter-spacing:-.02em;line-height:1}
+  .nav{display:flex;gap:26px;align-items:center}
+  .nav a{color:var(--ink);text-decoration:none;font-size:14px;font-weight:500}
+  .nav a:hover{color:var(--gold)}
+  .btn-ghost{border:1px solid var(--ink);padding:9px 16px;border-radius:0;font-size:13px;font-weight:600;text-decoration:none;color:var(--ink)}
+  .btn-solid{background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:0;font-size:13px;font-weight:600;text-decoration:none}
+  .rule{height:1px;background:var(--rule);margin:0}
+  .gold-rule{height:3px;background:var(--gold);width:64px;margin:18px 0}
+  /* hero */
+  .hero{padding:54px 0 40px}
+  .hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:start}
+  .kicker{margin-bottom:18px}
+  .headline{font-family:Fraunces,serif;font-weight:600;font-size:62px;line-height:.98;letter-spacing:-.025em}
+  .headline em{font-style:italic;font-weight:500;color:var(--ink-soft)}
+  .lede{margin-top:22px;font-size:17px;line-height:1.55;max-width:34ch;color:var(--ink-soft)}
+  .search{margin-top:30px;display:flex;border:1.5px solid var(--ink)}
+  .search input{flex:1;border:0;background:transparent;padding:15px 16px;font-size:15px;font-family:Inter;color:var(--ink)}
+  .search input:focus{outline:none}
+  .search button{background:var(--ink);color:var(--paper);border:0;padding:0 26px;font-weight:600;font-size:14px;cursor:pointer}
+  .hero-side{border-left:1px solid var(--line);padding-left:30px}
+  .feat-label{margin-bottom:14px}
+  .feat-card{}
+  .feat-photo{width:100%;aspect-ratio:4/5;background:#2c4636 url('https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=600&q=70') center/cover;}
+  .feat-name{font-family:Fraunces,serif;font-size:26px;margin-top:14px;font-weight:600}
+  .feat-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--gold);margin-top:6px;text-transform:uppercase}
+  .feat-quote{font-style:italic;font-family:Fraunces,serif;font-size:15px;color:var(--ink-soft);margin-top:10px;line-height:1.4}
+  /* sections */
+  section{padding:42px 0}
+  .sec-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--ink);padding-bottom:10px;margin-bottom:26px}
+  .sec-title{font-family:Fraunces,serif;font-size:30px;font-weight:600;letter-spacing:-.01em}
+  /* categories as folio list */
+  .cat-list{display:grid;grid-template-columns:repeat(3,1fr);gap:0 40px}
+  .cat-row{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--line);align-items:baseline}
+  .cat-num{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--gold);min-width:26px}
+  .cat-name{font-size:16px;font-weight:500}
+  .cat-sub{font-size:12px;color:var(--ink-soft);margin-left:auto}
+  /* trending editorial cards */
+  .trend{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+  .tcard{border-top:2px solid var(--ink);padding-top:14px}
+  .tcard .ph{width:100%;aspect-ratio:3/2;background:#2c4636 url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=70') center/cover}
+  .tcard h4{font-family:Fraunces,serif;font-size:21px;margin-top:12px;font-weight:600}
+  .tcard p{font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.45}
+  .tcard .by{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:var(--gold);margin-top:10px;text-transform:uppercase}
+  /* manifesto */
+  .manifesto{background:var(--ink);color:var(--paper);padding:64px 0}
+  .manifesto .wrap{max-width:820px}
+  .manifesto .big{font-family:Fraunces,serif;font-size:34px;line-height:1.25;font-weight:500}
+  .manifesto .big em{color:var(--gold);font-style:italic}
+  .manifesto .sig{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;margin-top:26px;opacity:.7}
+  /* footer */
+  footer{background:var(--paper-2);border-top:2px solid var(--ink);padding:40px 0 50px;font-size:13px}
+  footer .wrap{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
+  footer h5{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;color:var(--ink-soft)}
+  footer a{display:block;color:var(--ink);text-decoration:none;margin-bottom:7px}
+  footer a:hover{color:var(--gold)}
+  .colophon{grid-column:1/-1;border-top:1px solid var(--line);margin-top:24px;padding-top:16px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+  <div class="masthead">
+    <div class="wrap">
+      <div class="mast-l">
+        <div class="folio">Voeq — Campus Broadsheet · NMU Edition · Issue 01</div>
+        <div class="wordmark">Voeq</div>
+      </div>
+      <nav class="nav">
+        <a href="#">Discover</a><a href="#">Vendors</a><a href="#">Categories</a><a href="#">For Vendors</a>
+        <a href="#" class="btn-ghost">Sign in</a>
+        <a href="#" class="btn-solid">Become a vendor</a>
+      </nav>
+    </div>
+  </div>
+  <div class="rule"></div>
+
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <div class="kicker folio">The directory for campus commerce</div>
+        <h1 class="headline">Find the people who<br>make your campus <em>run.</em></h1>
+        <p class="lede">A verified index of the vendors and makers around NMU. Discover, read, and message — directly.</p>
+        <div class="search">
+          <input placeholder="Search food, repairs, tech, tailoring…">
+          <button>Search</button>
+        </div>
+      </div>
+      <aside class="hero-side">
+        <div class="feat-label folio">This week's cover vendor</div>
+        <div class="feat-card">
+          <div class="feat-photo"></div>
+          <div class="feat-name">Mama T's Kitchen</div>
+          <div class="feat-meta">Food · Live · Verified</div>
+          <div class="feat-quote">"I've fed half this campus out of a two-burner stove. Now they can finally find me."</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head"><div class="sec-title">The Index</div><div class="folio">Six sections · one campus</div></div>
+      <div class="cat-list">
+        <div class="cat-row"><span class="cat-num">01</span><span class="cat-name">Food &amp; Drink</span><span class="cat-sub">142</span></div>
+        <div class="cat-row"><span class="cat-num">02</span><span class="cat-name">Repairs</span><span class="cat-sub">63</span></div>
+        <div class="cat-row"><span class="cat-num">03</span><span class="cat-name">Tech &amp; Phones</span><span class="cat-sub">88</span></div>
+        <div class="cat-row"><span class="cat-num">04</span><span class="cat-name">Tailoring</span><span class="cat-sub">37</span></div>
+        <div class="cat-row"><span class="cat-num">05</span><span class="cat-name">Beauty &amp; Hair</span><span class="cat-sub">51</span></div>
+        <div class="cat-row"><span class="cat-num">06</span><span class="cat-name">Tutoring</span><span class="cat-sub">29</span></div>
+        <div class="cat-row"><span class="cat-num">07</span><span class="cat-name">Print &amp; Design</span><span class="cat-sub">18</span></div>
+        <div class="cat-row"><span class="cat-num">08</span><span class="cat-name">Photography</span><span class="cat-sub">22</span></div>
+        <div class="cat-row"><span class="cat-num">09</span><span class="cat-name">Other</span><span class="cat-sub">40</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head"><div class="sec-title">Trending on campus</div><div class="folio">Ranked by views · 7 days</div></div>
+      <div class="trend">
+        <article class="tcard"><div class="ph"></div><h4>QuickFix Repairs</h4><p>Screen swaps and charging-port fixes, same day on campus.</p><div class="by">Tech · 4.9 ★ · 210 views</div></article>
+        <article class="tcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=70')"></div><h4>Glow by Adaeze</h4><p>Braids, wigs and event makeup that show up when promised.</p><div class="by">Beauty · 4.8 ★ · 188 views</div></article>
+        <article class="tcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&q=70')"></div><h4>Campus Prints</h4><p>Projects, flyers and thesis binding delivered to your hostel.</p><div class="by">Print · 4.7 ★ · 164 views</div></article>
+      </div>
+    </div>
+  </section>
+
+  <div class="manifesto">
+    <div class="wrap">
+      <div class="big">Voeq is not a shop. It is a <em>noticeboard</em> — set in type, kept honest, and built for the people who actually live on this campus.</div>
+      <div class="sig">— The Voeq Editorial, NMU</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div>
+        <div class="wordmark" style="font-size:26px">Voeq</div>
+        <p style="margin-top:10px;color:var(--ink-soft);max-width:30ch;line-height:1.5">Find. Connect. Grow. Built for campus, built for you.</p>
+      </div>
+      <div><h5>Explore</h5><a href="#">Discover</a><a href="#">Categories</a><a href="#">Trending</a><a href="#">For Vendors</a></div>
+      <div><h5>Company</h5><a href="#">About</a><a href="#">Careers</a><a href="#">Press</a><a href="#">Contact</a></div>
+      <div><h5>Legal</h5><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Vendor Agreement</a></div>
+      <div class="colophon">© 2026 Voeq · Nigeria Maritime University pilot · Set in Fraunces &amp; Inter · A campus broadsheet.</div>
+    </div>
+  </footer>
+</body>
+</html>

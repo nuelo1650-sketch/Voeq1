@@ -1,0 +1,3 @@
+@import "tailwindcss";
+/* Voeq role tokens — the single source of visual truth (PROVISIONAL, Doc 05 B). */
+@import "@voeq/design-tokens/tokens.css";

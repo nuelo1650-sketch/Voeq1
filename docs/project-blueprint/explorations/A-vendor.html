@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq — Vendor Profile (Direction A · Broadsheet)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#F4EFE2;--paper-2:#EDE6D4;--ink:#1E3A29;--ink-soft:#33493B;--gold:#9C7A2E;--rule:#C9BE9E;--line:#D8CFB4}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 28px}
+  .folio{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft)}
+  .masthead{border-bottom:2px solid var(--ink);padding:14px 0 10px}
+  .masthead .wrap{display:flex;justify-content:space-between;align-items:flex-end}
+  .wordmark{font-family:Fraunces,serif;font-weight:600;font-size:30px;letter-spacing:-.02em}
+  .nav a{color:var(--ink);text-decoration:none;font-size:14px;font-weight:500;margin-left:24px}
+  .nav a:hover{color:var(--gold)}
+  /* vendor masthead */
+  .vhead{padding:40px 0 30px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end}
+  .vhead .kicker{margin-bottom:14px}
+  .vname{font-family:Fraunces,serif;font-weight:600;font-size:54px;line-height:.98;letter-spacing:-.02em}
+  .vmeta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.12em;color:var(--gold);margin-top:14px;text-transform:uppercase}
+  .vlede{margin-top:18px;font-size:16px;line-height:1.55;color:var(--ink-soft);max-width:40ch}
+  .vphoto{aspect-ratio:4/3;background:#2c4636 url('https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=800&q=70') center/cover;border:1px solid var(--ink)}
+  .trust{display:flex;gap:26px;margin-top:20px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .trust div{font-size:13px}
+  .trust b{font-family:Fraunces,serif;font-size:22px;display:block;font-weight:600}
+  .actions{display:flex;gap:12px;margin-top:22px}
+  .btn-solid{background:var(--ink);color:var(--paper);padding:12px 22px;border-radius:0;font-weight:600;font-size:14px;text-decoration:none}
+  .btn-ghost{border:1px solid var(--ink);color:var(--ink);padding:12px 22px;border-radius:0;font-weight:600;font-size:14px;text-decoration:none}
+  /* listings as editorial spread */
+  section{padding:40px 0}
+  .sec-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--ink);padding-bottom:10px;margin-bottom:24px}
+  .sec-title{font-family:Fraunces,serif;font-size:28px;font-weight:600}
+  .spread{display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
+  .listing{border-top:2px solid var(--ink);padding-top:14px}
+  .listing .ph{width:100%;aspect-ratio:3/2;background:#2c4636 url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=70') center/cover}
+  .listing h4{font-family:Fraunces,serif;font-size:22px;margin-top:12px;font-weight:600}
+  .listing .price{font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:13px;margin-top:6px}
+  .listing p{font-size:13.5px;color:var(--ink-soft);margin-top:8px;line-height:1.45}
+  /* reviews as pull quotes */
+  .reviews{background:var(--paper-2);border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:44px 0}
+  .rq{font-family:Fraunces,serif;font-style:italic;font-size:24px;line-height:1.3;max-width:60ch;margin:0 auto 14px}
+  .rq .by{display:block;font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--gold);margin-top:10px}
+  .review-block{max-width:760px;margin:0 auto}
+  .star{color:var(--gold);letter-spacing:2px}
+</style>
+</head>
+<body>
+  <div class="masthead"><div class="wrap"><div class="wordmark">Voeq</div><nav class="nav"><a href="#">Discover</a><a href="#">Directory</a><a href="#">Messages</a></nav></div></div>
+
+  <div class="wrap">
+    <div class="vhead">
+      <div>
+        <div class="kicker folio">Vendor Profile · Food &amp; Drink · NMU</div>
+        <div class="vname">Mama T's<br>Kitchen</div>
+        <div class="vmeta">● Open now · Verified · Live since 2025</div>
+        <p class="vlede">Home cooking delivered across the NMU hostels — jollof, soups, and small chops made the way your mother would.</p>
+        <div class="trust">
+          <div><b>4.9</b> Rating (128)</div>
+          <div><b>2.1k</b> Views</div>
+          <div><b>312</b> Messages</div>
+          <div><b>98%</b> Reply rate</div>
+        </div>
+        <div class="actions">
+          <a href="#" class="btn-solid">Message Mama T's</a>
+          <a href="#" class="btn-ghost">Save</a>
+          <a href="#" class="btn-ghost">Follow</a>
+        </div>
+      </div>
+      <div class="vphoto"></div>
+    </div>
+  </div>
+
+  <section><div class="wrap">
+    <div class="sec-head"><div class="sec-title">The Menu</div><div class="folio">4 listings</div></div>
+    <div class="spread">
+      <article class="listing"><div class="ph"></div><h4>Party Jollof Tray</h4><div class="price">₦4,500 – ₦9,000</div><p>Feeds 4–8. Smoky, generous, and ready in two hours.</p></article>
+      <article class="listing"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=70')"></div><h4>Ofada Rice &amp; Sauce</h4><div class="price">₦2,000</div><p>Local rice with the real ofada pepper sauce. Unapologetically spicy.</p></article>
+      <article class="listing"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&q=70')"></div><h4>Small Chops Pack</h4><div class="price">₦3,500</div><p>Spring rolls, puff-puff and gizdodo for your hostel hangout.</p></article>
+      <article class="listing"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600&q=70')"></div><h4>Sunday Soup Deal</h4><div class="price">₦2,800</div><p>Efo riro or egusi, delivered warm on Sundays only.</p></article>
+    </div>
+  </div></section>
+
+  <div class="reviews"><div class="wrap"><div class="review-block">
+    <div class="sec-head" style="border-color:var(--ink)"><div class="sec-title">What students say</div><div class="folio">128 reviews · 4.9 ★</div></div>
+    <p class="rq">"Ordered at 11pm during exams and she still came through. This is the only reason I ate that week." <span class="by">— Chidi, 400L · <span class="star">★★★★★</span></span></p>
+    <p class="rq">"The jollof is better than my aunty's and I will stand by that." <span class="by">— Ngozi, 200L · <span class="star">★★★★★</span></span></p>
+  </div></div></div>
+</body>
+</html>

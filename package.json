@@ -1,0 +1,23 @@
+{
+  "name": "voeq",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Voeq monorepo — Slice 0 global foundation (no product surface yet)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test -w apps/web",
+    "e2e": "npm run e2e -w apps/web"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
