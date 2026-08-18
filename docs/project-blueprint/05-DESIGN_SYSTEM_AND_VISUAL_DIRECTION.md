@@ -122,6 +122,15 @@ different *room of the same building*, not loaded a different website.
 | Staff (Moderation/Audit/Config/Analytics) | **Warm cream (Deep used strategically inside)** | LOCKED: Staff is an operational environment — queues, tables, evidence, audit, analytics, config. Cream handles density; Deep forest is used *strategically inside Staff* for hierarchy, important states, navigation, or high-value moments — never as the surface. |
 | Auth / account states | **Deep forest** | focused, low-distraction arrival moments |
 
+> ⚠️ **REVERSAL OF THIS TABLE — 2026-08-18 (founder Cream-first call, confirmed):**
+> The **"Landing / arrival → Deep forest"** row above is **reversed**. Cream is now the **default
+> environment across ALL public routes, including Landing**. Deep is an alternate/intentional environment
+> (still fully supported via the styleguide flip and any future opt-in) but is **never the silent default
+> anywhere**, including Landing and Auth. The "Explore / discovery → Warm cream" and downstream cream rows
+> remain correct. This overturns what was previously marked LOCKED/PROVISIONAL-to-confirm; the founder has
+> now confirmed the opposite. See Doc 06 §2 Slice 1 reversal note for the canonical record. Do not
+> re-derive "Landing = Deep" from this table.
+
 **The transition rule (LOCKED):** The Deep→Cream boundary occurs *once*, at Landing→Explore (and
 conceptually at Storefront-hero→body). We do **not** flip environments mid-task. A user inside Explore
 stays cream; inside a storefront stays cream; inside Staff stays cream; only the deliberate "arrival"
@@ -130,6 +139,14 @@ surfaces are Deep. This is what prevents theme-switch whiplash.
 **Conceptual progression (LOCKED framing):** the environments tell a story —
 **Arrive in Voeq (Deep) → enter the marketplace (Cream) → operate inside it (Cream).** Deep is the
 *brand/arrival* environment, not an arbitrary second theme. Its scarcity is what gives it weight.
+
+> ⚠️ **REVISION OF THIS PROGRESSION & TRANSITION RULE — 2026-08-18 (founder reversal, accepted):**
+> Because Landing is now **Cream** (not Deep), the "Arrive in Voeq (Deep) → enter (Cream)" story and the
+> "Deep→Cream boundary occurs once at Landing→Explore" rule are **collapsed**. Landing→Explore is now
+> **Cream→Cream**. The founder accepted this consequence. Continuity between Landing and Explore must be
+> re-established through **composition / motion / shared components**, NOT an environment-color flip.
+> **Slice 2 (Explore) planning MUST define a new continuity strategy before build.** This is recorded here
+> so the old "flip once" device is not silently re-derived in a future slice.
 
 ---
 

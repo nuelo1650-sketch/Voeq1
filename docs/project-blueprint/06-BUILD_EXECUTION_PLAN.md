@@ -66,11 +66,29 @@ Each slice is **done** only when it meets its verification gate (below). Nothing
 - **Gate:** tokens render in a static styleguide page; both environments (Deep/Cream) switch via role
   flip; reduced-motion + 60fps budget observable. No product page yet.
 
-### Slice 1 — Landing (Deep) [PUBLIC / portfolio]
-- Doc 04 PG-PUB-001. Deep forest hero, contour signature (strongest), display typography, arrival moment.
+### Slice 1 — Landing (Cream-first) [PUBLIC / portfolio]
+- Doc 04 PG-PUB-001. Cream environment, contour signature (strongest), display typography, arrival moment.
 - Continuity requirement locked (D.4.1): must read as *one world* with Explore.
-- **Gate:** Landing renders in Deep; contour meaningful (real-ish activity data); no perpetual animation;
-  mobile + reduced-motion clean. Stress: it must *feel* like Voeq's arrival, not a generic dark hero.
+- **Gate:** Landing renders in **Cream** (the default environment); contour meaningful (real-ish activity data);
+  no perpetual animation; mobile + reduced-motion clean. Stress: it must *feel* like Voeq's arrival, not a
+  generic SaaS hero.
+
+> ⚠️ **REVERSAL — 2026-08-18 (founder call, confirmed):**
+> This section previously read "Slice 1 — Landing (**Deep**)" with a "Landing renders in Deep" gate. That has
+> been **reversed**. **Cream is now the primary/default environment across ALL public routes, including
+> Landing.** Deep is an alternate/intentional environment (still fully supported via the styleguide flip and
+> any future opt-in), but it is **never the silent default anywhere**, including Landing.
+> - This OVERRIDES the original Slice 1 sign-off and supersedes the Doc 05 A.3 "Landing / arrival → Deep
+>   forest" mapping (see Doc 05 A.3 reversal note), the Doc 07 §7.2 route table (`/` = Deep), Doc 07 §7.6
+>   (Landing = Deep showpiece), and Doc 12 line 68 environment-mapping row.
+> - **Consequence (founder-accepted):** the Deep-arrival → Cream-explore "flip once" continuity device
+>   (Doc 05 A.3 transition rule; Doc 07 §7.2 "Landing→Explore flip happens once") is **collapsed** — Landing
+>   is now Cream, so Landing→Explore is Cream→Cream. Continuity between Landing and Explore must be
+>   re-established through **composition / motion / shared components**, NOT an environment-color flip.
+>   **Slice 2 (Explore) planning MUST define a new continuity strategy before build** — do not re-derive
+>   "Deep" from this doc.
+> - The Slice 1 code/gate was built Deep-first and then corrected to Cream-first (see repo commit history).
+>   The original Deep implementation is recorded as reversed, not as a defect-in-the-docs-only.
 
 ### Slice 2 — Explore (Cream) + the signature transition [PUBLIC]
 - Doc 04 PG-PUB-002/003. Cream discovery; contour as edge-whisper (B.12 placement rule).

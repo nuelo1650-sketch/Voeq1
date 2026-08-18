@@ -15,6 +15,12 @@
   list, not the target).
 - Explicit later instruction: **"focus on background for landing page than plain cream."**
 
+> ⚠️ **SUPERSEDED 2026-08-18 (founder Cream-first reversal):** the above instruction (landing background
+> "more than plain cream") is **overturned** by the founder's confirmed reversal that Cream is the
+> default environment across all public routes including Landing, and Deep is never the silent default.
+> This historical line is retained for the honest record of what was originally asked; it no longer
+> governs Landing's environment. See Doc 06 §2 Slice 1 reversal note.
+
 ## 2. What was produced (all in docs/project-blueprint/)
 - `01-CREATIVE_DIRECTION_EXPLORATION.md` — the main doc (A–D directions + M1–M3 modern + BG-1/BG-2
   background landings).
