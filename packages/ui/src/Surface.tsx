@@ -6,11 +6,13 @@ export function Surface({
   sunken = false,
   style,
   className,
+  ...rest
 }: {
   children: ReactNode;
   sunken?: boolean;
   style?: CSSProperties;
   className?: string;
+  [key: string]: unknown;
 }) {
   return (
     <div
@@ -23,6 +25,7 @@ export function Surface({
         boxShadow: "var(--shadow-1)",
         ...style,
       }}
+      {...rest}
     >
       {children}
     </div>

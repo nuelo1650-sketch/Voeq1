@@ -27,12 +27,14 @@ export function Type({
   children,
   style,
   className,
+  ...rest
 }: {
   tone?: Tone;
-  size?: "sm" | "md" | "lg" | "xl" | "display",
+  size?: "sm" | "md" | "lg" | "xl" | "display";
   children: ReactNode;
   style?: CSSProperties;
   className?: string;
+  [key: string]: unknown;
 }) {
   const sizeMap: Record<string, string> = {
     sm: "0.875rem",
@@ -52,6 +54,7 @@ export function Type({
         fontWeight: tone === "display" || size === "display" ? 600 : 400,
         ...style,
       }}
+      {...rest}
     >
       {children}
     </span>

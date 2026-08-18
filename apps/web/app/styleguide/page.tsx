@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Grid, Column, Stack, Surface, Type, Button } from "@voeq/ui";
 import { ContourEdge, CampusFingerprint, useContourData } from "@voeq/contour";
 import { setEnvironment, type VoeqEnvironment } from "@voeq/design-tokens";
@@ -10,10 +10,16 @@ import { setEnvironment, type VoeqEnvironment } from "@voeq/design-tokens";
  * It demonstrates the system: type roles, token roles, spacing, grid, controls,
  * states, environment flip, and contour primitives in their LEGITIMATE (data-gated)
  * states. It is deliberately NOT a product mockup (no landing/storefront).
+ * Kept as a dev/QA artifact (founder decision, Slice 1).
  */
 export default function Styleguide() {
   const [env, setEnv] = useState<VoeqEnvironment>("cream");
   const contour = useContourData(); // empty by default → no invented activity
+
+  // Styleguide demos Cream by default; the app root is Deep (Landing). Correct on mount.
+  useEffect(() => {
+    setEnvironment("cream");
+  }, []);
 
   function flip(next: VoeqEnvironment) {
     setEnv(next);
