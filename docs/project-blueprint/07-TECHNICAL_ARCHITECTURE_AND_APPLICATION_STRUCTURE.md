@@ -51,7 +51,7 @@ Routes are derived directly from Doc 04's locked page map (§1028–1041). Publi
 
 | Route (App Router) | Doc 04 PG ID | Slice (Doc 06) | Environment | Notes |
 |---|---|---|---|---|
-| `/` | PG-PUB-001 (Landing) | Slice 1 | **Deep** | Arrival; contour strongest; continuity source |
+| `/` | PG-PUB-001 (Landing) | Slice 1 | **Deep** ⚠️ **REVERSED→Cream** (2026-08-18 founder call: Cream is default on all public routes incl. Landing; Deep never silent default. See Doc 06 §2 reversal note) | Arrival; contour strongest; continuity source |
 | `/explore` | PG-PUB-002 (Explore, search folded in) | Slice 2 | Cream | Discovery; contour edge-whisper; weighted trending |
 | `/category/[slug]` | PG-PUB-003 (Category) | Slice 2 | Cream | Explore variant (Doc 04: category = Explore route variant) |
 | `/vendor/[id]` | PG-PUB-004 (Storefront) | Slice 4 | Deep hero + Cream body | **STRESS TEST** (B.16) |
@@ -74,6 +74,11 @@ Routes are derived directly from Doc 04's locked page map (§1028–1041). Publi
 - **Two environments, one world:** implemented as a single theme with a `data-env="deep|cream"` attribute
   on the route root; role tokens flip. The Landing→Explore flip happens **once** (Doc 05 A.3). No second
   theme, no mid-task environment switch (Doc 05 A.3 LOCKED).
+  > ⚠️ **REVISED 2026-08-18 (founder reversal):** Landing is now **Cream**, so the "Landing→Explore flip
+  > happens once" statement is **collapsed** — Landing→Explore is Cream→Cream. The single-theme /
+  > no-mid-task-switch principle still holds; only the environment *color* flip at the Landing boundary is
+  > gone. Continuity must come from composition/motion/shared components (Slice 2 needs a new strategy).
+  > See Doc 06 §2 reversal note.
 - **Route → environment mapping** is fixed by Doc 05 A.3/B.2: only Landing (`/`) and auth arrival are
   Deep; everything else Cream. Staff uses Deep *strategically inside* (alerts/high-value states), never as
   surface.
@@ -307,6 +312,8 @@ until Doc 08 ratification.
   PROVISIONAL.
 - **Landing (`/`) is the portfolio showpiece** (Deep environment, contour signature) — built in Slice 1,
   verified for "feels like Voeq," not just renders.
+  > ⚠️ **ENVIRONMENT REVERSED 2026-08-18:** "Deep environment" above is overturned — Landing is now
+  > **Cream** (default). Deep remains a supported alternate. See Doc 06 §2 reversal note.
 
 ---
 

@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-env="deep" className={`${fraunces.variable} ${hankenGrotesk.variable}`}>
+    <html lang="en" data-env="cream" className={`${fraunces.variable} ${hankenGrotesk.variable}`}>
       <body
         style={{
           margin: 0,

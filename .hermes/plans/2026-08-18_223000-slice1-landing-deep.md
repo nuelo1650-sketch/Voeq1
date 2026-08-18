@@ -1,5 +1,15 @@
 # Slice 1 — Landing (Deep) Implementation Plan
 
+> ⚠️ **SUPERSEDED BY FOUNDER REVERSAL — 2026-08-18.** This plan was approved and executed with
+> **Landing = Deep**. The founder subsequently **reversed** that decision: **Cream is now the default
+> environment across ALL public routes, including Landing**; Deep is an opt-in alternate only, never the
+> silent default. The code was corrected (`layout.tsx` → `data-env="cream"`, `page.tsx` comment, and the
+> e2e assertion flipped to cream with a separate Deep opt-in test). The authoritative reversal record is in
+> **Doc 06 §2 Slice 1 reversal note**, with cross-references in Doc 05 A.3, Doc 07 §7.2/§7.6, Doc 12 line 68,
+> and DESIGN_HANDOFF.md line 16. **Do NOT re-derive "Landing = Deep" from this plan.** The Deep-arrival →
+> Cream-explore "flip once" continuity device is also collapsed (Landing→Explore is now Cream→Cream); Slice 2
+> needs a new continuity strategy. See the Slice 1 audit + Doc 06 §2 for the replacement direction.
+
 > **For Hermes:** Plan only. Do NOT execute until founder reviews + signs off.
 > Execution follows the locked process: build → verify against Doc 06 §3 → intent-vs-implementation audit → fix → sign-off. Every slice gets its own plan first.
 

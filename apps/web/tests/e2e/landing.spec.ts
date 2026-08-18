@@ -1,20 +1,38 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Slice 1 Landing (Deep) regression gates — Doc 04 PG-PUB-001, Doc 05 A.3/B.2,
- * Doc 06 §2, Doc 07 §7.6, Doc 10 §54/§63/§66/§159/§167/§199.
+ * Slice 1 Landing (Cream-first) regression gates — Doc 04 PG-PUB-001, Doc 05 A.3 (reversed
+ * 2026-08-18: Cream is the default across all public routes incl. Landing), Doc 06 §2, Doc 07 §7.6,
+ * Doc 10 §54/§63/§66/§159/§167/§199.
  *
  * Option A (founder): contour communicates activity, never manufactures it.
  *  - production/mock default (empty repo) -> ZERO activity nodes
  *  - dev-only deterministic seed (never production truth) -> meaningful nodes
  * Both proven separately. Dev seed is gated behind a non-production flag.
+ *
+ * ENVIRONMENT (founder reversal 2026-08-18): Cream is the silent default on `/`. Deep is a
+ * supported alternate, toggled intentionally via `setEnvironment` (the same mechanism the
+ * styleguide "Deep" button uses — it sets `data-env` on <html>). Deep is NEVER the default.
  */
-test.describe("Slice 1 Landing (Deep)", () => {
-  test("renders at / in Deep environment (not redirected to styleguide)", async ({ page }) => {
+test.describe("Slice 1 Landing (Cream-first)", () => {
+  test("default load of / renders in Cream (never silent Deep)", async ({ page }) => {
     await page.goto("/");
     expect(page.url()).toMatch(/\/$/);
-    await expect(page.locator("html")).toHaveAttribute("data-env", "deep");
+    // Resolved default with NO override present must be cream.
+    await expect(page.locator("html")).toHaveAttribute("data-env", "cream");
     await expect(page.getByText(/voeq/i).first()).toBeVisible();
+  });
+
+  test("Deep still works as an explicit opt-in alternate (not the default)", async ({ page }) => {
+    await page.goto("/");
+    // Toggle Deep via the real mechanism (setEnvironment, used by the styleguide Deep button).
+    await page.evaluate(() => document.documentElement.setAttribute("data-env", "deep"));
+    await expect(page.locator("html")).toHaveAttribute("data-env", "deep");
+    // Deep tokens actually applied: body background resolves to the Deep forest color.
+    const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(bg).toBe("rgb(16, 35, 26)"); // --role-bg Deep (#10231a)
+    // And it was NOT the cream default background.
+    expect(bg).not.toBe("rgb(247, 244, 236)"); // --role-bg Cream (#f7f4ec)
   });
 
   test("contour: empty repository -> ZERO activity nodes (no invented activity)", async ({ page }) => {

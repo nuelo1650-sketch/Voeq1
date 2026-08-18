@@ -66,6 +66,11 @@ decision was silently resolved; Docs 00–11 remain mutually consistent.
 
 - **IA ↔ Design (Doc 04 ↔ 05):** PG-PUB-004 storefront = B.16 stress test target; PG-PUB-005 listing =
   C.3.1 first-class; environment mapping (Landing/Auth Deep, rest Cream) = A.3. ✅
+  > ⚠️ **SUPERSEDED 2026-08-18 (founder reversal):** the "Landing = Deep" half of this mapping is
+  > **reversed** — Cream is now the default across all public routes including Landing (see Doc 06 §2
+  > Slice 1 reversal note + Doc 05 A.3 reversal note). Only the "rest Cream" half remains correct.
+  > Auth-arrival = Deep is also reversed to Cream-default by the same founder call. Deep remains a
+  > supported alternate, never the silent default. Do not re-derive "Landing = Deep" from this row.
 - **Design ↔ Architecture (05 ↔ 07):** tokens→CSS vars (B.1/B.4→7.4); contour primitives (B.11→7.6);
   motion (D→7.14); two-environments-one-world (A.3→7.2). ✅
 - **Architecture ↔ Data (07 ↔ 08):** route table maps to PG IDs; repo boundary (7.7) = Doc 08 interfaces;
