@@ -4,8 +4,8 @@ import "@voeq/design-tokens/tokens.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Voeq — Foundation",
-  description: "Voeq Slice 0 global foundation (styleguide).",
+  title: "Voeq",
+  description: "Voeq — the campus marketplace. Arrive, discover, connect.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-env="cream" className={`${fraunces.variable} ${hankenGrotesk.variable}`}>
+    <html lang="en" data-env="deep" className={`${fraunces.variable} ${hankenGrotesk.variable}`}>
       <body
         style={{
           margin: 0,

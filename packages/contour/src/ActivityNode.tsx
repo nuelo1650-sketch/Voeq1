@@ -17,10 +17,12 @@ export function ActivityNode({
   data,
   style,
   className,
+  ...rest
 }: {
   data?: ActivityNodeData;
   style?: CSSProperties;
   className?: string;
+  [key: string]: unknown;
 }) {
   if (!data) return null;
   const clamped = Math.max(0, Math.min(1, data.intensity));
@@ -38,6 +40,7 @@ export function ActivityNode({
         opacity: 0.2 + clamped * 0.8,
         ...style,
       }}
+      {...rest}
     />
   );
 }
