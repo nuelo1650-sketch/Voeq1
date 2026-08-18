@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq — The Green Room (Direction B)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#F6F3EC; --field:#163025; --field-2:#1E3D2C; --ink:#1B2A20;
+    --muted:#5C6B5E; --gold:#C2A14E; --hair:#DAD3C2; --card:#FBF9F3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--canvas);color:var(--ink);font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 32px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  /* nav */
+  nav{display:flex;justify-content:space-between;align-items:center;padding:26px 0}
+  .brand{font-family:Manrope,sans-serif;font-weight:700;font-size:24px;letter-spacing:-.02em}
+  .links{display:flex;gap:30px;align-items:center}
+  .links a{color:var(--ink);text-decoration:none;font-size:14px;font-weight:500}
+  .links a:hover{color:var(--gold)}
+  .pill{border:1px solid var(--hair);background:var(--card);padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;text-decoration:none;color:var(--ink)}
+  .pill.dark{background:var(--field);color:#fff;border-color:var(--field)}
+  /* hero */
+  .hero{padding:40px 0 70px}
+  .hero h1{font-family:Manrope,sans-serif;font-weight:700;font-size:58px;line-height:1.04;letter-spacing:-.03em;max-width:16ch}
+  .hero p{margin-top:22px;font-size:17px;color:var(--muted);max-width:46ch;line-height:1.55}
+  .searchbar{margin-top:34px;display:flex;gap:10px;max-width:560px}
+  .searchbar input{flex:1;border:1px solid var(--hair);background:var(--card);border-radius:999px;padding:15px 20px;font-size:15px;font-family:Inter}
+  .searchbar input:focus{outline:none;border-color:var(--gold)}
+  .searchbar button{background:var(--field);color:#fff;border:0;border-radius:999px;padding:0 26px;font-weight:600;cursor:pointer}
+  /* green field feature */
+  .field{background:var(--field);color:#EAF1E9;border-radius:22px;padding:46px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center;margin:10px 0 70px}
+  .field .mono{color:#9DB3A2}
+  .field h2{font-family:Manrope,sans-serif;font-weight:700;font-size:34px;line-height:1.1;margin-top:14px;letter-spacing:-.02em}
+  .field p{margin-top:14px;color:#C7D6C9;font-size:15px;line-height:1.5;max-width:38ch}
+  .field .stat{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);margin-top:18px;letter-spacing:.1em}
+  .field .portrait{aspect-ratio:1/1;border-radius:16px;background:#0f2318 url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&q=70') center/cover}
+  /* categories: quiet chips */
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .chip{border:1px solid var(--hair);background:var(--card);border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:500;color:var(--ink)}
+  .chip:hover{border-color:var(--gold);color:var(--gold)}
+  /* trending: quiet cards */
+  .sec-h{font-family:Manrope,sans-serif;font-weight:700;font-size:26px;letter-spacing:-.02em;margin:60px 0 22px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .qc{border:1px solid var(--hair);background:var(--card);border-radius:14px;overflow:hidden}
+  .qc .ph{aspect-ratio:3/2;background:#2c4636 url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=70') center/cover}
+  .qc .body{padding:16px 18px 20px}
+  .qc h4{font-family:Manrope,sans-serif;font-weight:600;font-size:18px}
+  .qc .meta{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;gap:10px;align-items:center}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  /* quiet statement */
+  .statement{padding:80px 0;text-align:center}
+  .statement .q{font-family:Manrope,sans-serif;font-weight:600;font-size:32px;line-height:1.3;max-width:20ch;margin:0 auto;letter-spacing:-.02em}
+  .statement .mono{margin-top:20px}
+  /* footer */
+  footer{border-top:1px solid var(--hair);padding:50px 0 60px}
+  footer .wrap{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px;font-size:13.5px}
+  footer h5{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  footer a{display:block;color:var(--ink);text-decoration:none;margin-bottom:9px}
+  footer a:hover{color:var(--gold)}
+  .fbrand{font-family:Manrope,sans-serif;font-weight:700;font-size:22px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="brand">Voeq</div>
+      <div class="links">
+        <a href="#">Discover</a><a href="#">Vendors</a><a href="#">Categories</a>
+        <a href="#" class="pill">Sign in</a>
+        <a href="#" class="pill dark">Become a vendor</a>
+      </div>
+    </nav>
+
+    <div class="hero">
+      <h1>Your campus, catalogued.</h1>
+      <p>Every verified vendor around NMU, in one calm place. Browse, read reviews, and message — without the noise.</p>
+      <div class="searchbar">
+        <input placeholder="Search food, repairs, tech…">
+        <button>Search</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div>
+        <div class="mono">Featured this week</div>
+        <h2>Mama T's Kitchen</h2>
+        <p>Home cooking delivered across the NMU hostels. Verified, rated 4.9, and answering messages within the hour.</p>
+        <div class="stat">● OPEN NOW · 4.9 ★ · 210 views</div>
+      </div>
+      <div class="portrait"></div>
+    </div>
+
+    <div class="mono">Browse by section</div>
+    <div class="chips">
+      <span class="chip">Food &amp; Drink</span><span class="chip">Repairs</span><span class="chip">Tech &amp; Phones</span>
+      <span class="chip">Tailoring</span><span class="chip">Beauty &amp; Hair</span><span class="chip">Tutoring</span>
+      <span class="chip">Print &amp; Design</span><span class="chip">Photography</span><span class="chip">Other</span>
+    </div>
+
+    <div class="sec-h">Trending on campus</div>
+    <div class="grid3">
+      <article class="qc"><div class="ph"></div><div class="body"><h4>QuickFix Repairs</h4><div class="meta"><span class="dot"></span>Tech · 4.9 ★ · 210 views</div></div></article>
+      <article class="qc"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=70')"></div><div class="body"><h4>Glow by Adaeze</h4><div class="meta"><span class="dot"></span>Beauty · 4.8 ★ · 188 views</div></div></article>
+      <article class="qc"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&q=70')"></div><div class="body"><h4>Campus Prints</h4><div class="meta"><span class="dot"></span>Print · 4.7 ★ · 164 views</div></div></article>
+    </div>
+
+    <div class="statement">
+      <div class="q">Trust is the product. Everything else is just layout.</div>
+      <div class="mono">The Voeq principle</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div><div class="fbrand">Voeq</div><p style="margin-top:10px;color:var(--muted);max-width:28ch;line-height:1.5">Find. Connect. Grow. Built for campus, built for you.</p></div>
+      <div><h5>Explore</h5><a href="#">Discover</a><a href="#">Categories</a><a href="#">Trending</a><a href="#">For Vendors</a></div>
+      <div><h5>Company</h5><a href="#">About</a><a href="#">Careers</a><a href="#">Press</a></div>
+      <div><h5>Legal</h5><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Vendor Agreement</a></div>
+    </div>
+  </footer>
+</body>
+</html>

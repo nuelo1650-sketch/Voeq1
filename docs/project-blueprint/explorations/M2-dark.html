@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq — Dark Gallery (Modern M2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#163025;--ink-2:#0E2218;--cream:#E9E2CF;--cream-soft:#A9B6A0;--gold:#C2A14E;--line:#2B4536;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--cream);font-family:Inter,sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 44px}
+  .mono{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-soft)}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:34px 0;border-bottom:1px solid var(--line)}
+  .brand{font-weight:200;font-size:26px;letter-spacing:.04em;color:var(--cream)}
+  .navlinks a{color:var(--cream);text-decoration:none;font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-left:34px;font-weight:400;opacity:.8}
+  .navlinks a:hover{opacity:1;color:var(--gold)}
+  .pill{border:1px solid var(--cream);border-radius:999px;padding:11px 24px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;text-decoration:none;color:var(--cream)}
+  .hero{padding:130px 0 80px;text-align:center}
+  .hero .kicker{margin-bottom:34px;color:var(--gold)}
+  .display{font-weight:100;font-size:clamp(60px,12.5vw,141px);line-height:.88;letter-spacing:-.025em;color:var(--cream)}
+  .display em{font-style:italic;font-weight:200;color:var(--gold)}
+  .hero .label{margin-top:28px;color:var(--cream-soft)}
+  .lede{max-width:600px;margin:42px auto 0;font-size:19px;line-height:1.45;font-weight:300;color:var(--cream-soft)}
+  .cta{margin-top:46px;display:inline-block;border:1px solid var(--gold);border-radius:999px;padding:16px 40px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;text-decoration:none;color:var(--gold);transition:.35s ease}
+  .cta:hover{background:var(--gold);color:var(--ink-2)}
+  .rule{height:1px;background:var(--line)}
+  .vitrine{padding:90px 0 30px}
+  .sec-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:54px}
+  .sec-title{font-weight:200;font-size:34px;letter-spacing:-.01em;color:var(--cream)}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:50px;align-items:end}
+  .artifact{text-align:center}
+  .artifact .img{aspect-ratio:3/4;background:#0c1f15 center/cover;border-radius:7px;border:1px solid var(--line)}
+  .artifact .name{font-weight:400;font-size:18px;margin-top:20px;letter-spacing:-.01em;color:var(--cream)}
+  .artifact .meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-soft);margin-top:7px}
+  .tag{display:inline-block;margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:3px 11px}
+  .statement{padding:120px 0;text-align:center}
+  .statement p{max-width:660px;margin:0 auto;font-size:23px;line-height:1.12;font-weight:300;color:var(--cream)}
+  .statement .label{margin-top:30px;color:var(--cream-soft)}
+  footer{padding:54px 0;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);font-size:12px;color:var(--cream-soft)}
+  footer a{color:var(--cream);text-decoration:none;margin-left:26px;opacity:.8}
+  footer a:hover{opacity:1;color:var(--gold)}
+  @media(max-width:820px){.grid3{grid-template-columns:1fr;gap:46px}.display{font-size:54px}.navlinks{display:none}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <div class="brand">Voeq</div>
+      <div class="navlinks"><a href="#">Discover</a><a href="#">Vendors</a><a href="#">Categories</a><a href="#" class="pill">Sign in</a></div>
+    </nav>
+    <section class="hero">
+      <div class="kicker mono">The campus, after dark · NMU</div>
+      <h1 class="display">Find the<br><em>makers</em> near you.</h1>
+      <div class="label mono">Voeq — campus marketplace, established 2026</div>
+      <p class="lede">A quiet directory of the vendors and makers around your campus. No noise. Just the people worth knowing.</p>
+      <a href="#" class="cta">Explore the directory</a>
+    </section>
+    <div class="rule"></div>
+    <section class="vitrine">
+      <div class="sec-head"><div class="sec-title">Featured this week</div><div class="mono">Three of 570</div></div>
+      <div class="grid3">
+        <article class="artifact"><div class="img" style="background-image:url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=70')"></div><div class="name">QuickFix Repairs</div><div class="meta">Tech · NMU · 4.9 ★</div><span class="tag">Verified</span></article>
+        <article class="artifact"><div class="img" style="background-image:url('https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=70')"></div><div class="name">Glow by Adaeze</div><div class="meta">Beauty · NMU · 4.8 ★</div><span class="tag">Verified</span></article>
+        <article class="artifact"><div class="img" style="background-image:url('https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&q=70')"></div><div class="name">Campus Prints</div><div class="meta">Print · NMU · 4.7 ★</div><span class="tag">Verified</span></article>
+      </div>
+    </section>
+    <div class="rule"></div>
+    <section class="statement">
+      <p>We built Voeq for the campus that already runs on trust — and gave it a quieter place to live.</p>
+      <div class="label mono">Manifesto — 01</div>
+    </section>
+  </div>
+  <footer class="wrap"><div class="mono">Voeq © 2026</div><div><a href="#">Discover</a><a href="#">Vendors</a><a href="#">About</a></div></footer>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq — The Living Index (Direction C)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F5F1E6; --struct:#20402E; --struct-2:#2C5740; --ink:#16271C;
+    --muted:#5A6B5C; --gold:#C9A24B; --gold-soft:#E4C275; --line:#D6CFB8; --live:#C9A24B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--page);color:var(--ink);font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 28px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  /* activity rail */
+  .rail{background:var(--struct);color:#EAF1E9;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.06em;padding:9px 0;overflow:hidden;white-space:nowrap}
+  .rail .wrap{display:flex;gap:26px;align-items:center}
+  .rail .live{color:var(--gold);display:flex;align-items:center;gap:7px}
+  .rail .pulse{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(201,162,75,.6)}70%{box-shadow:0 0 0 8px rgba(201,162,75,0)}100%{box-shadow:0 0 0 0 rgba(201,162,75,0)}}
+  .rail span{opacity:.85}
+  /* nav */
+  nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--line)}
+  .brand{font-family:Archivo,sans-serif;font-weight:800;font-size:25px;letter-spacing:-.03em}
+  .brand b{color:var(--struct)}
+  .links{display:flex;gap:26px;align-items:center}
+  .links a{color:var(--ink);text-decoration:none;font-size:14px;font-weight:500}
+  .links a:hover{color:var(--struct-2)}
+  .cta{background:var(--struct);color:#fff;padding:9px 17px;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none}
+  /* hero */
+  .hero{padding:50px 0 36px;display:grid;grid-template-columns:1fr;gap:24px}
+  .hero h1{font-family:Archivo,sans-serif;font-weight:800;font-size:56px;line-height:1.02;letter-spacing:-.035em;max-width:18ch}
+  .hero h1 .acc{color:var(--struct-2)}
+  .hero p{font-size:16px;color:var(--muted);max-width:50ch;line-height:1.55;margin-top:6px}
+  .searchbar{display:flex;gap:0;max-width:600px;border:1.5px solid var(--struct);border-radius:9px;overflow:hidden}
+  .searchbar input{flex:1;border:0;padding:15px 18px;font-size:15px;font-family:Inter;background:#FCFAF3}
+  .searchbar input:focus{outline:none}
+  .searchbar button{background:var(--struct);color:#fff;border:0;padding:0 26px;font-weight:600;cursor:pointer}
+  /* dynamic grid */
+  .grid-h{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--struct);padding-bottom:10px;margin:46px 0 22px}
+  .grid-h h2{font-family:Archivo,sans-serif;font-weight:700;font-size:24px;letter-spacing:-.02em}
+  .dg{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .vcard{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#FCFAF3;position:relative}
+  .vcard.live{border-color:var(--gold)}
+  .vcard .ph{aspect-ratio:1/1;background:#2c4636 url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=70') center/cover}
+  .vcard .badge{position:absolute;top:10px;left:10px;background:var(--gold);color:#1c1407;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.08em;padding:4px 8px;border-radius:4px}
+  .vcard .body{padding:13px 14px 16px}
+  .vcard h4{font-family:Archivo,sans-serif;font-weight:600;font-size:15.5px;letter-spacing:-.01em}
+  .vcard .m{font-size:12px;color:var(--muted);margin-top:5px;display:flex;justify-content:space-between}
+  .vcard .m .g{color:var(--struct-2);font-weight:600}
+  /* categories as index */
+  .idx{display:grid;grid-template-columns:repeat(3,1fr);gap:0 36px;margin-top:14px}
+  .irow{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+  .irow .n{font-family:'JetBrains Mono',monospace;color:var(--gold);font-size:11px;margin-right:10px}
+  .irow .c{margin-left:auto;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px}
+  /* campus pulse */
+  .pulse-sec{background:var(--struct);color:#EAF1E9;border-radius:16px;padding:40px;margin:50px 0;display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center}
+  .pulse-sec h3{font-family:Archivo,sans-serif;font-weight:700;font-size:28px;letter-spacing:-.02em}
+  .pulse-sec p{color:#C7D6C9;font-size:14.5px;line-height:1.5;margin-top:12px}
+  .bars{display:flex;flex-direction:column;gap:12px}
+  .bar{display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:11px}
+  .bar .lab{width:90px;color:#9DB3A2}
+  .bar .track{flex:1;height:8px;background:#0f2318;border-radius:4px;overflow:hidden}
+  .bar .fill{height:100%;background:linear-gradient(90deg,var(--struct-2),var(--gold));border-radius:4px}
+  /* footer */
+  footer{border-top:1px solid var(--line);padding:46px 0 56px;font-size:13.5px}
+  footer .wrap{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
+  footer h5{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:13px}
+  footer a{display:block;color:var(--ink);text-decoration:none;margin-bottom:9px}
+  footer a:hover{color:var(--struct-2)}
+  .fbrand{font-family:Archivo,sans-serif;font-weight:800;font-size:22px}
+</style>
+</head>
+<body>
+  <div class="rail">
+    <div class="wrap">
+      <div class="live"><span class="pulse"></span>LIVE</div>
+      <span>3 new listings in the last hour</span>
+      <span>12 messages active</span>
+      <span>Tech &amp; Phones ▲ 40% this week</span>
+      <span>Beauty &amp; Hair ▲ 22%</span>
+      <span>NMU · Okerenkoko</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <nav>
+      <div class="brand">Vo<span>b</span>eq</div>
+      <div class="links">
+        <a href="#">Discover</a><a href="#">Vendors</a><a href="#">Categories</a>
+        <a href="#" class="cta">Become a vendor</a>
+      </div>
+    </nav>
+
+    <div class="hero">
+      <h1>What's happening on campus, <span class="acc">right now.</span></h1>
+      <p>A living index of NMU commerce — updated as vendors post, messages start, and tastes shift.</p>
+      <div class="searchbar">
+        <input placeholder="Search food, repairs, tech…">
+        <button>Search</button>
+      </div>
+    </div>
+
+    <div class="grid-h"><h2>Live vendors</h2><div class="mono">Sorted by recent activity</div></div>
+    <div class="dg">
+      <div class="vcard live"><div class="ph"></div><div class="badge">NEW</div><div class="body"><h4>QuickFix Repairs</h4><div class="m"><span>Tech</span><span class="g">4.9 ★</span></div></div></div>
+      <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=500&q=70')"></div><div class="body"><h4>Glow by Adaeze</h4><div class="m"><span>Beauty</span><span class="g">4.8 ★</span></div></div></div>
+      <div class="vcard live"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=500&q=70')"></div><div class="badge">HOT</div><div class="body"><h4>Campus Prints</h4><div class="m"><span>Print</span><span class="g">4.7 ★</span></div></div></div>
+      <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=500&q=70')"></div><div class="body"><h4>Mama T's Kitchen</h4><div class="m"><span>Food</span><span class="g">4.9 ★</span></div></div></div>
+      <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=500&q=70')"></div><div class="body"><h4>TechHub Solutions</h4><div class="m"><span>Tech</span><span class="g">4.6 ★</span></div></div></div>
+      <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=500&q=70')"></div><div class="body"><h4>Styled by Kemi</h4><div class="m"><span>Tailoring</span><span class="g">4.8 ★</span></div></div></div>
+      <div class="vcard live"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&q=70')"></div><div class="badge">NEW</div><div class="body"><h4>Campus Tutors</h4><div class="m"><span>Tutoring</span><span class="g">5.0 ★</span></div></div></div>
+      <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1492724441997-5b30ed186923?w=500&q=70')"></div><div class="body"><h4>Lens &amp; Light</h4><div class="m"><span>Photo</span><span class="g">4.7 ★</span></div></div></div>
+    </div>
+
+    <div class="grid-h"><h2>The Index</h2><div class="mono">Nine sections</div></div>
+    <div class="idx">
+      <div class="irow"><span><span class="n">01</span>Food &amp; Drink</span><span class="c">142</span></div>
+      <div class="irow"><span><span class="n">02</span>Repairs</span><span class="c">63</span></div>
+      <div class="irow"><span><span class="n">03</span>Tech &amp; Phones</span><span class="c">88</span></div>
+      <div class="irow"><span><span class="n">04</span>Tailoring</span><span class="c">37</span></div>
+      <div class="irow"><span><span class="n">05</span>Beauty &amp; Hair</span><span class="c">51</span></div>
+      <div class="irow"><span><span class="n">06</span>Tutoring</span><span class="c">29</span></div>
+      <div class="irow"><span><span class="n">07</span>Print &amp; Design</span><span class="c">18</span></div>
+      <div class="irow"><span><span class="n">08</span>Photography</span><span class="c">22</span></div>
+      <div class="irow"><span><span class="n">09</span>Other</span><span class="c">40</span></div>
+    </div>
+
+    <div class="pulse-sec">
+      <div>
+        <div class="mono" style="color:var(--gold)">Campus pulse · this week</div>
+        <h3>Where NMU is spending attention</h3>
+        <p>Computed from real views, messages, and new listings — not guesses.</p>
+      </div>
+      <div class="bars">
+        <div class="bar"><span class="lab">Tech</span><div class="track"><div class="fill" style="width:92%"></div></div></div>
+        <div class="bar"><span class="lab">Food</span><div class="track"><div class="fill" style="width:78%"></div></div></div>
+        <div class="bar"><span class="lab">Beauty</span><div class="track"><div class="fill" style="width:64%"></div></div></div>
+        <div class="bar"><span class="lab">Print</span><div class="track"><div class="fill" style="width:48%"></div></div></div>
+        <div class="bar"><span class="lab">Tutor</span><div class="track"><div class="fill" style="width:35%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div><div class="fbrand">Voeq</div><p style="margin-top:10px;color:var(--muted);max-width:28ch;line-height:1.5">Find. Connect. Grow. Built for campus, built for you.</p></div>
+      <div><h5>Explore</h5><a href="#">Discover</a><a href="#">Categories</a><a href="#">Trending</a><a href="#">For Vendors</a></div>
+      <div><h5>Company</h5><a href="#">About</a><a href="#">Careers</a><a href="#">Press</a></div>
+      <div><h5>Legal</h5><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Vendor Agreement</a></div>
+    </div>
+  </footer>
+</body>
+</html>

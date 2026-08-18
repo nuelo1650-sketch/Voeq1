@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq — Discovery (Direction C · Living Index)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--page:#F5F1E6;--struct:#20402E;--struct-2:#2C5740;--ink:#16271C;--muted:#5A6B5C;--gold:#C9A24B;--line:#D6CFB8;--live:#C9A24B}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--page);color:var(--ink);font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .rail{background:var(--struct);color:#EAF1E9;font-family:'JetBrains Mono',monospace;font-size:11px;padding:8px 0}
+  .rail .wrap{display:flex;gap:22px;align-items:center}
+  .rail .live{color:var(--gold);display:flex;align-items:center;gap:7px}
+  .pulse{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:p 1.6s infinite}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(201,162,75,.6)}70%{box-shadow:0 0 0 8px rgba(201,162,75,0)}100%{box-shadow:0 0 0 0 rgba(201,162,75,0)}}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+  .brand{font-family:Archivo,sans-serif;font-weight:800;font-size:23px;letter-spacing:-.03em}
+  .links a{color:var(--ink);text-decoration:none;font-size:14px;font-weight:500;margin-left:22px}
+  .cta{background:var(--struct);color:#fff;padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600}
+  .head{display:flex;justify-content:space-between;align-items:baseline;padding:30px 0 18px}
+  .head h1{font-family:Archivo,sans-serif;font-weight:800;font-size:36px;letter-spacing:-.03em}
+  .layout{display:grid;grid-template-columns:240px 1fr;gap:30px;padding-bottom:60px}
+  /* filters */
+  .filters .grp{margin-bottom:26px}
+  .filters h5{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .fchip{display:block;padding:8px 12px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;margin-bottom:8px;cursor:pointer;color:var(--ink);text-decoration:none}
+  .fchip.on{background:var(--struct);color:#fff;border-color:var(--struct)}
+  .slider{width:100%;accent-color:var(--struct)}
+  .rng{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted)}
+  /* results */
+  .bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .bar .sort{font-size:13px;color:var(--muted)}
+  .bar select{border:1px solid var(--line);background:#FCFAF3;border-radius:7px;padding:8px 12px;font-family:Inter;font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .vcard{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#FCFAF3;position:relative}
+  .vcard.live{border-color:var(--gold)}
+  .vcard .ph{aspect-ratio:1/0.82;background:#2c4636 url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=70') center/cover}
+  .vcard .badge{position:absolute;top:9px;left:9px;background:var(--gold);color:#1c1407;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:3px 7px;border-radius:4px;letter-spacing:.06em}
+  .vcard .body{padding:13px 14px 16px}
+  .vcard h4{font-family:Archivo,sans-serif;font-weight:600;font-size:15.5px;letter-spacing:-.01em}
+  .vcard .m{font-size:12px;color:var(--muted);margin-top:5px;display:flex;justify-content:space-between}
+  .vcard .m .g{color:var(--struct-2);font-weight:600}
+  /* empty state */
+  .empty{grid-column:1/-1;border:1px dashed var(--line);border-radius:12px;padding:50px;text-align:center;color:var(--muted)}
+  .empty b{font-family:Archivo,sans-serif;color:var(--ink);font-size:18px;display:block;margin-bottom:8px}
+</style>
+</head>
+<body>
+  <div class="rail"><div class="wrap"><div class="live"><span class="pulse"></span>LIVE</div><span>2 new listings · Tech ▲ 40% · 12 messages active</span></div></div>
+  <div class="wrap">
+    <nav><div class="brand">Vo<span>b</span>eq</div><div class="links"><a href="#">Discover</a><a href="#">Vendors</a><a href="#">Messages</a><a href="#" class="cta">Become a vendor</a></div></nav>
+    <div class="head"><h1>Discover</h1><div class="mono">NMU · 570 vendors · live</div></div>
+    <div class="layout">
+      <aside class="filters">
+        <div class="grp"><h5>Category</h5>
+          <a class="fchip on" href="#">All</a><a class="fchip" href="#">Food &amp; Drink</a><a class="fchip" href="#">Repairs</a><a class="fchip" href="#">Tech &amp; Phones</a><a class="fchip" href="#">Beauty &amp; Hair</a><a class="fchip" href="#">Tutoring</a><a class="fchip" href="#">Other</a>
+        </div>
+        <div class="grp"><h5>Campus</h5><a class="fchip on" href="#">NMU · Main</a><a class="fchip" href="#">NMU · Annex</a></div>
+        <div class="grp"><h5>Price range (₦)</h5><input class="slider" type="range" min="0" max="50000" value="20000"><div class="rng"><span>0</span><span>50k</span></div></div>
+        <div class="grp"><h5>Signal</h5><a class="fchip" href="#">Verified only</a><a class="fchip" href="#">Top rated (4.5+)</a><a class="fchip" href="#">Open now</a></div>
+      </aside>
+      <main>
+        <div class="bar"><div class="mono">Showing 8 of 570</div><div class="sort">Sort <select><option>Trending now</option><option>Newest</option><option>Top rated</option><option>Price ↑</option><option>Price ↓</option></select></div></div>
+        <div class="grid">
+          <div class="vcard live"><div class="ph"></div><div class="badge">NEW</div><div class="body"><h4>QuickFix Repairs</h4><div class="m"><span>Tech</span><span class="g">4.9 ★</span></div></div></div>
+          <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=500&q=70')"></div><div class="body"><h4>Glow by Adaeze</h4><div class="m"><span>Beauty</span><span class="g">4.8 ★</span></div></div></div>
+          <div class="vcard live"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=500&q=70')"></div><div class="badge">HOT</div><div class="body"><h4>Campus Prints</h4><div class="m"><span>Print</span><span class="g">4.7 ★</span></div></div></div>
+          <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=500&q=70')"></div><div class="body"><h4>Mama T's Kitchen</h4><div class="m"><span>Food</span><span class="g">4.9 ★</span></div></div></div>
+          <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=500&q=70')"></div><div class="body"><h4>TechHub Solutions</h4><div class="m"><span>Tech</span><span class="g">4.6 ★</span></div></div></div>
+          <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=500&q=70')"></div><div class="body"><h4>Styled by Kemi</h4><div class="m"><span>Tailoring</span><span class="g">4.8 ★</span></div></div></div>
+          <div class="vcard live"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&q=70')"></div><div class="badge">NEW</div><div class="body"><h4>Campus Tutors</h4><div class="m"><span>Tutoring</span><span class="g">5.0 ★</span></div></div></div>
+          <div class="vcard"><div class="ph" style="background-image:url('https://images.unsplash.com/photo-1492724441997-5b30ed186923?w=500&q=70')"></div><div class="body"><h4>Lens &amp; Light</h4><div class="m"><span>Photo</span><span class="g">4.7 ★</span></div></div></div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
