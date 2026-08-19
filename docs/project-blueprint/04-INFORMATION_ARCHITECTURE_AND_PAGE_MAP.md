@@ -82,14 +82,35 @@ Flows · Dependencies · Intentionally excluded.
 - **Purpose:** First impression + single entry into campus discovery; establishes Voeq's identity and
   the campus context immediately.
 - **Role:** All (public, pre-auth or signed-out).
-- **Required visible content:** Brand/wordmark; tagline conveying "campus marketplace"; the active
-  a **searchable campus selector** shown prominently — popover (desktop) / bottom-sheet (mobile), quick-select
-  chips (Popular: UNILAG, NMU, UI, OAU + Covenant, FUTO; NMU default), fuzzy alias search (Doc 01 §6 alias
-  table, e.g. `UNILAG`→`University of Lagos`), and a "Can't find your campus? Add it" input that triggers the
-  locked dynamic `unverified` persistence (immediate-select for the user, public only after ≥1 vendor);
-  primary CTA "Explore {campus}"; secondary entry to
-  For-Vendors; minimal legal links. Background may be the designed campus-terrain phenomenon
-  (design-phase decision, not product).
+- **Required visible content (rich arrival — Doc 05 A.19 + C.6–C.12):**
+  - **Atmosphere (C.6):** Cream base `#f7f4ec` + two *static* CSS layers (soft amber glow upper-left,
+    soft deep-green vignette lower-right) + static ≤3% SVG grain (multiply). **No ambient drift loop**
+    (A.1/A.18). Warmth/depth without breaking "minimal, not empty." This replaces the old flat-canvas
+    "may be the designed campus-terrain phenomenon (design-phase decision)" note — the atmosphere is now
+    a specified arrival layer.
+  - **Sculptural wordmark (C.7):** "Voeq" in Fraunces 600, `clamp(5rem, 14vw, 7rem)` (founder ceiling
+    ~7rem), tracking `-0.04em`, line-height `0.88`, warm `text-shadow` depth, optional 2%-larger "V".
+    One-shot "ink settling" entrance (staggered character fade-up, first arrival only, then still;
+    honors `prefers-reduced-motion`). **No 3D / rotateX.** Tagline conveys "campus marketplace."
+  - **Campus context (C.8):** a **searchable campus selector** shown prominently — popover (desktop) /
+    bottom-sheet (mobile), quick-select chips (Popular: UNILAG, NMU, UI, OAU + Covenant, FUTO; NMU
+    default), fuzzy alias search (Doc 01 §6 alias table, e.g. `UNILAG`→`University of Lagos`), and a
+    "Can't find your campus? Add it" input that triggers the locked dynamic `unverified` persistence
+    (immediate-select for the user, public only after ≥1 vendor). Inline "sentence" styling
+    ("Discover what's open near [NMU ▼]") — preserves `data-testid="campus-selector"`.
+  - **Contour field (C.9):** the signature, *strongest on Landing* (B.11). Asymmetric hero — desktop
+    left 55% = wordmark+tagline+selector+CTA; right 45% = contour field (frosted glass, SVG self-draw
+    when data exists, calm heartbeat empty-state "The marketplace is quiet right now"). **No CSS-3D
+    tilt** (Part D experimental).
+  - **Trust strip (C.10):** data-bound live counts — `{vendorCount}` vendors · `{campusCount}` campuses
+    · `{studentConnections}` connected. **No hardcoded numbers.** Under the 250+ Nigerian universities
+    scope, the campus figure is data-derived, not a fixed stat.
+  - **Primary CTA (C.11):** "Explore {campus}" — warm-shadow accent button, hover lift + arrow
+    micro-interaction, wired to the selector.
+  - **Secondary entries:** For-Vendors; About/Help/Legal (minimal legal links).
+  - **Signature footer (C.12):** single contour-line border, centered links + muted copyright.
+  - **Mobile:** full-screen atmospheric "window"; centered wordmark/selector/CTA; sticky CTA with
+    safe-area padding. Hamburger → full-screen overlay nav is optional build-phase scope.
 - **Primary actions:** Explore (→ PG-PUB-002); select campus.
 - **Secondary actions:** For-Vendors; About/Help/Legal; Login/Sign-up (if signed out).
 - **Interactive elements:** searchable campus selector (popover/bottom-sheet + chips + add-it fallback); CTAs; nav.
