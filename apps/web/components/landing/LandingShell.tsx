@@ -16,6 +16,7 @@ import { LandingFooter } from "./LandingFooter";
  */
 export function LandingShell() {
   const [campus, setCampus] = useState("nmu");
+  const [zone, setZone] = useState("Kurutie");
 
   return (
     <>
@@ -30,7 +31,12 @@ export function LandingShell() {
           <div className="landing-split">
             <div className="landing-split-left">
               <LandingHero />
-              <CampusContext campus={campus} onCampusChange={setCampus} />
+              <CampusContext
+                campus={campus}
+                onCampusChange={setCampus}
+                zone={zone}
+                onZoneChange={setZone}
+              />
               <DiscoveryProposition />
               <EntryToDiscovery campus={campus} />
             </div>
