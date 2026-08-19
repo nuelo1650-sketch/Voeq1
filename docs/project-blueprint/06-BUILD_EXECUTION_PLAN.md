@@ -72,6 +72,11 @@ Each slice is **done** only when it meets its verification gate (below). Nothing
 - **Gate:** Landing renders in **Cream** (the default environment); contour meaningful (real-ish activity data);
   no perpetual animation; mobile + reduced-motion clean. Stress: it must *feel* like Voeq's arrival, not a
   generic SaaS hero.
+- **Composition gate (B.15.3 Expressive / C.6):** on a rendered screenshot, is there ONE clear dominant
+  hierarchy (contour/wordmark/CTA) and do sections read as *grouped toward that hierarchy* rather than a
+  uniformly-spaced flat stack? Is whitespace deliberate/structural (B.15.2) — gaps vary by grouping, not
+  leftover uniform padding? Does content avoid spanning full container width by default (canvas-first, not
+  box-default)? **Pass = yes to all three; a flat equal-gap column fails this gate.**
 
 > ⚠️ **REVERSAL — 2026-08-18 (founder call, confirmed):**
 > This section previously read "Slice 1 — Landing (**Deep**)" with a "Landing renders in Deep" gate. That has
@@ -90,18 +95,35 @@ Each slice is **done** only when it meets its verification gate (below). Nothing
 > - The Slice 1 code/gate was built Deep-first and then corrected to Cream-first (see repo commit history).
 >   The original Deep implementation is recorded as reversed, not as a defect-in-the-docs-only.
 
+> 📝 **RETROACTIVE COMPOSITION-GRAMMAR GAP — recorded 2026-08-19:** Slice 1 was signed off against the
+> ORIGINAL gate criteria (content/functional: renders in Cream, contour meaningful, no perpetual animation,
+> mobile + reduced-motion clean). It has **NOT** been verified against the composition-grammar gate added in
+> this update (B.15/C.6 — Expressive tier: one dominant hierarchy, grouped-not-flat, whitespace-as-structure,
+> content not full-width-by-default). This is a recorded gap, **not** a failure and **not** a silent pass:
+> the original sign-off remains valid for its own criteria; the new composition criterion is flagged for a
+> retroactive pass. Do **not** re-open the original sign-off; do **not** mark Slice 1 as passing the new
+> gate until that retroactive composition pass is completed.
+
 ### Slice 2 — Explore (Cream) + the signature transition [PUBLIC]
 - Doc 04 PG-PUB-002/003. Cream discovery; contour as edge-whisper (B.12 placement rule).
 - **The Landing→Explore transition:** continuity LOCKED; contour-carry = PROPOSED motion (use simpler if
   better). Single directional move; 600–900ms first, 320ms after.
 - **Gate:** transition preserves spatial/visual continuity (the D.4.1 test — not "dark→different site");
   Explore shows listing results via C.3.1 arrangements; filters use meaningful transition (D.2/D.4).
+- **Composition gate (B.15.3 Editorial / C.6):** on a screenshot, do results read as *composed groupings*
+  (imagery leads each card, metadata grouped) rather than a uniform card grid? Is density comfortable but
+  never cramped (breathing room between groups)? Is contour used as whisper/structural (edge, ≤12%), not a
+  hero? **Pass = composed groupings + comfortable density + structural contour; a packed equal grid fails.**
 
 ### Slice 3 — Listing Detail [PUBLIC]
 - Doc 04 PG-PUB-005. Editorial object; gallery (B.6 frame); price/availability as data; message CTA.
 - Shared-element open from Explore (relationship motion, D.2).
 - **Gate:** opens from Explore with continuity; ugly-photo treatment holds; message CTA present (native,
   not WhatsApp — Doc 01/03 LOCKED).
+- **Composition gate (B.15.3 Editorial / C.6):** on a screenshot, does the object read as an *editorial
+  composition* (gallery/framed imagery leads; title in display; price/availability as data, prominent not
+  buried) rather than a card expansion? Is there one dominant entry (the imagery) with supporting info
+  grouped intentionally around it? **Pass = editorial object with grouped supporting info; a stacked card fails.**
 
 ### Slice 4 — Vendor Storefront [PUBLIC / THE STRESS TEST]
 - Doc 04 PG-PUB-004. Deep hero band + cream body (intra-page flip). Dominant identity (C.2.2).
@@ -111,26 +133,47 @@ Each slice is **done** only when it meets its verification gate (below). Nothing
   compact. Container rule (no card wall).
 - **Gate:** the B.16 six criteria all pass on real-shaped mock data; richness organized not hidden
   (C.6 #6); above-the-fold answers who/what/why-message.
+- **Composition gate (B.15.3 Editorial / C.6 #6 — THE STRESS TEST):** on a screenshot with 15 listings, is
+  richness *expressed not hidden* — hero identity dominant, body editorial rows, "all" compact, zero
+  card-monotony — and does the page stay *composed* (grouped, not a wall of boxes) under that density? Is
+  whitespace structural between groupings? **Pass = rich-but-composed at 15 listings; a uniform card wall fails.**
 
 ### Slice 5 — Auth + Shopper shell [PRODUCT]
 - Doc 04 PG-AUTH-*, PG-SHOP-*. Single sign-in (Doc 03 LOCKED). Bottom nav (mobile) / top nav (desktop),
   notification surfaces (C.5.1).
 - **Gate:** sign-in works on mock auth; nav + notifications render in Cream; no theme switch mid-task.
+- **Composition gate (B.15.3 Functional / C.6):** on a screenshot, is the surface calm, list-led,
+  utility-first — scannable, signature minimal, no decorative hierarchy fighting the task? Do nav/
+  notifications sit quiet (caption/small, ink-muted) and escalate only when needed (B.15.1)? **Pass =
+  calm/scannable with quiet utility; a loud or decorative layout fails.**
 
 ### Slice 6 — Vendor onboarding + Vendor Dashboard [PRODUCT]
 - Doc 04 PG-VEND-007 (create/edit distinct) + PG-VEND-001 (attention queue, not generic analytics).
 - 5-step onboarding (Doc 03). Dashboard = "how is my business doing / what needs attention" (Doc 04 LOCKED).
 - **Gate:** 5-step flow completes to a vendor; dashboard shows attention queue + trended perf + storefront
   health; reflects the LOCKED job, not a stats dashboard.
+- **Composition gate (B.15.3 Functional / C.6):** on a screenshot, does the dashboard read as "how is my
+  business doing / what needs attention" (attention queue, not generic stats) with a calm, grouped,
+  utility-first layout? Is data grouped by job, not dumped as panels? **Pass = attention-queue framing +
+  grouped utility; a stat-grid dump fails.**
 
 ### Slice 7 — Messaging [FEATURE, not MVP — built after public + auth + vendor]
 - Doc 04 PG-MSG-*. Native composer (C.4.1); pending→sent→delivered (cause-effect, D.3).
 - **Gate:** message thread works on mock; composer native; states animate per D.3; no WhatsApp exit.
+- **Composition gate (B.15.3 Functional / C.6):** on a screenshot, is the thread calm, list-led, scannable
+  — composer native, states (pending→sent→delivered) legible, signature minimal? Does the conversation
+  read as one clear hierarchy (the thread) with utility receding (B.15.1)? **Pass = calm scannable thread;
+  a decorative or cluttered chat fails.**
 
 ### Slice 8 — Staff operational surfaces [PRODUCT, last]
 - Doc 04 §3.7. Operational tier (B.12/B.15.3): no signature, Deep strategic for alerts.
 - Moderation workbench: Queue→Case→Evidence→Decision→Consequence (C.5.3).
 - **Gate:** moderator handles a case via the workbench flow; dense but legible; no 400-row table stare.
+- **Composition gate (B.15.3 Operational / C.6):** on a screenshot, is the console maximum-information-per-
+  area (tables/queues/audit) yet dense-but-legible — quiet surface, Deep used *strategically* (not as the
+  surface), and NO signature (A.12)? Is the workbench flow (Queue→Case→Evidence→Decision→Consequence)
+  readable as grouped stages, not a 400-row table stare? **Pass = dense-but-legible operational with
+  strategic-Deep and no signature; a loud or signature-bearing surface fails.**
 
 ### Phase 9 — Progressive real-infra connection [post-public-proof]
 - Replace `packages/data` mock repos with real API/DB, one domain at a time, starting with listings/
