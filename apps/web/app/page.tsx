@@ -1,9 +1,4 @@
-import { Grid, Column, Stack } from "@voeq/ui";
-import { LandingHero } from "@/components/landing/LandingHero";
-import { CampusContext } from "@/components/landing/CampusContext";
-import { DiscoveryProposition } from "@/components/landing/DiscoveryProposition";
-import { ContourSignature } from "@/components/landing/ContourSignature";
-import { EntryToDiscovery } from "@/components/landing/EntryToDiscovery";
+import { LandingShell } from "@/components/landing/LandingShell";
 
 /**
  * Landing — PG-PUB-001 (Doc 04), Cream-first environment (Doc 06 §2, reversed 2026-08-18:
@@ -11,24 +6,10 @@ import { EntryToDiscovery } from "@/components/landing/EntryToDiscovery";
  * First real product surface. Visual hierarchy (one dominant order per viewport):
  *   Voeq (arrival) -> campus context -> discovery proposition -> contour meaning -> enter
  * No auth, no browse grid, no marketing drift, no 3D.
+ * LandingShell owns the campus state and composes nav + hero + context + proposition +
+ * contour + entry + footer (Task B additions live in the shell, outside the locked center
+ * hierarchy).
  */
 export default function Landing() {
-  return (
-    <main
-      data-testid="landing"
-      style={{ minHeight: "100vh", paddingBlock: "var(--space-8)", paddingInline: "var(--space-2)" }}
-    >
-      <Grid>
-        <Column span={12}>
-          <Stack space={5}>
-            <LandingHero />
-            <CampusContext />
-            <DiscoveryProposition />
-            <ContourSignature />
-            <EntryToDiscovery />
-          </Stack>
-        </Column>
-      </Grid>
-    </main>
-  );
+  return <LandingShell />;
 }
