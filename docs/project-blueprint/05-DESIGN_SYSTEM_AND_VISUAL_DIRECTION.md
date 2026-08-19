@@ -146,7 +146,9 @@ surfaces are Deep. This is what prevents theme-switch whiplash.
 > **Cream→Cream**. The founder accepted this consequence. Continuity between Landing and Explore must be
 > re-established through **composition / motion / shared components**, NOT an environment-color flip.
 > **Slice 2 (Explore) planning MUST define a new continuity strategy before build.** This is recorded here
-> so the old "flip once" device is not silently re-derived in a future slice.
+> so the old "flip once" device is not silently re-derived in a future slice. See the **D.4.1 REPLACEMENT
+> MECHANISM note** (search "REPLACEMENT MECHANISM — 2026-08-18") for the founder-decided three-part
+> continuity proposal (contour-carry + shared anchor + transient Deep accent).
 
 ---
 
@@ -1228,6 +1230,27 @@ random card-float, scroll-everything. These have no cause → they are excluded 
   makes "same building" felt.
 - **Why this is the test:** if the transition reads as "dark page → different light website," it failed
   the LOCKED continuity requirement — regardless of how fancy the animation was.
+
+> ⚠️ **REPLACEMENT MECHANISM — 2026-08-18 (founder call).** The Cream-first reversal (see A.3 reversal
+> note, line ~143) collapsed the Deep→Cream *color* flip that D.4.1 originally leaned on. The LOCKED
+> continuity requirement ("one world, never dark→different-light-website") **still stands** — only the
+> vehicle changed. The replacement is a combined, **PROPOSED (not yet built/tested)** three-part mechanism,
+> to be validated during the actual Slice 2 (Explore) build with its own continuity verification gate:
+> 1. **Contour-carry (PROPOSED / PRIMARY):** a Landing activity node visually morphs into an Explore edge —
+>    the *same element* persists across the boundary, carrying the eye. (This was Doc 05's preferred
+>    mechanism pre-reversal; it now does the primary continuity work alone, not alongside a color flip.)
+> 2. **Shared spatial anchor (PROPOSED / PRIMARY):** 1–2 elements stay visually fixed in position across
+>    Landing→Explore (to be identified in Slice 2 — likely the logo position and/or the contour line), so
+>    the eye has a stable reference even as surrounding content changes.
+> 3. **Deep as strategic transitional accent (PROPOSED / UNPROVEN):** during the transition motion itself,
+>    a *brief* Deep-tinted moment may appear (e.g. the contour line flashes deep-green mid-motion). Deep
+>    **never** becomes a page background or resting state again — it exists only as a transient in-motion
+>    event, if at all. ⚠️ **UNPROVEN** — requires a motion prototype to confirm it reads as continuity
+>    rather than a glitch. Do **not** treat this component as LOCKED like (1) and (2); validate before
+>    Slice 2 sign-off.
+> **Planning artifact only — Slice 2 is not started.** Components (1)+(2) are the proposed PRIMARY
+> mechanism; (3) is UNPROVEN pending prototype. Slice 2 build must verify these actually deliver the
+> "one world" requirement, same as any other slice gate.
 
 ---
 
