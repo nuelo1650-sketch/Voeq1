@@ -83,6 +83,10 @@ Routes are derived directly from Doc 04's locked page map (§1028–1041). Publi
   **Cream** (default) per the 2026-08-18 founder reversal (see the `/` and `/auth/*` row notes); everything
   else Cream. Deep remains a supported alternate, used *strategically inside* Staff (alerts/high-value
   states), never as the surface.
+- **Campus scope (Phase 1):** discovery is scoped to **250+ Nigerian universities** (NMU default). The
+  campus selector draws a 250+ seed catalog + dynamic storage: a normalized (alias-aware) search miss
+  auto-persists the campus as `unverified` (selectable immediately for the user; publicly discoverable only
+  after ≥1 confirmed vendor; weekly founder review). See Doc 01 §5/§6, Doc 03 IDN-010, Doc 04 §86.
 
 ---
 

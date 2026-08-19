@@ -302,3 +302,39 @@ below. The original §A–§O audit above is reproduced unchanged; this §P reco
 **VERDICT: ✅ PASS — BLUEPRINT STILL READY FOR IMPLEMENTATION**, with composition-gates now present as
 enforceable, screenshot-verifiable criteria and the auth-arrival environment reversal consistently applied
 across Doc 07 + 12 (Doc 05 A.3 line 123 flagged for follow-up). No repo work, no Doc 13.
+
+---
+
+## Q — 2026-08-19 founder directive: Phase 1 scope reversal + supplied facts (additive; VERDICT UNCHANGED)
+
+Recorded after the in-session founder directive ("go"). The original §A–§P audit above is reproduced
+unchanged; this §Q records what postdates it.
+
+1. **REVERSAL — Phase 1 NMU-pilot → 250+ Nigerian universities (founder directive 2026-08-19).** The
+   locked blueprint scoped Phase 1 as an NMU pilot with multi-institution as FUT-003 (OPEN). Founder
+   reversed this: Phase 1 ships **250+ Nigerian universities** (NMU default/first) with dynamic campus
+   storage. This is a deliberate REVERSAL of locked scope, founder-directed, not a missed edit. Applied to:
+   Doc 01 §1.1/§5/§6/§7(10)/§9(10 risk); Doc 02 FUT-003 (→ Phase 1), Decision 10, §665; Doc 03 IDN-010
+   (§59), Decision 10 (§814); Doc 04 §86, Decision 6 (§1109).
+2. **Dynamic campus storage (DECIDED):** normalized + alias-aware match; a searched-unlisted campus
+   auto-persists `unverified`; selectable immediately for the triggering user; publicly discoverable only
+   after ≥1 confirmed vendor (guardrail against empty/spam campuses); weekly batch founder review promotes
+   → `verified` or soft-deletes (preserving any vendors for migration). Fuzzy/Levenshtein = "Did you mean?"
+   display only, never the insert. Trade-off: normalized+alias trades a little typo-catch for catalog
+   cleanliness; live+weekly-review trades instant perfection for zero manual maintenance — both serve the
+   founder's "no manual software updates" goal.
+3. **REFERENCED ONLY — NOT baked into locked blueprint (founder: "lag as references, don't expand its
+   calls"):**
+   - Pricing: ₦800/mo paid tier + add-ons, free through ~Jan 2027 (client spec §4). Reference only.
+   - Launch hard date: Oct 7–10, 2026 (client spec §1). External milestone reference.
+   - NMU Kurutie↔Okerenkoko two-campus toggle (client spec §2.3). Reference; subsumed by 250+ scope.
+   - WhatsApp Community/Channel + footer social (client spec §7). Reference only.
+4. **APPLIED content facts (per founder):** 20 categories + Accessories (considered, not committed);
+   copy-corrections list (Doc 06 §2 verification items); supplied legal copy About/Terms/Privacy (Doc 06
+   §2 content SUPPLIED; routes PG-PUB-006/007/008); Careers (PUB-012) + Media (PUB-013) added to VS1.
+5. **Cross-doc consistency re-verified:** Docs 01/02/03/04 now state 250+ Phase 1 + dynamic storage
+   consistently. No remaining internal contradiction on campus scope. (The Doc 05 A.3 line 123 flag from
+   §P remains a separate follow-up, untouched by this directive.)
+
+**VERDICT: ✅ PASS — BLUEPRINT STILL READY FOR IMPLEMENTATION**, with Phase 1 scope now 250+ universities
+(founder reversal) and dynamic campus storage specified. Doc-only; no repo code changes.

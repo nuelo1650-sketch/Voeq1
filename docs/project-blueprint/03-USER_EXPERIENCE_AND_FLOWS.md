@@ -56,7 +56,9 @@ Ten principles governing every flow. Each is a decision, not filler.
 
 `FLOW-SHOP-NEW-01`
 1. **Arrives** at `voeq.ng` (landing, PUB-001). Sees campus context + entry to discovery.
-2. **Campus selection** (IDN-010): picks default campus (NMU pilot). Stored; used as discovery scope.
+2. **Campus selection** (IDN-010): picks default campus from a **250+ university catalog (NMU default)**;
+  a campus not in the catalog is auto-persisted `unverified` on search (selectable immediately for the
+  user; public discovery only after ≥1 confirmed vendor; weekly founder review). Stored; used as discovery scope.
 3. **Discovery** (SHOP-003 / DISC): browse grid, "Trending on my campus", recently-viewed, followed
    preview. All campus-scoped.
 4. **Search / filter** (SHOP-004/005 / DISC-001..003): finds a vendor or listing by query + facets.
@@ -811,7 +813,7 @@ Genuine unresolved items. Recommendations are NOT converted to decisions.
 | 7 | Categories: official-only (P1, proposed) vs user-submitted | **OPEN** | DISC-005 |
 | 8 | Pre-auth messaging | **PROVISIONAL** (proposed: auth required) | MSG; return-intent preserves destination |
 | 9 | Monetization | **OPEN** | FUT-006 |
-| 10 | NMU-only vs multi-campus at launch | **OPEN** | FUT-003; data model multi-campus |
+| 10 | NMU-only vs multi-campus at launch | **RESOLVED (2026-08-19):** 250+ universities Phase 1 (NMU default), dynamic campus storage | FUT-003; Doc 01 §5/§6 |
 | 11 | Message blocking (MSG-012) ship or report-only | **OPEN** | §7.15 provisional |
 | 12 | Account deletion policy (soft vs hard, retention) | **OPEN** | §12.6 |
 | 13 | Vendor 5-step exact contents | **PROVISIONAL** (count LOCKED) | §4.2; reconcile at build |

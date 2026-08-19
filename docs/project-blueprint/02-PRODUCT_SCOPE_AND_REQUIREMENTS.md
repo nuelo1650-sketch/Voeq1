@@ -171,7 +171,7 @@ Organized by product area. Every item carries a stable ID used in §14.
 ## Future (FUT) — Phase 2+, awareness only
 - **VOEQ-FUT-001** Paystack escrow / checkout. `LATER` `NEW` (per founder Phase 2)
 - **VOEQ-FUT-002** Logistics / fulfillment. `LATER` `NEW`
-- **VOEQ-FUT-003** Multi-institution expansion. `LATER` `DECIDED` (architected for)
+- **VOEQ-FUT-003** Multi-institution expansion (250+ universities; NMU-default; dynamic campus storage). `PHASE 1` `DECIDED` (founder reversal 2026-08-19)
 - **VOEQ-FUT-004** Listing-scoped reviews. `LATER` `OPEN`
 - **VOEQ-FUT-005** Rich messaging (attachments, edit/delete, typing). `LATER` `NEW`
 - **VOEQ-FUT-006** Monetization mechanics. `LATER` `OPEN`
@@ -662,7 +662,7 @@ Separated by channel. No implementation decided.
   Combinable. Public.
 - **Sorting (DISC-003):** newest, price asc, price desc, rating (vendor avg), popularity. Public.
 - **Campus scope (DISC-004):** default = shopper's campus; switchable (shopper can browse other
-  campuses). Discovery surfaces are campus-scoped by default. NMU pilot but model multi-campus.
+  campuses). Discovery surfaces are campus-scoped by default. **Phase 1 scope = 250+ universities (NMU default)** but model multi-campus.
 - **Category scope (DISC-005):** official taxonomy (parent/child). **PROPOSED: official-only in Phase
   1** (curated quality); user-submitted categories `OPEN`. Staff-managed (STAFF-016).
 - **Vendor discovery (DISC-006):** browse vendors by category/campus; vendor cards with trust signals.
@@ -769,8 +769,9 @@ Do not implement or over-specify. Make Phase 1 aware without polluting it.
 - **FUT-001 Paystack escrow / checkout** — founder Phase 2. Phase 1 data/IA must allow attaching a
   future order entity (shopper↔vendor↔listing) without rework. No payments built now.
 - **FUT-002 Logistics / fulfillment** — Phase 2 per founder docx.
-- **FUT-003 Multi-institution expansion** — architected for (campus model multi-campus); NMU-first
-  launch `OPEN` (single vs multi at day 1).
+- **FUT-003 Multi-institution expansion** — **RESOLVED for Phase 1 (founder reversal 2026-08-19):**
+  Phase 1 ships **250+ Nigerian universities** (NMU-first/default); campus model multi-campus; dynamic
+  campus storage for searched-unlisted campuses (see Doc 01 §5/§6).
 - **FUT-004 Listing-scoped reviews** — `OPEN` (Phase 2).
 - **FUT-005 Rich messaging** — attachments, edit/delete, typing presence beyond basics.
 - **FUT-006 Monetization mechanics** — escrow fee / featured promotion; `OPEN` (Phase 2 decision).
@@ -918,7 +919,7 @@ Stable IDs for reference by UX / Architecture / API / Testing / Build batches / 
 | VOEQ-NOTIF-004 | Push notifications | Notif | LATER | NEW | NEW |
 | VOEQ-FUT-001 | Paystack escrow/checkout | Future | LATER | NEW | NEW |
 | VOEQ-FUT-002 | Logistics | Future | LATER | NEW | NEW |
-| VOEQ-FUT-003 | Multi-institution | Future | LATER | DECIDED | DECIDED |
+| VOEQ-FUT-003 | Multi-institution (250+ universities; NMU-default) | Phase 1 | NOW | DECIDED | DECIDED |
 | VOEQ-FUT-004 | Listing-scoped reviews | Future | LATER | OPEN | OPEN |
 | VOEQ-FUT-005 | Rich messaging | Future | LATER | NEW | NEW |
 | VOEQ-FUT-006 | Monetization | Future | LATER | OPEN | OPEN |
@@ -948,7 +949,7 @@ Stable IDs for reference by UX / Architecture / API / Testing / Build batches / 
 7. **Categories** — official-only (Phase 1, proposed) or allow user-submitted? (DISC-005)
 8. **Pre-auth messaging** — public discovery yes; messaging requires auth (proposed) — confirm. (MSG)
 9. **Monetization** — free Phase 1 (proposed); confirm + decide Phase 2 model. (FUT-006)
-10. **NMU-only vs multi-campus at launch** — data model supports multi; launch scope OPEN. (FUT-003)
+| 10. **NMU-only vs multi-campus at launch** — **RESOLVED (founder reversal 2026-08-19):** 250+ universities in Phase 1 scope (NMU default), dynamic campus storage. (FUT-003)
 11. **Message blocking** — include block-from-chat (MSG-012) or report-only in Phase 1? 
 12. **Design values / light-vs-dark / art-directed imagery / background boldness** — design-phase
     (carried from DESIGN_HANDOFF); not a product decision but affects PUB-001 acceptance.

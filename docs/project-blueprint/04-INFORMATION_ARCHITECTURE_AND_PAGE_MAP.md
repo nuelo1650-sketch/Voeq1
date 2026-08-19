@@ -83,7 +83,8 @@ Flows · Dependencies · Intentionally excluded.
   the campus context immediately.
 - **Role:** All (public, pre-auth or signed-out).
 - **Required visible content:** Brand/wordmark; tagline conveying "campus marketplace"; the active
-  campus selector (default NMU) shown prominently; primary CTA "Explore {campus}"; secondary entry to
+  campus selector (250+ university catalog, NMU default; searched-unlisted campus auto-persisted
+  `unverified`, public only after ≥1 vendor) shown prominently; primary CTA "Explore {campus}"; secondary entry to
   For-Vendors; minimal legal links. Background may be the designed campus-terrain phenomenon
   (design-phase decision, not product).
 - **Primary actions:** Explore (→ PG-PUB-002); select campus.
@@ -1106,7 +1107,7 @@ These are candidate slices, not the locked batch plan (Doc 01 §5 example, re-ex
 | 3 | Vendor entry in nav (shows "Business" when vendor) | **LOCKED** | Role-based nav. |
 | 4 | Staff as `/staff` path vs subdomain | **PROVISIONAL** (IA uses path; hosting = architecture later) | §12 uses path. |
 | 5 | Notifications as page vs panel-only | **PROVISIONAL** | PG-SHOP-005 kept but may be panel-primary. |
-| 6 | Multi-campus at launch (URL campus scope vs none) | **OPEN** | FUT-003; affects Explore scope only. |
+| 6 | Multi-campus at launch (URL campus scope vs none) | **RESOLVED (2026-08-19):** 250+ universities Phase 1 (NMU default), dynamic campus storage | FUT-003; affects Explore scope only. |
 | 7 | Moderator role shape (exact capabilities) | **OPEN** | Resolved ONLY as a structure in §3.7 matrix; the specific Moderator permissions (verify approve-only? audit/analytics read? user-action scope?) remain OPEN. Do not invent moderator pages or silently grant Admin/Super-Admin functions. |
 | 8 | Category URL slug strategy (`:slug` source) | **OPEN** (minor) | Implementation later. |
 | 9 | Account deletion page vs in-settings flow | **OPEN** | §12.6 policy OPEN. |
