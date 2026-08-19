@@ -110,8 +110,8 @@ Flows · Dependencies · Intentionally excluded.
   - **Secondary entries:** For-Vendors; About/Help/Legal (minimal legal links).
   - **Signature footer (C.12):** single contour-line border, centered links + muted copyright.
   - **Mobile:** full-screen atmospheric "window"; centered wordmark/selector/CTA; sticky CTA with
-    safe-area padding. Hamburger → full-screen overlay nav is optional build-phase scope.
-- **Primary actions:** Explore (→ PG-PUB-002); select campus.
+    safe-area padding. Hamburger → full-screen overlay nav is **required** (responsive necessity — at
+    ~375px, 6 text links + wordmark overflow without it; component built in code phase).
 - **Secondary actions:** For-Vendors; About/Help/Legal; Login/Sign-up (if signed out).
 - **Interactive elements:** searchable campus selector (popover/bottom-sheet + chips + add-it fallback); CTAs; nav.
 - **Key relationships:** → Explore, For-Vendors, Auth, legal.

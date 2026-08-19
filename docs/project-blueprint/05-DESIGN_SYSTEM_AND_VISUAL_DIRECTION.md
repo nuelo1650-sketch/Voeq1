@@ -532,8 +532,7 @@ forbidden list). The decisions below resolve the "Flatness Problem" raised in re
   (multiply). This adds warmth/depth without breaking "minimal, not empty." **No ambient drift loop** —
   a background that animates with no data behind it violates A.1 ("motion encodes state/activity, not
   ambient animation for its own sake") and A.18. The atmosphere is a still image.
-- **Sculptural wordmark.** "Voeq" in Fraunces 600, `clamp(5rem, 14vw, 7rem)` (founder ceiling ~7rem —
-  larger than the prior ~65px, but capped to avoid luxury-cosplay). Tracking `-0.04em`, line-height
+- **Sculptural wordmark.** "Voeq" in Fraunces 600, `clamp(5rem, 14vw, 8rem)` (founder ceiling 8rem ≈128px — bold, not cosplay; Expressive tier allows oversized display; restraint elsewhere prevents posturing). Tracking `-0.04em`, line-height
   `0.88`, warm `text-shadow` depth, optional 2%-larger "V". **No 3D / rotateX.**
 - **One-shot entrance ("ink settling into paper", A.18).** Staggered character fade-up (V→o→e→q,
   opacity+translateY, locked ease, ~2s total) on *first arrival only*, then still forever. Honors
@@ -546,23 +545,33 @@ forbidden list). The decisions below resolve the "Flatness Problem" raised in re
   ("Discover what's open near [NMU ▼]") — preserves `data-testid="campus-selector"` + popover/
   bottom-sheet + chips + fuzzy alias from commit 418981b. No card weight. Examples Nigerian
   (NMU default; UNILAG, UI, OAU, Covenant, FUTO).
-- **Trust strip (data-bound, no literals).** Live counts from the content boundary —
-  `{vendorCount}` vendors · `{campusCount}` campuses · `{studentConnections}` connected. **No hardcoded
-  numbers** (the review's 247/12/4,891 are illustrative only and discarded). Under the 250+ Nigerian
-  universities scope, the campus figure is data-derived, not a fixed stat.
+- **Trust strip (data-bound, no literals; professional in what we contain).** Live counts from the content boundary —
+  `{vendorCount}` vendors · `{campusCount}` campuses · `{studentConnections}` connected. Reflects what the app actually does, not invented or vague figures. **No hardcoded
+  numbers** (review's 247/12/4,891 discarded). Competition-status/review-framing counts (e.g. "X verified / Y applied / Z approved") avoided pending founder copy call (Conflict A). The strip carries **open states** (see §C.10.1 / Conflict D): active & mixed status, add/delete-now in progress, and legible "not yet live" states — the strip shows real operational status, not aspirational numbers.
 - **Elevated CTA + signature footer.** Warm-shadow accent button with hover lift + arrow micro-
   interaction, wired to the selector ("Explore {campus}"); signature contour-line footer border.
 - **Performance target (A.2):** all motion CSS-compositor only; 60fps target on mid-range Android;
   graceful reduced-motion + legacy degradation. Documented as a target, not a guarantee.
-- **Mobile = "window".** Full-screen atmosphere; centered wordmark/selector/CTA; sticky CTA with
-  safe-area padding. Hamburger → full-screen overlay nav is **optional build-phase scope** (not required
-  for this doc pass).
-- **Badge terminology (VERIFIED vs "Student Vouched"):** deferred — see the cross-doc copy
-  reconciliation (Conflict A, pending founder decision). The trust strip above uses data-bound counts
-  and avoids "verified" language pending that call.
+- **Mobile = "window"** with required overlay nav. Full-screen atmosphere; centered wordmark/selector/CTA; sticky CTA with
+  safe-area padding; **hamburger → full-screen overlay nav is REQUIRED** (responsive necessity — at ~375px, 6 text links + wordmark overflow without it). Overlay built in code phase; docs now mark it required.
+- **Badge terminology (Resolution A — VERIFIED → "Student Vouched", founder-approved here):** rename the
+  "VERIFIED" badge to "Student Vouched" throughout the product/display language. "Student Vouched" = a
+  student-backed trust signal, not a third-party certification claim. Removes the implication of external
+  verification and keeps the trust language honest. Apply across Doc 04 PG-PUB-001 required content, the
+  campus/listing trust signals, and any "X verified" reference (the trust strip avoids that framing
+  entirely; see §C.10.1). **Compliance note:** no "verified" language remains as a claim on the landing.
 
 > These are documented as the Landing's locked *visual direction*. Component-level tokens live in
 > Part C (C.6–C.12). Build implements from Part C, not from this prose.
+
+#### Conflict resolution log (founder-approved 2026-08-19, this doc pass)
+
+- **Conflict A — VERIFIED → "Student Vouched":** RESOLVED. Rename approved; no "verified" claim remains on the landing. See C.10.1 reservation.
+- **Conflict B — NMU two-campus:** RESOLVED. Single NMU entry + Kurutie/Okerenkoko toggle; not separate catalog rows. Client-design default.
+- **Conflict C — Homepage trust strip:** RESOLVED. Data-bound, professional, no lies/vague numbers, reflects what the app contains (C.10).
+- **Conflict D — Open states:** RESOLVED. Add/delete-now + active/mixed/not-yet-live states added (C.10.1).
+- **Landing call — Wordmark:** `clamp(5rem, 14vw, 8rem)` (8rem founder ceiling).
+- **Landing call — Mobile nav:** full-screen overlay nav now **required** (responsive necessity).
 
 ---
 
@@ -1232,8 +1241,7 @@ Implementation convenience **must not override Part C.** When building:
 
 ## C.7 — Landing wordmark (sculptural)
 - **Job:** the dominant arrival element — editorial authority, not a polite logo.
-- **Tokens:** Fraunces 600; `clamp(5rem, 14vw, 7rem)` (founder ceiling ~7rem — tunable, capped to avoid
-  luxury-cosplay); tracking `-0.04em`; line-height `0.88`; color `var(--role-text)` + warm `text-shadow`
+- **Tokens:** Fraunces 600; `clamp(5rem, 14vw, 8rem)` (founder ceiling 8rem ≈128px — bold, not cosplay; Expressive tier allows oversized display; restraint elsewhere prevents posturing); tracking `-0.04em`; line-height `0.88`; color `var(--role-text)` + warm `text-shadow`
   (`0 1px 2px rgba(184,137,59,0.08), 0 4px 12px rgba(31,42,34,0.06)`); optional 2%-larger "V".
 - **Motion (A.18 "ink settling"):** one-shot on first arrival only — staggered character fade-up
   (V→o→e→q, opacity 0→1 + translateY 24px→0, locked ease, ~2s total), then still forever.
@@ -1247,6 +1255,10 @@ Implementation convenience **must not override Part C.** When building:
   underline → `var(--role-accent)` on hover, custom chevron rotates 180° open. **`data-testid="campus-selector"`
   preserved on the `<select>`.** Examples Nigerian (NMU default; UNILAG, UI, OAU, Covenant, FUTO).
 - **No card / border / label** — reduces visual noise per "restraint is the brand" (A.2).
+- **NMU two-campus (Conflict B, RESOLVED):** NMU is a **single default entry** with a **two-campus toggle**
+  (Kurutie ↔ Okerenkoko), per the client spec design — **not** two separate catalog entries. "Leave the NMU
+  — it's there by design of the client" (founder). The selector lists NMU once; the toggle switches physical
+  campus context without a second catalog row.
 
 ## C.9 — Contour field (asymmetric hero)
 - **Job:** the signature at its *strongest* (B.11, six "strongest" citations) — Landing's visual
@@ -1261,15 +1273,31 @@ Implementation convenience **must not override Part C.** When building:
   Nigerian topography (Niger delta curves, Jos plateau ridges) — art, not a map.
 - **Banned:** CSS `perspective`/`rotateY` hover tilt (Part D "3D experimental" — CUT).
 
-## C.10 — Trust strip (data-bound)
+## C.10 — Trust strip (data-bound; professional in what we contain)
+
 - **Job:** credibility via real counts — "other students are already here."
 - **Tokens:** centered full-width band, `var(--space-6)` padding; `Hanken Grotesk 14px` uppercase
   `letter-spacing 0.08em` `var(--role-text-muted)`; numbers `Fraunces 2rem` 600 `var(--role-text)`;
-  middot separators.
+  middot separators. **Trust strip is professional and truthful** — it reflects what the app contains/provides and real operational status, not aspirational or invented figures.
 - **Content (DATA-BOUND, never literal):** `{vendorCount}` vendors · `{campusCount}` campuses ·
   `{studentConnections}` connected — sourced from the content boundary (seeded + live). Under the 250+
   Nigerian universities scope, `campusCount` is derived, not a fixed stat. **No hardcoded figures**
   (review's 247/12/4,891 are illustrative only — discarded). One-shot viewport-enter reveal (not a loop).
+- **Open states (§C.10.1):** the strip must remain legible and honest when data is incomplete — active /
+  mixed / in-progress statuses show real state, not "0" substitutes; where a count isn't live yet, show a
+  clear "not yet available" framing rather than a guessed number. **Add/delete-now** is in scope: the strip
+  reflects additions and deletions as they happen (e.g. campus/vendor changes), so it stays current.
+
+### C.10.1 — Open states for the trust strip (Conflict D)
+
+- **Active / mixed status:** when live data is partial, the strip shows what's real (partial counts, live
+  status notes) rather than hiding incompleteness. Honest partial ≠ vague.
+- **Add/delete-now:** additions (new campus, new vendor, new connection) and deletions (campus removed,
+  vendor removed, connection lost) are reflected in the strip in real time — it tracks what we actually
+  contain. Pending/soft-delete states show a clear "still under review / not yet live" state, not a stale
+  number.
+- **Reservation:** counts are *descriptive* of what's in the system; they are not competition framing (no
+  "verified / applied / approved" ladders pending the VERIFIED→Student Vouched rename, Conflict A).
 
 ## C.11 — Landing CTA (elevated)
 - **Tokens:** `inline-flex`, `padding 24px 48px`, `background var(--role-accent)`,
