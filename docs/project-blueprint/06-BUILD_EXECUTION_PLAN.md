@@ -77,6 +77,7 @@ Each slice is **done** only when it meets its verification gate (below). Nothing
   uniformly-spaced flat stack? Is whitespace deliberate/structural (B.15.2) — gaps vary by grouping, not
   leftover uniform padding? Does content avoid spanning full container width by default (canvas-first, not
   box-default)? **Pass = yes to all three; a flat equal-gap column fails this gate.**
+- **UX gate (campus selector + contour, 250+ scope):** the campus selector is a **searchable popover (desktop) / bottom-sheet (mobile)** with quick-select chips (Popular: UNILAG, NMU, UI, OAU), fuzzy alias search (Doc 01 §6), and an "Add your campus" fallback that persists `unverified` (Doc 01 §6 / Doc 03 IDN-010) — **NOT a plain `<select>`**. The contour signature is **dynamic per campus**: pulse intensity reflects vendor density (buzzing vs newly-seeded "waiting" state). **Pass = searchable selector functional + contour visibly differs by campus density.**
 
 > ⚠️ **REVERSAL — 2026-08-18 (founder call, confirmed):**
 > This section previously read "Slice 1 — Landing (**Deep**)" with a "Landing renders in Deep" gate. That has
@@ -114,6 +115,7 @@ Each slice is **done** only when it meets its verification gate (below). Nothing
   (imagery leads each card, metadata grouped) rather than a uniform card grid? Is density comfortable but
   never cramped (breathing room between groups)? Is contour used as whisper/structural (edge, ≤12%), not a
   hero? **Pass = composed groupings + comfortable density + structural contour; a packed equal grid fails.**
+- **UX gate (campus pill + contour, 250+ scope):** Explore shows a **campus indicator pill** (current campus) at the top of the grid with an **instant switcher** (reopens selector, no full reload); the contour edge-whisper is **dynamic per campus** (intensity tracks vendor density). **Pass = pill switches campus instantly + contour differs by density.**
 
 ### Slice 3 — Listing Detail [PUBLIC]
 - Doc 04 PG-PUB-005. Editorial object; gallery (B.6 frame); price/availability as data; message CTA.
@@ -146,6 +148,7 @@ Each slice is **done** only when it meets its verification gate (below). Nothing
   utility-first — scannable, signature minimal, no decorative hierarchy fighting the task? Do nav/
   notifications sit quiet (caption/small, ink-muted) and escalate only when needed (B.15.1)? **Pass =
   calm/scannable with quiet utility; a loud or decorative layout fails.**
+- **UX gate (campus selector on Auth/Shopper shell):** the Auth/account surface and Shopper shell use the **same searchable campus selector** (popover/bottom-sheet + chips + add-it) as Landing/Explore — **NOT a plain `<select>`** anywhere. Component continuity Landing→Auth→Explore→Shopper is verified. **Pass = consistent searchable selector on all surfaces; zero `<select>` campus pickers.**
 
 ### Slice 6 — Vendor onboarding + Vendor Dashboard [PRODUCT]
 - Doc 04 PG-VEND-007 (create/edit distinct) + PG-VEND-001 (attention queue, not generic analytics).
