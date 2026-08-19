@@ -19,8 +19,10 @@ Label convention used throughout:
 **DECIDED.** Voeq is a **campus-focused discovery and marketplace platform** for Nigerian tertiary
 students. Its first and primary experience is **discovery, connection, and communication** between
 students and campus vendors/service providers (food, repairs, tailoring, tech support, printing,
-beauty, tutoring, and similar). The pilot market is **NMU (Nigeria Maritime University, Okerenkoko)**,
-with explicit intent to expand to other tertiary institutions.
+beauty, tutoring, and similar). The **Phase 1 scope is 250+ Nigerian universities** (campus marketplace,
+not single-school); **NMU (Nigeria Maritime University, Okerenkoko) is the default/first launch campus**,
+with explicit intent to cover all tertiary institutions. Campuses not yet in the seed catalog are captured
+dynamically on search (see §5/§6 Campus/Institution).
 
 ### 1.2 What problem does it solve?
 **DECIDED (problem framing).** Nigerian tertiary students have no reliable, *campus-specific* way to
@@ -208,8 +210,10 @@ multi-currency, native mobile app, AI features, Events/Housing/Waybill.
   Phase 1 data/IA so payments can attach later (e.g., listings already carry price ranges; a future
   order entity links shopper↔vendor↔listing) **without** building it now.
 - **Logistics / fulfillment** integration (Phase 2 per docx).
-- **Multi-institution expansion** beyond the NMU pilot (campus model already supports this; Phase 1
-  ships NMU-first but the data model must not hard-code one campus).
+- **Multi-institution expansion** — **RESOLVED for Phase 1 (founder directive 2026-08-19):** Phase 1
+  ships **250+ Nigerian universities** (not a single pilot). NMU is the default/first campus. The campus
+  catalog is a seed list of 250+ institutions plus **dynamic storage**: a searched campus name not in the
+  catalog is persisted and becomes selectable. The data model must not hard-code one campus.
 - **Listing-scoped reviews** (legacy is vendor-scoped only — see §14, OPEN).
 - **Rich messaging** (attachments, edit/delete, typing presence beyond basics) — architected for,
   phased.
@@ -337,8 +341,16 @@ vendor must lose public visibility appropriately (ties to §2.6 banned/suspended
 **DECIDED (concepts), OPEN (exact ranking).** All discovery is campus-scoped.
 
 - **Campus / Institution:** Campuses belong to Institutions (university/polytechnic/college). A
-  shopper has a default campus; discovery defaults to it. NMU is the Phase 1 pilot but the model must
-  support multi-campus. `DECIDED.`
+  shopper has a default campus; discovery defaults to it. **Phase 1 scope = 250+ Nigerian universities,
+  NMU-default.** `DECIDED (founder reversal 2026-08-19; previously NMU-pilot/FUT-003-open).`
+  - **Dynamic campus storage:** a curated seed catalog of 250+ institutions + an **alias table** (e.g.
+    UNILAG→University of Lagos, OAU→Obafemi Awolowo, UNN→University of Nigeria Nsukka). Campus selection
+    **normalizes** input (case/space/punctuation) and matches against the canonical name + aliases. A
+    normalized miss **auto-persists** the campus as `unverified`, selectable immediately for the
+    triggering user. An `unverified` campus becomes publicly discoverable only once it has **≥1 confirmed
+    vendor** (kills empty/spam campuses without a human gate). A **weekly batch founder review** promotes
+    `unverified`→`verified` (globally discoverable) or soft-deletes (preserving any vendors for migration).
+    Fuzzy/Levenshtein is used for "Did you mean?" display only — never for the insert. `DECIDED.`
 - **Categories:** A curated official taxonomy (parent/child tree). Legacy supported user categories
   too — **PROPOSED:** Phase 1 ships official categories only (curated quality > crowd taxonomy);
   revisit user-submitted categories later. `OPEN.`
@@ -396,8 +408,9 @@ vendor must lose public visibility appropriately (ties to §2.6 banned/suspended
 7. **Categories:** official-only (Phase 1) vs allow user-submitted? — §11
 8. **Messaging guest browsing:** public discovery yes; pre-auth messaging no (proposed) — confirm. — §10.3
 9. **Monetization:** free Phase 1 (proposed); confirm and decide Phase 2 model. — §12
-10. **NMU-only vs multi-campus at launch:** ship NMU-locked or allow multiple campuses from day one?
-    (Data model supports multi; product launch scope is OPEN.) — §5/§6
+10. **NMU-only vs multi-campus at launch:** **RESOLVED (founder reversal 2026-08-19) → 250+ universities
+    in scope from day one (NMU default/first), with dynamic campus storage for searched-unlisted campuses.**
+    Data model is multi-campus; product launch scope is now 250+, not NMU-locked. — §5/§6
 11. **Exact green/gold/cream values, light vs dark primary, art-directed imagery direction:** design
     phase (carried from DESIGN_HANDOFF open questions).
 12. **Background phenomenon:** adopt the campus-terrain + live-vendor-constellation concept (design
@@ -418,7 +431,7 @@ vendor must lose public visibility appropriately (ties to §2.6 banned/suspended
 | 7 | **Discovery quality depends on ranking** (legacy trending = raw view count only) | Phase 1 | "Trending" must weight recency + rating + campus, not raw views (§11); define ranking in build. |
 | 8 | **Design execution risk** — exploration to date was template-grade (see DESIGN_HANDOFF) | Phase 1 | Design phase must produce one bold, art-directed direction with real imagery, not an option board; founder to supply a hero reference. |
 | 9 | **`.edu.ng` gating may block legitimate users** (part-time, non-traditional, nearby non-students) | Phase 1 | Decide mechanism (§14 #4) before auth build; allow manual review path. |
-| 10 | **Single-campus pilot limits network effect evidence** | Phase 1→2 | Keep data model multi-campus; treat NMU as validated learning, not a ceiling. |
+| 10 | **Single-campus pilot limits network effect evidence** | **RESOLVED (2026-08-19):** 250+ universities in Phase 1 scope (NMU default) removes the single-campus ceiling; the network-effect evidence bar is now multi-campus from launch. |
 
 ---
 

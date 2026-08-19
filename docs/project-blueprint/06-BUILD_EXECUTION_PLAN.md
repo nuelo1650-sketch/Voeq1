@@ -175,6 +175,28 @@ Each slice is **done** only when it meets its verification gate (below). Nothing
   readable as grouped stages, not a 400-row table stare? **Pass = dense-but-legible operational with
   strategic-Deep and no signature; a loud or signature-bearing surface fails.**
 
+### Public-surface inventory & Phase 1 scope (additive — 2026-08-19 founder directive)
+
+- **Phase 1 build scope = 250+ Nigerian universities** (NMU default/first), not an NMU-only pilot. See
+  Doc 01 §1.1/§5/§6, Doc 02 FUT-003 (now Phase 1), Doc 03 IDN-010, Doc 04 §86/§1109. Campus catalog =
+  250+ seed + **dynamic storage** (normalized + alias-aware match; a searched-unlisted campus auto-persists
+  `unverified`, selectable immediately for the user, publicly discoverable only after ≥1 confirmed vendor,
+  weekly founder review).
+- **Public surface (VS1-equivalent) pages:** Landing, Explore, Category, Storefront, Listing, About, Terms,
+  Privacy, Help, For-Vendors, Press — **plus Careers (PUB-012) and Media (PUB-013), added per founder
+  2026-08-19**. About/Terms/Privacy **content is SUPPLIED** by the client `Voeq_Developer_Build_Spec.md`
+  §6 (resolves the prior VS1 content gap); the routes already existed (PG-PUB-006/007/008).
+- **Categories (taxonomy):** static, curated 20 (Food…Other). **Accessories = CONSIDERED, not committed.**
+  Rule: campuses and emergent service tags are dynamic/self-growing; categories, badges, footer social
+  links, and vendor types remain editorial/static (curated, not free-form). Do not open category insertion
+  to users. (Tags may become dynamic later; categories never.)
+- **Copy-corrections (verification items, from client spec §5):** favicon resolves (16/32/180/192/512);
+  no duplicate wordmark on auth pages; OG/meta description no longer claims "100+ universities"; homepage
+  drops the "100+ Universities" stat card and the "coming soon" university list; footer credit "Powered by
+  Legacy LM" kept; remove duplicated features block; remove "What is Voeq?" duplicate from homepage.
+- **Footer social links (reference, client spec §7):** WhatsApp Channel/Community + Instagram + TikTok +
+  Twitter/X.
+
 ### Phase 9 — Progressive real-infra connection [post-public-proof]
 - Replace `packages/data` mock repos with real API/DB, one domain at a time, starting with listings/
   vendors (the public surfaces that already proved the design). UI unchanged (data boundary holds).
