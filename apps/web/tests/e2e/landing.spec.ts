@@ -217,4 +217,20 @@ test.describe("Task B — Landing completion + contour richness", () => {
     const distinct = new Set(positions.map((p) => `${p.x},${p.y}`));
     expect(distinct.size).toBeGreaterThan(1);
   });
+
+  // --- Content item 7: mobile full-screen overlay nav (Doc 05 A.19 REQUIRED) ---
+  test("mobile (375px): hamburger opens full-screen overlay nav with links", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/");
+    const hamburger = page.getByTestId("landing-nav-hamburger");
+    await expect(hamburger).toBeVisible();
+    // Inline links hidden on mobile per .landing-nav-links (<=768px in globals.css).
+    await expect(page.getByTestId("nav-about")).toBeHidden();
+    await hamburger.click();
+    const overlay = page.getByTestId("landing-nav-overlay");
+    await expect(overlay).toBeVisible();
+    await expect(page.getByTestId("nav-about-overlay")).toBeVisible();
+    await page.getByTestId("landing-nav-overlay-close").click();
+    await expect(overlay).toBeHidden();
+  });
 });
