@@ -120,7 +120,8 @@ different *room of the same building*, not loaded a different website.
 | Messaging | **Warm cream** | sustained reading; calm |
 | Vendor dashboard | **Warm cream** | data density |
 | Staff (Moderation/Audit/Config/Analytics) | **Warm cream (Deep used strategically inside)** | LOCKED: Staff is an operational environment — queues, tables, evidence, audit, analytics, config. Cream handles density; Deep forest is used *strategically inside Staff* for hierarchy, important states, navigation, or high-value moments — never as the surface. |
-| Auth / account states | **Deep forest** | focused, low-distraction arrival moments |
+| Auth / account states | **Cream** (default arrival; Deep *strategically inside* only) | focused, low-distraction arrival — Cream keeps it calm; Deep reserved for in-flow high-value states |
+> ↩️ **Auth row resolved 2026-08-19 (founder Cream-first reversal):** was "Deep forest"; now Cream-default, mirroring the Landing row above. Deep permitted *strategically inside* Auth (alerts/high-value states) but never the arrival surface. See the table reversal note below + Doc 07 §7.2 / Doc 12.
 
 > ⚠️ **REVERSAL OF THIS TABLE — 2026-08-18 (founder Cream-first call, confirmed):**
 > The **"Landing / arrival → Deep forest"** row above is **reversed**. Cream is now the **default
