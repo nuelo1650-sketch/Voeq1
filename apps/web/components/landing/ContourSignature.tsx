@@ -74,10 +74,11 @@ export function ContourSignature() {
                   DEV FIXTURE SEED — not production data
                 </Type>
               )}
-              <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "center" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-3)", alignItems: "center", width: "100%" }}>
                 {/* Density field: nodes positioned by intensity (abstract, not geographic). */}
                 <div
                   data-testid="contour-field"
+                  className="contour-field-min"
                   style={{
                     position: "relative",
                     width: FIELD,

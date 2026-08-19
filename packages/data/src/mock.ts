@@ -67,8 +67,8 @@ export const mockListingsRepo: ListingsRepo = {
     const cat = params?.category;
     return cat ? MOCK_EXPLORE_LISTINGS.filter((l) => l.categorySlug === cat) : MOCK_EXPLORE_LISTINGS;
   },
-  async getById() {
-    return null;
+  async getById(id: string) {
+    return MOCK_EXPLORE_LISTINGS.find((l) => l.id === id) ?? null;
   },
 };
 

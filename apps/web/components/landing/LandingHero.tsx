@@ -10,7 +10,7 @@ export function LandingHero() {
     <Grid>
       <Column span={12}>
         <Stack space={3}>
-          <Type data-testid="landing-heading" tone="display" size="display">
+          <Type data-testid="landing-heading" tone="display" size="display" style={{ letterSpacing: "-0.04em", lineHeight: 0.88, textShadow: "0 1px 0 rgba(184,137,59,0.18)" }}>
             Voeq
           </Type>
         </Stack>
