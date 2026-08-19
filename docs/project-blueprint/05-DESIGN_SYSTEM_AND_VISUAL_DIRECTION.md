@@ -547,7 +547,7 @@ forbidden list). The decisions below resolve the "Flatness Problem" raised in re
   (NMU default; UNILAG, UI, OAU, Covenant, FUTO).
 - **Trust strip (data-bound, no literals; professional in what we contain).** Live counts from the content boundary —
   `{vendorCount}` vendors · `{campusCount}` campuses · `{studentConnections}` connected. Reflects what the app actually does, not invented or vague figures. **No hardcoded
-  numbers** (review's 247/12/4,891 discarded). Competition-status/review-framing counts (e.g. "X verified / Y applied / Z approved") avoided pending founder copy call (Conflict A). The strip carries **open states** (see §C.10.1 / Conflict D): active & mixed status, add/delete-now in progress, and legible "not yet live" states — the strip shows real operational status, not aspirational numbers.
+  numbers** (review's 247/12/4,891 discarded). Competition-status/review-framing counts (e.g. "X verified / Y applied / Z approved") are avoided: the strip shows what the app contains, not a verification ladder. Per the Conflict A resolution, the badge language is **"Student Vouched"** (student-backed trust signal, not a third-party certification claim) — no "verified" competition framing. The strip carries **open states** (see §C.10.1 / Conflict D): active & mixed status, add/delete-now in progress, and legible "not yet live" states — the strip shows real operational status, not aspirational numbers.
 - **Elevated CTA + signature footer.** Warm-shadow accent button with hover lift + arrow micro-
   interaction, wired to the selector ("Explore {campus}"); signature contour-line footer border.
 - **Performance target (A.2):** all motion CSS-compositor only; 60fps target on mid-range Android;
