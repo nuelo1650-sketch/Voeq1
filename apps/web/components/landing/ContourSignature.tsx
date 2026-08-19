@@ -76,9 +76,12 @@ export function ContourSignature() {
               )}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-3)", alignItems: "center", width: "100%" }}>
                 {/* Density field: nodes positioned by intensity (abstract, not geographic). */}
+                {/* Frosted-but-not-blurred panel (B.5: no backdrop-filter). SVG contour-line
+                    self-draws ONLY when activity exists — the contour communicates, never
+                    manufactures it (A.1/A.18: no animation without data behind it). */}
                 <div
                   data-testid="contour-field"
-                  className="contour-field-min"
+                  className="contour-panel contour-field-min"
                   style={{
                     position: "relative",
                     width: FIELD,
@@ -86,6 +89,23 @@ export function ContourSignature() {
                     maxWidth: "100%",
                   }}
                 >
+                  <svg
+                    data-testid="contour-line"
+                    className="contour-line"
+                    viewBox={`0 0 ${FIELD} ${FIELD}`}
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+                    aria-hidden="true"
+                  >
+                    <path
+                      className="contour-line-path"
+                      d={`M ${CENTER} ${CENTER - CENTER * 0.7}
+                           L ${CENTER - CENTER * 0.5} ${CENTER}
+                           L ${CENTER + CENTER * 0.4} ${CENTER + CENTER * 0.3}
+                           L ${CENTER} ${CENTER + CENTER * 0.6}
+                           Z`}
+                      fill="none"
+                    />
+                  </svg>
                   {nodes.map((n) => {
                     const r = 0.25 + (1 - n.intensity) * 0.6; // higher intensity -> nearer center
                     const angle = hash01(n.id) * Math.PI * 2;
