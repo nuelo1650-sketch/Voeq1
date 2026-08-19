@@ -290,18 +290,17 @@ below. The original §A–§O audit above is reproduced unchanged; this §P reco
    column linking every route to its slice's composition tier. §7.16 live text softened so it no longer
    contradicts its own SUPERSEDED note.
 4. **Cross-doc consistency re-verified (partial).** Docs 07 + 12 now agree auth-arrival = Cream-default.
-   ONE remaining stale reference persists: **Doc 05 A.3 environment table line 123** ("Auth / account
-   states | **Deep forest**") still describes the pre-reversal state. This audit's edit scope was Doc 07 +
-   Doc 12 only; the Doc 05 A.3 row is flagged here for a follow-up correction (recommended: set to
-   Cream-default with a dated reversal note, mirroring the Landing row). Until then, Doc 05 A.3 line 123
-   is the single known inconsistent cell.
+   **RESOLVED (2026-08-19):** the former stale reference — **Doc 05 A.3 environment table line 123**
+   ("Auth / account states | **Deep forest**") — has been corrected to **Cream** (default arrival; Deep
+   strategically-inside only) with a dated reversal footnote mirroring the Landing row. The blueprint is
+   now 100% aligned on Cream-first across all public + auth surfaces. No remaining inconsistent cell.
 5. **Check 8 (testing integrity) scope note.** "every LOCKED rule has a gate" now additionally covers the
    B.15/C.6 composition criteria (Doc 06 §2 gates), not just gate existence. No LOCKED decision lacks a
    protecting gate.
 
 **VERDICT: ✅ PASS — BLUEPRINT STILL READY FOR IMPLEMENTATION**, with composition-gates now present as
 enforceable, screenshot-verifiable criteria and the auth-arrival environment reversal consistently applied
-across Doc 07 + 12 (Doc 05 A.3 line 123 flagged for follow-up). No repo work, no Doc 13.
+across Doc 07 + 12 (Doc 05 A.3 line 123 resolved 2026-08-19). No repo work, no Doc 13.
 
 ---
 
@@ -334,7 +333,7 @@ unchanged; this §Q records what postdates it.
    §2 content SUPPLIED; routes PG-PUB-006/007/008); Careers (PUB-012) + Media (PUB-013) added to VS1.
 5. **Cross-doc consistency re-verified:** Docs 01/02/03/04 now state 250+ Phase 1 + dynamic storage
    consistently. No remaining internal contradiction on campus scope. (The Doc 05 A.3 line 123 flag from
-   §P remains a separate follow-up, untouched by this directive.)
+   §P is now RESOLVED — the Auth/account-states cell corrected to Cream 2026-08-19.)
 
 **VERDICT: ✅ PASS — BLUEPRINT STILL READY FOR IMPLEMENTATION**, with Phase 1 scope now 250+ universities
 (founder reversal) and dynamic campus storage specified. Doc-only; no repo code changes.
