@@ -112,7 +112,7 @@ different *room of the same building*, not loaded a different website.
 
 | Surface | Environment | Rationale |
 |---|---|---|
-| Landing / arrival | **Deep forest** | brand moment, first impression, strongest signature expression |
+| Landing / arrival | **Warm cream** (Cream-first arrival, 2026-08-19 reversal) | brand moment, first impression, strongest signature expression |
 | Explore / discovery | **Warm cream** | dense browsing needs light canvas; contour = spatial whisper |
 | Vendor storefront | **Cream + Deep hero** | cream for density; Deep hero carries the campus-identity mark |
 | Listing detail | **Warm cream** | reading + imagery; needs light |
@@ -517,6 +517,52 @@ go-ahead. Part A is not rewritten from here.
 ---
 
 **END OF PART A (Stage 1) — LOCKED.**
+
+---
+
+## A.19 — Landing visual direction (the "rich arrival", Cream-first)
+
+**LOCKED direction (founder-approved 2026-08-19, via the Voeq visual-gap review):**
+The Landing is the single brand-arrival moment. It must feel like *arrival*, not a styleguide
+demo — but within the locked blueprint's hard rules (A.1, A.2, Part D "3D experimental", the
+forbidden list). The decisions below resolve the "Flatness Problem" raised in review.
+
+- **Atmosphere, not flatness.** Cream base (`#f7f4ec`) + two *static* CSS layers: a soft amber radial
+  glow upper-left, a soft deep-green radial vignette lower-right, plus a static ≤3% SVG grain
+  (multiply). This adds warmth/depth without breaking "minimal, not empty." **No ambient drift loop** —
+  a background that animates with no data behind it violates A.1 ("motion encodes state/activity, not
+  ambient animation for its own sake") and A.18. The atmosphere is a still image.
+- **Sculptural wordmark.** "Voeq" in Fraunces 600, `clamp(5rem, 14vw, 7rem)` (founder ceiling ~7rem —
+  larger than the prior ~65px, but capped to avoid luxury-cosplay). Tracking `-0.04em`, line-height
+  `0.88`, warm `text-shadow` depth, optional 2%-larger "V". **No 3D / rotateX.**
+- **One-shot entrance ("ink settling into paper", A.18).** Staggered character fade-up (V→o→e→q,
+  opacity+translateY, locked ease, ~2s total) on *first arrival only*, then still forever. Honors
+  `prefers-reduced-motion`. **No rotateX in the entrance.**
+- **Contour as hero (asymmetric counterweight).** Expressive tier (full-bleed permission) — contour is
+  *strongest on Landing* per B.11 / six "strongest" citations. Desktop: left 55% = wordmark + tagline +
+  inline selector + CTA; right 45% = contour field (frosted glass, SVG self-draw when data exists, calm
+  heartbeat empty-state). **No CSS-3D perspective tilt** (Part D experimental — CUT).
+- **Inline campus selector (skin over the locked searchable selector).** Styled as a sentence
+  ("Discover what's open near [NMU ▼]") — preserves `data-testid="campus-selector"` + popover/
+  bottom-sheet + chips + fuzzy alias from commit 418981b. No card weight. Examples Nigerian
+  (NMU default; UNILAG, UI, OAU, Covenant, FUTO).
+- **Trust strip (data-bound, no literals).** Live counts from the content boundary —
+  `{vendorCount}` vendors · `{campusCount}` campuses · `{studentConnections}` connected. **No hardcoded
+  numbers** (the review's 247/12/4,891 are illustrative only and discarded). Under the 250+ Nigerian
+  universities scope, the campus figure is data-derived, not a fixed stat.
+- **Elevated CTA + signature footer.** Warm-shadow accent button with hover lift + arrow micro-
+  interaction, wired to the selector ("Explore {campus}"); signature contour-line footer border.
+- **Performance target (A.2):** all motion CSS-compositor only; 60fps target on mid-range Android;
+  graceful reduced-motion + legacy degradation. Documented as a target, not a guarantee.
+- **Mobile = "window".** Full-screen atmosphere; centered wordmark/selector/CTA; sticky CTA with
+  safe-area padding. Hamburger → full-screen overlay nav is **optional build-phase scope** (not required
+  for this doc pass).
+- **Badge terminology (VERIFIED vs "Student Vouched"):** deferred — see the cross-doc copy
+  reconciliation (Conflict A, pending founder decision). The trust strip above uses data-bound counts
+  and avoids "verified" language pending that call.
+
+> These are documented as the Landing's locked *visual direction*. Component-level tokens live in
+> Part C (C.6–C.12). Build implements from Part C, not from this prose.
 
 ---
 
@@ -1169,6 +1215,77 @@ Implementation convenience **must not override Part C.** When building:
 
 ---
 
+---
+
+> **Landing component extensions — added 2026-08-19 (founder-approved visual direction, Doc 05 A.19).**
+> These extend the locked Part C with the Landing/arrival components and are part of the locked design
+> system for build. They are component tokens for an already-approved direction, not a new design stage.
+
+## C.6 — Landing atmosphere (background layer)
+- **Job:** give the cream arrival warmth + depth without animation (resolves the "Flatness Problem").
+- **Tokens:** base `var(--role-bg)` cream `#f7f4ec`; static amber radial glow upper-left
+  (`rgba(184,137,59,0.08)`); static deep-green radial vignette lower-right (`rgba(16,35,26,0.06)`);
+  static SVG grain data-URI at ≤3% opacity, `mix-blend-mode: multiply`.
+- **Banned:** any loop/keyframe drift on these layers (A.1 "motion encodes state, not ambient"; A.18).
+  The atmosphere is a still image.
+- **Responsive:** same layers on mobile, where the warm field reads as a "window" into campus.
+
+## C.7 — Landing wordmark (sculptural)
+- **Job:** the dominant arrival element — editorial authority, not a polite logo.
+- **Tokens:** Fraunces 600; `clamp(5rem, 14vw, 7rem)` (founder ceiling ~7rem — tunable, capped to avoid
+  luxury-cosplay); tracking `-0.04em`; line-height `0.88`; color `var(--role-text)` + warm `text-shadow`
+  (`0 1px 2px rgba(184,137,59,0.08), 0 4px 12px rgba(31,42,34,0.06)`); optional 2%-larger "V".
+- **Motion (A.18 "ink settling"):** one-shot on first arrival only — staggered character fade-up
+  (V→o→e→q, opacity 0→1 + translateY 24px→0, locked ease, ~2s total), then still forever.
+  `prefers-reduced-motion`: instant. **No rotateX / 3D.**
+
+## C.8 — Campus selector (inline "sentence" treatment)
+- **Job:** campus context as part of the prose, not a card.
+- **Skin over the locked component (commit 418981b):** the searchable popover/bottom-sheet + chips +
+  fuzzy alias + dynamic `unverified` persistence is unchanged. Presentation only: rendered as
+  "Discover what's open near [NMU ▼]" — underlined word, `Hanken Grotesk 600` `var(--role-accent)`,
+  underline → `var(--role-accent)` on hover, custom chevron rotates 180° open. **`data-testid="campus-selector"`
+  preserved on the `<select>`.** Examples Nigerian (NMU default; UNILAG, UI, OAU, Covenant, FUTO).
+- **No card / border / label** — reduces visual noise per "restraint is the brand" (A.2).
+
+## C.9 — Contour field (asymmetric hero)
+- **Job:** the signature at its *strongest* (B.11, six "strongest" citations) — Landing's visual
+  counterweight to the wordmark.
+- **Layout:** desktop 55/45 split (text left, contour right, full hero height); mobile full-width
+  300px. Expressive tier (full-bleed permission).
+- **Tokens:** `var(--role-surface)` @40% + `backdrop-filter: blur(12px)`; 1px `var(--role-border)` @50%;
+  `border-radius: 12px`; 380×420px desktop.
+- **States:** populated → SVG self-draw (stroke-dashoffset), soft-glow nodes (radial, not circles),
+  connecting lines `var(--role-accent)` @12%, slow 20s figure-8 node drift; empty → single calm
+  heartbeat pulse + "The marketplace is quiet right now" (italic, `var(--role-text-muted)`). Abstract
+  Nigerian topography (Niger delta curves, Jos plateau ridges) — art, not a map.
+- **Banned:** CSS `perspective`/`rotateY` hover tilt (Part D "3D experimental" — CUT).
+
+## C.10 — Trust strip (data-bound)
+- **Job:** credibility via real counts — "other students are already here."
+- **Tokens:** centered full-width band, `var(--space-6)` padding; `Hanken Grotesk 14px` uppercase
+  `letter-spacing 0.08em` `var(--role-text-muted)`; numbers `Fraunces 2rem` 600 `var(--role-text)`;
+  middot separators.
+- **Content (DATA-BOUND, never literal):** `{vendorCount}` vendors · `{campusCount}` campuses ·
+  `{studentConnections}` connected — sourced from the content boundary (seeded + live). Under the 250+
+  Nigerian universities scope, `campusCount` is derived, not a fixed stat. **No hardcoded figures**
+  (review's 247/12/4,891 are illustrative only — discarded). One-shot viewport-enter reveal (not a loop).
+
+## C.11 — Landing CTA (elevated)
+- **Tokens:** `inline-flex`, `padding 24px 48px`, `background var(--role-accent)`,
+  `color var(--role-on-accent)`, `Hanken Grotesk 600 18px`, `border-radius 4px` (locked),
+  `box-shadow 0 2px 8px rgba(47,107,63,0.15)` → hover `0 8px 24px` + `translateY(-3px)`;
+  arrow `→` slides `translateX(6px)` on hover (aria-hidden). Text "Explore {campus}" wired to selector.
+- **Motion:** hover lift (relationship/state, A.18) — not ambient. `prefers-reduced-motion`: no lift.
+
+## C.12 — Signature footer
+- **Job:** visual closing statement, not a link list.
+- **Tokens:** top border = single contour-line SVG path, 1px `var(--role-text)` @4%; centered links
+  `13px` `var(--role-text-muted)` (hover `var(--role-text)`); copyright `12px` @60%;
+  `padding var(--space-8) top / var(--space-6) bottom`.
+
+---
+
 # PART D — MOTION LANGUAGE (Stage 4)
 
 > **Status:** Motion *language*, not an animation catalogue (founder). **FOR REVIEW — not locked.** Built
@@ -1229,7 +1346,7 @@ random card-float, scroll-everything. These have no cause → they are excluded 
 - **Navigation (cause: route change):** directional transition (240–320ms, standard easing). The rule from
   C: **Deep and Cream are two rooms of one building.** The Landing→Explore flip must *show* that.
 
-### D.4.1 — THE signature transition: Landing (Deep) → Explore (Cream)
+### D.4.1 — THE signature transition: Landing (Cream-first arrival) → Explore (Cream)
 - **Cause:** user taps "Explore" / scrolls past the arrival moment.
 - **LOCKED REQUIREMENT — continuity:** the transition **must preserve spatial and visual continuity**
   between Deep and Cream, so the two read as *one world* (two rooms of one building), never as "dark page
