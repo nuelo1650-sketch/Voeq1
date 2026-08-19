@@ -337,3 +337,37 @@ unchanged; this §Q records what postdates it.
 
 **VERDICT: ✅ PASS — BLUEPRINT STILL READY FOR IMPLEMENTATION**, with Phase 1 scope now 250+ universities
 (founder reversal) and dynamic campus storage specified. Doc-only; no repo code changes.
+
+---
+
+## R — 2026-08-19 founder directive: Conflicts A–D + Landing visual-direction calls (additive; VERDICT UNCHANGED)
+
+Recorded after commit `8729a20` (pushed to origin/master, includes `64b2999`). The original §A–§Q audit
+above is reproduced unchanged; this §R records what postdates it and is now LOCKED in the blueprint.
+
+1. **Wordmark ceiling → 8rem (Landing call).** Doc 05 A.19 + C.7 now specify `clamp(5rem, 14vw, 8rem)`
+   with **8rem as the LOCKED final ceiling** (founder decision 2026-08-19, **not tunable**). The earlier
+   conservative 7rem guard is superseded. No other doc referenced 7rem.
+2. **Mobile nav → REQUIRED (Landing call).** Doc 04 (IA, PG-PUB-001) + Doc 05 A.19 now state the
+   hamburger → full-screen overlay nav is **required** (responsive necessity at ~375px), not optional
+   build-phase scope. Component built in code phase; docs mark it required now.
+3. **Trust strip — professional, data-bound, open states (Conflicts C + D resolved).** Doc 05 A.19 +
+   C.10 now specify the strip as **professional in what the app contains** (real counts from the content
+   boundary `{vendorCount}` · `{campusCount}` · `{studentConnections}`), **no hardcoded/aspirational
+   figures** (247/12/4,891 discarded), and carries **open states** (active / mixed / in-progress /
+   "not yet live") so incomplete data reads honestly. Conflict D adds **add/delete-now** as in-scope
+   open operations (C.10.1).
+4. **Student Vouched rename (Conflict A resolved).** Doc 05 A.19 + C.10.1 / display language: the
+   "VERIFIED" badge is renamed **"Student Vouched"** (a student-backed trust signal, not a third-party
+   certification claim). No "verified" claim language remains on the landing.
+5. **NMU two-campus toggle (Conflict B resolved).** Doc 05 C.8: NMU is a **single default entry** with a
+   **Kurutie ↔ Okerenkoko two-campus toggle** (client-spec design) — not two catalog entries. "Leave the
+   NMU — it's there by design of the client" (founder).
+6. **Contour desktop `min-width: 320px` (orchestrator review, founder-approved 2026-08-19).** Doc 05 C.9
+   now specifies `min-width: 320px` as the desktop floor for the contour field (added this pass). The
+   field never collapses below 320px at narrow desktop widths. Mobile remains full-width 300px.
+
+**VERDICT: ✅ PASS — BLUEPRINT STILL READY FOR IMPLEMENTATION.** Conflicts A–D and the three Landing
+visual-direction founder calls are now LOCKED across Docs 04/05 and recorded in this audit. No LOCKED
+decision is contradicted; no OPEN decision silently resolved. All doc-only; no repo code changes. The
+blueprint is the source of truth and the code phase may proceed per the founder's standing go.

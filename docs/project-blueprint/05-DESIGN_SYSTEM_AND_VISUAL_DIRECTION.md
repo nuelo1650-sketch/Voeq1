@@ -532,7 +532,7 @@ forbidden list). The decisions below resolve the "Flatness Problem" raised in re
   (multiply). This adds warmth/depth without breaking "minimal, not empty." **No ambient drift loop** —
   a background that animates with no data behind it violates A.1 ("motion encodes state/activity, not
   ambient animation for its own sake") and A.18. The atmosphere is a still image.
-- **Sculptural wordmark.** "Voeq" in Fraunces 600, `clamp(5rem, 14vw, 8rem)` (founder ceiling 8rem ≈128px — bold, not cosplay; Expressive tier allows oversized display; restraint elsewhere prevents posturing). Tracking `-0.04em`, line-height
+- **Sculptural wordmark.** "Voeq" in Fraunces 600, `clamp(5rem, 14vw, 8rem)` (LOCKED final ceiling 8rem ≈128px — founder decision, **not tunable**; bold, not cosplay; Expressive tier permits oversized display; restraint elsewhere prevents posturing). Tracking `-0.04em`, line-height
   `0.88`, warm `text-shadow` depth, optional 2%-larger "V". **No 3D / rotateX.**
 - **One-shot entrance ("ink settling into paper", A.18).** Staggered character fade-up (V→o→e→q,
   opacity+translateY, locked ease, ~2s total) on *first arrival only*, then still forever. Honors
@@ -1241,7 +1241,7 @@ Implementation convenience **must not override Part C.** When building:
 
 ## C.7 — Landing wordmark (sculptural)
 - **Job:** the dominant arrival element — editorial authority, not a polite logo.
-- **Tokens:** Fraunces 600; `clamp(5rem, 14vw, 8rem)` (founder ceiling 8rem ≈128px — bold, not cosplay; Expressive tier allows oversized display; restraint elsewhere prevents posturing); tracking `-0.04em`; line-height `0.88`; color `var(--role-text)` + warm `text-shadow`
+- **Tokens:** Fraunces 600; `clamp(5rem, 14vw, 8rem)` (LOCKED final ceiling 8rem ≈128px — founder decision, **not tunable**; bold, not cosplay; Expressive tier permits oversized display; restraint elsewhere prevents posturing); tracking `-0.04em`; line-height `0.88`; color `var(--role-text)` + warm `text-shadow`
   (`0 1px 2px rgba(184,137,59,0.08), 0 4px 12px rgba(31,42,34,0.06)`); optional 2%-larger "V".
 - **Motion (A.18 "ink settling"):** one-shot on first arrival only — staggered character fade-up
   (V→o→e→q, opacity 0→1 + translateY 24px→0, locked ease, ~2s total), then still forever.
@@ -1266,7 +1266,7 @@ Implementation convenience **must not override Part C.** When building:
 - **Layout:** desktop 55/45 split (text left, contour right, full hero height); mobile full-width
   300px. Expressive tier (full-bleed permission).
 - **Tokens:** `var(--role-surface)` @40% + `backdrop-filter: blur(12px)`; 1px `var(--role-border)` @50%;
-  `border-radius: 12px`; 380×420px desktop.
+  `border-radius: 12px`; 380×420px desktop; **`min-width: 320px`** (desktop floor — added per orchestrator review / founder approval 2026-08-19; the field never collapses below 320px even at narrow desktop widths).
 - **States:** populated → SVG self-draw (stroke-dashoffset), soft-glow nodes (radial, not circles),
   connecting lines `var(--role-accent)` @12%, slow 20s figure-8 node drift; empty → single calm
   heartbeat pulse + "The marketplace is quiet right now" (italic, `var(--role-text-muted)`). Abstract
