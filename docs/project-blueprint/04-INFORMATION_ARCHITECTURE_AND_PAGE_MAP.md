@@ -83,13 +83,16 @@ Flows · Dependencies · Intentionally excluded.
   the campus context immediately.
 - **Role:** All (public, pre-auth or signed-out).
 - **Required visible content:** Brand/wordmark; tagline conveying "campus marketplace"; the active
-  campus selector (250+ university catalog, NMU default; searched-unlisted campus auto-persisted
-  `unverified`, public only after ≥1 vendor) shown prominently; primary CTA "Explore {campus}"; secondary entry to
+  a **searchable campus selector** shown prominently — popover (desktop) / bottom-sheet (mobile), quick-select
+  chips (Popular: UNILAG, NMU, UI, OAU + Covenant, FUTO; NMU default), fuzzy alias search (Doc 01 §6 alias
+  table, e.g. `UNILAG`→`University of Lagos`), and a "Can't find your campus? Add it" input that triggers the
+  locked dynamic `unverified` persistence (immediate-select for the user, public only after ≥1 vendor);
+  primary CTA "Explore {campus}"; secondary entry to
   For-Vendors; minimal legal links. Background may be the designed campus-terrain phenomenon
   (design-phase decision, not product).
 - **Primary actions:** Explore (→ PG-PUB-002); select campus.
 - **Secondary actions:** For-Vendors; About/Help/Legal; Login/Sign-up (if signed out).
-- **Interactive elements:** campus selector; CTAs; nav.
+- **Interactive elements:** searchable campus selector (popover/bottom-sheet + chips + add-it fallback); CTAs; nav.
 - **Key relationships:** → Explore, For-Vendors, Auth, legal.
 - **Editable:** none (static + campus scope).
 - **Permissions:** public.
@@ -105,13 +108,13 @@ Flows · Dependencies · Intentionally excluded.
 - **Purpose:** The core discovery surface — find campus vendors/listings by browsing, searching,
   filtering, and trending. The primary "marketplace" view.
 - **Role:** All (public; personalized if authed).
-- **Required visible content:** active campus indicator; search field; filter controls (category,
+- **Required visible content:** **campus indicator pill** (current campus, tap to reopen selector / switch instantly, no full reload); search field; filter controls (category,
   price min/max, min rating, verified-only, featured); sort control; result grid of vendor/listing
   cards (each with trust signals); a "Trending on my campus" rail; recently-viewed rail (deduped).
 - **Primary actions:** open a vendor; open a listing; apply filter/sort; search.
 - **Secondary actions:** switch campus; save/follow from card; share.
 - **Interactive elements:** search box (debounced), filter chips/drawer, sort dropdown, cards,
-  pagination/infinite scroll, trending rail.
+  pagination/infinite scroll, trending rail, **campus indicator pill (instant switcher)**.
 - **Key relationships:** ← Landing; → Vendor storefront, Listing detail, Category. Search is a *mode*
   of this page (query in URL), not a separate page.
 - **Editable:** filter/sort/search state (user-scoped, not persisted as content).
@@ -319,12 +322,12 @@ VERIFY-FAIL.
      onboarding → default to campus-trending, not blank).
   8. **Important notifications** (conditional): platform/account alerts where appropriate (full list on
      PG-SHOP-005).
-- **Required content:** campus bar; trending rail; categories; vendors-to-discover; message badge.
+- **Required content:** **campus indicator pill** (tap to switch campus); trending rail; categories; vendors-to-discover; message badge.
 - **Optional/conditional content:** saved/followed activity, personalized rail, notification alert,
   recently-viewed (only if present, deduped).
 - **Primary actions:** open a listing/vendor; open Messages; switch campus; open a category (→ Explore).
 - **Secondary actions:** open Saved/Following; open Profile/Settings; open Notifications; share.
-- **Interactive elements:** rails (horizontal scroll/swipe), cards with trust signals, campus selector,
+- **Interactive elements:** rails (horizontal scroll/swipe), cards with trust signals, **campus indicator pill (instant switcher)**,
   unread badge, "see all" links into Explore.
 - **Key relationships:** ← login/nav; → Explore (deliberate browse), Vendor Storefront, Listing Detail,
   Saved&Following, Messages, Notifications.
@@ -825,7 +828,7 @@ Surface at `/staff`, role-scoped. Consolidated into 5 pages (legacy had many adm
 # 11. NAVIGATION MODEL
 
 ### Desktop
-- **Public:** top header (logo, Explore, campus selector, Search, For-Vendors, Login/Sign-up or
+- **Public:** top header (logo, Explore, **searchable campus selector**, Search, For-Vendors, Login/Sign-up or
   avatar). No heavy nav.
 - **Authenticated app:** left or top app nav with: Explore (public), Home (you), Messages, [Business
   if vendor], avatar → Profile/Settings. Staff → separate `/staff` entry.
