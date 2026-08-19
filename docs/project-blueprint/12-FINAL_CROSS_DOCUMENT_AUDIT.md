@@ -265,3 +265,40 @@ After applying the §F correction, the following were re-verified against the ac
 No repository work begins until the founder authorizes the §F correction and signs off.
 
 **DO NOT PROCEED TO IMPLEMENTATION OR DOC 13 WITHOUT FOUNDER SIGN-OFF ON THE §F CORRECTION.**
+
+---
+
+## P — 2026-08-19 re-audit (additive; VERDICT UNCHANGED: ✅ PASS)
+
+Record-only note appended after the Doc 05 C.6 reversal-completion + Doc 06 §2 composition-gate
+injection (commit `37306c5` on origin/master) and the Doc 07 §7.2/§7.16 auth-arrival correction
+below. The original §A–§O audit above is reproduced unchanged; this §P records what postdates it.
+
+1. **Doc 05 C.6 reversal notes (prerequisite to this audit).** Both stale Landing-narrative paragraphs
+   (C.6 #4 "Deep arrives, cream works; the flip happens once"; the "open voeq.ng → land in Deep forest…"
+   portfolio read) now carry dated 2026-08-18 REVERSAL notes pointing to Doc 05 A.3 as canonical. The
+   storefront "Deep hero, cream body" references (Doc 05 lines 295/936/1039) are Slice 4/8 own design
+   decisions and remain untouched.
+2. **Doc 06 §2 composition gates (prerequisite).** Eight concrete, screenshot-checkable composition-gate
+   lines added to the slice gates (one per slice, B.15.3 tier: S1 Expressive, S2/S3/S4 Editorial,
+   S5/S6/S7 Functional, S8 Operational), plus a Slice 1 retroactive-composition-gap note. These make
+   B.15/C.6 a literal yes/no reviewer criterion — catching the exact failure mode Landing shipped
+   (content present, flat/undifferentiated stack).
+3. **Doc 07 §7.2 / §7.16 auth-arrival correction (this audit).** The `/auth/*` route row and the §7.2
+   "Route → environment mapping" prose now state **Cream** as the auth-arrival default (2026-08-18 founder
+   reversal, same as Landing). The §7.2 route table also gained a `Composition gate (Doc 06 §2 tier)`
+   column linking every route to its slice's composition tier. §7.16 live text softened so it no longer
+   contradicts its own SUPERSEDED note.
+4. **Cross-doc consistency re-verified (partial).** Docs 07 + 12 now agree auth-arrival = Cream-default.
+   ONE remaining stale reference persists: **Doc 05 A.3 environment table line 123** ("Auth / account
+   states | **Deep forest**") still describes the pre-reversal state. This audit's edit scope was Doc 07 +
+   Doc 12 only; the Doc 05 A.3 row is flagged here for a follow-up correction (recommended: set to
+   Cream-default with a dated reversal note, mirroring the Landing row). Until then, Doc 05 A.3 line 123
+   is the single known inconsistent cell.
+5. **Check 8 (testing integrity) scope note.** "every LOCKED rule has a gate" now additionally covers the
+   B.15/C.6 composition criteria (Doc 06 §2 gates), not just gate existence. No LOCKED decision lacks a
+   protecting gate.
+
+**VERDICT: ✅ PASS — BLUEPRINT STILL READY FOR IMPLEMENTATION**, with composition-gates now present as
+enforceable, screenshot-verifiable criteria and the auth-arrival environment reversal consistently applied
+across Doc 07 + 12 (Doc 05 A.3 line 123 flagged for follow-up). No repo work, no Doc 13.
