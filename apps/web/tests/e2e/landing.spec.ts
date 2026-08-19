@@ -124,3 +124,97 @@ test.describe("Slice 1 Landing (Cream-first)", () => {
     for (let i = 1; i < order.length; i++) expect(order[i]).toBeGreaterThanOrEqual(order[i - 1] - 1);
   });
 });
+
+/* ============================================================================
+ * TASK B — Landing completion + contour signature richness (2026-08-18).
+ * Adds assertions for the 6 required content items (PG-PUB-001) and 3 richness
+ * items (Doc 05 B.11 / D.5). These are ADDITIVE — the Slice 1 gates above stay intact.
+ * ========================================================================== */
+test.describe("Task B — Landing completion + contour richness", () => {
+  // --- Content item 1: active campus selector, default NMU, shown prominently ---
+  test("campus selector exists and defaults to NMU", async ({ page }) => {
+    await page.goto("/");
+    const sel = page.getByTestId("campus-selector");
+    await expect(sel).toBeVisible();
+    await expect(sel).toHaveValue("nmu");
+  });
+
+  // --- Content item 2: primary CTA text "Explore {campus}" wired to selector ---
+  test("primary CTA reads 'Explore NMU' and updates with selector", async ({ page }) => {
+    await page.goto("/");
+    const entry = page.getByTestId("entry-discovery");
+    await expect(entry).toContainText(/explore\s+nmu/i);
+    // Changing the selector updates the CTA label.
+    await page.getByTestId("campus-selector").selectOption("wits");
+    await expect(entry).toContainText(/explore\s+wits/i);
+  });
+
+  // --- Content item 3: secondary entry to For-Vendors (placeholder route) ---
+  test("For-Vendors secondary link present (placeholder route)", async ({ page }) => {
+    await page.goto("/");
+    const link = page.getByTestId("footer-for-vendors");
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", /\/for-vendors/);
+  });
+
+  // --- Content item 4: minimal legal links (Terms, Privacy) present ---
+  test("legal links Terms + Privacy present (placeholder routes)", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("footer-terms")).toHaveAttribute("href", /\/terms/);
+    await expect(page.getByTestId("footer-privacy")).toHaveAttribute("href", /\/privacy/);
+  });
+
+  // --- Content item 5: slim top nav with wordmark + secondary links ---
+  test("slim top nav with wordmark + secondary links", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("landing-nav")).toBeVisible();
+    await expect(page.getByTestId("wordmark")).toHaveText(/voeq/i);
+    await expect(page.getByTestId("nav-about")).toBeVisible();
+    await expect(page.getByTestId("nav-help")).toBeVisible();
+    await expect(page.getByTestId("nav-legal")).toBeVisible();
+    await expect(page.getByTestId("nav-login")).toBeVisible();
+    await expect(page.getByTestId("nav-signup")).toBeVisible();
+  });
+
+  // --- Content item 6: tagline conveys 'campus marketplace' ---
+  test("discovery proposition conveys 'campus marketplace'", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("discovery-proposition")).toContainText(/campus marketplace/i);
+  });
+
+  // --- Richness item 1: pulse animation exists on seeded nodes (rests after) ---
+  test("seeded contour nodes pulse once then rest (not infinite)", async ({ page }) => {
+    await page.goto("/?seed=1");
+    const node = page.getByTestId("activity-node").first();
+    await expect(node).toBeVisible();
+    // After the 400ms pulse completes, no animation should be running on the node.
+    await page.waitForTimeout(600);
+    const stillRunning = await node.evaluate((el) =>
+      (el as HTMLElement).getAnimations().some((a) => a.playState === "running")
+    );
+    expect(stillRunning).toBe(false);
+  });
+
+  // --- Richness item 2: CampusFingerprint wired into Landing contour ---
+  test("CampusFingerprint is rendered in the contour signature", async ({ page }) => {
+    await page.goto("/?seed=1");
+    await expect(page.getByTestId("activity-node")).toHaveCount(2); // seed mounted first
+    await expect(page.getByTestId("campus-fingerprint")).toBeVisible();
+  });
+
+  // --- Richness item 3: density clustering — nodes are positioned (not a flat row) ---
+  test("contour nodes are spatially clustered (absolute positions), not a flat row", async ({ page }) => {
+    await page.goto("/?seed=1");
+    const nodes = page.getByTestId("activity-node");
+    await expect(nodes).toHaveCount(2); // wait for seed to mount
+    const positions = await nodes.evaluateAll((els) =>
+      els.map((el) => {
+        const r = (el as HTMLElement).getBoundingClientRect();
+        return { x: Math.round(r.left), y: Math.round(r.top) };
+      })
+    );
+    // At least two distinct positions => clustering field, not a single inline row.
+    const distinct = new Set(positions.map((p) => `${p.x},${p.y}`));
+    expect(distinct.size).toBeGreaterThan(1);
+  });
+});

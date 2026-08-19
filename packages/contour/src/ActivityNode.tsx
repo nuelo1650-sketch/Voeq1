@@ -17,11 +17,14 @@ export function ActivityNode({
   data,
   style,
   className,
+  pulse = true,
   ...rest
 }: {
   data?: ActivityNodeData;
   style?: CSSProperties;
   className?: string;
+  /** Pulse once on mount then rest (D.5). Disabled under prefers-reduced-motion globally. */
+  pulse?: boolean;
   [key: string]: unknown;
 }) {
   if (!data) return null;
@@ -29,7 +32,7 @@ export function ActivityNode({
   return (
     <span
       aria-hidden="true"
-      className={className}
+      className={[pulse ? "contour-node-pulse" : "", className ?? ""].filter(Boolean).join(" ")}
       title={data.label}
       style={{
         display: "inline-block",

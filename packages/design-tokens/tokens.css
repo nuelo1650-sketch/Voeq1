@@ -91,8 +91,63 @@
   }
 }
 
+/* Contour node pulse-once-then-rest (Doc 05 D.5). Plays once on mount, then static.
+   The global prefers-reduced-motion rule above neutralizes it for users who opt out. */
+@keyframes contour-pulse-once {
+  0%   { transform: scale(0.6); opacity: 0.2; }
+  55%  { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.contour-node-pulse {
+  animation: contour-pulse-once 400ms var(--motion-ease, ease) forwards;
+  transform-origin: center;
+}
+
+/* Skeleton shimmer (B.6 loading state, within the image frame). Reduced-motion neutralized. */
+@keyframes contour-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Shared nav/anchor geometry (Doc 05 D.4.1 shared spatial anchor, 2026-08-18).
+   Landing's top nav AND Explore's top bar BOTH read these exact tokens, so the
+   wordmark sits at the same offset across the Landing->Explore boundary — a genuine
+   shared anchor, not two similar-but-misaligned bars. Neutral layout values; not part
+   of the Cream/Deep color-role system. */
+:root {
+  --nav-height: 56px;
+  --nav-inline-pad: var(--space-2); /* 16px, matches Landing/Explore content inset */
+  --nav-bg: var(--role-surface);
+  --nav-border: var(--role-border);
+}
+
+/* ---- D.4.1 Landing->Explore continuity entrance (REPLACEMENT MECHANISM, 2026-08-18) ----
+   Single directional move; 600-900ms first arrival, 320ms subsequent (Doc 06 §2).
+   Not a hard cut, not a generic fade-to-white. Reduced-motion neutralized above. */
+@keyframes explore-entrance {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.explore-entrance {
+  animation: explore-entrance 700ms var(--motion-ease, ease) both;
+}
+
+/* Component 3 (UNPROVEN, optional) — PROTOTYPED AND CUT (2026-08-18): the brief Deep-tinted
+   flash on the contour line read as a glitch on a 1px hairline rather than continuity. Per the
+   Doc 05 D.4.1 replacement note it is optional/unproven and was removed; components 1+2 ship. */
+
 /* Accessible focus ring (B.8 LOCKED): 2px accent-strong, keyboard only */
 :focus-visible {
   outline: 2px solid var(--role-accent-strong);
   outline-offset: 2px;
+}
+
+/* Responsive visibility helpers (Explore: desktop sidebar vs mobile bottom-sheet). */
+.explore-desktop-only { display: block; }
+.explore-mobile-only { display: none; }
+.explore-layout { grid-template-columns: 220px 1fr; }
+@media (max-width: 768px) {
+  .explore-desktop-only { display: none !important; }
+  .explore-mobile-only { display: block !important; }
+  .explore-layout { grid-template-columns: 1fr !important; }
 }

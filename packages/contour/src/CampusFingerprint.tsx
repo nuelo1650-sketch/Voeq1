@@ -7,9 +7,11 @@
 export function CampusFingerprint({
   activity,
   className,
+  ...rest
 }: {
   activity?: number[];
   className?: string;
+  [key: string]: unknown;
 }) {
   if (!activity || activity.length === 0) {
     return (
@@ -23,6 +25,7 @@ export function CampusFingerprint({
           border: "1px solid var(--role-border)",
           opacity: 0.12,
         }}
+        {...rest}
       />
     );
   }
@@ -34,6 +37,7 @@ export function CampusFingerprint({
       width={64}
       height={64}
       style={{ opacity: 0.7 }}
+      {...rest}
     >
       {activity.map((v, i) => (
         <circle
