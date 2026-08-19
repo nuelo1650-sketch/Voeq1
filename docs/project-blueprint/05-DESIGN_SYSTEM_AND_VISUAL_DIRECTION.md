@@ -1081,6 +1081,14 @@ a consistent *grammar*:
    *composition*, not a grid of boxes.
 4. **The two environments share DNA, differing only in loudness (§A.3/B.12).** Deep arrives, cream works;
    the flip happens once. Same type/grid/components across both.
+
+> ⚠️ **REVERSAL — 2026-08-18 (founder call, confirmed):** The "Deep arrives, cream works; the flip happens
+> once" sentence above is **superseded**. Per the Doc 05 A.3 reversal (canonical), **Cream is now the
+> default environment across ALL public routes, including Landing** — Landing no longer "arrives in Deep"
+> and there is no Landing→Explore environment flip. The two environments still share DNA (same type/grid/
+> components); only the *default* changed. See Doc 05 A.3 reversal note + Doc 06 §2 Slice 1 reversal note
+> for the authoritative record. Do not re-derive "Deep arrival" from this line.
+
 5. **The signature means something (B.11/A.12).** Contour = real campus activity, at edges, only when
    warranted. Its *restraint* is the statement: Voeq knows when NOT to decorate.
 6. **Density is expressed, not hidden (B.15.3/B.13).** Expressive→Operational shift scale + loudness, not
@@ -1094,6 +1102,14 @@ a consistent *grammar*:
 marketplace → a vendor storefront that is *rich but composed* (identity, trust, 15 listings, message CTA,
 all organized, none buried) → message natively → a Staff console that is dense but legible. Same
 grammar throughout. *That* is Voeq, not any single button.
+
+> ⚠️ **REVERSAL — 2026-08-18 (founder call, confirmed):** The "open voeq.ng → land in Deep forest …
+> cross into cream marketplace" sentence above is **superseded**. Per the Doc 05 A.3 reversal (canonical),
+> **Cream is now the default environment across ALL public routes, including Landing** — the arrival is
+> Cream, not Deep forest, and there is no Deep→Cream flip on entry. The *portfolio read* still holds as a
+> description of the visual grammar (one world, rich-but-composed storefront, dense-but-legible Staff) —
+> only the *entry environment* changed. See Doc 05 A.3 reversal note + Doc 06 §2 Slice 1 reversal note for
+> the authoritative record.
 
 ---
 
