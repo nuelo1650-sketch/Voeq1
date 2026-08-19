@@ -54,3 +54,79 @@
 @media (max-width: 768px) {
   .listing-detail-grid { grid-template-columns: 1fr !important; }
 }
+
+/* Landing atmosphere — Doc 05 A.19 (static depth, NO ambient drift loop).
+   Cream base #f7f4ec + two static CSS layers: amber radial glow (upper-left)
+   + deep-green vignette (lower-right) + ≤3% SVG grain (multiply). A.1/A.18:
+   a background that animates with no data behind it is forbidden — this is still. */
+.landing-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #f7f4ec; /* cream base, A.19 locked value */
+}
+.landing-surface {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.landing-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 45% at 12% 8%, rgba(176, 141, 87, 0.20), rgba(176, 141, 87, 0) 70%),
+    radial-gradient(65% 55% at 92% 96%, rgba(31, 77, 46, 0.18), rgba(31, 77, 46, 0) 70%);
+}
+.landing-atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.03; /* ≤3% grain, A.19 */
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Landing 55/45 asymmetric split (A.19: left 55% content, right 45% contour).
+   Stacks to single column on mobile. Inline-style scope (decision 1 = A). */
+.landing-split {
+  display: grid;
+  grid-template-columns: 11fr 9fr; /* 55 / 45 */
+  gap: var(--space-8);
+  align-items: start;
+}
+.landing-split-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.landing-split-right {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+@media (max-width: 900px) {
+  .landing-split { grid-template-columns: 1fr; gap: var(--space-6); }
+}
+
+/* Wordmark entrance — Doc 05 A.19 "ink settling into paper" (~1.8s total,
+   first-arrival only). Locked ease cubic-bezier(.2,0,.0,1) (B.10 hero tier).
+   reduced-motion → instant (A.15). */
+.wordmark-char {
+  opacity: 0;
+  transform: translateY(0.4em);
+  animation: wordmark-rise 0.9s cubic-bezier(.2, 0, 0, 1) forwards;
+}
+@keyframes wordmark-rise {
+  from { opacity: 0; transform: translateY(0.4em); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.wordmark-char--instant {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wordmark-char { opacity: 1; transform: none; animation: none; }
+}

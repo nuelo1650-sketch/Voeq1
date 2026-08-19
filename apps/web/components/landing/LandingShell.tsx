@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Grid, Column, Stack } from "@voeq/ui";
 import { LandingNav } from "./LandingNav";
 import { LandingHero } from "./LandingHero";
 import { CampusContext } from "./CampusContext";
@@ -20,24 +19,28 @@ export function LandingShell() {
 
   return (
     <>
-      <LandingNav />
-      <main
-        data-testid="landing"
-        style={{ minHeight: "100vh", paddingBlock: "var(--space-8)", paddingInline: "var(--space-2)" }}
-      >
-        <Grid>
-          <Column span={12}>
-            <Stack space={5}>
+      <div className="landing-bg" />
+      <div className="landing-atmosphere" />
+      <div className="landing-surface">
+        <LandingNav />
+        <main
+          data-testid="landing"
+          style={{ minHeight: "100vh", paddingBlock: "var(--space-8)", paddingInline: "var(--space-2)" }}
+        >
+          <div className="landing-split">
+            <div className="landing-split-left">
               <LandingHero />
               <CampusContext campus={campus} onCampusChange={setCampus} />
               <DiscoveryProposition />
-              <ContourSignature />
               <EntryToDiscovery campus={campus} />
-            </Stack>
-          </Column>
-        </Grid>
-      </main>
-      <LandingFooter />
+            </div>
+            <div className="landing-split-right">
+              <ContourSignature />
+            </div>
+          </div>
+        </main>
+        <LandingFooter />
+      </div>
     </>
   );
 }
