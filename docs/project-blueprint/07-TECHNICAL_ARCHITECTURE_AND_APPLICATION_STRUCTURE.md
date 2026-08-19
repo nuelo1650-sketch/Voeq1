@@ -49,27 +49,27 @@
 Routes are derived directly from Doc 04's locked page map (§1028–1041). Public routes are built first
 (archive priority / portfolio). Auth, vendor, messaging, staff follow Doc 06 order.
 
-| Route (App Router) | Doc 04 PG ID | Slice (Doc 06) | Environment | Notes |
-|---|---|---|---|---|
-| `/` | PG-PUB-001 (Landing) | Slice 1 | **Deep** ⚠️ **REVERSED→Cream** (2026-08-18 founder call: Cream is default on all public routes incl. Landing; Deep never silent default. See Doc 06 §2 reversal note) | Arrival; contour strongest; continuity source |
-| `/explore` | PG-PUB-002 (Explore, search folded in) | Slice 2 | Cream | Discovery; contour edge-whisper; weighted trending |
-| `/category/[slug]` | PG-PUB-003 (Category) | Slice 2 | Cream | Explore variant (Doc 04: category = Explore route variant) |
-| `/vendor/[id]` | PG-PUB-004 (Storefront) | Slice 4 | Deep hero + Cream body | **STRESS TEST** (B.16) |
-| `/listing/[id]` | PG-PUB-005 (Listing Detail) | Slice 3 | Cream | Editorial object; native message CTA |
-| `/auth/*` | PG-AUTH-001..004 (single coherent) | Slice 5 | Deep | FLOW-AUTH-SINGLE (Doc 03/04 LOCKED) |
-| `/onboarding/shopper` | PG-ONB-001 | Slice 5 | Cream | Shopper onboarding |
-| `/onboarding/vendor` | PG-ONB-002 (5-step) | Slice 6 | Cream | Founder: 5 steps (not 4) |
-| `/shopper/*` (home, saved, settings, notifications) | PG-SHOP-001..005 | Slice 5 | Cream | Notifications panel-primary (PG-SHOP-005 PROVISIONAL panel) |
-| `/vendor/*` (dashboard, listings mgmt, settings) | PG-VEND-001..006 | Slice 6 | Cream | Dashboard = attention queue (PG-VEND-001 LOCKED job) |
-| `/vendor/listing/[action]` | PG-VEND-007 (create/edit distinct) | Slice 6 | Cream | Large experience, not a sub-form (Doc 04 CHANGE) |
-| `/messages/*` | PG-MSG-001/002 | Slice 7 | Cream | **FEATURE, not MVP** — built after public+auth+vendor |
-| `/staff/*` (queue, case, analytics, config) | PG-STAFF-001..005 | Slice 8 | Cream (+Deep strategic) | Operational tier; no signature |
-| `/about` | PG-PUB-006 (About) | LATER | Cream | Standalone info page (Doc 04) |
-| `/terms` | PG-PUB-007 (Terms) | Slice 5 | Cream | **Consent destination** — versioned TOS referenced by consent gate (Doc 03 §3.1 / 09 §9.4) |
-| `/privacy` | PG-PUB-008 (Privacy) | Slice 5 | Cream | **Consent destination** — versioned Privacy referenced by consent gate (Doc 03 §3.1 / 09 §9.4) |
-| `/help` | PG-PUB-009 (Help) | LATER | Cream | Standalone info page (Doc 04) |
-| `/for-vendors` | PG-PUB-010 (For-Vendors) | LATER | Cream | Standalone info + CTA (Doc 04) |
-| `/press` | PG-PUB-011 (Press) | ⏭ LATER | Cream | Standalone info page (Doc 04) |
+| Route (App Router) | Doc 04 PG ID | Slice (Doc 06) | Environment | Composition gate (Doc 06 §2 tier) | Notes |
+|---|---|---|---|---|---|
+| `/` | PG-PUB-001 (Landing) | Slice 1 | **Deep** ⚠️ **REVERSED→Cream** (2026-08-18 founder call: Cream is default on all public routes incl. Landing; Deep never silent default. See Doc 06 §2 reversal note) | **Expressive** — one dominant hierarchy; grouped-not-flat; whitespace structural; not full-width-by-default (S1 composition gate) | Arrival; contour strongest; continuity source |
+| `/explore` | PG-PUB-002 (Explore, search folded in) | Slice 2 | Cream | **Editorial** — composed groupings, imagery leads, comfortable-not-cramped, contour whisper (S2 composition gate) | Discovery; contour edge-whisper; weighted trending |
+| `/category/[slug]` | PG-PUB-003 (Category) | Slice 2 | Cream | **Editorial** — same as `/explore` (Explore variant) | Explore variant (Doc 04: category = Explore route variant) |
+| `/vendor/[id]` | PG-PUB-004 (Storefront) | Slice 4 | Deep hero + Cream body | **Editorial** — B.16 stress: rich-but-composed at 15 listings, zero card-monotony (S4 composition gate) | **STRESS TEST** (B.16) |
+| `/listing/[id]` | PG-PUB-005 (Listing Detail) | Slice 3 | Cream | **Editorial** — editorial object, framed imagery leads, data prominent not buried (S3 composition gate) | Editorial object; native message CTA |
+| `/auth/*` | PG-AUTH-001..004 (single coherent) | Slice 5 | **Deep** ⚠️ **REVERSED→Cream** (2026-08-18 founder call: auth arrival → Cream-default, same reversal as Landing; Deep remains supported alternate. See Doc 06 §2 reversal note) | **Functional** — calm, list-led, utility-first, signature minimal, quiet nav (S5 composition gate) | FLOW-AUTH-SINGLE (Doc 03/04 LOCKED) |
+| `/onboarding/shopper` | PG-ONB-001 | Slice 5 | Cream | **Functional** — calm, utility-first (S5 composition gate) | Shopper onboarding |
+| `/onboarding/vendor` | PG-ONB-002 (5-step) | Slice 6 | Cream | **Functional** — grouped utility, attention-queue framing (S6 composition gate) | Founder: 5 steps (not 4) |
+| `/shopper/*` (home, saved, settings, notifications) | PG-SHOP-001..005 | Slice 5 | Cream | **Functional** — calm, list-led, scannable, quiet utility (S5 composition gate) | Notifications panel-primary (PG-SHOP-005 PROVISIONAL panel) |
+| `/vendor/*` (dashboard, listings mgmt, settings) | PG-VEND-001..006 | Slice 6 | Cream | **Functional** — attention-queue framing, grouped utility, not a stat-grid dump (S6 composition gate) | Dashboard = attention queue (PG-VEND-001 LOCKED job) |
+| `/vendor/listing/[action]` | PG-VEND-007 (create/edit distinct) | Slice 6 | Cream | **Functional** — grouped utility (S6 composition gate) | Large experience, not a sub-form (Doc 04 CHANGE) |
+| `/messages/*` | PG-MSG-001/002 | Slice 7 | Cream | **Functional** — calm scannable thread, one clear hierarchy, utility receding (S7 composition gate) | **FEATURE, not MVP** — built after public+auth+vendor |
+| `/staff/*` (queue, case, analytics, config) | PG-STAFF-001..005 | Slice 8 | Cream (+Deep strategic) | **Operational** — dense-but-legible, strategic-Deep, NO signature, grouped workbench stages (S8 composition gate) | Operational tier; no signature |
+| `/about` | PG-PUB-006 (About) | LATER | Cream | **Editorial** (info page composition) | Standalone info page (Doc 04) |
+| `/terms` | PG-PUB-007 (Terms) | Slice 5 | Cream | **Functional** — calm, utility-first (S5 composition gate) | **Consent destination** — versioned TOS referenced by consent gate (Doc 03 §3.1 / 09 §9.4) |
+| `/privacy` | PG-PUB-008 (Privacy) | Slice 5 | Cream | **Functional** — calm, utility-first (S5 composition gate) | **Consent destination** — versioned Privacy referenced by consent gate (Doc 03 §3.1 / 09 §9.4) |
+| `/help` | PG-PUB-009 (Help) | LATER | Cream | **Editorial** (info page composition) | Standalone info page (Doc 04) |
+| `/for-vendors` | PG-PUB-010 (For-Vendors) | LATER | Cream | **Editorial** (info page composition) | Standalone info + CTA (Doc 04) |
+| `/press` | PG-PUB-011 (Press) | ⏭ LATER | Cream | **Editorial** (info page composition) | Standalone info page (Doc 04) |
 
 - **Two environments, one world:** implemented as a single theme with a `data-env="deep|cream"` attribute
   on the route root; role tokens flip. The Landing→Explore flip happens **once** (Doc 05 A.3). No second
@@ -79,9 +79,10 @@ Routes are derived directly from Doc 04's locked page map (§1028–1041). Publi
   > no-mid-task-switch principle still holds; only the environment *color* flip at the Landing boundary is
   > gone. Continuity must come from composition/motion/shared components (Slice 2 needs a new strategy).
   > See Doc 06 §2 reversal note.
-- **Route → environment mapping** is fixed by Doc 05 A.3/B.2: only Landing (`/`) and auth arrival are
-  Deep; everything else Cream. Staff uses Deep *strategically inside* (alerts/high-value states), never as
-  surface.
+- **Route → environment mapping** is fixed by Doc 05 A.3/B.2: Landing (`/`) and auth arrival are now
+  **Cream** (default) per the 2026-08-18 founder reversal (see the `/` and `/auth/*` row notes); everything
+  else Cream. Deep remains a supported alternate, used *strategically inside* Staff (alerts/high-value
+  states), never as the surface.
 
 ---
 
@@ -310,8 +311,8 @@ until Doc 08 ratification.
 - Public routes are RSC + SSR/SSG (7.3) for crawlability.
 - Per-page `metadata` (title/description/OG) from route data; structured data (Product/Organization)
   PROVISIONAL.
-- **Landing (`/`) is the portfolio showpiece** (Deep environment, contour signature) — built in Slice 1,
-  verified for "feels like Voeq," not just renders.
+- **Landing (`/`) is the portfolio showpiece** (Cream default environment, contour signature — Deep remains
+  a supported alternate) — built in Slice 1, verified for "feels like Voeq," not just renders.
   > ⚠️ **ENVIRONMENT REVERSED 2026-08-18:** "Deep environment" above is overturned — Landing is now
   > **Cream** (default). Deep remains a supported alternate. See Doc 06 §2 reversal note.
 
