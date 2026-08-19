@@ -1,48 +1,49 @@
-import { Stack, Type, Surface } from "@voeq/ui";
-
 /**
- * CampusContext — plumbing for campus context (Doc 04 PG-PUB-001), now with a REAL
- * selector (Task B Part 1.1). Default "NMU" is a PRODUCT DEFAULT, not a claim about the
- * user's real location — we still have no campus service. Honest-state rule preserved:
- * the block labels the campus as a selected/default view, never "You are at X".
+ * CampusContext — plumbing for campus context (Doc 04 PG-PUB-001), now an INLINE
+ * sentence-skin selector (Chunk 4). Default "NMU" is a PRODUCT DEFAULT, not a claim
+ * about the user's real location — we still have no campus service.
+ *
+ * Locked spec: inline "Discover what's open near [NMU ▾]" — no card, no glassmorphism.
+ * Nigerian campuses (NMU default). Conflict B: NMU carries a Kurutie/Okerenkoko zone
+ * toggle, rendered inline only when NMU is selected. data-testid="campus-selector"
+ * preserved on the <select>; data-testid="campus-context" preserved on the wrapper.
  */
 export const CAMPUS_OPTIONS = [
-  { id: "nmu", label: "NMU" },
-  { id: "up", label: "University of Pretoria" },
-  { id: "wits", label: "Wits" },
-  { id: "uct", label: "UCT" },
+  { id: "nmu", label: "NMU", zones: ["Kurutie", "Okerenkoko"] },
+  { id: "unilag", label: "UNILAG" },
+  { id: "ui", label: "UI" },
+  { id: "oau", label: "OAU" },
+  { id: "covenant", label: "Covenant" },
+  { id: "futo", label: "FUTO" },
 ] as const;
+
+type CampusOption = (typeof CAMPUS_OPTIONS)[number];
 
 export function CampusContext({
   campus,
   onCampusChange,
+  zone,
+  onZoneChange,
 }: {
   campus: string;
   onCampusChange: (id: string) => void;
+  zone: string;
+  onZoneChange: (id: string) => void;
 }) {
+  const selected = CAMPUS_OPTIONS.find((c) => c.id === campus) ?? CAMPUS_OPTIONS[0];
+  const zones = "zones" in selected ? selected.zones : undefined;
+
   return (
-    <Surface data-testid="campus-context" sunken>
-      <Stack space={1}>
-        <Type tone="accent" size="sm">
-          Campus context
-        </Type>
-        <label style={{ display: "flex", gap: "var(--space-1)", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--role-font-ui)", fontSize: "14px", color: "var(--role-text)" }}>
-            Showing the marketplace near
-          </span>
+    <div data-testid="campus-context" className="campus-context">
+      <p className="campus-context-sentence">
+        <span className="campus-context-prefix">Discover what&apos;s open near</span>{" "}
+        <span className="campus-context-select-wrap">
           <select
             data-testid="campus-selector"
+            className="campus-context-select"
             value={campus}
             onChange={(e) => onCampusChange(e.target.value)}
-            style={{
-              fontFamily: "var(--role-font-ui)",
-              fontSize: "14px",
-              padding: "4px 8px",
-              borderRadius: "var(--radius)",
-              border: "1px solid var(--role-border)",
-              background: "var(--role-surface)",
-              color: "var(--role-text)",
-            }}
+            aria-label="Campus"
           >
             {CAMPUS_OPTIONS.map((c) => (
               <option key={c.id} value={c.id}>
@@ -50,11 +51,26 @@ export function CampusContext({
               </option>
             ))}
           </select>
-        </label>
-        <Type tone="muted" size="sm">
-          (Default view — campus selection is a product default, not a detected location yet.)
-        </Type>
-      </Stack>
-    </Surface>
+          <span aria-hidden="true" className="campus-context-chevron">
+            ▾
+          </span>
+        </span>
+      </p>
+      {zones && (
+        <div className="zone-toggle" role="group" aria-label="NMU zone">
+          {zones.map((z) => (
+            <button
+              key={z}
+              type="button"
+              data-active={zone === z ? "true" : "false"}
+              aria-pressed={zone === z}
+              onClick={() => onZoneChange(z)}
+            >
+              {z}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

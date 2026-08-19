@@ -161,3 +161,84 @@
 @media (prefers-reduced-motion: reduce) {
   .contour-line-path { animation: none; stroke-dashoffset: 0; }
 }
+
+/* Campus context — Chunk 4 (inline sentence skin, Doc 05 A.19 + Doc 04).
+   No card, no glassmorphism. Tokens only. Select = accent underlined text.
+   Conflict B zone toggle: inline segmented control, shown only when NMU selected. */
+.campus-context {
+  display: inline-block;
+  margin-block: var(--space-1);
+}
+.campus-context-sentence {
+  margin: 0;
+  font-family: var(--role-font-ui);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--role-text);
+}
+.campus-context-prefix {
+  color: var(--role-text-muted);
+}
+.campus-context-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.campus-context-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--role-accent);
+  border-radius: 0;
+  padding: 0 18px 0 2px;
+  font-family: var(--role-font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--role-accent);
+  cursor: pointer;
+  line-height: 1.5;
+}
+.campus-context-select:focus-visible {
+  outline: 2px solid var(--role-accent-strong);
+  outline-offset: 2px;
+}
+.campus-context-chevron {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--role-accent);
+  font-size: 12px;
+  line-height: 1;
+}
+.zone-toggle {
+  display: inline-flex;
+  gap: 4px;
+  margin-top: 4px;
+  font-family: var(--role-font-ui);
+  font-size: 13px;
+  font-weight: 500;
+}
+.zone-toggle button {
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--role-border);
+  background: transparent;
+  color: var(--role-text-muted);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+}
+.zone-toggle button[data-active="true"] {
+  background: var(--role-surface-sunken);
+  color: var(--role-text);
+  border-color: var(--role-accent);
+}
+.zone-toggle button:focus-visible {
+  outline: 2px solid var(--role-accent-strong);
+  outline-offset: 2px;
+}
