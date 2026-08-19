@@ -45,7 +45,6 @@ export function ListingCard({ listing, loading }: { listing: ExploreListing; loa
         {loading ? (
           <div data-testid="listing-shimmer" style={shimmerStyle} />
         ) : img ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={img}
             alt={listing.title}
@@ -112,7 +111,7 @@ export function ListingCard({ listing, loading }: { listing: ExploreListing; loa
         <div data-testid="listing-trust" style={{ display: "flex", gap: 8, alignItems: "center", fontSize: "12px", color: "var(--role-text-muted)" }}>
           {listing.verified && (
             <span data-testid="listing-verified" style={{ color: "var(--role-accent-strong)" }}>
-              ✓ Verified
+              ✓ Student Vouched
             </span>
           )}
           {typeof listing.rating === "number" && (

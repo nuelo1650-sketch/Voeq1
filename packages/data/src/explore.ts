@@ -71,7 +71,7 @@ function toExploreListing(l: Listing, vendors: Vendor[]): ExploreListing {
     soldOut: extra.soldOut,
     availability: extra.availability,
     categorySlug: extra.categorySlug,
-    image: extra.image,
+    image: extra.image ?? (Array.isArray(l.images) ? l.images[0] : undefined),
     trending: extra.trending,
   };
 }
@@ -140,4 +140,18 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
       error: e instanceof Error ? e.message : "Unknown error",
     };
   }
+}
+
+/**
+ * Load a single listing for the detail view (Slice 3, PG-PUB-005) through the same
+ * repo boundary + ExploreListing view mapping as Explore. The mock repo resolves
+ * getById against the dev dataset; the real backend (Phase 9) will too.
+ */
+export async function loadListing(id: string): Promise<ExploreListing | null> {
+  const [listing, vendors] = await Promise.all([
+    mockListingsRepo.getById(id),
+    mockVendorsRepo.listVendors({}),
+  ]);
+  if (!listing) return null;
+  return toExploreListing(listing, vendors);
 }

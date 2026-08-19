@@ -93,7 +93,7 @@ export function Filters({
           checked={!!value.verifiedOnly}
           onChange={(e) => set({ verifiedOnly: e.target.checked })}
         />
-        Verified only
+        Student Vouched only
       </label>
 
       <label style={checkStyle}>

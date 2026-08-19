@@ -41,7 +41,7 @@ export function Type({
     md: "1rem",
     lg: "1.25rem",
     xl: "1.75rem",
-    display: "clamp(2.5rem, 6vw, 4.5rem)",
+    display: "clamp(5rem, 14vw, 8rem)", // LOCKED final ceiling 8rem (Doc 05 A.19/C.7) — founder decision, not tunable
   };
   return (
     <span
