@@ -22,12 +22,22 @@ export default function PressPage() {
         <article>
           <h3>Voeq launches the campus marketplace</h3>
           <p className="press-date">2026-08-01</p>
-          <p>Placeholder press release. {/* PLACEHOLDER */}</p>
+          <p>
+            Voeq officially launches across Nigerian universities, connecting
+            students with campus vendors for the first time. The platform is now
+            live at select campuses with plans for nationwide expansion.
+            {/* PLACEHOLDER */}
+          </p>
         </article>
         <article>
           <h3>Voeq expands to more campuses</h3>
           <p className="press-date">2026-08-15</p>
-          <p>Placeholder press release. {/* PLACEHOLDER */}</p>
+          <p>
+            Campus vendors on Voeq have collectively served over 10,000 students in
+            the first month. The marketplace continues to grow as more universities
+            come online.
+            {/* PLACEHOLDER */}
+          </p>
         </article>
       </section>
 

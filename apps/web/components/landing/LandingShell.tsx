@@ -8,6 +8,10 @@ import { ContourSignature } from "./ContourSignature";
 import { EntryToDiscovery } from "./EntryToDiscovery";
 import { TrustStrip } from "./TrustStrip";
 import { LandingFooter } from "./LandingFooter";
+import { LandingHowItWorks } from "./LandingHowItWorks";
+import { LandingCategories } from "./LandingCategories";
+import { LandingFAQ } from "./LandingFAQ";
+import { LandingFinalCTA } from "./LandingFinalCTA";
 
 /**
  * LandingShell - client wrapper that owns the selected-campus state (Task B) and composes
@@ -46,6 +50,13 @@ export function LandingShell() {
           </div>
         </main>
         <TrustStrip />
+        {/* Reversal of locked PG-PUB-001 (founder authorized, 2026-08-20): rich
+            public landing. How-It-Works + Categories + FAQ + Final CTA compose
+            below the locked hero/trust hierarchy. */}
+        <LandingHowItWorks />
+        <LandingCategories />
+        <LandingFAQ />
+        <LandingFinalCTA campus={campus} />
         <LandingFooter />
       </div>
     </>
