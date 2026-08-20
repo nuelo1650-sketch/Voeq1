@@ -23,6 +23,8 @@ const NAV_LINKS = [
   { href: "/terms", testid: "nav-legal", label: "Legal" },
   { href: "/login", testid: "nav-login", label: "Login" },
   { href: "/signup", testid: "nav-signup", label: "Sign up" },
+  { href: "/press", testid: "nav-press", label: "Press" },
+  { href: "/careers", testid: "nav-careers", label: "Careers" },
 ] as const;
 
 export function LandingNav() {
