@@ -25,29 +25,36 @@ export function LandingHero() {
   }, []);
 
   return (
-    <h1
-      data-testid="landing-heading"
-      aria-label={WORD}
-      style={{ margin: 0, display: "flex", gap: "0.01em", lineHeight: 0.88 }}
-    >
-      {WORD.split("").map((ch, i) => (
-        <Type
-          key={i}
-          tone="display"
-          size="display"
-          data-testid="wordmark-char"
-          className={play ? "wordmark-char" : "wordmark-char wordmark-char--instant"}
-          style={{
-            display: "inline-block",
-            animationDelay: `${i * 0.3}s`,
-            letterSpacing: "-0.04em",
-            lineHeight: 0.88,
-            textShadow: "0 1px 0 rgba(184,137,59,0.18)",
-          }}
-        >
-          {ch}
-        </Type>
-      ))}
-    </h1>
+    <>
+      <h1
+        data-testid="landing-heading"
+        aria-label={WORD}
+        style={{ margin: 0, display: "flex", gap: "0.01em", lineHeight: 0.88 }}
+      >
+        {WORD.split("").map((ch, i) => (
+          <Type
+            key={i}
+            tone="display"
+            size="display"
+            data-testid="wordmark-char"
+            className={play ? "wordmark-char" : "wordmark-char wordmark-char--instant"}
+            style={{
+              display: "inline-block",
+              animationDelay: `${i * 0.3}s`,
+              letterSpacing: "-0.04em",
+              lineHeight: 0.88,
+              textShadow: "0 1px 0 rgba(184,137,59,0.18)",
+            }}
+          >
+            {ch}
+          </Type>
+        ))}
+      </h1>
+
+      <Type tone="muted" size="lg" data-testid="discovery-proposition">
+        The campus marketplace — discover what&rsquo;s open near you, and connect with the
+        people selling it.
+      </Type>
+    </>
   );
 }

@@ -77,7 +77,9 @@ export function LandingNav() {
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
-        {"☰"}
+        <svg width="20" height="14" viewBox="0 0 20 14" fill="none" aria-hidden="true">
+          <path d="M1 1h18M1 7h18M1 13h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
       </button>
 
       {/* Mobile full-screen overlay nav (Doc 05 A.19 REQUIRED) */}
@@ -96,7 +98,9 @@ export function LandingNav() {
             aria-label="Close menu"
             onClick={() => setOpen(false)}
           >
-            {"✕"}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M1 1l14 14M15 1L1 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
           </button>
           {NAV_LINKS.map((l) => (
             <a
