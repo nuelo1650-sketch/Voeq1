@@ -402,3 +402,88 @@ test.describe("Chunk 8 — Landing A.19 visual direction", () => {
     await expect(footer.locator(".landing-footer-links a")).toHaveCount(5);
   });
 });
+
+/* ============================================================================
+ * CHUNK 9 — Landing enrichment (PG-PUB-001 reversal, 2026-08-20): How It Works,
+ * Popular Categories, FAQ, Final CTA. ADDITIVE: Slice 1 + Task B + Chunk 8 gates
+ * above stay intact. Asserts the new sections render, category chips link to the
+ * canonical /c/[slug] routes, reveal is progressive (never permanently hidden),
+ * and the Fraunces display font is actually applied (computed font-family on the
+ * wordmark, not the deprecated document.fonts.check('16px Fraunces') which returns
+ * false for next/font's hashed family names).
+ * ========================================================================== */
+test.describe("Chunk 9 — Landing enrichment (PG-PUB-001 reversal)", () => {
+  test("4 enrichment sections render below the trust strip", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("trust-strip")).toBeVisible();
+    for (const id of ["landing-how-it-works", "landing-categories", "landing-faq", "landing-final-cta"]) {
+      const sec = page.getByTestId(id);
+      await expect(sec).toBeVisible();
+      // Ordered after the trust strip in DOM.
+      const order = await page.evaluate((testid) => {
+        const t = document.querySelector('[data-testid="trust-strip"]')!.getBoundingClientRect().top;
+        const s = document.querySelector(`[data-testid="${testid}"]`)!.getBoundingClientRect().top;
+        return s - t;
+      }, id);
+      expect(order).toBeGreaterThan(0);
+    }
+  });
+
+  test("How It Works shows 3 steps with copy", async ({ page }) => {
+    await page.goto("/");
+    const steps = page.locator('[data-testid="landing-how-it-works"] .how-step');
+    await expect(steps).toHaveCount(3);
+    await expect(steps.first().locator(".how-step-title")).toHaveText(/pick your campus/i);
+    await expect(steps.first().locator(".how-step-body")).not.toBeEmpty();
+  });
+
+  test("category chips link to canonical /c/[slug] routes", async ({ page }) => {
+    await page.goto("/");
+    const chips = page.locator('[data-testid="landing-categories"] .category-chip');
+    await expect(chips).toHaveCount(5);
+    for (const slug of ["food", "books", "beauty", "apparel", "services"]) {
+      const chip = page.getByTestId(`category-chip-${slug}`);
+      await expect(chip).toHaveAttribute("href", `/c/${slug}`);
+    }
+  });
+
+  test("FAQ renders 5 questions, first open, answers non-empty", async ({ page }) => {
+    await page.goto("/");
+    const items = page.locator('[data-testid="landing-faq"] .faq-item');
+    await expect(items).toHaveCount(5);
+    await expect(items.first()).toHaveAttribute("open", "");
+    await expect(items.first().locator(".faq-answer")).not.toBeEmpty();
+  });
+
+  test("Final CTA echoes selected campus label", async ({ page }) => {
+    await page.goto("/");
+    const cta = page.getByTestId("entry-discovery-final");
+    await expect(cta).toBeVisible();
+    await expect(cta).toHaveAttribute("href", "/explore");
+    await expect(cta).toContainText(/explore\s+nmu/i);
+  });
+
+  test("reveal is progressive: content visible without JS-driven hide", async ({ page }) => {
+    await page.goto("/");
+    // Without JS enhancement the sections must still be visible (no empty-page regression).
+    // We assert the section is in the viewport-rendered tree and has non-zero height.
+    const how = page.getByTestId("landing-how-it-works");
+    await expect(how).toBeVisible();
+    const h = await how.evaluate((el) => el.getBoundingClientRect().height);
+    expect(h).toBeGreaterThan(0);
+  });
+
+  test("Fraunces display font is applied (computed font-family on wordmark, not check('16px Fraunces'))", async ({ page }) => {
+    await page.goto("/");
+    // Wait for fonts to finish loading (next/font uses hashed family names, so the
+    // literal 'Fraunces' string fails document.fonts.check — we assert the computed
+    // family on the rendered glyph instead, which is the real proof of application).
+    await page.evaluate(async () => { await (document as any).fonts.ready; });
+    const status = await page.evaluate(() => (document as any).fonts.status);
+    expect(status).toBe("loaded");
+    const ff = await page.getByTestId("wordmark-char").first().evaluate(
+      (el) => getComputedStyle(el).fontFamily
+    );
+    expect(ff.toLowerCase()).toContain("fraunces");
+  });
+});

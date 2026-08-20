@@ -547,3 +547,158 @@
     transform: none;
   }
 }
+
+/* ===== Landing enrichment sections (PG-PUB-001 reversal, 2026-08-20) =====
+   Progressive enhancement: sections are VISIBLE by default. The useReveal hook
+   only adds [data-reveal="pending"] once JS + IntersectionObserver are known
+   good, at which point we hide + transition. If JS never runs, content stays
+   visible — no empty-page regression. */
+.landing-section {
+  max-width: 1100px;
+  margin-inline: auto;
+  padding-block: var(--space-8);
+  padding-inline: var(--space-2);
+}
+.landing-section-title {
+  font-family: var(--role-font-display);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 600;
+  color: var(--role-text);
+  text-align: center;
+  margin: 0 0 var(--space-6);
+}
+
+/* How it works */
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+.how-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--role-surface);
+  border: 1px solid var(--role-border);
+  border-radius: var(--radius-lg);
+}
+.how-step-icon {
+  color: var(--role-accent-strong);
+  display: inline-flex;
+}
+.how-step-title {
+  font-family: var(--role-font-ui);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--role-text);
+  margin: 0;
+}
+.how-step-body {
+  font-family: var(--role-font-ui);
+  font-size: 0.9375rem;
+  color: var(--role-text-muted);
+  margin: 0;
+}
+
+/* Popular categories */
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+.category-chip {
+  font-family: var(--role-font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--role-text);
+  background: var(--role-surface);
+  border: 1px solid var(--role-border);
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-5);
+  text-decoration: none;
+  transition: background 160ms var(--motion-ease), color 160ms var(--motion-ease);
+}
+.category-chip:hover {
+  background: var(--role-accent);
+  color: var(--role-on-accent);
+  border-color: var(--role-accent);
+}
+
+/* FAQ */
+.faq-list {
+  max-width: 720px;
+  margin-inline: auto;
+}
+.faq-item {
+  border-bottom: 1px solid var(--role-border);
+}
+.faq-question {
+  font-family: var(--role-font-ui);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--role-text);
+  padding: var(--space-3) 0;
+  cursor: pointer;
+  list-style: none;
+}
+.faq-question::-webkit-details-marker { display: none; }
+.faq-question::after {
+  content: "+";
+  float: right;
+  color: var(--role-text-muted);
+  font-weight: 400;
+}
+.faq-item[open] .faq-question::after { content: "\2212"; }
+.faq-answer {
+  font-family: var(--role-font-ui);
+  font-size: 0.9375rem;
+  color: var(--role-text-muted);
+  margin: 0;
+  padding: 0 0 var(--space-3);
+}
+
+/* Final CTA */
+.landing-final-cta {
+  background: var(--role-surface-sunken);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+.landing-final-cta-title {
+  font-family: var(--role-font-display);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 600;
+  color: var(--role-text);
+  margin: 0;
+  max-width: 20ch;
+}
+
+/* Reveal: only hide when JS has confirmed it can reveal (data-reveal="pending"). */
+[data-reveal="pending"] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 600ms var(--motion-ease), transform 600ms var(--motion-ease);
+}
+[data-reveal="visible"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal="pending"] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .how-steps {
+    grid-template-columns: 1fr;
+  }
+}

@@ -29,7 +29,7 @@ export function LandingHero() {
       <h1
         data-testid="landing-heading"
         aria-label={WORD}
-        style={{ margin: 0, display: "flex", gap: "0.01em", lineHeight: 0.88 }}
+        style={{ margin: 0, display: "flex", gap: "0.01em", lineHeight: 0.88, fontFamily: "var(--role-font-display)" }}
       >
         {WORD.split("").map((ch, i) => (
           <Type
