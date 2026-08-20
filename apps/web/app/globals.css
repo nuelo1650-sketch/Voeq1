@@ -471,3 +471,79 @@
   border-radius: var(--radius);
   text-decoration: none;
 }
+
+/* StaffContactForm (C.7 — Press PG-PUB-011 / Careers PG-PUB-012).
+   Scoped to .staff-contact-form so it never leaks into other surfaces.
+   Cream inherited from layout.tsx; tokens only. */
+.staff-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 48ch;
+}
+.staff-contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.staff-contact-field label {
+  font-family: var(--role-font-ui);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--role-text);
+}
+.staff-contact-field input,
+.staff-contact-field textarea,
+.staff-contact-field select {
+  font-family: var(--role-font-ui);
+  font-size: 1rem;
+  color: var(--role-text);
+  background: var(--role-surface-sunken);
+  border: 1px solid var(--role-border);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  width: 100%;
+}
+.staff-contact-field input:focus,
+.staff-contact-field textarea:focus,
+.staff-contact-field select:focus {
+  outline: 2px solid var(--role-accent-strong);
+  outline-offset: 1px;
+}
+.staff-contact-field [aria-invalid="true"] {
+  border-color: var(--role-danger);
+}
+.staff-contact-error {
+  font-family: var(--role-font-ui);
+  font-size: 0.8125rem;
+  color: var(--role-danger);
+}
+.staff-contact-submit {
+  align-self: flex-start;
+  font-family: var(--role-font-ui);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--role-on-accent);
+  background: var(--role-accent);
+  border: none;
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-5);
+  cursor: pointer;
+  transition: transform 160ms var(--motion-ease);
+}
+.staff-contact-submit:hover {
+  transform: translateY(-1px);
+}
+.staff-contact-form--done {
+  font-family: var(--role-font-ui);
+  color: var(--role-text);
+  background: var(--role-surface);
+  border: 1px solid var(--role-border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .staff-contact-submit:hover {
+    transform: none;
+  }
+}
