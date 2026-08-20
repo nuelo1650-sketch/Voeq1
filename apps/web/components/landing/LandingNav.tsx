@@ -20,7 +20,7 @@ import Link from "next/link";
 const NAV_LINKS = [
   { href: "/about", testid: "nav-about", label: "About" },
   { href: "/help", testid: "nav-help", label: "Help" },
-  { href: "/legal", testid: "nav-legal", label: "Legal" },
+  { href: "/terms", testid: "nav-legal", label: "Legal" },
   { href: "/login", testid: "nav-login", label: "Login" },
   { href: "/signup", testid: "nav-signup", label: "Sign up" },
 ] as const;
@@ -101,9 +101,9 @@ export function LandingNav() {
       {/* Desktop: inline links (hidden <=768px via .landing-nav-links in globals.css) */}
       <div className="landing-nav-links">
         {NAV_LINKS.map((l) => (
-          <a key={l.href} href={l.href} data-testid={l.testid} style={linkStyle}>
+          <Link key={l.href} href={l.href} data-testid={l.testid} style={linkStyle}>
             {l.label}
-          </a>
+          </Link>
         ))}
       </div>
 
