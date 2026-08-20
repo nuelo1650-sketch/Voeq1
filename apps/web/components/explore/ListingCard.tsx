@@ -9,7 +9,7 @@ import { CampusFingerprint } from "@voeq/contour";
  * loading -> shimmer in frame.
  */
 function formatPrice(minor: number): string {
-  return `R ${(minor / 100).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`;
+  return `₦ ${(minor / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 }
 
 const AVAIL_LABEL: Record<string, string> = { open: "Open now", closed: "Sold out", soon: "Opening soon" };

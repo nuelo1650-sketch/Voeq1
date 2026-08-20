@@ -20,9 +20,8 @@ import { ContourEdge, CampusFingerprint } from "@voeq/contour";
 const AVAIL_LABEL: Record<string, string> = { open: "Open now", closed: "Sold out", soon: "Opening soon" };
 
 function formatPrice(minor: number): string {
-  // NOTE: mock layer uses ZAR-style "R" formatting inherited from ExploreListing fixtures.
-  // Currency is NOT specified by the locked Doc 05; flag for founder confirmation (likely ₦).
-  return `R ${(minor / 100).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`;
+  // Currency: NGN (₦) per product decisions §7 (NGN-only; no multi-currency in Phase 1).
+  return `₦ ${(minor / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 }
 
 type DetailStatus = "loading" | "success" | "error" | "notfound";
