@@ -11,7 +11,7 @@ test.describe("Slice 3 Listing Detail (PG-PUB-005)", () => {
     await page.goto("/listing/l1");
     await expect(page.getByTestId("listing-detail")).toBeVisible();
     await expect(page.getByTestId("listing-detail-title")).toContainText(/Jollof/i);
-    await expect(page.getByTestId("listing-detail-price")).toContainText(/R\s/);
+    await expect(page.getByTestId("listing-detail-price")).toContainText(/₦\s/);
     await expect(page.getByTestId("listing-detail-vendor")).toContainText(/Mama Nkechi/i);
     await expect(page.getByTestId("listing-detail-message-cta")).toBeVisible();
     // Trust language is the locked "Student Vouched", never "Verified".

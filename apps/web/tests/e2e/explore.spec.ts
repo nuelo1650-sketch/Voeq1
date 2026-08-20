@@ -33,7 +33,7 @@ test.describe("Slice 2 Explore", () => {
     // Trust signals present on at least one card.
     await expect(page.getByTestId("listing-verified").first()).toBeVisible();
     // Price is tabular + always present (never recedes).
-    await expect(page.getByTestId("listing-price").first()).toContainText(/R\s/);
+    await expect(page.getByTestId("listing-price").first()).toContainText(/₦\s/);
     // Availability chip present.
     await expect(page.getByTestId("listing-availability").first()).toBeVisible();
   });
