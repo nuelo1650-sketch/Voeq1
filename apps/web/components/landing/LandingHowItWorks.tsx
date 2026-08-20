@@ -1,7 +1,5 @@
 "use client";
 
-import { useReveal } from "./useReveal";
-
 const STEPS = [
   {
     icon: (
@@ -38,9 +36,8 @@ const STEPS = [
 ];
 
 export function LandingHowItWorks() {
-  const { ref } = useReveal<HTMLDivElement>();
   return (
-    <section data-testid="landing-how-it-works" ref={ref} className="landing-section landing-how-it-works">
+    <section data-testid="landing-how-it-works" className="landing-section landing-how-it-works">
       <h2 className="landing-section-title">How it works</h2>
       <div className="how-steps">
         {STEPS.map((s, i) => (

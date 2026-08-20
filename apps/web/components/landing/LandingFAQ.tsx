@@ -1,7 +1,5 @@
 "use client";
 
-import { useReveal } from "./useReveal";
-
 const FAQ = [
   {
     q: "Is Voeq free to use?",
@@ -26,9 +24,8 @@ const FAQ = [
 ];
 
 export function LandingFAQ() {
-  const { ref } = useReveal<HTMLDivElement>();
   return (
-    <section data-testid="landing-faq" ref={ref} className="landing-section landing-faq">
+    <section data-testid="landing-faq" className="landing-section landing-faq">
       <h2 className="landing-section-title">Frequently asked questions</h2>
       <div className="faq-list">
         {FAQ.map((item, i) => (

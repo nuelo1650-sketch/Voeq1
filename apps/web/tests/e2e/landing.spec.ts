@@ -53,15 +53,18 @@ test.describe("Slice 1 Landing (Cream-first)", () => {
 
   test("Landing has NO auth surface (PG-PUB-001 forbids login on landing)", async ({ page }) => {
     await page.goto("/");
+    // No password field, and no login/registration form (the hero search form is allowed).
     await expect(page.locator('input[type="password"]')).toHaveCount(0);
-    await expect(page.locator("form")).toHaveCount(0);
+    await expect(page.locator('form[action*="login"], form[action*="signin"], form[action*="auth"]')).toHaveCount(0);
   });
 
-  test("primary entry action links to /explore (not a browse grid)", async ({ page }) => {
+  test("primary entry action is the hero search → /browse (no browse grid on landing)", async ({ page }) => {
     await page.goto("/");
-    const entry = page.getByTestId("entry-discovery");
-    await expect(entry).toBeVisible();
-    await expect(entry).toHaveAttribute("href", /\/explore/);
+    const form = page.getByTestId("landing-search");
+    await expect(form).toBeVisible();
+    await expect(form).toHaveAttribute("action", /\/browse/);
+    await expect(page.getByTestId("search-input")).toBeVisible();
+    await expect(page.getByTestId("search-submit")).toBeVisible();
     await expect(page.getByTestId("browse-grid")).toHaveCount(0);
   });
 
@@ -100,7 +103,7 @@ test.describe("Slice 1 Landing (Cream-first)", () => {
     await expect(page.getByText(/voeq/i).first()).toBeVisible();
   });
 
-  test("visual hierarchy: one dominant order Voeq -> context -> discovery -> enter", async ({ page }) => {
+  test("visual hierarchy: one dominant order Voeq -> proposition -> search -> proof", async ({ page }) => {
     await page.goto("/");
     // Dominant display heading (Voeq / arrival) exists and is the largest text.
     const heading = page.getByTestId("landing-heading");
@@ -110,14 +113,13 @@ test.describe("Slice 1 Landing (Cream-first)", () => {
     const charFont = await page.getByTestId("wordmark-char").first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     const bodyFont = await page.getByTestId("discovery-proposition").evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     expect(charFont).toBeGreaterThan(bodyFont); // display wordmark dominates the proposition copy
-    // Context block present (honest neutral state), discovery proposition present, entry present.
-    await expect(page.getByTestId("campus-context")).toBeVisible();
+    // Proposition present, search bar present, proof row present.
     await expect(page.getByTestId("discovery-proposition")).toBeVisible();
-    await expect(page.getByTestId("entry-discovery")).toBeVisible();
-    // Order in DOM (current structure post-Chunk 7: proposition inlined into the hero,
-    // above the campus context): heading -> proposition -> context -> entry.
+    await expect(page.getByTestId("landing-search")).toBeVisible();
+    await expect(page.getByTestId("landing-proof-row")).toBeVisible();
+    // Order in DOM: heading -> proposition -> search -> proof.
     const order = await page.evaluate(() => {
-      const ids = ["landing-heading", "discovery-proposition", "campus-context", "entry-discovery"];
+      const ids = ["landing-heading", "discovery-proposition", "landing-search", "landing-proof-row"];
       const tops = ids.map((id) => {
         const el = document.querySelector(`[data-testid="${id}"]`);
         return el ? el.getBoundingClientRect().top : Infinity;
@@ -134,22 +136,26 @@ test.describe("Slice 1 Landing (Cream-first)", () => {
  * items (Doc 05 B.11 / D.5). These are ADDITIVE — the Slice 1 gates above stay intact.
  * ========================================================================== */
 test.describe("Task B — Landing completion + contour richness", () => {
-  // --- Content item 1: active campus selector, default NMU, shown prominently ---
-  test("campus selector exists and defaults to NMU", async ({ page }) => {
+  // --- Content item 1 (revised Phase B): campus selector REMOVED; search is primary ---
+  test("campus selector removed (location filtering deferred to 'discover near you')", async ({ page }) => {
     await page.goto("/");
-    const sel = page.getByTestId("campus-selector");
-    await expect(sel).toBeVisible();
-    await expect(sel).toHaveValue("nmu");
+    await expect(page.getByTestId("campus-selector")).toHaveCount(0);
+    await expect(page.getByTestId("campus-context")).toHaveCount(0);
+    // Search bar is the primary discovery action in its place.
+    await expect(page.getByTestId("landing-search")).toBeVisible();
   });
 
-  // --- Content item 2: primary CTA text "Explore {campus}" wired to selector ---
-  test("primary CTA reads 'Explore NMU' and updates with selector", async ({ page }) => {
+  // --- Content item 2 (revised Phase B): hero has NO campus selector; primary action is search ---
+  test("hero has no campus selector; primary action is the search bar", async ({ page }) => {
     await page.goto("/");
-    const entry = page.getByTestId("entry-discovery");
-    await expect(entry).toContainText(/explore\s+nmu/i);
-    // Changing the selector updates the CTA label.
-    await page.getByTestId("campus-selector").selectOption("unilag");
-    await expect(entry).toContainText(/explore\s+unilag/i);
+    // Campus selector was removed (founder 2026-08-20) — location filtering deferred
+    // to the "discover near you" feature. Assert it is gone.
+    await expect(page.getByTestId("campus-selector")).toHaveCount(0);
+    await expect(page.getByTestId("campus-context")).toHaveCount(0);
+    // The hero's primary action is the search form (not a campus-driven "Explore NMU" button).
+    await expect(page.getByTestId("landing-search")).toBeVisible();
+    // The bottom FinalCTA still echoes the campus (separate action) — sanity check it exists.
+    await expect(page.getByTestId("entry-discovery-final")).toContainText(/explore\s+nmu/i);
   });
 
   // --- Content item 3: secondary entry to For-Vendors (placeholder route) ---
@@ -237,18 +243,26 @@ test.describe("Task B — Landing completion + contour richness", () => {
     await expect(overlay).toBeHidden();
   });
 
-  // --- Content item 8: Trust strip (Chunk 5) renders data-bound stats below the CTA ---
-  test("trust strip renders 3 data-bound stat groups below the CTA", async ({ page }) => {
+  // --- Content item 8 (revised 2026-08-20): Trust strip shows HONEST value pillars, no mock numbers ---
+  test("trust strip renders 3 honest value pillars (no fabricated stats)", async ({ page }) => {
     await page.goto("/");
     const strip = page.getByTestId("trust-strip");
     await expect(strip).toBeVisible();
-    // 3 groups (number + label pairs); values sourced from getMockStats() — no UI literals.
+    // 3 groups (label + note pairs); NO .trust-strip-number (mock stats removed).
     await expect(strip.locator(".trust-strip-group")).toHaveCount(3);
-    await expect(strip.locator(".trust-strip-number")).toHaveCount(3);
+    await expect(strip.locator(".trust-strip-number")).toHaveCount(0);
     await expect(strip.locator(".trust-strip-label")).toHaveCount(3);
-    // Honest placeholder values: 6 vendors (MOCK_VENDORS.length), 6 campuses, 47 connections.
-    const numbers = await strip.locator(".trust-strip-number").allInnerTexts();
-    expect(numbers).toEqual(["6", "6", "47"]);
+    await expect(strip.locator(".trust-strip-note")).toHaveCount(3);
+    // Honest pillars — real product properties, not invented metrics.
+    const labels = await strip.locator(".trust-strip-label").allInnerTexts();
+    expect(labels).toEqual([
+      "Free to browse & connect",
+      "Built for campuses",
+      "Student to student",
+    ]);
+    // No number looks like a fabricated count.
+    const notes = await strip.locator(".trust-strip-note").allInnerTexts();
+    for (const n of notes) expect(n.trim()).not.toMatch(/^\d{2,}/);
   });
 
   test("trust strip stacks vertically on mobile (375px) and hides separators", async ({ page }) => {
@@ -264,30 +278,30 @@ test.describe("Task B — Landing completion + contour richness", () => {
     await expect(seps.nth(1)).toBeHidden();
   });
 
-  // --- Chunk 6: CTA elevated to invitation (.landing-cta + aria-hidden arrow) ---
-  test("primary CTA is styled as .landing-cta with an aria-hidden arrow", async ({ page }) => {
+  // --- Chunk 6 / Phase B: search submit is styled as .landing-cta pill (no arrow) ---
+  test("search submit button is styled as .landing-cta pill (no arrow)", async ({ page }) => {
     await page.goto("/");
-    const entry = page.getByTestId("entry-discovery");
-    await expect(entry).toBeVisible();
-    await expect(entry).toHaveAttribute("href", /\/explore/);
-    await expect(entry).toHaveClass(/landing-cta/);
-    const arrow = entry.locator(".cta-arrow");
-    await expect(arrow).toHaveCount(1);
-    await expect(arrow).toHaveAttribute("aria-hidden", "true");
-    await expect(arrow).toHaveText("→");
+    const submit = page.getByTestId("search-submit");
+    await expect(submit).toBeVisible();
+    await expect(submit).toHaveClass(/landing-cta/);
+    await expect(submit).toHaveText("Search");
+    const arrow = submit.locator(".cta-arrow");
+    await expect(arrow).toHaveCount(0); // search button has no arrow (unlike the ghost CTA)
   });
 
-  // --- Chunk 6: signature footer — contour line + 5 centered links, testids preserved ---
-  test("signature footer renders contour line + 5 centered links", async ({ page }) => {
+  // --- Chunk 6: rich footer (rewritten 2026-08-20) — brand + 3 link columns + bottom bar ---
+  test("rich footer renders brand, 3 link columns, and bottom bar", async ({ page }) => {
     await page.goto("/");
     const footer = page.getByTestId("landing-footer");
     await expect(footer).toBeVisible();
-    await expect(footer.locator(".landing-footer-contour")).toHaveCount(1);
-    await expect(footer.locator(".landing-footer-contour path")).toHaveCount(1);
-    await expect(footer.locator(".landing-footer-links a")).toHaveCount(5);
-    for (const id of ["footer-for-vendors", "footer-terms", "footer-privacy", "footer-login", "footer-signup"]) {
+    await expect(page.getByTestId("footer-wordmark")).toHaveText(/voeq/i);
+    // 3 columns (Explore / Company / Legal) with the preserved link testids.
+    await expect(footer.locator(".landing-footer-col")).toHaveCount(3);
+    for (const id of ["footer-for-vendors", "footer-terms", "footer-privacy", "footer-login", "footer-signup", "footer-about", "footer-press", "footer-careers", "footer-browse", "footer-help"]) {
       await expect(page.getByTestId(id)).toHaveAttribute("href", /\//);
     }
+    // Bottom bar with copyright.
+    await expect(footer.locator(".landing-footer-bottom")).toBeVisible();
   });
 });
 
@@ -353,14 +367,12 @@ test.describe("Chunk 8 — Landing A.19 visual direction", () => {
     expect(animName).toBe("none");
   });
 
-  test("campus selector is INLINE (transparent select), not a card", async ({ page }) => {
+  test("campus context line removed (no inline campus selector on landing)", async ({ page }) => {
     await page.goto("/");
-    const sel = page.getByTestId("campus-selector");
-    await expect(sel).toBeVisible();
-    const bg = await sel.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(bg).toBe("rgba(0, 0, 0, 0)"); // transparent -> inline text select, no card surface
-    // Wrapped in an inline sentence, not a surface/card element.
-    await expect(page.locator(".campus-context-sentence")).toBeVisible();
+    // The "Discover what's open near [NMU]" inline selector was removed (founder 2026-08-20).
+    await expect(page.getByTestId("campus-context")).toHaveCount(0);
+    await expect(page.getByTestId("campus-selector")).toHaveCount(0);
+    await expect(page.locator(".campus-context-sentence")).toHaveCount(0);
   });
 
   test("contour line SVG self-draws ONLY when activity exists (seed=1)", async ({ page }) => {
@@ -375,30 +387,36 @@ test.describe("Chunk 8 — Landing A.19 visual direction", () => {
     expect(stroke).not.toBe("none");
   });
 
-  test("trust strip: data-bound 3 groups below the CTA, honest values", async ({ page }) => {
+  test("trust strip: 3 honest pillars below the hero, no fabricated numbers", async ({ page }) => {
     await page.goto("/");
     const strip = page.getByTestId("trust-strip");
     await expect(strip).toBeVisible();
     await expect(strip.locator(".trust-strip-group")).toHaveCount(3);
-    const numbers = await strip.locator(".trust-strip-number").allInnerTexts();
-    expect(numbers).toEqual(["6", "6", "47"]); // vendorCount, campusCount, studentConnections (no UI literals)
-    // Positioned below the entry CTA in DOM order.
+    await expect(strip.locator(".trust-strip-number")).toHaveCount(0);
+    const labels = await strip.locator(".trust-strip-label").allInnerTexts();
+    expect(labels).toEqual([
+      "Free to browse & connect",
+      "Built for campuses",
+      "Student to student",
+    ]);
+    // Positioned below the hero search in DOM order.
     const order = await page.evaluate(() => {
       const t = document.querySelector('[data-testid="trust-strip"]')!.getBoundingClientRect().top;
-      const e = document.querySelector('[data-testid="entry-discovery"]')!.getBoundingClientRect().top;
+      const e = document.querySelector('[data-testid="landing-search"]')!.getBoundingClientRect().top;
       return { t, e };
     });
     expect(order.t).toBeGreaterThan(order.e);
   });
 
-  test("signature footer: centered, contour top line, 5 links", async ({ page }) => {
+  test("rich footer: multi-column layout, not centered single row", async ({ page }) => {
     await page.goto("/");
     const footer = page.getByTestId("landing-footer");
     await expect(footer).toBeVisible();
+    // New footer is a grid (brand + columns), not text-align:center single column.
     const align = await footer.evaluate((el) => getComputedStyle(el).textAlign);
-    expect(align).toBe("center");
-    await expect(footer.locator(".landing-footer-contour")).toHaveCount(1);
-    await expect(footer.locator(".landing-footer-links a")).toHaveCount(5);
+    expect(align).not.toBe("center");
+    await expect(footer.locator(".landing-footer-inner")).toHaveCount(1);
+    await expect(footer.locator(".landing-footer-col")).toHaveCount(3);
   });
 });
 
@@ -511,9 +529,9 @@ test.describe("Phase A — Landing redesign v3 (motion-only)", () => {
     expect(dashCount).toBeGreaterThanOrEqual(1);
   });
 
-  test("hero pair: primary 'Explore' CTA + ghost 'Post something' CTA", async ({ page }) => {
+  test("hero pair: search bar (primary) + ghost 'Post something' CTA", async ({ page }) => {
     await page.goto("/");
-    const primary = page.getByTestId("entry-discovery");
+    const primary = page.getByTestId("search-submit");
     await expect(primary).toBeVisible();
     await expect(primary).toHaveClass(/landing-cta/);
     const ghost = page.getByTestId("entry-post");
@@ -525,7 +543,7 @@ test.describe("Phase A — Landing redesign v3 (motion-only)", () => {
 
   test("CTA buttons are pill-shaped (border-radius 9999px)", async ({ page }) => {
     await page.goto("/");
-    const r1 = await page.getByTestId("entry-discovery").evaluate((el) => getComputedStyle(el).borderRadius);
+    const r1 = await page.getByTestId("search-submit").evaluate((el) => getComputedStyle(el).borderRadius);
     const r2 = await page.getByTestId("entry-post").evaluate((el) => getComputedStyle(el).borderRadius);
     // 9999px computes to a value >= the element's half-height (fully rounded).
     expect(parseFloat(r1)).toBeGreaterThanOrEqual(20);
@@ -576,5 +594,71 @@ test.describe("Phase A — Landing redesign v3 (motion-only)", () => {
     await expect(row).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
     expect(overflow).toBe(true);
+  });
+
+  test("mobile (375px): hero search stacks input above button, full width", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/");
+    const form = page.getByTestId("landing-search");
+    await expect(form).toBeVisible();
+    const dir = await form.evaluate((el) => getComputedStyle(el).flexDirection);
+    expect(dir).toBe("column");
+  });
+});
+
+/* ============================================================================
+ * PHASE B — Hero search + /browse stub (2026-08-20).
+ * Asserts: search form submits to /browse?q=…, /browse stub renders honestly
+ * (echoes query, "Showing results across all campuses"), and the motion-discipline
+ * rule (entrance/load animation only in hero; below-fold sections are static — no
+ * scroll-reveal / IntersectionObserver fade). ADDITIVE: all prior gates stay intact.
+ * ========================================================================== */
+test.describe("Phase B — Hero search + /browse stub", () => {
+  test("search form: single input + single button, submits to /browse?q=", async ({ page }) => {
+    await page.goto("/");
+    const form = page.getByTestId("landing-search");
+    await expect(form).toBeVisible();
+    await expect(form).toHaveAttribute("action", /\/browse/);
+    await expect(form).toHaveAttribute("method", "get");
+    // Exactly ONE text input (no dropdown, no second field).
+    await expect(page.getByTestId("search-input")).toHaveCount(1);
+    await expect(page.locator('select')).toHaveCount(0);
+    await expect(page.getByTestId("search-submit")).toHaveText("Search");
+  });
+
+  test("submitting the search navigates to /browse?q=…", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("search-input").fill("textbooks");
+    await page.getByTestId("search-submit").click();
+    await page.waitForURL(/\/browse\?q=textbooks/);
+    const q = page.url();
+    expect(q).toMatch(/q=textbooks/);
+  });
+
+  test("/browse stub: echoes query and states all-campus scope (honest)", async ({ page }) => {
+    await page.goto("/browse?q=tickets");
+    await expect(page.getByTestId("browse-page")).toBeVisible();
+    await expect(page.getByTestId("browse-query")).toContainText(/tickets/);
+    await expect(page.getByTestId("browse-scope")).toContainText(/all campuses/i);
+    // No fabricated result counts.
+    const txt = await page.getByTestId("browse-page").innerText();
+    expect(txt).not.toMatch(/\d{2,}\s*(listings|results|vendors)/i);
+  });
+
+  test("motion discipline: below-the-fold sections are static (no scroll-reveal / IntersectionObserver fade)", async ({ page }) => {
+    await page.goto("/");
+    // None of the below-fold sections should carry the useReveal [data-reveal] attribute.
+    const revealed = await page.evaluate(() => {
+      const ids = ["landing-how-it-works", "landing-categories", "landing-faq", "landing-final-cta", "landing-proof-row"];
+      return ids.some((id) => {
+        const el = document.querySelector(`[data-testid="${id}"]`);
+        return el && el.getAttribute("data-reveal") !== null;
+      });
+    });
+    expect(revealed).toBe(false);
+    // And they are visible immediately (no opacity:0 hiding pending IO).
+    for (const id of ["landing-how-it-works", "landing-categories", "landing-faq", "landing-final-cta"]) {
+      await expect(page.getByTestId(id)).toBeVisible();
+    }
   });
 });
