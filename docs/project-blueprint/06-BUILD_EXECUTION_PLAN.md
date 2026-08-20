@@ -178,6 +178,12 @@ Each slice is **done** only when it meets its verification gate (below). Nothing
   readable as grouped stages, not a 400-row table stare? **Pass = dense-but-legible operational with
   strategic-Deep and no signature; a loud or signature-bearing surface fails.**
 
+### Slice 4.5 — Press + Careers (Phase B+, public info) [PUBLIC]
+- Doc 04 PG-PUB-011 (Press) + PG-PUB-012 (Careers). Cream `InfoPageShell`; both mount the shared `StaffContactForm` (press: name/email/publication/message; careers: name/email/resume-link/cover-letter/role-selector). UI validates, mock-submits, inline success state — **no backend until Phase 9**.
+- **Why here (sequence):** follows the storefront/B.16 stress slice (Slice 4) and precedes Auth (Slice 5). Careers already in VS1 scope per the 2026-08-19 directive; this makes its Doc 04 spec explicit. Media (PUB-013) remains `LATER`, not built.
+- **Gate:** both pages render in Cream; forms present, validate, and show inline success on mock submit; no navigation on submit; `data-testid` on form + success state for e2e. No theme switch; no real network call.
+- **Composition gate (B.15.3 Editorial / C.6):** on a screenshot, does Press read as editorial (date-stamped, typographic) and Careers as composed role cards + warm CTA — not a flat form dump? **Pass = composed, not a wall of inputs.**
+
 ### Public-surface inventory & Phase 1 scope (additive — 2026-08-19 founder directive)
 
 - **Phase 1 build scope = 250+ Nigerian universities** (NMU default/first), not an NMU-only pilot. See

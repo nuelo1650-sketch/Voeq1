@@ -575,6 +575,18 @@ forbidden list). The decisions below resolve the "Flatness Problem" raised in re
 
 ---
 
+## A.20 — Public info pages: Press & Careers visual direction + `StaffContactForm` + consent checkbox (2026-08-20)
+
+Additive design guidance for the two Phase B+ public info pages (Doc 04 PG-PUB-011 Press, PG-PUB-012 Careers) and the shared staff-contact form.
+
+- **Environment:** Cream (consistent with all public info pages; reuses `InfoPageShell` — 65ch max-width, slim nav).
+- **Press (PG-PUB-011):** editorial layout — date-stamped releases, clean publication-grade typography (Fraunces display openers, Hanken body). Reuses the Editorial/Expressive density discipline; no signature contour (content doesn't warrant it, A.12).
+- **Careers (PG-PUB-012):** card-based role listings (2 placeholder roles) with a warm CTA into the application form; culture paragraph above the grid. Restrained, not a job-board.
+- **`StaffContactForm` (shared component):** `apps/web/components/forms/StaffContactForm.tsx`, props `{ kind: "press" | "careers"; fields: Field[]; onSubmit }`. Surface tokens: `var(--role-surface)` (sunken) field background, `var(--role-border)` inputs, accent focus ring (`accent-strong`, 2px, B.8). Both Press and Careers mount it; UI validates, mock-submits, shows an **inline success state** (below the form, not a global toast). No real sending until Phase 9 backend.
+- **Consent checkbox (pre-signup, cross-cutting):** rendered left-of-label, required `*` marker, links to `/terms` + `/privacy`; submit CTA `opacity:.5` + `disabled` until checked. Applies to both Google and email/password registration (Doc 02 IDN-001/002, Doc 04 PG-AUTH-001).
+
+---
+
 # PART B — VISUAL TOKENS (Stage 2)
 
 > **Status:** Concrete foundation, translated from the actual approved strategy in Part A. **FOR REVIEW

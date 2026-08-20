@@ -371,3 +371,17 @@ above is reproduced unchanged; this §R records what postdates it and is now LOC
 visual-direction founder calls are now LOCKED across Docs 04/05 and recorded in this audit. No LOCKED
 decision is contradicted; no OPEN decision silently resolved. All doc-only; no repo code changes. The
 blueprint is the source of truth and the code phase may proceed per the founder's standing go.
+
+---
+
+## S — 2026-08-20 doc update: auth additions + Press/Careers completion (additive; VERDICT UNCHANGED)
+
+Recorded after founder approval of the `doc-update-press-careers-auth` plan. Original §A–§R reproduced unchanged; this §S records what postdates it.
+
+1. **Doc 02 auth additions (NOT a correction of phone-OTP — no such text existed).** Confirmed via grep: no doc contained "phone OTP"/"OTP to phone". Real additions: (a) **email + password** as a first-class registration method (alongside Google; OTP-to-email 6-digit for verification); (b) **pre-signup consent checkbox** — submit disabled until checked, both Google + email/password flows (distinct from post-auth forced modal IDN-009); (c) **Remember me** → ~30d extended session; (d) **phone is NOT an auth factor** (optional post-reg, vendor contact only). Applied to Doc 02 §1 (PUB-012 split), §2 (IDN-001/002), §4 (inventory).
+2. **Doc 04 page-map:** PG-PUB-011 Press promoted LATER → **Phase B+**; **new PG-PUB-012 Careers** added; PG-AUTH-001 notes pre-signup consent + email/password. No LOCKED decision contradicted.
+3. **Doc 05 design:** A.20 added — Press/Careers visual (Cream InfoPageShell), `StaffContactForm` shared component spec, consent-checkbox visual.
+4. **Doc 06 build plan:** Slice 4.5 (Press + Careers, Phase B+) inserted; Careers already in VS1 scope.
+5. **ID reconciliation:** Doc 02 `VOEQ-PUB-012 Press/Media` split into Careers (PUB-012) + Media (PUB-013, LATER, Press page = Doc 04 PG-PUB-011). No duplicate routes; Media left un-specced.
+
+**VERDICT: ✅ PASS — BLUEPRINT STILL READY FOR IMPLEMENTATION.** All changes are additive or net-new spec; no LOCKED decision silently overridden; no OPEN decision silently resolved. Doc-only; no repo code changes beyond the docs themselves.
