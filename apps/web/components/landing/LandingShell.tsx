@@ -12,6 +12,7 @@ import { LandingHowItWorks } from "./LandingHowItWorks";
 import { LandingCategories } from "./LandingCategories";
 import { LandingFAQ } from "./LandingFAQ";
 import { LandingFinalCTA } from "./LandingFinalCTA";
+import { LandingProofRow } from "./LandingProofRow";
 
 /**
  * LandingShell - client wrapper that owns the selected-campus state (Task B) and composes
@@ -26,7 +27,6 @@ export function LandingShell() {
   return (
     <>
       <div className="landing-bg" />
-      <div className="landing-atmosphere" />
       <div className="landing-surface">
         <LandingNav />
         <main
@@ -43,6 +43,7 @@ export function LandingShell() {
                 onZoneChange={setZone}
               />
               <EntryToDiscovery campus={campus} />
+              <LandingProofRow />
             </div>
             <div className="landing-split-right">
               <ContourSignature />

@@ -300,21 +300,20 @@ test.describe("Task B — Landing completion + contour richness", () => {
  * (not card) selector, contour SVG self-draw, data-bound trust strip, footer.
  * ========================================================================== */
 test.describe("Chunk 8 — Landing A.19 visual direction", () => {
-  test("atmosphere: cream base + static amber/deep-green layers (no ambient drift)", async ({ page }) => {
+  test("atmosphere: aurora SCRAPPED — flat cream canvas, no gradient/grain/drift", async ({ page }) => {
     await page.goto("/");
-    // Cream base locked value (#f7f4ec) on body.
+    // Cream base locked value (#f7f4ec) on body — and now the ONLY background (aurora removed).
     const bodyBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     expect(bodyBg).toBe("rgb(247, 244, 236)");
-    // Static atmosphere layer with two radial gradients present.
-    const atmo = page.locator(".landing-atmosphere");
-    await expect(atmo).toBeVisible();
-    const bgImage = await atmo.evaluate((el) => getComputedStyle(el).backgroundImage);
-    expect(bgImage).toContain("radial-gradient");
-    // Still image: no running animation on the atmosphere (A.1/A.18).
-    const atmoRunning = await atmo.evaluate((el) =>
-      (el as HTMLElement).getAnimations().some((a) => a.playState === "running")
-    );
-    expect(atmoRunning).toBe(false);
+    // The .landing-atmosphere element was removed entirely (founder: "too much for minimalist design").
+    await expect(page.locator(".landing-atmosphere")).toHaveCount(0);
+    // No radial-gradient background image anywhere on the landing surface.
+    const hasGradient = await page.evaluate(() => {
+      const surf = document.querySelector(".landing-surface") as HTMLElement | null;
+      const bg = surf ? getComputedStyle(surf).backgroundImage : "";
+      return /radial-gradient|linear-gradient/.test(bg || "");
+    });
+    expect(hasGradient).toBe(false);
   });
 
   test("asymmetric split: left column ~55% (11fr) wider than right 45% (9fr)", async ({ page }) => {
@@ -485,5 +484,97 @@ test.describe("Chunk 9 — Landing enrichment (PG-PUB-001 reversal)", () => {
       (el) => getComputedStyle(el).fontFamily
     );
     expect(ff.toLowerCase()).toContain("fraunces");
+  });
+});
+
+/* ============================================================================
+ * PHASE A — Landing redesign v3 (motion-only, aurora scrapped, 2026-08-20).
+ * Asserts: proof-row honest labels (no fake stats), hero ghost CTA pair, pill
+ * buttons (9999px), numbered How-It-Works badges, wordmark blur-in, reduced-motion
+ * freezes entrance, mobile proof-row stacks. ADDITIVE: all prior gates stay intact.
+ * ========================================================================== */
+test.describe("Phase A — Landing redesign v3 (motion-only)", () => {
+  test("proof row renders honest labels — NO fabricated social-proof numbers", async ({ page }) => {
+    await page.goto("/");
+    const row = page.getByTestId("landing-proof-row");
+    await expect(row).toBeVisible();
+    const cards = page.getByTestId("proof-card");
+    await expect(cards).toHaveCount(3);
+    // Every value is either a real fact or an em-dash placeholder — never a fake "1,200+".
+    const values = await page.getByTestId("proof-card").locator(".proof-value").allInnerTexts();
+    for (const v of values) {
+      expect(v.trim()).not.toMatch(/^\d{2,}[k+]?$/); // reject invented large counts
+      expect(v.trim().toLowerCase()).not.toContain("listings");
+    }
+    // At least one card is explicitly labeled placeholder (data-real=false -> em-dash).
+    const dashCount = await page.getByTestId("proof-card").locator('.proof-value[data-real="false"]').count();
+    expect(dashCount).toBeGreaterThanOrEqual(1);
+  });
+
+  test("hero pair: primary 'Explore' CTA + ghost 'Post something' CTA", async ({ page }) => {
+    await page.goto("/");
+    const primary = page.getByTestId("entry-discovery");
+    await expect(primary).toBeVisible();
+    await expect(primary).toHaveClass(/landing-cta/);
+    const ghost = page.getByTestId("entry-post");
+    await expect(ghost).toBeVisible();
+    await expect(ghost).toHaveClass(/landing-cta--ghost/);
+    await expect(ghost).toHaveAttribute("href", /\/for-vendors/);
+    await expect(ghost).toContainText(/post something/i);
+  });
+
+  test("CTA buttons are pill-shaped (border-radius 9999px)", async ({ page }) => {
+    await page.goto("/");
+    const r1 = await page.getByTestId("entry-discovery").evaluate((el) => getComputedStyle(el).borderRadius);
+    const r2 = await page.getByTestId("entry-post").evaluate((el) => getComputedStyle(el).borderRadius);
+    // 9999px computes to a value >= the element's half-height (fully rounded).
+    expect(parseFloat(r1)).toBeGreaterThanOrEqual(20);
+    expect(parseFloat(r2)).toBeGreaterThanOrEqual(20);
+  });
+
+  test("How It Works steps carry numbered badges (sequential order)", async ({ page }) => {
+    await page.goto("/");
+    const steps = page.locator('[data-testid="landing-how-it-works"] .how-step');
+    await expect(steps).toHaveCount(3);
+    // ::before badge content equals the data-step attr (1,2,3).
+    for (let i = 0; i < 3; i++) {
+      const badge = await steps.nth(i).evaluate((el) => getComputedStyle(el, "::before").content);
+      expect(badge).toContain(String(i + 1));
+    }
+  });
+
+  test("wordmark blur-in: animation applies a blur filter (not just opacity)", async ({ page }) => {
+    await page.goto("/");
+    const char = page.getByTestId("wordmark-char").first();
+    // At animation start the filter is blurred; assert the keyframe includes blur.
+    const hasBlur = await char.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      // Either currently blurred, or the animation name resolves to a keyframe with blur.
+      return cs.animationName.includes("wordmark") && (cs.filter.includes("blur") || cs.animationName === "wordmark-rise");
+    });
+    expect(hasBlur).toBe(true);
+  });
+
+  test("reduced-motion: all entrance animations frozen (animationName none)", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const frozen = await page.evaluate(() => {
+      const els = [".wordmark-char", ".landing-nav [data-testid='wordmark']", ".landing-nav-links a"];
+      return els.every((sel) => {
+        const el = document.querySelector(sel) as HTMLElement | null;
+        if (!el) return true;
+        return getComputedStyle(el).animationName === "none";
+      });
+    });
+    expect(frozen).toBe(true);
+  });
+
+  test("mobile (375px): proof row stacks vertically, no horizontal overflow", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/");
+    const row = page.getByTestId("landing-proof-row");
+    await expect(row).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+    expect(overflow).toBe(true);
   });
 });

@@ -40,7 +40,7 @@ export function LandingHero() {
             className={play ? "wordmark-char" : "wordmark-char wordmark-char--instant"}
             style={{
               display: "inline-block",
-              animationDelay: `${i * 0.3}s`,
+              animationDelay: `${i * 0.06}s`,
               letterSpacing: "-0.04em",
               lineHeight: 0.88,
               textShadow: "0 1px 0 rgba(184,137,59,0.18)",
@@ -55,6 +55,13 @@ export function LandingHero() {
         The campus marketplace — discover what&rsquo;s open near you, and connect with the
         people selling it.
       </Type>
+
+      <div className="landing-hero-actions">
+        <a href="/for-vendors" data-testid="entry-post" className="landing-cta landing-cta--ghost">
+          Post something
+          <span className="cta-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
     </>
   );
 }
