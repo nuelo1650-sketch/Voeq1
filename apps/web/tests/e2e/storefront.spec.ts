@@ -16,9 +16,10 @@ test.describe("Vendor Storefront (PG-PUB-004)", () => {
     await expect(page.getByTestId("storefront-vouched")).toContainText(/Student Vouched/i);
     // Derived rating from real mock listings (v1 has rated listings).
     await expect(page.getByTestId("storefront-rating")).toContainText(/★/);
-    // Grid renders the vendor's listings (v1 = Mama Nkechi, l1 + l4).
+    // Grid renders the vendor's listings (v1 = Mama Nkechi). C.6/B.16 stress fixture
+    // brings v1 to 15 listings (l1, l4 + l13-l25); cap is 15 so all render.
     await expect(page.getByTestId("storefront-grid")).toBeVisible();
-    await expect(page.getByTestId("listing-card")).toHaveCount(2);
+    await expect(page.getByTestId("listing-card")).toHaveCount(15);
     await expect(page.getByTestId("listing-card").first()).toBeVisible();
     // Reviews graceful absence.
     await expect(page.getByTestId("storefront-reviews-empty")).toContainText(/No reviews yet/i);
@@ -29,6 +30,19 @@ test.describe("Vendor Storefront (PG-PUB-004)", () => {
     await expect(message).toBeVisible();
     await expect(follow).toBeEnabled();
     await expect(message).toBeEnabled();
+  });
+
+  test("B.16 stress: 15 listings render without monotony", async ({ page }) => {
+    await page.goto("/vendor/v1");
+    const cards = page.getByTestId("listing-card");
+    await expect(cards).toHaveCount(15);
+    // Variety signal: no two cards share a title; >=10 unique titles across 15 cards.
+    const titles = await cards.locator('[data-testid="listing-title"]').allTextContents();
+    const uniqueTitles = new Set(titles);
+    expect(uniqueTitles.size).toBeGreaterThanOrEqual(10);
+    // Grid holds up under stress: first and last cards both visible (no overlap / overflow break).
+    await expect(cards.first()).toBeVisible();
+    await expect(cards.nth(14)).toBeVisible();
   });
 
   test("unknown vendor id -> not-found", async ({ page }) => {

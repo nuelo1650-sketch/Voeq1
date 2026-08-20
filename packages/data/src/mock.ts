@@ -47,6 +47,26 @@ export const MOCK_EXPLORE_LISTINGS: (Listing & MockListingExtra)[] = [
   { id: "l10", vendorId: "v4", title: "Custom Tote Bag", priceMinor: 5000, isPublished: true, images: ["https://picsum.photos/seed/voeq10/400/300"], rating: 4.2, verified: false, availability: "open", categorySlug: "apparel" },
   { id: "l11", vendorId: "v5", title: "Group Study Notes — Physics", priceMinor: 3000, isPublished: true, images: [], rating: 4.0, verified: true, availability: "open", categorySlug: "books" },
   { id: "l12", vendorId: "v6", title: "Campus Snack Pack", priceMinor: 4500, isPublished: true, images: ["https://picsum.photos/seed/voeq12/400/300"], rating: 4.6, verified: true, availability: "open", categorySlug: "food" },
+
+  // --- C.6 / B.16 stress fixture: 13 additional listings for v1 (Mama Nkechi) ---
+  // Brings v1 from 2 -> 15 listings to prove the storefront grid holds up under
+  // stress without card monotony. Varied title length, price spread, availability
+  // mix (open/soon/closed), ratings, verified/featured flags. No description field
+  // exists on the data model, so visual variety comes from title/price/availability.
+  // NOTE: IDs l5-l12 are taken by other vendors; these use l13-l25 to avoid collision.
+  { id: "l13", vendorId: "v1", title: "Akara Plate", priceMinor: 1200, isPublished: true, images: ["https://picsum.photos/seed/voeq13/400/400"], rating: 4.5, verified: true, availability: "open", categorySlug: "food" },
+  { id: "l14", vendorId: "v1", title: "Meat Pie", priceMinor: 800, isPublished: true, images: ["https://picsum.photos/seed/voeq14/400/560"], rating: 4.3, verified: true, availability: "open", categorySlug: "food" },
+  { id: "l15", vendorId: "v1", title: "Chin Chin", priceMinor: 500, isPublished: true, images: ["https://picsum.photos/seed/voeq15/560/400"], rating: 4.1, verified: false, availability: "open", categorySlug: "food" },
+  { id: "l16", vendorId: "v1", title: "Spicy Jollof Rice Bowl", priceMinor: 3800, isPublished: true, images: ["https://picsum.photos/seed/voeq16/560/400"], rating: 4.7, verified: true, featured: true, availability: "open", categorySlug: "food" },
+  { id: "l17", vendorId: "v1", title: "Fried Yam with Egg", priceMinor: 2500, isPublished: true, images: ["https://picsum.photos/seed/voeq17/400/400"], rating: 4.4, verified: true, availability: "open", categorySlug: "food" },
+  { id: "l18", vendorId: "v1", title: "Pepper Soup Combo", priceMinor: 4900, isPublished: true, images: ["https://picsum.photos/seed/voeq18/400/560"], rating: 4.6, verified: true, availability: "soon", categorySlug: "food" },
+  { id: "l19", vendorId: "v1", title: "Plantain and Beans", priceMinor: 2200, isPublished: true, images: ["https://picsum.photos/seed/voeq19/560/400"], rating: 4.2, verified: false, availability: "open", categorySlug: "food" },
+  { id: "l20", vendorId: "v1", title: "Grilled Fish Platter", priceMinor: 6500, isPublished: true, images: ["https://picsum.photos/seed/voeq20/560/400"], rating: 4.8, verified: true, featured: true, availability: "open", categorySlug: "food" },
+  { id: "l21", vendorId: "v1", title: "Homemade Moi Moi with Custard", priceMinor: 3100, isPublished: true, images: ["https://picsum.photos/seed/voeq21/400/400"], rating: 4.5, verified: true, availability: "soon", categorySlug: "food" },
+  { id: "l22", vendorId: "v1", title: "Party Jollof Catering for Events", priceMinor: 22500, isPublished: true, images: ["https://picsum.photos/seed/voeq22/400/560"], rating: 4.9, verified: true, featured: true, trending: true, availability: "soon", categorySlug: "services" },
+  { id: "l23", vendorId: "v1", title: "Fresh Okra Soup with Assorted Meat", priceMinor: 5500, isPublished: true, images: ["https://picsum.photos/seed/voeq23/560/400"], rating: 4.6, verified: true, availability: "open", categorySlug: "food" },
+  { id: "l24", vendorId: "v1", title: "Breakfast Semo and Egusi Combo", priceMinor: 4500, isPublished: true, images: ["https://picsum.photos/seed/voeq24/560/400"], rating: 4.3, verified: false, soldOut: true, availability: "closed", categorySlug: "food" },
+  { id: "l25", vendorId: "v1", title: "Small Chops Platter for Celebrations", priceMinor: 8500, isPublished: true, images: ["https://picsum.photos/seed/voeq25/560/400"], rating: 4.7, verified: true, soldOut: true, availability: "closed", categorySlug: "food" },
 ];
 
 export const MOCK_VENDORS: Vendor[] = [
