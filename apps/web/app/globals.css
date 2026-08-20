@@ -383,3 +383,62 @@
     transform: none;
   }
 }
+
+/* Info pages (Phase B) — structured public pages sharing Landing's nav/footer.
+   Cream inherited from layout.tsx (data-env="cream"). Tokens only. */
+.info-page-shell {
+  max-width: 65ch;
+  margin-inline: auto;
+  padding-block: var(--space-8) var(--space-6);
+  padding-inline: var(--space-2);
+}
+.info-page-shell h1 {
+  font-family: var(--role-font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--role-text);
+  line-height: 1.1;
+  margin: 0 0 var(--space-1);
+}
+.info-page-subtitle {
+  font-family: var(--role-font-ui);
+  font-size: 1.125rem;
+  color: var(--role-text-muted);
+  margin: 0 0 var(--space-6);
+}
+.info-page-shell section { margin-block-end: var(--space-6); }
+.info-page-shell h2 {
+  font-family: var(--role-font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--role-text);
+  margin: 0 0 var(--space-2);
+}
+.info-page-shell dl { margin: 0; }
+.info-page-shell dt {
+  font-family: var(--role-font-ui);
+  font-weight: 600;
+  color: var(--role-text);
+}
+.info-page-shell dd {
+  margin: 0 0 var(--space-3);
+  font-family: var(--role-font-ui);
+  color: var(--role-text-muted);
+}
+.info-page-shell ul {
+  margin: 0 0 var(--space-6);
+  padding-inline-start: var(--space-3);
+  font-family: var(--role-font-ui);
+  color: var(--role-text-muted);
+}
+.info-page-shell a[data-testid="for-vendors-cta"] {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-5);
+  background: var(--role-accent);
+  color: var(--role-on-accent);
+  font-family: var(--role-font-ui);
+  font-weight: 600;
+  border-radius: var(--radius);
+  text-decoration: none;
+}
