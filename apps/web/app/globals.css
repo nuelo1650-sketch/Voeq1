@@ -296,3 +296,90 @@
     font-size: 1.25rem;
   }
 }
+
+/* Landing CTA — Chunk 6 (entry to discovery, elevated from plain button to invitation).
+   Tokens only; CSS transitions only; reduced-motion guarded. */
+.landing-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--role-accent);
+  color: var(--role-on-accent);
+  font-family: var(--role-font-ui);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(47, 107, 63, 0.15);
+  transition: transform 160ms var(--motion-ease), box-shadow 160ms var(--motion-ease);
+}
+.landing-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(47, 107, 63, 0.25);
+}
+.landing-cta:hover .cta-arrow {
+  transform: translateX(4px);
+}
+.cta-arrow {
+  display: inline-block;
+  transition: transform 160ms var(--motion-ease);
+}
+
+/* Landing signature footer — Chunk 6 (centered editorial signature, contour top line).
+   Tokens only; reduced-motion guarded. */
+.landing-footer {
+  margin-top: var(--space-8);
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-6);
+  padding-inline: var(--nav-inline-pad);
+  text-align: center;
+}
+.landing-footer-contour {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin-bottom: var(--space-6);
+}
+.landing-footer-contour path {
+  stroke: var(--role-text);
+  stroke-width: 1;
+  opacity: 0.04;
+}
+.landing-footer-links {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+.landing-footer-links a {
+  font-family: var(--role-font-ui);
+  font-size: 13px;
+  color: var(--role-text-muted);
+  text-decoration: none;
+  transition: color 160ms var(--motion-ease);
+}
+.landing-footer-links a:hover {
+  color: var(--role-text);
+}
+.landing-footer-sep {
+  color: var(--role-border);
+  font-size: 13px;
+}
+.landing-footer-copy {
+  margin-top: var(--space-3);
+  font-family: var(--role-font-ui);
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--role-text-muted);
+  opacity: 0.6;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-cta:hover,
+  .landing-cta:hover .cta-arrow {
+    transform: none;
+  }
+}
