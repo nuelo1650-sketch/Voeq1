@@ -86,8 +86,8 @@ export const mockVendorsRepo: VendorsRepo = {
   async listVendors() {
     return MOCK_VENDORS;
   },
-  async getById() {
-    return null;
+  async getById(id: string) {
+    return MOCK_VENDORS.find((v) => v.id === id) ?? null;
   },
 };
 
@@ -132,5 +132,9 @@ export const mockRepos = {
   staff: mockStaffRepo,
   search: mockSearchRepo,
 };
+
+/** Mock-only: a vendor's listings, filtered from the dev explore dataset. */
+export const listListingsByVendor = (vendorId: string): (Listing & MockListingExtra)[] =>
+  MOCK_EXPLORE_LISTINGS.filter((l) => l.vendorId === vendorId);
 
 export { vendorName };
