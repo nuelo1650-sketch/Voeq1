@@ -4,16 +4,16 @@ import { useState } from "react";
 import { LandingNav } from "./LandingNav";
 import { LandingHero } from "./LandingHero";
 import { CampusContext } from "./CampusContext";
-import { DiscoveryProposition } from "./DiscoveryProposition";
 import { ContourSignature } from "./ContourSignature";
 import { EntryToDiscovery } from "./EntryToDiscovery";
 import { TrustStrip } from "./TrustStrip";
 import { LandingFooter } from "./LandingFooter";
 
 /**
- * LandingShell — client wrapper that owns the selected-campus state (Task B) and composes
+ * LandingShell - client wrapper that owns the selected-campus state (Task B) and composes
  * the Landing surface. Keeps the LOCKED primary hierarchy intact in the center Stack
  * (Voeq -> context -> proposition -> contour -> enter); nav + footer sit OUTSIDE it.
+ * Proposition is now inlined into LandingHero (founder directive: INLINE IT, Chunk 7).
  */
 export function LandingShell() {
   const [campus, setCampus] = useState("nmu");
@@ -38,7 +38,6 @@ export function LandingShell() {
                 zone={zone}
                 onZoneChange={setZone}
               />
-              <DiscoveryProposition />
               <EntryToDiscovery campus={campus} />
             </div>
             <div className="landing-split-right">
