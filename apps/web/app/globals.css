@@ -110,6 +110,35 @@
   .landing-split { grid-template-columns: 1fr; gap: var(--space-6); }
 }
 
+/* Vendor Storefront Deep override (PG-PUB-004, Doc 05 A.3) — the ONE Deep page.
+   `tokens.css` flips color roles via `:root[data-env="deep"]`, but the root <html>
+   is Cream (set in layout.tsx). This scoped descendant override re-maps the SAME
+   color-role values as the locked `:root[data-env="deep"]` block, so the storefront
+   subtree renders Deep without a second stylesheet or touching tokens.css. Only
+   color roles change — structure/spacing/grid are shared (per token contract). */
+[data-env="deep"] {
+  --role-bg: #10231a;
+  --role-surface: #173025;
+  --role-surface-sunken: #0c1b13;
+  --role-text: #eef3ec;
+  --role-text-muted: #9fb3a4;
+  --role-border: #2a463a;
+  --role-accent: #6fcf97;
+  --role-accent-strong: #8fe3b0;
+  --role-gold: #e0b964;
+  --role-danger: #e08a7a;
+  --role-on-accent: #10231a;
+}
+
+/* Storefront responsive grid (3 / 2 / 1 — mirrors Explore). Declared here so the
+   deep override + grid live in one place; StorefrontGrid sets the base 3-col. */
+@media (max-width: 900px) {
+  [data-testid="storefront-grid"] { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 600px) {
+  [data-testid="storefront-grid"] { grid-template-columns: 1fr !important; }
+}
+
 /* Wordmark entrance — Doc 05 A.19 "ink settling into paper" (~1.8s total,
    first-arrival only). Locked ease cubic-bezier(.2,0,.0,1) (B.10 hero tier).
    reduced-motion → instant (A.15). */
