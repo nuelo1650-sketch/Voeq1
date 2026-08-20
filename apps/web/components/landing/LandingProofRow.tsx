@@ -1,11 +1,11 @@
 "use client";
 
-import { useReveal } from "./useReveal";
-
 /**
  * LandingProofRow — adapted from Steep's floating-artifact pattern, Voeq-flavored.
  * Flat white cards, hairline border, NO resting shadow (shadow only on hover).
- * ENTRANCE: fades+rises as a group after the hero CTA (~1.1s) via useReveal.
+ * Static (visible on load) — NO scroll-reveal, per the motion-discipline rule
+ * (2026-08-20): entrance/load animation lives only in the hero; hero-cluster
+ * supporting elements and below-the-fold content are static or hover-only.
  *
  * HONESTY RULE (founder + review): no fabricated social-proof numbers. Until the
  * data layer exposes real counts, every stat is a LABELED placeholder — never a
@@ -20,9 +20,8 @@ const PROOF = [
 ] as const;
 
 export function LandingProofRow() {
-  const { ref } = useReveal<HTMLDivElement>();
   return (
-    <div data-testid="landing-proof-row" ref={ref} className="landing-proof-row">
+    <div data-testid="landing-proof-row" className="landing-proof-row">
       {PROOF.map((p) => (
         <div key={p.label} className="proof-card" data-testid="proof-card">
           <span className="proof-value" data-real={p.real}>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Type } from "@voeq/ui";
+import { LandingSearch } from "./LandingSearch";
 
 const WORD = "Voeq";
 
@@ -57,6 +58,7 @@ export function LandingHero() {
       </Type>
 
       <div className="landing-hero-actions">
+        <LandingSearch />
         <a href="/for-vendors" data-testid="entry-post" className="landing-cta landing-cta--ghost">
           Post something
           <span className="cta-arrow" aria-hidden="true">→</span>

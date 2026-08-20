@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { LandingNav } from "./LandingNav";
 import { LandingHero } from "./LandingHero";
-import { CampusContext } from "./CampusContext";
 import { ContourSignature } from "./ContourSignature";
-import { EntryToDiscovery } from "./EntryToDiscovery";
 import { TrustStrip } from "./TrustStrip";
 import { LandingFooter } from "./LandingFooter";
 import { LandingHowItWorks } from "./LandingHowItWorks";
@@ -17,12 +15,14 @@ import { LandingProofRow } from "./LandingProofRow";
 /**
  * LandingShell - client wrapper that owns the selected-campus state (Task B) and composes
  * the Landing surface. Keeps the LOCKED primary hierarchy intact in the center Stack
- * (Voeq -> context -> proposition -> contour -> enter); nav + footer sit OUTSIDE it.
- * Proposition is now inlined into LandingHero (founder directive: INLINE IT, Chunk 7).
+ * (Voeq -> proposition -> contour -> enter); nav + footer sit OUTSIDE it.
+ * Proposition is inlined into LandingHero (founder directive: INLINE IT, Chunk 7).
+ * NOTE: the inline "Discover what's open near [NMU]" CampusContext selector was REMOVED
+ * (founder 2026-08-20) — location filtering is deferred to the "discover near you" feature
+ * (the buyer's actual location), not a hero pre-filter.
  */
 export function LandingShell() {
   const [campus, setCampus] = useState("nmu");
-  const [zone, setZone] = useState("Kurutie");
 
   return (
     <>
@@ -36,13 +36,6 @@ export function LandingShell() {
           <div className="landing-split">
             <div className="landing-split-left">
               <LandingHero />
-              <CampusContext
-                campus={campus}
-                onCampusChange={setCampus}
-                zone={zone}
-                onZoneChange={setZone}
-              />
-              <EntryToDiscovery campus={campus} />
               <LandingProofRow />
             </div>
             <div className="landing-split-right">

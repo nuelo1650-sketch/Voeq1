@@ -314,21 +314,18 @@
 .trust-strip-group {
   display: inline-flex;
   align-items: baseline;
-  gap: var(--space-3);
-}
-.trust-strip-number {
-  font-family: var(--role-font-display);
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 600;
-  line-height: 1;
-  color: var(--role-text);
-  font-variant-numeric: tabular-nums;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 .trust-strip-label {
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--role-text);
+}
+.trust-strip-note {
+  font-size: 13px;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--role-text-muted);
 }
 .trust-strip-sep {
@@ -346,9 +343,6 @@
   }
   .trust-strip-sep {
     display: none;
-  }
-  .trust-strip-number {
-    font-size: 1.25rem;
   }
 }
 
@@ -400,52 +394,126 @@
 
 /* Landing signature footer — Chunk 6 (centered editorial signature, contour top line).
    Tokens only; reduced-motion guarded. */
+/* Landing footer — rich, professional (rewritten 2026-08-20). Flat, hairline-divided,
+   multi-column. Reuses Phase A tokens: --role-border, --role-text, --role-text-muted.
+   No new colors, no new shadow language. */
 .landing-footer {
   margin-top: var(--space-8);
   padding-top: var(--space-8);
   padding-bottom: var(--space-6);
   padding-inline: var(--nav-inline-pad);
-  text-align: center;
+  border-top: 1px solid var(--role-border);
+  background: var(--role-bg);
 }
-.landing-footer-contour {
-  display: block;
-  width: 100%;
-  height: 1px;
-  margin-bottom: var(--space-6);
+.landing-footer-inner {
+  max-width: 1100px;
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1.5fr 2fr;
+  gap: var(--space-8);
+  align-items: start;
 }
-.landing-footer-contour path {
-  stroke: var(--role-text);
-  stroke-width: 1;
-  opacity: 0.04;
-}
-.landing-footer-links {
+.landing-footer-brand {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   gap: var(--space-2);
-  flex-wrap: wrap;
-  align-items: center;
 }
-.landing-footer-links a {
+.landing-footer-wordmark {
+  font-family: var(--role-font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--role-text);
+  line-height: 1;
+}
+.landing-footer-tagline {
   font-family: var(--role-font-ui);
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--role-text-muted);
+  margin: 0;
+  max-width: 32ch;
+}
+.landing-footer-note {
+  font-family: var(--role-font-ui);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--role-text-muted);
+  opacity: 0.8;
+  margin: 0;
+  max-width: 34ch;
+}
+.landing-footer-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+.landing-footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.landing-footer-col-title {
+  font-family: var(--role-font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--role-text-muted);
+  margin: 0 0 var(--space-1);
+}
+.landing-footer-col a {
+  font-family: var(--role-font-ui);
+  font-size: 14px;
+  color: var(--role-text);
   text-decoration: none;
   transition: color 160ms var(--motion-ease);
 }
-.landing-footer-links a:hover {
-  color: var(--role-text);
+.landing-footer-col a:hover {
+  color: var(--role-accent);
 }
-.landing-footer-sep {
-  color: var(--role-border);
-  font-size: 13px;
+.landing-footer-bottom {
+  max-width: 1100px;
+  margin: var(--space-8) auto 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--role-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 .landing-footer-copy {
-  margin-top: var(--space-3);
   font-family: var(--role-font-ui);
   font-weight: 400;
   font-size: 12px;
   color: var(--role-text-muted);
-  opacity: 0.6;
+}
+.landing-footer-bottom-links {
+  display: flex;
+  gap: var(--space-4);
+}
+.landing-footer-bottom-links a {
+  font-family: var(--role-font-ui);
+  font-size: 12px;
+  color: var(--role-text-muted);
+  text-decoration: none;
+  transition: color 160ms var(--motion-ease);
+}
+.landing-footer-bottom-links a:hover {
+  color: var(--role-text);
+}
+@media (max-width: 768px) {
+  .landing-footer-inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  .landing-footer-cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .landing-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .landing-cta:hover,
@@ -773,6 +841,55 @@
    hover). Honest labels only — never fabricated social-proof numbers. */
 .landing-hero-actions {
   margin-top: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+/* Hero search — Phase B (2026-08-20). One input + one pill button. Reuses Phase A
+   tokens: .landing-cta pill, --role-border hairline. NO new colors, NO new shadow
+   language (focus uses outline, not box-shadow). Native GET form → /browse?q=… */
+.landing-search {
+  display: flex;
+  gap: var(--space-2);
+  flex: 1 1 340px;
+  min-width: 0;
+}
+.landing-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--space-3) var(--space-5);
+  font-family: var(--role-font-ui);
+  font-size: 1.0625rem;
+  color: var(--role-text);
+  background: var(--role-surface);
+  border: 1px solid var(--role-border);
+  border-radius: 9999px;
+  outline: none;
+  transition: border-color 160ms var(--motion-ease);
+}
+.landing-search-input::placeholder {
+  color: var(--role-text-muted);
+}
+.landing-search-input:focus {
+  border-color: var(--role-accent);
+  outline: 2px solid var(--role-accent);
+  outline-offset: 2px;
+}
+@media (max-width: 768px) {
+  .landing-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .landing-search {
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+  .landing-search .landing-cta,
+  .landing-hero-actions .landing-cta--ghost {
+    width: 100%;
+    justify-content: center;
+  }
 }
 .landing-proof-row {
   display: flex;
