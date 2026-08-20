@@ -31,7 +31,8 @@ Organized by product area. Every item carries a stable ID used in §14.
 - **VOEQ-PUB-009** Privacy. `MUST` `DECIDED`
 - **VOEQ-PUB-010** Help. `SHOULD` `DECIDED`
 - **VOEQ-PUB-011** For-Vendors (public recruitment page). `SHOULD` `NEW`
-- **VOEQ-PUB-012** Press/Media. `LATER` `LEGACY-PRESERVED` (legacy had it; low priority, defer)
+- **VOEQ-PUB-012** Careers (public roles + application form). `Phase B+` `NEW`
+- **VOEQ-PUB-013** Media (Press page spec lives at Doc 04 PG-PUB-011). `LATER` `LEGACY-PRESERVED` (legacy had it; low priority, defer)
 
 ## Identity (IDN)
 - **VOEQ-IDN-001** Registration (email OTP + magic-link, or Google OAuth; intent = shopper/vendor).
@@ -199,9 +200,7 @@ Detailed blocks for the product spine. Each is product-level; no implementation 
 - **Purpose:** Let a student create/sign in to an account (shopper or vendor intent).
 - **User:** Prospective shopper / vendor.
 - **Preconditions:** API + auth provider reachable; Google client configured; email sender configured.
-- **Core behavior:** Email signup → OTP/magic-link verify (pending token required, anti-enumeration) →
-  session. Google OAuth → find-or-create by email; role by `intent`. Campus/consent gates applied
-  post-auth.
+- **Core behavior:** **Two registration methods** — (a) **email + password**; (b) **Google OAuth** (find-or-create by email; role by `intent`). Email verification = **6-digit OTP sent to email** (pending-token gated, anti-enumeration); magic-link optional. **Pre-signup consent (2026-08-20):** submit CTA disabled until the agreement checkbox (links `/terms` + `/privacy`) is checked — applies to BOTH methods. **Remember me (2026-08-20):** extends session (~30d vs default ~1d; server-revocable, IDN-004). **Phone is NOT an auth factor** — optional, collected post-registration for vendor contact only. Campus/consent gates applied post-auth.
 - **Success:** Authenticated session; post-auth redirect by role + completion state.
 - **Empty state:** N/A (entry form).
 - **Loading state:** Form shows submitting state; no indefinite spinners.
@@ -210,7 +209,9 @@ Detailed blocks for the product spine. Each is product-level; no implementation 
 - **Permission:** Public.
 - **Edge cases:** Google user with no `agreementAcceptedAt` is **not** silently consented (forced
   consent modal). super_admin/admin Google → `/admin`. Vendor intent promotes buyer→vendor (never
-  demotes staff). `.edu.ng` gating `OPEN` (§14 #4).
+  demotes staff). `.edu.ng` gating `OPEN` (§14 #4). **Pre-signup consent enforced (2026-08-20):**
+  submit blocked until checkbox checked (both methods). **Remember me (2026-08-20):** ~30d session when
+  checked. **Phone ≠ auth (2026-08-20):** phone never identifies/verifies a user; verification is email-based only.
 - **Dependencies:** IDN-003 (verification), IDN-004 (sessions), IDN-009/010 (gates), email provider.
 
 ---
@@ -462,7 +463,8 @@ Groups: PUBLIC · AUTH · ONBOARDING · SHOPPER · VENDOR · MESSAGING · STAFF 
 | Privacy | All | Privacy policy | Yes | Public | Versioned doc | STAFF-017 |
 | Help | All | How-to / FAQ | Should | Public | Static + contact | — |
 | For-Vendors | All | Recruit vendors | Should | Public | Value prop + CTA | VEND-001 |
-| Press | All | Announcements | Later | Public | List | STAFF-018 |
+| Press | All | Announcements + press contact | Phase B+ | Public | List + form | STAFF-018 |
+| Careers | All | Open roles + application | Phase B+ | Public | Roles + form | STAFF-018 |
 
 ### AUTH
 | Experience | User | Purpose | Req? | Priv | Major | Deps |

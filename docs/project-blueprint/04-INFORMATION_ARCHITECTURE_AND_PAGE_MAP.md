@@ -259,15 +259,33 @@ offerings → communication.**
   "Become a vendor" → Register (vendor intent). **Perms:** public. **Req:** PUB-011. **Excluded:**
   vendor management UI (that's VENDOR area).
 
-### PG-PUB-011 — Press  · standalone (info) · LATER
-- Deferred. Announcements surface. Not Phase 1.
+### PG-PUB-011 — Press  · standalone (info) · Phase B+ (promoted 2026-08-20)
+- **Purpose:** News, updates, media kit, and a press-contact path.
+- **Role:** All (public).
+- **Required visible content:** date-stamped press releases (placeholder for now), media assets / media kit block, **press contact form** (Name, Email, Publication, Message → staff inbox — UI-only until Phase 9 backend; validates, mock-submits, shows inline success state). Editorial, publication-grade typography.
+- **Primary actions:** open a release; submit press inquiry.
+- **Secondary actions:** download media kit.
+- **Environment:** Cream (reuses `InfoPageShell`: 65ch max-width, slim nav).
+- **Permissions:** public. **Excluded:** CMS; real sending (Phase 9).
+- **Requirements:** PUB-011. **Shares:** `StaffContactForm` (kind=`"press"`) with PG-PUB-012.
+
+### PG-PUB-012 — Careers  · standalone (info) · Phase B+ (added 2026-08-20)
+- **Purpose:** Open roles + culture + an application path.
+- **Role:** All (public, prospective hires).
+- **Required visible content:** 2 placeholder roles (title, description, location), a culture paragraph, **application form** (Name, Email, Resume link, Cover letter, Role selector → staff inbox — UI-only until Phase 9; validates, mock-submits, shows inline success state). Card-based roles with a warm CTA into the form.
+- **Primary actions:** open a role; submit application.
+- **Secondary actions:** none.
+- **Environment:** Cream (reuses `InfoPageShell`).
+- **Permissions:** public. **Excluded:** ATS; real sending (Phase 9).
+- **Requirements:** PUB-012. **Shares:** `StaffContactForm` (kind=`"careers"`) with PG-PUB-011.
+- **Note:** Doc 02 previously merged Press/Media into `VOEQ-PUB-012`; that is **split** here — Careers = PG-PUB-012, Media = PUB-013 (LATER, referenced by Docs 06/12, not specced here).
 
 ---
 
 ## 3.2 AUTH (gate, not nav-top)
 
 ### PG-AUTH-001 — Register  · standalone (transient flow) · LOCKED
-- **Purpose:** Create an account (email OTP/magic or Google), capturing shopper/vendor intent.
+- **Purpose:** Create an account — **email + password OR Google OAuth** (verification = 6-digit OTP to email; magic-link optional), capturing shopper/vendor intent. **Phone is NOT an auth factor** (optional, collected post-registration for vendor contact only).
 - **Role:** Prospect. **Required content:** identity input (email or Google), intent choice (shopper /
   vendor), anti-enumeration behavior. **Primary:** submit → verify state. **Secondary:** switch to
   login. **Interactive:** email field, Google button, intent toggle. **Relationships:** → verify
@@ -276,6 +294,7 @@ offerings → communication.**
   rejected; rate-limit lockout. **Mobile/Desktop:** full-screen step. **Req:** IDN-001..011. **Flows:**
   FLOW-AUTH-REG, FLOW-AUTH-DUP, FLOW-AUTH-SINGLE. **Deps:** IDN-003/004/009/010. **Excluded:** auto-merge
   by email (REJECTED, Doc 03 §3.5).
+- **Consent gate (pre-signup, 2026-08-20):** the registration submit CTA is **disabled until the user checks the agreement checkbox**, for BOTH Google and email/password flows. The checkbox links to `/terms` + `/privacy`; checking is a hard precondition to submitting — distinct from, and in addition to, the post-auth forced consent modal (IDN-009).
 
 ### PG-AUTH-002 — Login  · standalone · LOCKED
 - **Purpose:** Sign in; return user to intended destination (`?next=`).
