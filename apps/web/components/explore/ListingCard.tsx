@@ -135,5 +135,4 @@ const shimmerStyle: React.CSSProperties = {
   background:
     "linear-gradient(90deg, var(--role-surface-sunken) 0%, rgba(255,255,255,0.5) 50%, var(--role-surface-sunken) 100%)",
   backgroundSize: "200% 100%",
-  animation: "contour-shimmer 1.2s linear infinite",
 };
