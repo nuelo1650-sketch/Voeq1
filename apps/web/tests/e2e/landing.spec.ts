@@ -255,4 +255,30 @@ test.describe("Task B — Landing completion + contour richness", () => {
     await expect(strip).toBeVisible();
     await expect(strip.locator(".trust-strip-sep")).toHaveCount(0);
   });
+
+  // --- Chunk 6: CTA elevated to invitation (.landing-cta + aria-hidden arrow) ---
+  test("primary CTA is styled as .landing-cta with an aria-hidden arrow", async ({ page }) => {
+    await page.goto("/");
+    const entry = page.getByTestId("entry-discovery");
+    await expect(entry).toBeVisible();
+    await expect(entry).toHaveAttribute("href", /\/explore/);
+    await expect(entry).toHaveClass(/landing-cta/);
+    const arrow = entry.locator(".cta-arrow");
+    await expect(arrow).toHaveCount(1);
+    await expect(arrow).toHaveAttribute("aria-hidden", "true");
+    await expect(arrow).toHaveText("→");
+  });
+
+  // --- Chunk 6: signature footer — contour line + 5 centered links, testids preserved ---
+  test("signature footer renders contour line + 5 centered links", async ({ page }) => {
+    await page.goto("/");
+    const footer = page.getByTestId("landing-footer");
+    await expect(footer).toBeVisible();
+    await expect(footer.locator(".landing-footer-contour")).toHaveCount(1);
+    await expect(footer.locator(".landing-footer-contour path")).toHaveCount(1);
+    await expect(footer.locator(".landing-footer-links a")).toHaveCount(5);
+    for (const id of ["footer-for-vendors", "footer-terms", "footer-privacy", "footer-login", "footer-signup"]) {
+      await expect(page.getByTestId(id)).toHaveAttribute("href", /\//);
+    }
+  });
 });
