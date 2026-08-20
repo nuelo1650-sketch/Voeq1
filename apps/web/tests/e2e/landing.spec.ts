@@ -233,4 +233,26 @@ test.describe("Task B — Landing completion + contour richness", () => {
     await page.getByTestId("landing-nav-overlay-close").click();
     await expect(overlay).toBeHidden();
   });
+
+  // --- Content item 8: Trust strip (Chunk 5) renders data-bound stats below the CTA ---
+  test("trust strip renders 3 data-bound stat groups below the CTA", async ({ page }) => {
+    await page.goto("/");
+    const strip = page.getByTestId("trust-strip");
+    await expect(strip).toBeVisible();
+    // 3 groups (number + label pairs); values sourced from getMockStats() — no UI literals.
+    await expect(strip.locator(".trust-strip-group")).toHaveCount(3);
+    await expect(strip.locator(".trust-strip-number")).toHaveCount(3);
+    await expect(strip.locator(".trust-strip-label")).toHaveCount(3);
+    // Honest placeholder values: 6 vendors (MOCK_VENDORS.length), 6 campuses, 47 connections.
+    const numbers = await strip.locator(".trust-strip-number").allInnerTexts();
+    expect(numbers).toEqual(["6", "6", "47"]);
+  });
+
+  test("trust strip stacks vertically on mobile (375px) and hides separators", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/");
+    const strip = page.getByTestId("trust-strip");
+    await expect(strip).toBeVisible();
+    await expect(strip.locator(".trust-strip-sep")).toHaveCount(0);
+  });
 });

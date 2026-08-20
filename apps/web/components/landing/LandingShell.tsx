@@ -7,6 +7,7 @@ import { CampusContext } from "./CampusContext";
 import { DiscoveryProposition } from "./DiscoveryProposition";
 import { ContourSignature } from "./ContourSignature";
 import { EntryToDiscovery } from "./EntryToDiscovery";
+import { TrustStrip } from "./TrustStrip";
 import { LandingFooter } from "./LandingFooter";
 
 /**
@@ -45,6 +46,7 @@ export function LandingShell() {
             </div>
           </div>
         </main>
+        <TrustStrip />
         <LandingFooter />
       </div>
     </>
