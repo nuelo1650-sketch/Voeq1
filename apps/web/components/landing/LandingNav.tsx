@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 /**
@@ -27,6 +27,45 @@ const NAV_LINKS = [
 
 export function LandingNav() {
   const [open, setOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  // Close overlay + restore focus to the hamburger (keyboard/SR users don't lose place).
+  const close = () => {
+    setOpen(false);
+    hamburgerRef.current?.focus();
+  };
+
+  // Focus trap: on open, focus first link; Escape closes; Tab/Shift+Tab cycle within overlay.
+  useEffect(() => {
+    if (!open) return;
+    const el = document.querySelector<HTMLElement>('[data-testid="landing-nav-overlay"]');
+    if (!el) return;
+    const focusables = () =>
+      Array.from(el.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"));
+    focusables()[0]?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+        return;
+      }
+      if (e.key === "Tab") {
+        const items = focusables();
+        if (items.length === 0) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    el.addEventListener("keydown", onKeyDown);
+    return () => el.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   return (
     <nav
@@ -71,6 +110,7 @@ export function LandingNav() {
       {/* Mobile: hamburger (hidden on desktop via .landing-nav-hamburger) */}
       <button
         type="button"
+        ref={hamburgerRef}
         data-testid="landing-nav-hamburger"
         className="landing-nav-hamburger"
         aria-label="Open menu"
@@ -96,21 +136,21 @@ export function LandingNav() {
             data-testid="landing-nav-overlay-close"
             className="landing-nav-overlay-close"
             aria-label="Close menu"
-            onClick={() => setOpen(false)}
+            onClick={close}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M1 1l14 14M15 1L1 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
           {NAV_LINKS.map((l) => (
-            <a
+            <Link
               key={l.href}
               href={l.href}
               data-testid={`${l.testid}-overlay`}
               onClick={() => setOpen(false)}
             >
               {l.label}
-            </a>
+            </Link>
           ))}
         </div>
       )}
