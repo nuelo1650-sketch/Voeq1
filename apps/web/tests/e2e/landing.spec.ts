@@ -105,16 +105,19 @@ test.describe("Slice 1 Landing (Cream-first)", () => {
     // Dominant display heading (Voeq / arrival) exists and is the largest text.
     const heading = page.getByTestId("landing-heading");
     await expect(heading).toBeVisible();
-    const hFont = await heading.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    // The <h1> wrapper carries no font-size (Tailwind preflight resets headings to inherit);
+    // the actual display glyphs are the .wordmark-char spans (clamp(5rem,14vw,8rem)).
+    const charFont = await page.getByTestId("wordmark-char").first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     const bodyFont = await page.getByTestId("discovery-proposition").evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-    expect(hFont).toBeGreaterThan(bodyFont); // heading dominates, not decorative > useful
+    expect(charFont).toBeGreaterThan(bodyFont); // display wordmark dominates the proposition copy
     // Context block present (honest neutral state), discovery proposition present, entry present.
     await expect(page.getByTestId("campus-context")).toBeVisible();
     await expect(page.getByTestId("discovery-proposition")).toBeVisible();
     await expect(page.getByTestId("entry-discovery")).toBeVisible();
-    // Order in DOM: heading before context before proposition before entry.
+    // Order in DOM (current structure post-Chunk 7: proposition inlined into the hero,
+    // above the campus context): heading -> proposition -> context -> entry.
     const order = await page.evaluate(() => {
-      const ids = ["landing-heading", "campus-context", "discovery-proposition", "entry-discovery"];
+      const ids = ["landing-heading", "discovery-proposition", "campus-context", "entry-discovery"];
       const tops = ids.map((id) => {
         const el = document.querySelector(`[data-testid="${id}"]`);
         return el ? el.getBoundingClientRect().top : Infinity;
@@ -145,8 +148,8 @@ test.describe("Task B — Landing completion + contour richness", () => {
     const entry = page.getByTestId("entry-discovery");
     await expect(entry).toContainText(/explore\s+nmu/i);
     // Changing the selector updates the CTA label.
-    await page.getByTestId("campus-selector").selectOption("wits");
-    await expect(entry).toContainText(/explore\s+wits/i);
+    await page.getByTestId("campus-selector").selectOption("unilag");
+    await expect(entry).toContainText(/explore\s+unilag/i);
   });
 
   // --- Content item 3: secondary entry to For-Vendors (placeholder route) ---
@@ -253,7 +256,12 @@ test.describe("Task B — Landing completion + contour richness", () => {
     await page.goto("/");
     const strip = page.getByTestId("trust-strip");
     await expect(strip).toBeVisible();
-    await expect(strip.locator(".trust-strip-sep")).toHaveCount(0);
+    // Separators exist in the DOM (2, between the 3 groups) but are display:none on mobile
+    // (globals.css @media max-width:640px) — assert they are hidden, not absent.
+    const seps = strip.locator(".trust-strip-sep");
+    await expect(seps).toHaveCount(2);
+    await expect(seps.nth(0)).toBeHidden();
+    await expect(seps.nth(1)).toBeHidden();
   });
 
   // --- Chunk 6: CTA elevated to invitation (.landing-cta + aria-hidden arrow) ---
@@ -280,5 +288,117 @@ test.describe("Task B — Landing completion + contour richness", () => {
     for (const id of ["footer-for-vendors", "footer-terms", "footer-privacy", "footer-login", "footer-signup"]) {
       await expect(page.getByTestId(id)).toHaveAttribute("href", /\//);
     }
+  });
+});
+
+/* ============================================================================
+ * CHUNK 8 — Landing A.19 visual-direction regression assertions
+ * (landing-visual-direction-remediation.md, chunk 8). ADDITIVE ONLY: the Slice 1
+ * + Task B gates above stay intact. Each assertion targets a REAL DOM / computed-
+ * style fact verified on disk — no baked-in bug. Asserts the visual direction is
+ * actually rendered: atmosphere layers, 55/45 split, wordmark entrance, INLINE
+ * (not card) selector, contour SVG self-draw, data-bound trust strip, footer.
+ * ========================================================================== */
+test.describe("Chunk 8 — Landing A.19 visual direction", () => {
+  test("atmosphere: cream base + static amber/deep-green layers (no ambient drift)", async ({ page }) => {
+    await page.goto("/");
+    // Cream base locked value (#f7f4ec) on body.
+    const bodyBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(bodyBg).toBe("rgb(247, 244, 236)");
+    // Static atmosphere layer with two radial gradients present.
+    const atmo = page.locator(".landing-atmosphere");
+    await expect(atmo).toBeVisible();
+    const bgImage = await atmo.evaluate((el) => getComputedStyle(el).backgroundImage);
+    expect(bgImage).toContain("radial-gradient");
+    // Still image: no running animation on the atmosphere (A.1/A.18).
+    const atmoRunning = await atmo.evaluate((el) =>
+      (el as HTMLElement).getAnimations().some((a) => a.playState === "running")
+    );
+    expect(atmoRunning).toBe(false);
+  });
+
+  test("asymmetric split: left column ~55% (11fr) wider than right 45% (9fr)", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/");
+    const left = page.locator(".landing-split-left");
+    const right = page.locator(".landing-split-right");
+    await expect(left).toBeVisible();
+    await expect(right).toBeVisible();
+    const { lW, rW } = await page.evaluate(() => {
+      const l = document.querySelector(".landing-split-left") as HTMLElement;
+      const r = document.querySelector(".landing-split-right") as HTMLElement;
+      return { lW: l.getBoundingClientRect().width, rW: r.getBoundingClientRect().width };
+    });
+    expect(lW).toBeGreaterThan(rW);
+    const ratio = lW / rW;
+    expect(ratio).toBeGreaterThan(1.05);
+    expect(ratio).toBeLessThan(1.45); // 11/9 ≈ 1.222
+  });
+
+  test("wordmark entrance: 4 char spans carrying the rise animation (first-arrival)", async ({ page }) => {
+    await page.goto("/");
+    const chars = page.getByTestId("wordmark-char");
+    await expect(chars).toHaveCount(4);
+    const animName = await chars.first().evaluate((el) => getComputedStyle(el).animationName);
+    expect(animName).toMatch(/wordmark/);
+  });
+
+  test("wordmark: reduced-motion renders instantly (no rise)", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const chars = page.getByTestId("wordmark-char");
+    await expect(chars).toHaveCount(4);
+    const opacity = await chars.first().evaluate((el) => getComputedStyle(el).opacity);
+    expect(opacity).toBe("1");
+    const animName = await chars.first().evaluate((el) => getComputedStyle(el).animationName);
+    expect(animName).toBe("none");
+  });
+
+  test("campus selector is INLINE (transparent select), not a card", async ({ page }) => {
+    await page.goto("/");
+    const sel = page.getByTestId("campus-selector");
+    await expect(sel).toBeVisible();
+    const bg = await sel.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(bg).toBe("rgba(0, 0, 0, 0)"); // transparent -> inline text select, no card surface
+    // Wrapped in an inline sentence, not a surface/card element.
+    await expect(page.locator(".campus-context-sentence")).toBeVisible();
+  });
+
+  test("contour line SVG self-draws ONLY when activity exists (seed=1)", async ({ page }) => {
+    await page.goto("/?seed=1");
+    const svg = page.getByTestId("contour-line");
+    await expect(svg).toBeVisible();
+    const path = svg.locator("path.contour-line-path");
+    await expect(path).toHaveCount(1);
+    const d = await path.getAttribute("d");
+    expect(d && d.trim().length).toBeGreaterThan(0);
+    const stroke = await path.evaluate((el) => getComputedStyle(el).stroke);
+    expect(stroke).not.toBe("none");
+  });
+
+  test("trust strip: data-bound 3 groups below the CTA, honest values", async ({ page }) => {
+    await page.goto("/");
+    const strip = page.getByTestId("trust-strip");
+    await expect(strip).toBeVisible();
+    await expect(strip.locator(".trust-strip-group")).toHaveCount(3);
+    const numbers = await strip.locator(".trust-strip-number").allInnerTexts();
+    expect(numbers).toEqual(["6", "6", "47"]); // vendorCount, campusCount, studentConnections (no UI literals)
+    // Positioned below the entry CTA in DOM order.
+    const order = await page.evaluate(() => {
+      const t = document.querySelector('[data-testid="trust-strip"]')!.getBoundingClientRect().top;
+      const e = document.querySelector('[data-testid="entry-discovery"]')!.getBoundingClientRect().top;
+      return { t, e };
+    });
+    expect(order.t).toBeGreaterThan(order.e);
+  });
+
+  test("signature footer: centered, contour top line, 5 links", async ({ page }) => {
+    await page.goto("/");
+    const footer = page.getByTestId("landing-footer");
+    await expect(footer).toBeVisible();
+    const align = await footer.evaluate((el) => getComputedStyle(el).textAlign);
+    expect(align).toBe("center");
+    await expect(footer.locator(".landing-footer-contour")).toHaveCount(1);
+    await expect(footer.locator(".landing-footer-links a")).toHaveCount(5);
   });
 });
