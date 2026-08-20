@@ -26,9 +26,9 @@ test("for-vendors CTA links to /signup", async ({ page }) => {
 });
 
 for (const p of [
-  { path: "/about", heading: "Our Mission" },
-  { path: "/terms", heading: "Agreement" },
-  { path: "/privacy", heading: "Data Collection" },
+  { path: "/about", heading: "Why We Exist" },
+  { path: "/terms", heading: "1. What Voeq Is" },
+  { path: "/privacy", heading: "1. What We Collect" },
   { path: "/for-vendors", heading: "Why Sell on Voeq?" },
   // /press has a different structure (release bodies under <article>); covered by the
   // dedicated "press release bodies" test below, not this generic sibling-<p> check.
@@ -37,13 +37,23 @@ for (const p of [
     await page.goto(p.path);
     const section = page.getByRole("heading", { name: p.heading, level: 2 });
     await expect(section).toBeVisible();
-    // The copy lives in the first <p> of the heading's parent <section> (sibling of the h2).
-    const para = section.locator("xpath=../p").first();
-    await expect(para).toBeVisible();
-    const text = (await para.innerText()).replace(/\{?\/\* PLACEHOLDER \*\/\}?/g, "").trim();
+    // The copy lives in the first <p> or <ul> of the heading's parent <section> (sibling of the h2).
+    const block = section.locator("xpath=../p | ../ul").first();
+    await expect(block).toBeVisible();
+    const text = (await block.innerText()).replace(/\{?\/\* PLACEHOLDER \*\/\}?/g, "").trim();
     expect(text.length).toBeGreaterThan(0);
   });
 }
+
+test("Terms + Privacy show 'Last updated: [date]' and real section prose", async ({ page }) => {
+  for (const path of ["/terms", "/privacy"]) {
+    await page.goto(path);
+    await expect(page.getByText(/Last updated:/)).toBeVisible();
+    // Spot-check a real provided clause is present (not placeholder).
+    const shellText = await page.getByTestId("info-page-shell").innerText();
+    expect(shellText).toContain("support@voeq.ng");
+  }
+});
 
 test("help FAQ answers are non-empty", async ({ page }) => {
   await page.goto("/help");
