@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { fraunces, hankenGrotesk } from "./fonts";
+import { playfair, inter, jetbrainsMono } from "./fonts";
 import "@voeq/design-tokens/tokens.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Voeq",
-  description: "Voeq — the campus marketplace. Arrive, discover, connect.",
+  title: "Voeq — Find. Connect. Grow.",
+  description: "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-env="cream" className={`${fraunces.variable} ${hankenGrotesk.variable}`}>
+    <html lang="en" data-env="cream" className={`${playfair.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
       <body
         style={{
           margin: 0,

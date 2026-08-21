@@ -1,29 +1,38 @@
-import type { ReactNode } from "react";
-import { LandingNav } from "@/components/landing/LandingNav";
-import { LandingFooter } from "@/components/landing/LandingFooter";
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { LandingFooter } from '../landing/LandingFooter';
 
 interface InfoPageShellProps {
-  title: string;
-  subtitle?: string;
-  children: ReactNode;
+  children: React.ReactNode;
+  title?: string;
 }
 
-/**
- * InfoPageShell — shared chrome for public info pages (Phase B, PG-PUB-009).
- * Reuses LandingNav + LandingFooter (no duplication). Cream inherited from
- * layout.tsx (data-env="cream"). Content column capped at 65ch via .info-page-shell.
- * Server component (no "use client") so route pages can still export `metadata`.
- */
-export function InfoPageShell({ title, subtitle, children }: InfoPageShellProps) {
+export function InfoPageShell({ children, title }: InfoPageShellProps) {
   return (
-    <>
-      <LandingNav />
-      <main className="info-page-shell" data-testid="info-page-shell">
-        <h1 data-testid="info-page-title">{title}</h1>
-        {subtitle ? <p className="info-page-subtitle">{subtitle}</p> : null}
-        {children}
+    <div className="info-page-wrapper">
+      {/* Simple top nav */}
+      <nav className="info-page-nav">
+        <div className="info-page-nav-content">
+          <Link href="/" className="info-page-logo">
+            Voeq
+          </Link>
+          <Link href="/" className="info-page-back">
+            <ArrowLeft size={16} />
+            <span>Back to home</span>
+          </Link>
+        </div>
+      </nav>
+
+      {/* Main content container */}
+      <main className="info-page-main">
+        <div className="info-page-container">
+          {title && <h1 className="info-page-title">{title}</h1>}
+          {children}
+        </div>
       </main>
+
+      {/* Footer */}
       <LandingFooter />
-    </>
+    </div>
   );
 }

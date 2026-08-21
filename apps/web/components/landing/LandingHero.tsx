@@ -1,69 +1,87 @@
-"use client";
+'use client';
+import { useState } from 'react';
+import Link from 'next/link';
+import { Search } from 'lucide-react';
+import { LiquidGlassPanel } from './LiquidGlassPanel';
+import { CampusSelector } from './CampusSelector';
+import { HeroVisual } from './HeroVisual';
+import { categories, campuses } from '@voeq/data';
 
-import { useEffect, useState } from "react";
-import { Type } from "@voeq/ui";
-import { LandingSearch } from "./LandingSearch";
-
-const WORD = "Voeq";
-
-/**
- * LandingHero — the arrival moment (Doc 05 A.3 / A.19).
- * Display wordmark, char-split "ink settling into paper" entrance (~1.8s total,
- * staggered V→o→e→q), first-arrival only (sessionStorage gate), reduced-motion →
- * instant (A.15). Semantic <h1> for SEO/a11y; display size comes from Type.tsx
- * (LOCKED clamp(5rem,14vw,8rem) — single source of truth, not re-specified here).
- */
 export function LandingHero() {
-  const [play, setPlay] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCampus, setSelectedCampus] = useState(campuses[0].id);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (sessionStorage.getItem("voeq:wordmark-played")) {
-      setPlay(false); // returning visitor in this session — stay still
-      return;
-    }
-    sessionStorage.setItem("voeq:wordmark-played", "1");
-  }, []);
+  const handleSearch = () => {
+    // TODO: Navigate to explore page with filters
+    const params = new URLSearchParams();
+    if (searchQuery) params.append('q', searchQuery);
+    if (selectedCategory !== 'all') params.append('category', selectedCategory);
+    if (selectedCampus) params.append('campus', selectedCampus);
+    window.location.href = `/explore?${params.toString()}`;
+  };
 
   return (
-    <>
-      <h1
-        data-testid="landing-heading"
-        aria-label={WORD}
-        style={{ margin: 0, display: "flex", gap: "0.01em", lineHeight: 0.88, fontFamily: "var(--role-font-display)" }}
-      >
-        {WORD.split("").map((ch, i) => (
-          <Type
-            key={i}
-            tone="display"
-            size="display"
-            data-testid="wordmark-char"
-            className={play ? "wordmark-char" : "wordmark-char wordmark-char--instant"}
-            style={{
-              display: "inline-block",
-              animationDelay: `${i * 0.06}s`,
-              letterSpacing: "-0.04em",
-              lineHeight: 0.88,
-              textShadow: "0 1px 0 rgba(184,137,59,0.18)",
-            }}
-          >
-            {ch}
-          </Type>
-        ))}
-      </h1>
+    <section className="hero-section">
+      {/* Full-screen glass white background with animated moving dots */}
+      <HeroVisual />
 
-      <Type tone="muted" size="lg" data-testid="discovery-proposition">
-        The campus marketplace — discover what&rsquo;s open near you, and connect with the
-        people selling it.
-      </Type>
+      {/* Content layer */}
+      <div className="hero-content">
+        {/* Campus selector in liquid glass panel (breathe duration: 11s) */}
+        <LiquidGlassPanel breathDuration={11} delay={0}>
+          <CampusSelector />
+        </LiquidGlassPanel>
 
-      <div className="landing-hero-actions">
-        <LandingSearch />
-        <a href="/for-vendors" data-testid="entry-post" className="landing-cta landing-cta--ghost">
-          Post something
-          <span className="cta-arrow" aria-hidden="true">→</span>
-        </a>
+        {/* Main headline */}
+        <h1 className="hero-headline">Find. Connect. Grow.</h1>
+        <p className="hero-subheadline">The campus marketplace for Nigerian students</p>
+
+        {/* Search bar in liquid glass panel (breathe duration: 14s, delay: 1s) */}
+        <LiquidGlassPanel breathDuration={14} delay={1} className="hero-search-panel">
+          <div className="hero-search-bar">
+            <div className="hero-search-input-wrapper">
+              <Search size={20} className="hero-search-icon" />
+              <input 
+                type="text"
+                placeholder="What are you looking for?"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="hero-search-input"
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="hero-search-select"
+            >
+              <option value="all">All categories</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.slug}>{c.name}</option>
+              ))}
+            </select>
+            
+            <button 
+              onClick={handleSearch}
+              className="hero-search-btn"
+            >
+              Search
+            </button>
+          </div>
+        </LiquidGlassPanel>
+
+        {/* CTA buttons */}
+        <div className="hero-ctas">
+          <Link href="/explore" className="btn-primary btn-lg">
+            Get Started
+          </Link>
+          <Link href="/for-vendors" className="btn-ghost btn-lg">
+            Become a vendor
+          </Link>
+        </div>
       </div>
-    </>
+    </section>
   );
 }

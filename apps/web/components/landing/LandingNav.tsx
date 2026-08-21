@@ -18,13 +18,8 @@ import Link from "next/link";
  */
 
 const NAV_LINKS = [
-  { href: "/about", testid: "nav-about", label: "About" },
-  { href: "/help", testid: "nav-help", label: "Help" },
-  { href: "/terms", testid: "nav-legal", label: "Legal" },
-  { href: "/login", testid: "nav-login", label: "Login" },
-  { href: "/signup", testid: "nav-signup", label: "Sign up" },
-  { href: "/press", testid: "nav-press", label: "Press" },
-  { href: "/careers", testid: "nav-careers", label: "Careers" },
+  { href: "/login", testid: "nav-login", label: "Login", cta: false },
+  { href: "/signup", testid: "nav-signup", label: "Sign up", cta: true },
 ] as const;
 
 export function LandingNav() {
@@ -100,10 +95,17 @@ export function LandingNav() {
         Voeq
       </Link>
 
-      {/* Desktop: inline links (hidden <=768px via .landing-nav-links in globals.css) */}
+      {/* Desktop: inline links (hidden <=768px via .landing-nav-links in globals.css).
+          Sign up renders as the pill CTA; Login as a plain text link. */}
       <div className="landing-nav-links">
         {NAV_LINKS.map((l) => (
-          <Link key={l.href} href={l.href} data-testid={l.testid} style={linkStyle}>
+          <Link
+            key={l.href}
+            href={l.href}
+            data-testid={l.testid}
+            className={l.cta ? "landing-cta landing-cta--sm" : undefined}
+            style={l.cta ? undefined : linkStyle}
+          >
             {l.label}
           </Link>
         ))}
@@ -149,6 +151,7 @@ export function LandingNav() {
               key={l.href}
               href={l.href}
               data-testid={`${l.testid}-overlay`}
+              className={l.cta ? "landing-cta landing-cta--sm" : undefined}
               onClick={() => setOpen(false)}
             >
               {l.label}
@@ -163,6 +166,7 @@ export function LandingNav() {
 const linkStyle: React.CSSProperties = {
   fontFamily: "var(--role-font-ui)",
   fontSize: "14px",
-  color: "var(--role-text-muted)",
+  fontWeight: 600,
+  color: "var(--role-text)",
   textDecoration: "none",
 };

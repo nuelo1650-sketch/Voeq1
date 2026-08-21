@@ -1,15 +1,37 @@
-import { LandingShell } from "@/components/landing/LandingShell";
+import { LandingHero } from '@/components/landing/LandingHero';
+import { TrendingRail } from '@/components/landing/TrendingRail';
+import { CategoryGrid } from '@/components/landing/CategoryGrid';
+import { HowItWorks } from '@/components/landing/HowItWorks';
+import { TrustPillars } from '@/components/landing/TrustPillars';
+import { ForVendorsCTA } from '@/components/landing/ForVendorsCTA';
+import { LandingFooter } from '@/components/landing/LandingFooter';
 
 /**
- * Landing — PG-PUB-001 (Doc 04), Cream-first environment (Doc 06 §2, reversed 2026-08-18:
- * Cream is the default across all public routes incl. Landing; Deep is an opt-in alternate only).
- * First real product surface. Visual hierarchy (one dominant order per viewport):
- *   Voeq (arrival) -> campus context -> discovery proposition -> contour meaning -> enter
- * No auth, no browse grid, no marketing drift, no 3D.
- * LandingShell owns the campus state and composes nav + hero + context + proposition +
- * contour + entry + footer (Task B additions live in the shell, outside the locked center
- * hierarchy).
+ * Landing — GLASS-WHITE CANVAS REBUILD (2026-08-21)
+ * 
+ * New design direction: Glass-white canvas where campus life and vendor abundance 
+ * live as full-bleed photography, organized by warm amber category signals, 
+ * framed in liquid-glass panels.
+ * 
+ * Section hierarchy:
+ *   1. Hero (full-bleed with liquid glass panels)
+ *   2. Trending vendors rail
+ *   3. Category grid
+ *   4. How it works (dark forest section)
+ *   5. Trust pillars
+ *   6. For vendors CTA
+ *   7. Footer (wavy organic top)
  */
 export default function Landing() {
-  return <LandingShell />;
+  return (
+    <main className="landing-page">
+      <LandingHero />
+      <TrendingRail />
+      <CategoryGrid />
+      <HowItWorks />
+      <TrustPillars />
+      <ForVendorsCTA />
+      <LandingFooter />
+    </main>
+  );
 }
