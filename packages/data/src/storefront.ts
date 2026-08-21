@@ -11,8 +11,9 @@
  */
 
 import type { Listing, Vendor, Review } from "./interfaces";
-import { mockVendorsRepo, vendorName, listListingsByVendor, type MockListingExtra } from "./mock";
+import { MOCK_VENDORS, mockVendorsRepo, vendorName, listListingsByVendor, type MockListingExtra } from "./mock";
 import type { ExploreListing } from "./explore";
+import { vendors as showcaseVendors } from "./explore-view";
 
 // Local mapper mirroring `toExploreListing` in explore.ts so this module stays
 // independent of that file. Reads the mock-only extras already attached to each listing.
@@ -43,29 +44,49 @@ export interface VendorStorefrontView extends Vendor {
 
 /**
  * Load a vendor storefront through the locked repo boundary + the same
- * ExploreListing view mapping as Explore. Returns null for an unknown id
- * (route must call notFound()).
+ * ExploreListing view mapping as Explore. Resolves by id OR handle for the
+ * curated storefront fixtures (v1-v6, which have real listings), and by id OR
+ * slug for the hand-curated Explore showcase vendors (1-12) — those render a
+ * graceful storefront (hero + honest empty listings/reviews) rather than 404.
+ * Returns null only for an id/slug that matches nothing (route calls notFound()).
  */
-export async function loadVendorStorefront(id: string): Promise<VendorStorefrontView | null> {
-  const vendor = await mockVendorsRepo.getById(id);
-  if (!vendor) return null;
+export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStorefrontView | null> {
+  // 1) Curated storefront fixture (has real listings).
+  const fixture = MOCK_VENDORS.find((v) => v.id === idOrSlug || v.handle === idOrSlug);
+  if (fixture) {
+    const displayName = fixture.name ?? vendorName(fixture.id);
+    const listings = listListingsByVendor(fixture.id).map((l) => toExploreListingLocal(l, displayName));
+    const rated = listings.filter((m) => typeof m.rating === "number");
+    const ratingAvg = rated.length > 0 ? rated.reduce((s, m) => s + (m.rating as number), 0) / rated.length : undefined;
+    return {
+      ...fixture,
+      listings,
+      ratingAvg,
+      ratingCount: rated.length,
+      verifiedCount: listings.filter((m) => m.verified).length,
+      listingCount: listings.length,
+      reviews: [],
+    };
+  }
 
-  const displayName = vendor.name ?? vendorName(id);
-  const listings = listListingsByVendor(id).map((l) => toExploreListingLocal(l, displayName));
+  // 2) Hand-curated Explore showcase vendor (no listings yet) — graceful storefront,
+  //    never a 404. Reuses StorefrontHero/Grid/Trust's honest empty states.
+  const showcase = showcaseVendors.find((v) => v.id === idOrSlug || v.slug === idOrSlug);
+  if (showcase) {
+    return {
+      id: showcase.id,
+      name: showcase.name,
+      handle: showcase.slug,
+      campus: showcase.campusId,
+      categoryIds: [showcase.categorySlug],
+      listings: [],
+      ratingAvg: showcase.rating,
+      ratingCount: showcase.reviewCount,
+      verifiedCount: 0,
+      listingCount: 0,
+      reviews: [],
+    };
+  }
 
-  const rated = listings.filter((m) => typeof m.rating === "number");
-  const ratingAvg =
-    rated.length > 0
-      ? rated.reduce((sum, m) => sum + (m.rating as number), 0) / rated.length
-      : undefined;
-
-  return {
-    ...vendor,
-    listings,
-    ratingAvg,
-    ratingCount: rated.length,
-    verifiedCount: listings.filter((m) => m.verified).length,
-    listingCount: listings.length,
-    reviews: [],
-  };
+  return null;
 }

@@ -173,16 +173,21 @@ test.describe("Task B — Landing completion + contour richness", () => {
     await expect(page.getByTestId("footer-privacy")).toHaveAttribute("href", /\/privacy/);
   });
 
-  // --- Content item 5: slim top nav with wordmark + secondary links ---
-  test("slim top nav with wordmark + secondary links", async ({ page }) => {
+  // --- Content item 5 (revised 2026-08-20): slim top nav with wordmark + Login(text) + Sign up(pill) ---
+  test("slim top nav with wordmark + Login (text) + Sign up (pill CTA)", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("landing-nav")).toBeVisible();
     await expect(page.getByTestId("wordmark")).toHaveText(/voeq/i);
-    await expect(page.getByTestId("nav-about")).toBeVisible();
-    await expect(page.getByTestId("nav-help")).toBeVisible();
-    await expect(page.getByTestId("nav-legal")).toBeVisible();
+    // Only Login (text link) + Sign up (pill CTA) remain; About/Help/Legal/etc removed.
     await expect(page.getByTestId("nav-login")).toBeVisible();
     await expect(page.getByTestId("nav-signup")).toBeVisible();
+    await expect(page.getByTestId("nav-about")).toHaveCount(0);
+    await expect(page.getByTestId("nav-help")).toHaveCount(0);
+    await expect(page.getByTestId("nav-legal")).toHaveCount(0);
+    await expect(page.getByTestId("nav-press")).toHaveCount(0);
+    await expect(page.getByTestId("nav-careers")).toHaveCount(0);
+    // Sign up renders as the pill CTA.
+    await expect(page.getByTestId("nav-signup")).toHaveClass(/landing-cta/);
   });
 
   // --- Content item 6: tagline conveys 'campus marketplace' ---
@@ -234,11 +239,12 @@ test.describe("Task B — Landing completion + contour richness", () => {
     const hamburger = page.getByTestId("landing-nav-hamburger");
     await expect(hamburger).toBeVisible();
     // Inline links hidden on mobile per .landing-nav-links (<=768px in globals.css).
-    await expect(page.getByTestId("nav-about")).toBeHidden();
+    await expect(page.getByTestId("nav-login")).toBeHidden();
     await hamburger.click();
     const overlay = page.getByTestId("landing-nav-overlay");
     await expect(overlay).toBeVisible();
-    await expect(page.getByTestId("nav-about-overlay")).toBeVisible();
+    await expect(page.getByTestId("nav-login-overlay")).toBeVisible();
+    await expect(page.getByTestId("nav-signup-overlay")).toBeVisible();
     await page.getByTestId("landing-nav-overlay-close").click();
     await expect(overlay).toBeHidden();
   });
@@ -290,7 +296,7 @@ test.describe("Task B — Landing completion + contour richness", () => {
   });
 
   // --- Chunk 6: rich footer (rewritten 2026-08-20) — brand + 3 link columns + bottom bar ---
-  test("rich footer renders brand, 3 link columns, and bottom bar", async ({ page }) => {
+  test("rich footer renders brand, 3 link columns, and bottom bar on dark ground", async ({ page }) => {
     await page.goto("/");
     const footer = page.getByTestId("landing-footer");
     await expect(footer).toBeVisible();
@@ -302,6 +308,12 @@ test.describe("Task B — Landing completion + contour richness", () => {
     }
     // Bottom bar with copyright.
     await expect(footer.locator(".landing-footer-bottom")).toBeVisible();
+    // DARK ground: background computes to the ink-deep token (#1F2A22).
+    const bg = await footer.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(bg).toBe("rgb(31, 42, 34)");
+    // Cream text on dark (WCAG AA): wordmark computes to a near-white cream.
+    const wmColor = await page.getByTestId("footer-wordmark").evaluate((el) => getComputedStyle(el).color);
+    expect(wmColor).toBe("rgb(243, 241, 234)");
   });
 });
 
@@ -660,5 +672,39 @@ test.describe("Phase B — Hero search + /browse stub", () => {
     for (const id of ["landing-how-it-works", "landing-categories", "landing-faq", "landing-final-cta"]) {
       await expect(page.getByTestId(id)).toBeVisible();
     }
+  });
+
+  test("dark sections: How-It-Works + Footer are --role-ink-deep, cream text (WCAG AA)", async ({ page }) => {
+    await page.goto("/");
+    // Exactly two dark sections (the "alternating rhythm" rule): How-It-Works + Footer.
+    for (const id of ["landing-how-it-works", "landing-footer"]) {
+      const el = page.getByTestId(id);
+      const bg = await el.evaluate((e) => getComputedStyle(e).backgroundColor);
+      expect(bg).toBe("rgb(31, 42, 34)"); // #1F2A22 ink-deep
+    }
+    // How-It-Works cream body text (muted cream #a9b8ac) — passes AA on dark.
+    const howTitle = await page.getByTestId("landing-how-it-works").locator(".how-step-title").first().evaluate((e) => getComputedStyle(e).color);
+    expect(howTitle).toBe("rgb(243, 241, 234)");
+    // Three steps present; gold badge is gold-on-ink (not emerald) via the ::before computed bg.
+    await expect(page.locator('[data-testid="landing-how-it-works"] .how-step')).toHaveCount(3);
+    const badgeBg = await page.getByTestId("landing-how-it-works").locator(".how-step").first().evaluate((e) => {
+      const before = getComputedStyle(e, "::before");
+      return before.backgroundColor;
+    });
+    expect(badgeBg).toBe("rgb(216, 168, 90)"); // --role-gold-on-ink #d8a85a
+  });
+
+  test("hero right column: static contour texture fills the empty state (no dead void, no fake data)", async ({ page }) => {
+    await page.goto("/");
+    // Production default (no activity) -> contour-empty SVG renders as a static texture.
+    const empty = page.getByTestId("contour-empty");
+    await expect(empty).toBeVisible();
+    const shape = empty.locator(".contour-empty-shape");
+    await expect(shape).toBeVisible();
+    // Static: no draw animation running on the empty path (animationName none).
+    const anim = await shape.locator(".contour-line-path").evaluate((e) => getComputedStyle(e).animationName);
+    expect(anim).toBe("none");
+    // Not a text-only empty state.
+    await expect(empty.locator("text=marketplace is quiet")).toHaveCount(0);
   });
 });

@@ -9,12 +9,11 @@ import { ContourEdge, CampusFingerprint } from "@voeq/contour";
  * ListingDetail — PG-PUB-005 (Doc 04). The editorial object (Doc 05 B.15.3 Editorial /
  * C.6). Imagery leads (B.6 framed 4:3; contour monogram fallback for missing/ugly photos),
  * title in display type, price/availability as PROMINENT data (never buried), trust row,
- * vendor, and a NATIVE message CTA (Doc 01/03 LOCKED: native, NOT WhatsApp).
+ * vendor, a NATIVE message CTA (Doc 01/03 LOCKED: native, NOT WhatsApp), plus Share / Report
+ * surfaces and a mobile sticky action bar.
  *
- * Continuity (Doc 05 D.4.1): the whole detail opens with the `.explore-entrance` directional
- * move (same token as Explore) and carries a contour-whisper at top, so opening from an
- * Explore card reads as one world. Full shared-element image morph is a Slice-7-era nicety;
- * this is the continuity-carrying entrance per the approved workaround.
+ * Auth is deferred to VS2 (Reversal 4): the message CTA is gated behind an honest inline
+ * "Get Started" panel (no fake send, no disabled-looking dead button, no "Coming soon").
  */
 
 const AVAIL_LABEL: Record<string, string> = { open: "Open now", closed: "Sold out", soon: "Opening soon" };
@@ -26,11 +25,39 @@ function formatPrice(minor: number): string {
 
 type DetailStatus = "loading" | "success" | "error" | "notfound";
 
+const ctaStyle: React.CSSProperties = {
+  fontFamily: "var(--role-font-ui)",
+  fontSize: "16px",
+  fontWeight: 600,
+  padding: "14px 28px",
+  borderRadius: "var(--radius)",
+  border: "1px solid var(--role-accent-strong)",
+  background: "var(--role-accent-strong)",
+  color: "var(--role-on-accent)",
+  cursor: "pointer",
+  textAlign: "center",
+};
+
+const REPORT_REASONS = [
+  "Inappropriate content",
+  "Misleading listing",
+  "Scam or fraud",
+  "Spam",
+  "Other",
+] as const;
+
 export function ListingDetail({ id }: { id: string }) {
   const [status, setStatus] = useState<DetailStatus>("loading");
   const [listing, setListing] = useState<ExploreListing | null>(null);
-  const [msgOpen, setMsgOpen] = useState(false);
-  const [msgState, setMsgState] = useState<"idle" | "sending" | "sent">("idle");
+
+  // Share
+  const [shareState, setShareState] = useState<"idle" | "copied">("idle");
+  // Report
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState<string>(REPORT_REASONS[0]);
+  const [reportSent, setReportSent] = useState(false);
+  // Message — gated (auth deferred to VS2)
+  const [msgGated, setMsgGated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +78,23 @@ export function ListingDetail({ id }: { id: string }) {
       cancelled = true;
     };
   }, [id]);
+
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: listing?.title ?? "Voeq listing", url });
+        return;
+      }
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        setShareState("copied");
+        setTimeout(() => setShareState("idle"), 2000);
+      }
+    } catch {
+      /* user cancelled share sheet — ignore */
+    }
+  };
 
   if (status === "loading") {
     return (
@@ -82,7 +126,7 @@ export function ListingDetail({ id }: { id: string }) {
     <div
       data-testid="listing-detail"
       className="explore-entrance"
-      style={{ minHeight: "100vh", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}
+      style={{ minHeight: "100vh", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)", paddingBottom: "calc(var(--space-8) + env(safe-area-inset-bottom))" }}
     >
       {/* Continuity: contour whisper carries from Explore (D.4.1 component 1/2 spirit). */}
       <div data-testid="listing-detail-contour" style={{ marginBottom: "var(--space-2)" }}>
@@ -133,6 +177,52 @@ export function ListingDetail({ id }: { id: string }) {
               />
             )}
           </div>
+
+          {/* Secondary actions (desktop) */}
+          <div className="listing-detail-actions" style={{ display: "flex", gap: "var(--space-2)" }}>
+            <button data-testid="listing-detail-share" onClick={handleShare} style={{ ...ctaStyle, background: "transparent", color: "var(--role-accent-strong)", padding: "10px 18px", fontSize: "14px", flex: 1 }}>
+              {shareState === "copied" ? "Link copied" : "Share"}
+            </button>
+            <button
+              data-testid="listing-detail-report"
+              onClick={() => setReportOpen((o) => !o)}
+              style={{ background: "transparent", border: "1px solid var(--role-border)", color: "var(--role-text-muted)", borderRadius: "var(--radius)", padding: "10px 18px", fontSize: "14px", fontFamily: "var(--role-font-ui)", cursor: "pointer" }}
+            >
+              Report
+            </button>
+          </div>
+
+          {reportOpen && (
+            <div
+              data-testid="listing-detail-report-panel"
+              style={{ border: "1px solid var(--role-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-3)", display: "flex", flexDirection: "column", gap: "var(--space-2)", fontFamily: "var(--role-font-ui)" }}
+            >
+              <strong style={{ color: "var(--role-text)" }}>Report this listing</strong>
+              <select
+                data-testid="listing-detail-report-reason"
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                style={{ fontFamily: "var(--role-font-ui)", fontSize: "14px", padding: "8px", borderRadius: "var(--radius)", border: "1px solid var(--role-border)", background: "var(--role-surface)", color: "var(--role-text)" }}
+              >
+                {REPORT_REASONS.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+              {!reportSent ? (
+                <button
+                  data-testid="listing-detail-report-submit"
+                  onClick={() => setReportSent(true)}
+                  style={{ ...ctaStyle, fontSize: "14px", padding: "10px 18px" }}
+                >
+                  Submit report
+                </button>
+              ) : (
+                <div data-testid="listing-detail-report-sent" style={{ fontSize: "13px", color: "var(--role-text-muted)" }}>
+                  Thanks — reports are reviewed by staff. <Link href="/explore" data-testid="listing-detail-report-cta" style={{ color: "var(--role-accent-strong)", fontWeight: 600 }}>Get Started</Link> to track it.
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Meta: title (display) + price/availability as data + trust + vendor + native CTA. */}
@@ -196,69 +286,55 @@ export function ListingDetail({ id }: { id: string }) {
             by {listing.vendorName}
           </div>
 
-          {/* Native message CTA (Doc 01/03 LOCKED: native, NOT WhatsApp). Composer is a Slice-7
-              surface; here we prove the CTA + native send (pending->sent cause-effect, D.3). */}
+          {/* Message CTA — gated (auth deferred to VS2, Reversal 4). Honest inline panel,
+              no fake send. */}
           <div data-testid="listing-detail-message" style={{ marginTop: "var(--space-2)" }}>
-            {!msgOpen ? (
-              <button data-testid="listing-detail-message-cta" onClick={() => setMsgOpen(true)} style={ctaStyle}>
+            {!msgGated ? (
+              <button data-testid="listing-detail-message-cta" onClick={() => setMsgGated(true)} style={ctaStyle}>
                 Message {listing.vendorName}
               </button>
             ) : (
               <div
-                data-testid="listing-detail-composer"
-                style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)", border: "1px solid var(--role-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-2)" }}
+                data-testid="listing-detail-auth-gate"
+                role="status"
+                style={{
+                  border: "1px solid var(--role-border)",
+                  borderRadius: "var(--radius-lg)",
+                  padding: "var(--space-3)",
+                  background: "var(--role-surface)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "var(--space-2)",
+                  fontFamily: "var(--role-font-ui)",
+                  fontSize: "14px",
+                  color: "var(--role-text-muted)",
+                }}
               >
-                <textarea
-                  data-testid="listing-detail-input"
-                  placeholder={`Message ${listing.vendorName}…`}
-                  rows={3}
-                  style={{
-                    fontFamily: "var(--role-font-ui)",
-                    fontSize: "14px",
-                    border: "1px solid var(--role-border)",
-                    borderRadius: "var(--radius)",
-                    padding: "8px",
-                    resize: "vertical",
-                    color: "var(--role-text)",
-                    background: "var(--role-surface)",
-                  }}
-                />
-                <div style={{ display: "flex", gap: "var(--space-1)", alignItems: "center" }}>
-                  <button
-                    data-testid="listing-detail-send"
-                    disabled={msgState === "sending"}
-                    onClick={() => {
-                      setMsgState("sending");
-                      // Native send simulation: pending -> sent (cause-effect, D.3).
-                      setTimeout(() => setMsgState("sent"), 400);
-                    }}
-                    style={ctaStyle}
-                  >
-                    {msgState === "sending" ? "Sending…" : "Send"}
-                  </button>
-                  {msgState === "sent" && (
-                    <span data-testid="listing-detail-status" style={{ fontSize: "13px", color: "var(--role-accent-strong)", fontFamily: "var(--role-font-ui)" }}>
-                      Sent (native — not WhatsApp)
-                    </span>
-                  )}
-                </div>
+                <span data-testid="listing-detail-auth-gate-text">
+                  Sign in to message {listing.vendorName} directly.
+                </span>
+                <Link
+                  href="/explore"
+                  data-testid="listing-detail-auth-gate-cta"
+                  style={{ alignSelf: "flex-start", fontWeight: 600, fontSize: "14px", padding: "10px 18px", borderRadius: "var(--radius)", background: "var(--role-accent-strong)", color: "var(--color-forest, #1f4d33)", textDecoration: "none" }}
+                >
+                  Get Started
+                </Link>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Mobile sticky action bar (CSS-only visibility via .listing-detail-sticky). */}
+      <div data-testid="listing-detail-sticky" className="listing-detail-sticky" style={{ display: "none" }}>
+        <button data-testid="listing-detail-sticky-message" onClick={() => setMsgGated(true)} style={{ ...ctaStyle, flex: 1 }}>
+          Message
+        </button>
+        <button data-testid="listing-detail-sticky-share" onClick={handleShare} style={{ ...ctaStyle, background: "transparent", color: "var(--role-accent-strong)", flex: "0 0 auto" }}>
+          {shareState === "copied" ? "Copied" : "Share"}
+        </button>
+      </div>
     </div>
   );
 }
-
-const ctaStyle: React.CSSProperties = {
-  fontFamily: "var(--role-font-ui)",
-  fontSize: "16px",
-  fontWeight: 600,
-  padding: "14px 28px",
-  borderRadius: "var(--radius)",
-  border: "1px solid var(--role-accent-strong)",
-  background: "var(--role-accent-strong)",
-  color: "var(--role-on-accent)",
-  cursor: "pointer",
-};

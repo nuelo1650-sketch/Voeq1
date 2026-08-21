@@ -16,7 +16,7 @@
 const PROOF = [
   { value: "1", label: "campus live — NMU", real: true },
   { value: "Free", label: "to list & connect — no fees", real: true },
-  { value: "—", label: "vendors onboarding soon", real: false },
+  { value: "—", label: "Vendors onboarding soon", real: false },
 ] as const;
 
 export function LandingProofRow() {

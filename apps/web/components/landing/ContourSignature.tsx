@@ -64,9 +64,30 @@ export function ContourSignature() {
         <Stack space={2}>
           <ContourEdge />
           {nodes.length === 0 ? (
-            <Type data-testid="contour-empty" tone="muted" size="sm">
-              No live activity right now — the marketplace is quiet.
-            </Type>
+            // Empty state (production default — NMU just went live, no activity yet):
+            // a STATIC low-opacity contour texture fills the column so the hero right
+            // side has visual weight (no dead void), WITHOUT manufacturing fake activity
+            // (Option A: the contour communicates, it never fabricates). No draw animation.
+            <div
+              data-testid="contour-empty"
+              className="contour-panel contour-empty"
+              aria-hidden="true"
+            >
+              <svg
+                className="contour-empty-shape"
+                viewBox="0 0 220 220"
+                style={{ width: "80%", height: "80%" }}
+              >
+                <path
+                  className="contour-line-path"
+                  d="M110 44 L60 110 L140 158 L110 176 Z"
+                  fill="none"
+                />
+                <circle cx="110" cy="44" r="3" className="contour-empty-dot" />
+                <circle cx="60" cy="110" r="3" className="contour-empty-dot" />
+                <circle cx="140" cy="158" r="3" className="contour-empty-dot" />
+              </svg>
+            </div>
           ) : (
             <Stack space={1}>
               {isDevSeed && (

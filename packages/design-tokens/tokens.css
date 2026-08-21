@@ -1,39 +1,60 @@
 /*
- * Voeq design tokens — PROVISIONAL (Doc 05 B.1 / B.2).
+ * Voeq design tokens — GLASS-WHITE CANVAS SYSTEM (2026-08-21)
  *
- * CONTRACT (enforced by QC principle, Doc 05 after C):
- *   - Every visual value used by the product lives HERE as a `--role-*` token.
- *   - Components read `var(--role-*)`. They NEVER hardcode hex, spacing, or radii.
- *   - To retune the brand (palette / type), edit only this file. Zero component edits.
- *   - Hex values below are PROVISIONAL and adjustable in real composition — not locked.
+ * NEW DESIGN DIRECTION:
+ *   Glass-white canvas where campus life and vendor abundance live as full-bleed photography,
+ *   organized by warm amber category signals, framed in liquid-glass panels.
  *
- * ENVIRONMENTS (Doc 05 A.3, Doc 06 §2):
- *   - Two environments, ONE world. Cream is the default environment.
- *   - Deep overrides ONLY color-role tokens (forest arrival); structure/spacing/grid are shared.
- *   - Flip = set `data-env="deep"` (or "cream") on the <html> element. No second stylesheet.
+ * CONTRACT:
+ *   - Every visual value used by the product lives HERE as tokens.
+ *   - Components read `var(--color-*)` or `var(--role-*)`. They NEVER hardcode values.
+ *   - To retune the brand, edit only this file. Zero component edits.
  */
 
 :root,
 :root[data-env="cream"] {
-  /* ---- Color roles: Cream environment (default) ---- */
-  --role-bg: #f7f4ec;            /* cream canvas */
-  --role-surface: #ffffff;        /* card / panel */
-  --role-surface-sunken: #efe9dc; /* inset / hover */
-  --role-text: #1f2a22;           /* near-black green-ink */
-  --role-text-muted: #5c6b5f;
-  --role-border: #ddd5c4;
-  --role-accent: #2f6b3f;         /* forest green */
-  --role-accent-strong: #1f4d2c;  /* deepest green — focus ring / strong CTA */
-  --role-gold: #b8893b;           /* restrained gold — accents only, never body text */
-  --role-danger: #9c3b2e;
-  --role-on-accent: #f7f4ec;
+  /* ---- PRIMARY SURFACES ---- */
+  --color-glass-white: #F5F1E8;
+  --color-cream: #FAF6EC;
+  --color-white: #FFFFFF;
 
-  /* ---- Typography roles (PROVISIONAL pairing: Fraunces display + Hanken Grotesk UI, B.2) ---- */
-  --role-font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --role-font-ui: var(--font-hanken), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --role-font-mono: ui-monospace, "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+  /* ---- STRUCTURAL COLORS ---- */
+  --color-forest: #0F2A1D;
+  --color-forest-mid: #2D5A3D;
+  --color-forest-light: #4A7A5C;
 
-  /* ---- Spacing scale: 8pt base (B.3) ---- */
+  /* ---- ACCENT ---- */
+  --color-amber: #E8A33D;
+  --color-amber-dark: #D4922A;
+  --color-amber-light: #F5C36A;
+
+  /* ---- TYPOGRAPHY ---- */
+  --color-black: #000000;
+  --color-ink: #0A0A0A;
+  --color-ink-muted: #4A4A4A;
+  --color-ink-subtle: #7A7A7A;
+
+  /* ---- STATUS ---- */
+  --color-status-open: #2D5A3D;
+  --color-status-closing: #D4922A;
+  --color-status-closed: #B85C3E;
+
+  /* ---- GLASS EFFECTS ---- */
+  --glass-bg: rgba(245, 241, 232, 0.08);
+  --glass-bg-strong: rgba(245, 241, 232, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: blur(20px) saturate(180%);
+
+  /* ---- SPACING (8pt grid) ---- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+
+  /* ---- Legacy spacing aliases for backwards compatibility ---- */
   --space-1: 8px;
   --space-2: 16px;
   --space-3: 24px;
@@ -42,39 +63,86 @@
   --space-6: 64px;
   --space-8: 96px;
 
-  /* ---- Grid (B.4): 12 columns, container rule ---- */
+  /* ---- RADIUS ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* ---- Legacy radius aliases ---- */
+  --radius: 8px;
+
+  /* ---- SHADOWS (minimal, non-glassy except hero) ---- */
+  --shadow-sm: 0 1px 2px rgba(15, 42, 29, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 42, 29, 0.08);
+  --shadow-lg: 0 8px 24px rgba(15, 42, 29, 0.12);
+  --shadow-glass: 0 8px 32px rgba(15, 42, 29, 0.15);
+
+  /* ---- Legacy shadow aliases ---- */
+  --shadow-1: 0 1px 2px rgba(15, 42, 29, 0.06);
+  --shadow-2: 0 4px 12px rgba(15, 42, 29, 0.08);
+
+  /* ---- ROLE MAPPINGS (for backwards compatibility) ---- */
+  --role-bg: var(--color-glass-white);
+  --role-surface: var(--color-white);
+  --role-surface-sunken: var(--color-cream);
+  --role-text: var(--color-ink);
+  --role-text-muted: var(--color-ink-muted);
+  --role-border: rgba(15, 42, 29, 0.12);
+  --role-accent: var(--color-forest-mid);
+  --role-accent-strong: var(--color-forest);
+  --role-gold: var(--color-amber);
+  --role-ink-deep: var(--color-forest);
+  --role-gold-on-ink: var(--color-amber-light);
+  --role-danger: var(--color-status-closed);
+  --role-on-accent: var(--color-glass-white);
+
+  /* ---- Typography roles ---- */
+  --role-font-display: var(--font-display), Georgia, "Times New Roman", serif;
+  --role-font-ui: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --role-font-mono: var(--font-mono), ui-monospace, "IBM Plex Mono", monospace;
+
+  /* ---- Grid ---- */
   --grid-cols: 12;
-  --grid-gap: var(--space-2);
+  --grid-gap: var(--space-md);
   --container-max: 1200px;
-  --container-pad: var(--space-2);
+  --container-pad: var(--space-md);
 
-  /* ---- Radius / shadow foundations ---- */
-  --radius: 4px;
-  --radius-lg: 12px;
-  --shadow-1: 0 1px 2px rgba(31, 42, 34, 0.08);
-  --shadow-2: 0 4px 12px rgba(31, 42, 34, 0.10);
+  /* ---- Section spacing ---- */
+  --section-gap: 96px;
+  --section-gap-mobile: 48px;
 
-  /* ---- Motion budget (D.7 / D.8) ---- */
+  /* ---- Motion budget ---- */
   --motion-fast: 160ms;
   --motion-med: 320ms;
   --motion-ease: cubic-bezier(0.2, 0.6, 0.2, 1);
 
+  /* ---- Type Scale ---- */
+  --text-display-xl: clamp(3rem, 8vw, 6rem);
+  --text-display-l: clamp(2rem, 5vw, 3.5rem);
+  --text-h1: 2.5rem;
+  --text-h2: 1.75rem;
+  --text-h3: 1.25rem;
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+  --text-caption: 0.75rem;
+
   color-scheme: light;
 }
 
-:root[data-env="deep"] {
-  /* ---- Color roles: Deep environment (forest arrival) — overrides color ONLY ---- */
-  --role-bg: #10231a;            /* deep forest */
-  --role-surface: #173025;
-  --role-surface-sunken: #0c1b13;
-  --role-text: #eef3ec;
-  --role-text-muted: #9fb3a4;
-  --role-border: #2a463a;
-  --role-accent: #6fcf97;        /* brighter green for dark ground */
-  --role-accent-strong: #8fe3b0;
-  --role-gold: #e0b964;          /* gold reads on forest */
-  --role-danger: #e08a7a;
-  --role-on-accent: #10231a;
+[data-theme="dark"] {
+  /* ---- Dark theme overrides ---- */
+  --color-glass-white: #0F2A1D;
+  --color-cream: #163025;
+  --color-ink: #F5F1E8;
+  --color-ink-muted: #B7C2B8;
+
+  /* ---- Role mappings for dark theme ---- */
+  --role-bg: var(--color-glass-white);
+  --role-surface: var(--color-cream);
+  --role-text: var(--color-ink);
+  --role-text-muted: var(--color-ink-muted);
 
   color-scheme: dark;
 }

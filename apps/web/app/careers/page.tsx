@@ -1,51 +1,75 @@
 import type { Metadata } from "next";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
-import { StaffContactForm, type StaffField } from "@/components/forms/StaffContactForm";
 
 export const metadata: Metadata = {
   title: "Careers — Voeq",
-  description: "Join the team building the future of campus commerce.",
+  description: "Join the team building the campus marketplace.",
 };
-
-const ROLES = [
-  { title: "Frontend Engineer", description: "Build the campus marketplace.", location: "Nigeria" },
-  { title: "Community Manager", description: "Grow the vendor network.", location: "Nigeria" },
-];
-
-const CAREERS_FIELDS: StaffField[] = [
-  { name: "name", label: "Name", type: "text", required: true },
-  { name: "email", label: "Email", type: "email", required: true },
-  { name: "role", label: "Role", type: "select", required: true, options: ROLES.map((r) => r.title) },
-  { name: "resumeLink", label: "Resume Link", type: "text", required: true },
-  { name: "coverLetter", label: "Cover Letter", type: "textarea", required: true },
-];
 
 export default function CareersPage() {
   return (
     <InfoPageShell title="Careers">
-      <section data-testid="careers-why">
-        <h2>Why Voeq</h2>
-        <p>
-          We are building the commerce layer for African campuses — tools that let student vendors
-          reach their peers without the noise of global marketplaces. {/* PLACEHOLDER */}
-        </p>
-      </section>
+      <div className="info-page-content">
+        <section className="info-section">
+          <p className="info-lead">
+            We\'re building the campus marketplace that connects students with 
+            vendors across Nigerian universities. If you\'re interested in solving 
+            real problems for real users, we\'d love to hear from you.
+          </p>
+        </section>
 
-      <section data-testid="careers-roles">
-        <h2>Open Roles</h2>
-        {ROLES.map((r) => (
-          <article key={r.title} className="careers-role" data-testid="careers-role">
-            <h3>{r.title}</h3>
-            <p>{r.description}</p>
-            <p className="careers-location">{r.location}</p>
-          </article>
-        ))}
-      </section>
+        <section className="info-section">
+          <h2 className="info-heading">Why Voeq</h2>
+          <p>
+            Campus commerce is scattered — group chats, Instagram DMs, 
+            word-of-mouth recommendations. Students waste time hunting for basics. 
+            Great vendors go undiscovered. We\'re building the platform that brings 
+            it all together.
+          </p>
+          <p>
+            Voeq is early-stage. That means you\'ll have real ownership, real impact, 
+            and the chance to shape how millions of students discover and connect 
+            with campus vendors.
+          </p>
+        </section>
 
-      <section data-testid="careers-apply">
-        <h2>Apply</h2>
-        <StaffContactForm kind="careers" fields={CAREERS_FIELDS} />
-      </section>
+        <section className="info-section">
+          <h2 className="info-heading">What We Value</h2>
+          <ul className="info-list">
+            <li>Shipping fast over perfection (we iterate based on real usage)</li>
+            <li>Solving user problems, not building features for the sake of it</li>
+            <li>Clear communication over assumptions</li>
+            <li>Ownership and autonomy</li>
+            <li>Building for Nigerian students, by people who understand the context</li>
+          </ul>
+        </section>
+
+        <section className="info-section">
+          <h2 className="info-heading">Open Roles</h2>
+          <p className="info-muted">
+            We\'re not actively hiring at the moment, but we\'re always open to 
+            meeting talented people who are excited about what we\'re building.
+          </p>
+          <p>
+            If you\'re a developer, designer, marketer, or campus community builder 
+            interested in Voeq, reach out. We\'re particularly interested in people 
+            who have lived the campus experience and understand the pain points 
+            we\'re solving.
+          </p>
+        </section>
+
+        <section className="info-section">
+          <h2 className="info-heading">Get in Touch</h2>
+          <p>
+            Send your CV, portfolio, or just an introduction to:{' '}
+            <a href="mailto:careers@voeq.ng" className="info-link">careers@voeq.ng</a>
+          </p>
+          <p className="info-muted">
+            Tell us what you\'re interested in working on and why Voeq. We read 
+            every email.
+          </p>
+        </section>
+      </div>
     </InfoPageShell>
   );
 }

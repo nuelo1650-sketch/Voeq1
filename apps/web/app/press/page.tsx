@@ -1,57 +1,89 @@
 import type { Metadata } from "next";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
-import { StaffContactForm, type StaffField } from "@/components/forms/StaffContactForm";
 
 export const metadata: Metadata = {
   title: "Press — Voeq",
-  description: "News, updates, and media resources for Voeq.",
+  description: "Media inquiries and press resources for Voeq.",
 };
-
-const PRESS_FIELDS: StaffField[] = [
-  { name: "name", label: "Name", type: "text", required: true },
-  { name: "email", label: "Email", type: "email", required: true },
-  { name: "publication", label: "Publication", type: "text", required: true },
-  { name: "message", label: "Message", type: "textarea", required: true },
-];
 
 export default function PressPage() {
   return (
     <InfoPageShell title="Press">
-      <section data-testid="press-releases">
-        <h2>Press Releases</h2>
-        <article>
-          <h3>Voeq launches the campus marketplace</h3>
-          <p className="press-date">2026-08-01</p>
-          <p>
-            Voeq officially launches across Nigerian universities, connecting
-            students with campus vendors for the first time. The platform is now
-            live at select campuses with plans for nationwide expansion.
-            {/* PLACEHOLDER */}
+      <div className="info-page-content">
+        <section className="info-section">
+          <p className="info-lead">
+            Voeq is building the campus marketplace connecting students with 
+            vendors across Nigerian universities. For media inquiries, interviews, 
+            or press materials, reach out below.
           </p>
-        </article>
-        <article>
-          <h3>Voeq expands to more campuses</h3>
-          <p className="press-date">2026-08-15</p>
+        </section>
+
+        <section className="info-section">
+          <h2 className="info-heading">About Voeq</h2>
           <p>
-            Campus vendors on Voeq have collectively served over 10,000 students in
-            the first month. The marketplace continues to grow as more universities
-            come online.
-            {/* PLACEHOLDER */}
+            Voeq (pronounced "voke") is a free campus marketplace platform that 
+            connects students with vendors serving their school. From food delivery 
+            to fashion, tech repairs to tutoring services, Voeq makes it easy for 
+            students to discover and connect with trusted campus vendors.
           </p>
-        </article>
-      </section>
+          <p>
+            Unlike traditional e-commerce platforms, Voeq doesn't process payments 
+            or take commissions. We simply facilitate the connection — vendors list 
+            for free, students discover for free, and transactions happen directly 
+            between the two parties.
+          </p>
+        </section>
 
-      <section data-testid="press-media-kit">
-        <h2>Media Kit</h2>
-        <p>
-          Logo, brand assets, and founder photos are available on request. {/* PLACEHOLDER */}
-        </p>
-      </section>
+        <section className="info-section">
+          <h2 className="info-heading">Key Facts</h2>
+          <ul className="info-list">
+            <li>Free listing for all campus vendors</li>
+            <li>No transaction fees or commissions</li>
+            <li>Multi-campus platform with campus-specific marketplaces</li>
+            <li>Categories include Food, Fashion, Tech, Services, Health & Beauty, 
+            and Stationery</li>
+            <li>Direct connection model — students message vendors through Voeq's 
+            in-app chat</li>
+          </ul>
+        </section>
 
-      <section data-testid="press-contact">
-        <h2>Contact</h2>
-        <StaffContactForm kind="press" fields={PRESS_FIELDS} />
-      </section>
+        <section className="info-section">
+          <h2 className="info-heading">Press Kit</h2>
+          <p>
+            Brand assets, logos, screenshots, and founder information available 
+            upon request. Contact us using the information below and specify what 
+            materials you need.
+          </p>
+        </section>
+
+        <section className="info-section">
+          <h2 className="info-heading">Media Contact</h2>
+          <p>
+            For press inquiries, interviews, or partnership discussions:
+          </p>
+          <p>
+            Email:{' '}
+            <a href="mailto:press@voeq.ng" className="info-link">press@voeq.ng</a>
+          </p>
+          <p className="info-muted">
+            We typically respond to media inquiries within 24 hours.
+          </p>
+        </section>
+
+        <section className="info-section">
+          <h2 className="info-heading">Recent Updates</h2>
+          <div className="press-update">
+            <h3 className="press-update-title">Voeq Launches Campus Marketplace</h3>
+            <p className="press-update-date">August 2026</p>
+            <p>
+              Voeq officially launches its campus marketplace platform, starting 
+              with select Nigerian universities. The platform aims to solve the 
+              scattered nature of campus commerce by centralizing vendor discovery 
+              in one place.
+            </p>
+          </div>
+        </section>
+      </div>
     </InfoPageShell>
   );
 }

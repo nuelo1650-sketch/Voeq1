@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { VendorStorefrontView } from "@voeq/data";
 
 /**
- * StorefrontTrust — reviews (graceful absence, no fake reviews) + the Follow /
- * Message CTAs. Per founder rule & locked scope: NO auth yet, so the CTAs are
- * present and styled as active buttons but are NO-OP (Phase D adds real behavior).
- * They must NOT be `disabled` — they look live, they just do nothing yet.
+ * StorefrontTrust — reviews (graceful absence, no fake reviews) + Follow /
+ * Message CTAs. Auth is deferred to VS2 (Reversal 4), so these are NOT dead
+ * no-ops: clicking reveals an honest inline auth-gate that links to Get Started
+ * (/explore) — no "Coming soon", no disabled buttons (which would look broken).
  */
 
 export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
-  const [followed, setFollowed] = useState(false);
-  const [messaged, setMessaged] = useState(false);
+  const [gated, setGated] = useState<null | "follow" | "message">(null);
 
   const ctaStyle: React.CSSProperties = {
     fontFamily: "var(--role-font-ui)",
@@ -24,17 +24,6 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
     background: "var(--role-accent-strong)",
     color: "var(--role-on-accent)",
     cursor: "pointer",
-  };
-
-  // No-op handlers: auth is a Phase D concern. Visible intent, no side effects.
-  const onFollow = () => {
-    setFollowed(true);
-    // TODO(Phase D): wire to auth + follow mutation.
-    console.warn("[storefront] Follow is a no-op until Phase D auth lands.");
-  };
-  const onMessage = () => {
-    setMessaged(true);
-    console.warn("[storefront] Message is a no-op until Phase D auth lands.");
   };
 
   return (
@@ -66,19 +55,62 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
       <div style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-2)" }}>
         <button
           data-testid="storefront-follow-btn"
-          onClick={onFollow}
+          onClick={() => setGated("follow")}
           style={ctaStyle}
         >
-          {followed ? "Following" : "Follow"}
+          Follow
         </button>
         <button
           data-testid="storefront-message-btn"
-          onClick={onMessage}
+          onClick={() => setGated("message")}
           style={{ ...ctaStyle, background: "transparent", color: "var(--role-accent-strong)" }}
         >
-          {messaged ? "Message sent (demo)" : "Message"}
+          Message
         </button>
       </div>
+
+      {gated && (
+        <div
+          data-testid="storefront-auth-gate"
+          role="status"
+          style={{
+            marginTop: "var(--space-2)",
+            padding: "var(--space-3)",
+            border: "1px solid var(--role-border)",
+            borderRadius: "var(--radius-lg)",
+            background: "var(--role-surface)",
+            fontFamily: "var(--role-font-ui)",
+            fontSize: "14px",
+            color: "var(--role-text-muted)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--space-2)",
+          }}
+        >
+          <span data-testid="storefront-auth-gate-text">
+            {gated === "follow"
+              ? `Sign in to follow ${vendor.name} and get updates on new listings.`
+              : `Sign in to message ${vendor.name} directly.`}
+          </span>
+          <Link
+            href="/explore"
+            data-testid="storefront-auth-gate-cta"
+            style={{
+              alignSelf: "flex-start",
+              fontFamily: "var(--role-font-ui)",
+              fontWeight: 600,
+              fontSize: "14px",
+              padding: "10px 18px",
+              borderRadius: "var(--radius)",
+              background: "var(--role-accent-strong)",
+              color: "var(--role-on-accent)",
+              textDecoration: "none",
+            }}
+          >
+            Get Started
+          </Link>
+        </div>
+      )}
     </section>
   );
 }
