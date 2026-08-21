@@ -3749,3 +3749,129 @@
     flex: 0 0 calc(25% - var(--space-3));
   }
 }
+
+/* ===== Auth pages (VS2) — Functional tier, Cream role tokens ===== */
+/* Reuses InfoPageShell wrapper. Quiet, utility-first, no decorative motion. */
+.auth-card {
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.auth-lede {
+  font-family: var(--role-font-ui);
+  color: var(--role-text-muted);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  margin: 0;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.auth-intent {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+.auth-intent-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3);
+  border: 1px solid var(--role-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  background: var(--role-surface);
+  font-family: var(--role-font-ui);
+}
+.auth-intent-opt span {
+  font-weight: 600;
+  color: var(--role-text);
+}
+.auth-intent-opt small {
+  color: var(--role-text-muted);
+  font-size: var(--text-caption);
+}
+.auth-intent-opt.is-active {
+  border-color: var(--role-accent-strong);
+  box-shadow: inset 0 0 0 1px var(--role-accent-strong);
+}
+.auth-intent-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.auth-field label {
+  font-family: var(--role-font-ui);
+  font-size: var(--text-caption);
+  color: var(--role-text-muted);
+  font-weight: 600;
+}
+.auth-field input {
+  font-family: var(--role-font-ui);
+  font-size: var(--text-body);
+  color: var(--role-text);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--role-border);
+  border-radius: var(--radius);
+  background: var(--role-bg);
+}
+.auth-field input:focus-visible {
+  outline: 2px solid var(--role-accent-strong);
+  outline-offset: 2px;
+}
+.auth-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-family: var(--role-font-ui);
+  font-size: var(--text-caption);
+  color: var(--role-text);
+  line-height: var(--leading-body);
+}
+.auth-consent input { margin-top: 3px; }
+.auth-consent a { color: var(--role-accent-strong); text-decoration: underline; }
+.auth-error {
+  font-family: var(--role-font-ui);
+  font-size: var(--text-caption);
+  color: var(--role-danger);
+}
+.auth-form-error {
+  font-family: var(--role-font-ui);
+  font-size: var(--text-body);
+  color: var(--role-danger);
+  background: color-mix(in srgb, var(--role-danger) 8%, var(--role-surface));
+  border: 1px solid color-mix(in srgb, var(--role-danger) 30%, transparent);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+.auth-submit {
+  font-family: var(--role-font-ui);
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--role-on-accent);
+  background: var(--role-accent-strong);
+  border: none;
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+.auth-submit:hover:not(:disabled) { transform: translateY(-1px); }
+.auth-submit:focus-visible { outline: 2px solid var(--role-accent-strong); outline-offset: 2px; }
+.auth-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.auth-alt {
+  font-family: var(--role-font-ui);
+  font-size: var(--text-caption);
+  color: var(--role-text-muted);
+  text-align: center;
+}
+.auth-alt a { color: var(--role-accent-strong); text-decoration: none; }
+

@@ -117,11 +117,7 @@ export const mockActivityRepo: ActivityRepo = {
   },
 };
 
-export const mockAuthRepo: AuthRepo = {
-  async currentIdentity() {
-    return null;
-  },
-};
+// mockAuthRepo lives in auth.ts (full Identity & Access impl, VS2).
 
 export const mockMessagesRepo: MessagesRepo = {
   async listConversations() {
@@ -147,7 +143,6 @@ export const mockRepos = {
   listings: mockListingsRepo,
   vendors: mockVendorsRepo,
   activity: mockActivityRepo,
-  auth: mockAuthRepo,
   messages: mockMessagesRepo,
   staff: mockStaffRepo,
   search: mockSearchRepo,
