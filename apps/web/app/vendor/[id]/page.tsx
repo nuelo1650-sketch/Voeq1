@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { loadVendorStorefront } from "@voeq/data";
+import { loadVendorStorefront, canVendorBePublic } from "@voeq/data";
 import { StorefrontHero } from "@/components/storefront/StorefrontHero";
 import { StorefrontGrid } from "@/components/storefront/StorefrontGrid";
 import { StorefrontTrust } from "@/components/storefront/StorefrontTrust";
@@ -11,11 +11,9 @@ import { StorefrontTrust } from "@/components/storefront/StorefrontTrust";
  * no fake reviews per founder rule). This is the ONE Deep-environment page:
  * Cream is the default world; the storefront arrives in the forest (Doc 05 A.3).
  *
- * NOTE on the Deep override: `tokens.css` flips color roles via
- * `:root[data-env="deep"]` and `layout.tsx` sets `data-env="cream"` on <html>.
- * A `data-env="deep"` on this page's <main> does NOT match the `:root[...]`
- * selector, so `globals.css` carries a scoped `[data-env="deep"]` descendant
- * override (same color values as the locked token block) to flip this subtree.
+ * VS3.5: visibility is DERIVED (no stored isPublic flag). A vendor is only
+ * publicly visible when canVendorBePublic() is true (Phase A + Phase B complete).
+ * Unknown id OR not-yet-public => 404, never a 500.
  */
 
 interface StorefrontPageProps {
@@ -25,7 +23,7 @@ interface StorefrontPageProps {
 export async function generateMetadata({ params }: StorefrontPageProps): Promise<Metadata> {
   const { id } = await params;
   const vendor = await loadVendorStorefront(id);
-  if (!vendor) {
+  if (!vendor || !canVendorBePublic(vendor)) {
     return {
       title: "Storefront not found — Voeq",
       description: "This vendor storefront could not be found.",
@@ -41,7 +39,8 @@ export async function generateMetadata({ params }: StorefrontPageProps): Promise
 export default async function StorefrontPage({ params }: StorefrontPageProps) {
   const { id } = await params;
   const vendor = await loadVendorStorefront(id);
-  if (!vendor) notFound();
+  // Only render storefronts that pass the derived visibility precondition.
+  if (!vendor || !canVendorBePublic(vendor)) notFound();
 
   return (
     <main data-env="deep" data-testid="storefront-page" style={{ minHeight: "100vh", background: "var(--role-bg)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>

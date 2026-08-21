@@ -14,6 +14,21 @@ export interface Vendor {
   handle: string;
   campus: string;
   categoryIds: string[];
+  /** VS3.2 (Reversal 7): onboarding lifecycle. pending_listings = account exists, NOT public. live = public. */
+  status: "pending_listings" | "live";
+  /** VS3.2: business description (Doc 08 §8.4 business layer; min 50 chars enforced at API). */
+  description: string;
+  /** VS3.2: campus sub-area (hostel/faculty) — optional. */
+  subArea: string | null;
+  /** VS3.4: profile photo (Cloudinary mock URL). Null until uploaded. */
+  profilePhotoUrl: string | null;
+  /** VS3.2: Vendor Agreement version accepted (null until Phase A step 3). */
+  agreementVersion: string | null;
+  agreementAcceptedAt: string | null;
+  /** VS3.2/3.6: links this Vendor to the ONE Identity (one account, role widens). */
+  identityId: string | null;
+  /** URL-safe slug for storefront routing. */
+  slug: string;
 }
 
 export interface Listing {
@@ -23,6 +38,21 @@ export interface Listing {
   priceMinor: number;
   isPublished: boolean;
   images: string[];
+  /** VS3.4: price range (min required, max optional). Migrated from priceMinor. */
+  priceMinMinor: number;
+  priceMaxMinor: number | null;
+  categoryId: string;
+  description: string | null;
+  /** VS3.4: listing lifecycle. active = publicly listed. */
+  status: "active" | "removed";
+}
+
+export interface VendorRepo {
+  listVendors(params?: { campus?: string }): Promise<Vendor[]>;
+  getById(id: string): Promise<Vendor | null>;
+  getByIdentityId(identityId: string): Promise<Vendor | null>;
+  create(input: Partial<Vendor> & { identityId: string; name: string; campus: string; categoryIds: string[] }): Promise<Vendor>;
+  patch(id: string, patch: Partial<Vendor>): Promise<Vendor | null>;
 }
 
 export interface ActivityEvent {
@@ -66,6 +96,9 @@ export interface StaffCase {
 export interface ListingsRepo {
   list(params?: { campus?: string; category?: string }): Promise<Listing[]>;
   getById(id: string): Promise<Listing | null>;
+  create(input: Partial<Listing> & { vendorId: string; title: string; priceMinMinor: number; categoryId: string }): Promise<Listing>;
+  /** Remove a listing (VS3 audit fix: enables visibility reversion on delete). */
+  remove(id: string): Promise<boolean>;
 }
 
 export interface VendorsRepo {
@@ -128,6 +161,8 @@ export interface Identity {
   emailVerified: boolean;
   campus: string | null; // null until /select-campus
   consent: ConsentAcceptance[];
+  /** VS3.2/3.6: the linked Vendor record (null until Phase A complete). Role widens to 'vendor' on canGoLive. */
+  vendorId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -152,8 +187,20 @@ export interface UserPreference {
   identityId: string;
   campus: string;
   notificationPrefs: Record<string, NotificationPref>;
-  onboardingInterests: string[];
+  /** VS3.1: shopper feed-preference capture gate (Doc 08 §8.3). null until set. */
+  interestTags: string[];
+  feedPrefsSetAt: string | null;
   updatedAt: string;
+}
+
+export interface UserPreferenceRepo {
+  get(identityId: string): Promise<UserPreference | null>;
+  save(input: {
+    identityId: string;
+    campus?: string;
+    interestTags?: string[];
+    feedPrefsSetAt?: string | null;
+  }): Promise<UserPreference>;
 }
 
 export interface AuditEntry {

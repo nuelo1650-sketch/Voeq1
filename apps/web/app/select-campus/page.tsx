@@ -53,7 +53,7 @@ export default function SelectCampusPage() {
         setError(data.error ?? "Could not save campus.");
         return;
       }
-      router.push(data.redirect ?? "/onboarding");
+      router.push(data.redirect ?? "/onboarding/shopper");
     } catch {
       setError("Network error. Please try again.");
     } finally {

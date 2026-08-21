@@ -12,6 +12,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const PROTECTED_PREFIXES = [
   "/onboarding",
   "/shopper",
+  "/home",
   "/vendor/dashboard",
   "/messages",
   "/staff",
@@ -53,6 +54,7 @@ export const config = {
   matcher: [
     "/onboarding/:path*",
     "/shopper/:path*",
+    "/home/:path*",
     "/vendor/dashboard/:path*",
     "/messages/:path*",
     "/staff/:path*",

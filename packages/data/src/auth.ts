@@ -20,12 +20,23 @@ import type {
   MagicLinkRepo,
   PendingToken,
   UserRole,
+  UserPreference,
+  UserPreferenceRepo,
 } from "./interfaces";
 import { logAudit } from "./audit";
 
 // ---- Tunable constants (Phase 9: env-configurable) ---------------------------
 export const CURRENT_TERMS_VERSION = "2026-08-01";
 export const CURRENT_PRIVACY_VERSION = "2026-08-01";
+export const CURRENT_VENDOR_AGREEMENT_VERSION = "2026-08-01";
+export const VENDOR_AGREEMENT_TEXT = `Voeq Vendor Agreement (v${CURRENT_VENDOR_AGREEMENT_VERSION})
+
+1. You are responsible for the accuracy of your business information, listings, and pricing.
+2. All transactions are between you and the buyer; Voeq is a discovery and communication platform.
+3. You will not use Voeq to list prohibited, fraudulent, or misleading goods or services.
+4. You agree to respond to messages from shoppers in good faith and within a reasonable time.
+5. Voeq may suspend or remove your storefront for violations of this agreement or community standards.
+6. You retain ownership of your content; you grant Voeq a license to display it on the platform.`;
 export const OTP_TTL_MS = 10 * 60 * 1000; // 10 min
 export const OTP_MAX_ACTIVE = 3; // max concurrent active codes per (email,purpose)
 export const OTP_MAX_ATTEMPTS = 5; // wrong tries before revoke+resend
@@ -68,6 +79,7 @@ export const mockIdentityRepo: IdentityRepo = {
       emailVerified: false,
       campus: null,
       consent: [],
+      vendorId: null,
       createdAt: nowIso(),
       updatedAt: nowIso(),
     };
@@ -383,4 +395,31 @@ export function resetAuthState(): void {
   pendingTokens.clear();
   otpStore.clear();
   magicLinks.clear();
+}
+
+// ---- UserPreferenceRepo (VS3.1) ---------------------------------------------
+const userPrefs = new Map<string, UserPreference>();
+
+export const mockUserPrefRepo: UserPreferenceRepo = {
+  async get(identityId) {
+    return userPrefs.get(identityId) ?? null;
+  },
+  async save({ identityId, campus, interestTags, feedPrefsSetAt }) {
+    const existing = userPrefs.get(identityId);
+    const updated: UserPreference = {
+      identityId,
+      campus: campus ?? existing?.campus ?? "",
+      notificationPrefs: existing?.notificationPrefs ?? {},
+      interestTags: interestTags ?? existing?.interestTags ?? [],
+      feedPrefsSetAt: feedPrefsSetAt !== undefined ? feedPrefsSetAt : existing?.feedPrefsSetAt ?? null,
+      updatedAt: nowIso(),
+    };
+    userPrefs.set(identityId, updated);
+    return updated;
+  },
+};
+
+/** Dev/test-only: wipe user-preference store (companion to resetAuthState). */
+export function resetUserPrefs(): void {
+  userPrefs.clear();
 }

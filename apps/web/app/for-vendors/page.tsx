@@ -112,8 +112,8 @@ export default function ForVendorsPage() {
             Create your vendor listing in under 5 minutes. No approval wait time. 
             No complicated setup.
           </p>
-          <div className="vendor-cta-group">
-            <Link href="/explore" className="vendor-cta-primary">
+          <div className="vendor-cta-group" data-testid="for-vendors-cta">
+            <Link href="/become-vendor" className="vendor-cta-primary">
               Create Vendor Listing
             </Link>
             <Link href="/help" className="vendor-cta-secondary">

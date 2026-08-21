@@ -1,5 +1,5 @@
 import type { Listing, Vendor } from "./interfaces";
-import { mockListingsRepo, mockVendorsRepo, mockSearchRepo, mockListingsRepoThatFails, vendorName } from "./mock";
+import { mockListingsRepo, mockVendorRepo, mockSearchRepo, mockListingsRepoThatFails, vendorName } from "./mock";
 
 /**
  * Explore data boundary (Doc 04 PG-PUB-002/003, Doc 07 §7.7).
@@ -111,7 +111,7 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
   try {
     const [listings, vendors] = await Promise.all([
       listingsRepo.list({ campus: params.campus, category }),
-      mockVendorsRepo.listVendors({ campus: params.campus }),
+      mockVendorRepo.listVendors({ campus: params.campus }),
     ]);
 
     let mapped: ExploreListing[] = listings.map((l) => toExploreListing(l, vendors));
@@ -150,7 +150,7 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
 export async function loadListing(id: string): Promise<ExploreListing | null> {
   const [listing, vendors] = await Promise.all([
     mockListingsRepo.getById(id),
-    mockVendorsRepo.listVendors({}),
+    mockVendorRepo.listVendors({}),
   ]);
   if (!listing) return null;
   return toExploreListing(listing, vendors);

@@ -11,7 +11,7 @@
  */
 
 import type { Listing, Vendor, Review } from "./interfaces";
-import { MOCK_VENDORS, mockVendorsRepo, vendorName, listListingsByVendor, type MockListingExtra } from "./mock";
+import { MOCK_VENDORS, mockVendorRepo, vendorName, listListingsByVendor, type MockListingExtra } from "./mock";
 import type { ExploreListing } from "./explore";
 import { vendors as showcaseVendors } from "./explore-view";
 
@@ -79,6 +79,14 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
       handle: showcase.slug,
       campus: showcase.campusId,
       categoryIds: [showcase.categorySlug],
+      status: "live",
+      description: "",
+      subArea: null,
+      profilePhotoUrl: null,
+      agreementVersion: null,
+      agreementAcceptedAt: null,
+      identityId: null,
+      slug: showcase.slug,
       listings: [],
       ratingAvg: showcase.rating,
       ratingCount: showcase.reviewCount,

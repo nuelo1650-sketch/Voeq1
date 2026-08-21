@@ -6,3 +6,6 @@ export * from "./audit";
 export * from "./explore";
 export * from "./explore-view";
 export * from "./storefront";
+export * from "./media";
+export * from "./visibility";
+export * from "./onboarding";

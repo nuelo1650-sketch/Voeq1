@@ -29,5 +29,5 @@ export async function POST(req: NextRequest) {
 
   await mockIdentityRepo.patch(identity.id, { campus });
   await logAudit("campus.selected", identity.id, { campus });
-  return NextResponse.json({ ok: true, redirect: "/onboarding" });
+  return NextResponse.json({ ok: true, redirect: "/onboarding/shopper" });
 }
