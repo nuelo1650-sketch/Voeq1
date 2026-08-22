@@ -24,7 +24,7 @@ export function canGoLive(vendor: {
   id: string;
   agreementAcceptedAt: string | null;
   profilePhotoUrl: string | null;
-  status: "pending_listings" | "live";
+  status: "pending_listings" | "live" | "suspended";
 }): CanGoLiveResult {
   const reasons: string[] = [];
   if (!vendor.agreementAcceptedAt) reasons.push("phase_a_incomplete");

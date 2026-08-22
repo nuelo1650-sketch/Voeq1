@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { VendorStorefrontView } from "@voeq/data";
+import { OpenNowBadge } from "@/components/vendor/OpenNowBadge";
 
 /**
  * StorefrontHero — the editorial arrival band for a vendor's world (PG-PUB-004).
@@ -55,18 +56,21 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <h1
-          data-testid="storefront-name"
-          style={{
-            margin: 0,
-            fontFamily: "var(--role-font-display)",
-            fontSize: "2.5rem",
-            lineHeight: 1.05,
-            color: "var(--role-text)",
-          }}
-        >
-          {vendor.name}
-        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap" }}>
+          <h1
+            data-testid="storefront-name"
+            style={{
+              margin: 0,
+              fontFamily: "var(--role-font-display)",
+              fontSize: "2.5rem",
+              lineHeight: 1.05,
+              color: "var(--role-text)",
+            }}
+          >
+            {vendor.name}
+          </h1>
+          <OpenNowBadge vendor={vendor} />
+        </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", fontSize: "13px", color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
           {/* Locked trust language — "Student Vouched", never "Verified". */}
@@ -74,13 +78,30 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
             ✓ Student Vouched
           </span>
           {hasRating && (
-            <span data-testid="storefront-rating">★ {vendor.ratingAvg!.toFixed(1)}</span>
+            <span data-testid="storefront-rating">★ {vendor.ratingAvg!.toFixed(1)} ({vendor.ratingCount})</span>
           )}
           <span>{vendor.campus}</span>
           <Link href="/explore" data-testid="storefront-back" style={{ color: "var(--role-text-muted)", textDecoration: "none" }}>
             ← Explore
           </Link>
         </div>
+
+        {(vendor.socials?.phone || vendor.socials?.instagram || vendor.socials?.twitter || vendor.socials?.tiktok) && (
+          <div data-testid="storefront-socials" style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap", fontSize: 13, fontFamily: "var(--role-font-ui)" }}>
+            {vendor.socials.phone && (
+              <a href={`tel:${vendor.socials.phone}`} data-testid="storefront-social-phone" style={{ color: "var(--role-text)" }}>📞 {vendor.socials.phone}</a>
+            )}
+            {vendor.socials.instagram && (
+              <a href={`https://instagram.com/${vendor.socials.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-instagram" style={{ color: "var(--role-text)" }}>Instagram: {vendor.socials.instagram}</a>
+            )}
+            {vendor.socials.twitter && (
+              <a href={`https://x.com/${vendor.socials.twitter.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-twitter" style={{ color: "var(--role-text)" }}>Twitter: {vendor.socials.twitter}</a>
+            )}
+            {vendor.socials.tiktok && (
+              <a href={`https://tiktok.com/@${vendor.socials.tiktok.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-tiktok" style={{ color: "var(--role-text)" }}>TikTok: {vendor.socials.tiktok}</a>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

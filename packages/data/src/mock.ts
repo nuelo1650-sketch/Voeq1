@@ -115,6 +115,12 @@ export const mockListingsRepo: ListingsRepo = {
     MOCK_EXPLORE_LISTINGS.splice(idx, 1);
     return true;
   },
+  async update(id: string, patch: Partial<Listing>) {
+    const l = MOCK_EXPLORE_LISTINGS.find((x) => x.id === id);
+    if (!l) return null;
+    Object.assign(l, patch);
+    return l;
+  },
 };
 
 /** Forces a failure — used by the Explore error/retry e2e path via ?exploreError=1. */
@@ -127,6 +133,9 @@ export const mockListingsRepoThatFails: ListingsRepo = {
   },
   async create() {
     throw new Error("Simulated listings create failure (mock)");
+  },
+  async update() {
+    throw new Error("Simulated listings update failure (mock)");
   },
   async remove() {
     throw new Error("Simulated listings remove failure (mock)");

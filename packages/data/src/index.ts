@@ -10,3 +10,4 @@ export * from "./media";
 export * from "./visibility";
 export * from "./onboarding";
 export * from "./shopper";
+export * from "./analytics";

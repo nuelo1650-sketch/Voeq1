@@ -1,12 +1,19 @@
 import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
-import { mockVendorRepo, listListingsByVendor, canVendorBePublic } from "@voeq/data";
+import {
+  mockVendorRepo,
+  listListingsByVendor,
+  canVendorBePublic,
+  mockReviewRepo,
+} from "@voeq/data";
+import { VendorDashboardClient } from "@/components/vendor/VendorDashboardClient";
+import { ListingCreateForm } from "@/components/vendor/ListingCreateForm";
 
 /**
- * VS3.4 — Vendor dashboard. After Phase A (account) the vendor lands here and
- * completes Phase B: (1) upload a profile photo, (2) create a first listing.
- * `canGoLive` (derived via canVendorBePublic) flips to true once both are done,
- * at which point the storefront is publicly reachable.
+ * VS3.4 / VS5 — Vendor dashboard (single-scroll, one-identity).
+ * Shopper capabilities (saved / following / notifications) stay at the TOP;
+ * vendor builder capabilities are BELOW, in the stateful VendorDashboardClient
+ * which owns live-preview draft state (VS5.4).
  */
 export default async function VendorDashboardPage() {
   const identity = await getCurrentIdentity();
@@ -16,8 +23,20 @@ export default async function VendorDashboardPage() {
   const vendor = await mockVendorRepo.getById(identity.vendorId);
   if (!vendor) redirect("/onboarding/vendor");
 
-  const listings = listListingsByVendor(vendor.id);
+  const listings = listListingsByVendor(vendor.id).map((l) => ({
+    ...l,
+    vendorName: vendor.name,
+    rating: undefined,
+    verified: (l as { verified?: boolean }).verified,
+    categorySlug: l.categoryId,
+    image: l.images?.[0],
+  }));
   const live = canVendorBePublic(vendor);
+  const reviews = await mockReviewRepo.listByVendor(vendor.id);
+  const ratingCount = reviews.length;
+  const ratingAvg =
+    ratingCount > 0 ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / ratingCount) * 10) / 10 : 0;
+  const verifiedCount = listings.filter((l) => (l as { verified?: boolean }).verified).length;
 
   return (
     <main data-testid="vendor-dashboard" style={{ minHeight: "100vh", background: "var(--role-bg)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
@@ -25,6 +44,12 @@ export default async function VendorDashboardPage() {
       <p data-testid="vendor-status" style={{ color: "var(--role-muted)" }}>
         Status: {live ? "Public" : "Account ready — not yet public"}
       </p>
+
+      {vendor.status === "suspended" && (
+        <div data-testid="vendor-suspended-banner" role="alert" style={{ background: "var(--role-danger-soft, #fdecea)", color: "var(--role-danger)", border: "1px solid var(--role-danger)", borderRadius: "var(--radius)", padding: "var(--space-2) var(--space-3)", marginBottom: "var(--space-3)" }}>
+          Your storefront is suspended by staff. You can browse, but editing listings and messaging are disabled. Contact support for details.
+        </div>
+      )}
 
       <ol className="wizard-steps" aria-label="Phase B progress" data-testid="phase-b-steps">
         <li className={vendor.profilePhotoUrl ? "is-active" : ""} data-testid="step-photo">
@@ -38,29 +63,7 @@ export default async function VendorDashboardPage() {
         </li>
       </ol>
 
-      <section data-testid="photo-upload" style={{ marginTop: "var(--space-4)" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h3)" }}>Profile photo</h2>
-        {vendor.profilePhotoUrl ? (
-          <img src={vendor.profilePhotoUrl} alt="Profile" width={96} height={96} style={{ borderRadius: "50%" }} data-testid="vendor-photo" />
-        ) : (
-          <p style={{ color: "var(--role-muted)" }}>No photo uploaded yet.</p>
-        )}
-      </section>
-
-      <section data-testid="listings-section" style={{ marginTop: "var(--space-4)" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h3)" }}>Listings</h2>
-        {listings.length === 0 ? (
-          <p style={{ color: "var(--role-muted)" }}>No listings yet — create your first one.</p>
-        ) : (
-          <ul data-testid="listing-list">
-            {listings.map((l) => (
-              <li key={l.id}>{l.title} — ₦{l.priceMinMinor / 100}</li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <div data-testid="can-go-live" style={{ marginTop: "var(--space-4)" }}>
+      <div data-testid="can-go-live" style={{ marginTop: "var(--space-2)" }}>
         {live ? (
           <p style={{ color: "var(--color-accent-gold)" }}>Your storefront is live. 🎉</p>
         ) : (
@@ -69,6 +72,18 @@ export default async function VendorDashboardPage() {
           </p>
         )}
       </div>
+
+      <hr style={{ border: 0, borderTop: "1px solid var(--role-border)", margin: "var(--space-4) 0" }} />
+
+      <VendorDashboardClient
+        vendor={vendor}
+        listings={listings}
+        ratingAvg={ratingAvg}
+        ratingCount={ratingCount}
+        verifiedCount={verifiedCount}
+        reviews={reviews}
+        disabled={vendor.status === "suspended"}
+      />
     </main>
   );
 }

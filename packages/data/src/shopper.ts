@@ -28,7 +28,7 @@ import type {
   ReportRepo as IReportRepo,
   NotificationRepo as INotificationRepo,
 } from "./interfaces";
-import { mockStaffRepo } from "./mock";
+import { mockStaffRepo, mockListingsRepo } from "./mock";
 
 const nowIso = () => new Date().toISOString();
 const id = (p: string) => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -69,6 +69,16 @@ export const mockSavedListingRepo: SavedListingRepo = {
   },
 };
 
+/** VS5.11: count saves attributable to a vendor (direct vendor saves + saves of their listings). */
+export async function countSavesByVendor(vendorId: string): Promise<number> {
+  const vendorListingIds = new Set(
+    (await mockListingsRepo.list()).filter((l) => l.vendorId === vendorId).map((l) => l.id),
+  );
+  return [...savedItems.values()].filter(
+    (s) => s.vendorId === vendorId || (s.listingId != null && vendorListingIds.has(s.listingId)),
+  ).length;
+}
+
 // ---- FollowRepo --------------------------------------------------------------
 export const mockFollowRepo: FollowRepo = {
   async toggle({ followerId, vendorId }) {
@@ -85,6 +95,9 @@ export const mockFollowRepo: FollowRepo = {
   },
   async list(followerId) {
     return [...follows.values()].filter((f) => f.followerId === followerId);
+  },
+  async listByVendor(vendorId) {
+    return [...follows.values()].filter((f) => f.vendorId === vendorId);
   },
 };
 
@@ -134,6 +147,21 @@ export const mockReviewRepo: ReviewRepo = {
   },
   async getById(rid) {
     return reviews.get(rid) ?? null;
+  },
+  async respond(reviewId: string, vendorId: string, body: string) {
+    const r = reviews.get(reviewId);
+    if (!r) return null;
+    if (r.vendorId !== vendorId) return null; // ownership: only the reviewed vendor responds
+    if (r.response) return r; // one response per review (no create-twice)
+    const now = nowIso();
+    // 24h edit window = later of review.createdAt OR response.createdAt (founder 2026-08-22, Doc 09 §9.8).
+    // (If a response already existed we'd have returned at line 155; here response is null.)
+    const anchor = r.createdAt;
+    if (Date.now() - new Date(anchor).getTime() > 24 * 60 * 60 * 1000) {
+      return r; // window closed — caller treats as locked (returns unchanged)
+    }
+    r.response = { body, createdAt: now, editedAt: null };
+    return r;
   },
 };
 
