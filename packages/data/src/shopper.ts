@@ -138,6 +138,7 @@ export const mockReviewRepo: ReviewRepo = {
       rating,
       body,
       createdAt: nowIso(),
+      status: "visible",
     };
     reviews.set(review.id, review);
     return review;
@@ -147,6 +148,15 @@ export const mockReviewRepo: ReviewRepo = {
   },
   async getById(rid) {
     return reviews.get(rid) ?? null;
+  },
+  async patch(rid, patch) {
+    const r = reviews.get(rid);
+    if (!r) return null;
+    Object.assign(r, patch);
+    return r;
+  },
+  async listAll() {
+    return Array.from(reviews.values());
   },
   async respond(reviewId: string, vendorId: string, body: string) {
     const r = reviews.get(reviewId);

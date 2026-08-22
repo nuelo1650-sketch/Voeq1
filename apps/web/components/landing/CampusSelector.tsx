@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client';
 import { useState, useEffect } from 'react';
 import { ChevronDown, MapPin, Search, X } from 'lucide-react';

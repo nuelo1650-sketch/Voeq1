@@ -5,7 +5,7 @@ import {
   mockMessageRepo,
   mockReportRepo,
   mockStaffRepo,
-  mockNotificationRepo,
+  notifyStaff,
   logAudit,
 } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
@@ -53,14 +53,8 @@ export async function POST(req: NextRequest) {
     consequence: "pending_review",
   });
 
-  // Queue staff notification (consumed by /admin in VS7). No PII in body.
-  await mockNotificationRepo.create({
-    recipientId: "admin",
-    type: "system",
-    title: "Message reported",
-    body: "Would you like to block while waiting for staff review?",
-    refId: staffCase.id,
-  });
+  // VS7.15 — notify staff on everything (single mechanism).
+  await notifyStaff("new_report", { refId: staffCase.id });
 
   await logAudit("message.reported", identity.id, { messageId, reportId: report.id, caseId: staffCase.id });
   return NextResponse.json({ ok: true, report, caseId: staffCase.id }, { status: 200 });

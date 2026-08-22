@@ -4,6 +4,7 @@ import { loadVendorStorefront, canVendorBePublic } from "@voeq/data";
 import { StorefrontHero } from "@/components/storefront/StorefrontHero";
 import { StorefrontGrid } from "@/components/storefront/StorefrontGrid";
 import { StorefrontTrust } from "@/components/storefront/StorefrontTrust";
+import { ShareButtons } from "@/components/share/ShareButtons";
 
 /**
  * Vendor Storefront — PG-PUB-004 (Doc 04). The vendor's world: editorial hero,
@@ -47,6 +48,10 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
       <StorefrontHero vendor={vendor} />
       <StorefrontGrid listings={vendor.listings} />
       <StorefrontTrust vendor={vendor} />
+      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "24px var(--nav-inline-pad)" }}>
+        <h2 style={{ fontSize: "var(--fs-h3)", fontFamily: "var(--font-display)" }}>Share this store</h2>
+        <ShareButtons vendorId={vendor.id} />
+      </section>
     </main>
   );
 }
