@@ -1,53 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { z } from "zod";
-import { mockAuthRepo, mockVendorRepo, mockListingsRepo } from "@voeq/data";
+import { mockAuthRepo, mockVendorRepo, mockListingsRepo, logAudit } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
- * VS3.4 — First listing creation (Phase B, step 2 of 2).
- * Creates a listing under the vendor linked to this identity.
+ * VS5.6 — Create a listing (Phase B, step 2 of 2). Owner-only.
+ * Validates required fields; defaults isPublished=true, status='active'.
+ * New listing does not auto-promote to live (go-live is still gated in the UI).
  */
-const schema = z.object({
-  title: z.string().trim().min(3, "Title is required."),
-  priceMinMinor: z.number().int().nonnegative("Price must be ≥ 0."),
-  priceMaxMinor: z.number().int().nonnegative().nullable().optional(),
-  categoryId: z.string().min(1, "Category is required."),
-  description: z.string().trim().optional(),
-  images: z.array(z.string()).optional(),
-});
-
 export async function POST(req: NextRequest) {
   const store = await cookies();
   const sessionId = store.get(SESSION_COOKIE)?.value ?? null;
   const identity = await mockAuthRepo.currentIdentity(sessionId);
-  if (!identity) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
-  if (!identity.vendorId) return NextResponse.json({ error: "No vendor account." }, { status: 400 });
+  if (!identity) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!identity.vendorId) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
-  let body: unknown;
+  let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   }
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", fieldErrors: parsed.error.flatten().fieldErrors },
-      { status: 400 },
-    );
-  }
-  const { title, priceMinMinor, priceMaxMinor, categoryId, description, images } = parsed.data;
+
+  const title = typeof body.title === "string" ? body.title.trim() : "";
+  const categoryId = typeof body.categoryId === "string" ? body.categoryId : "";
+  const priceMinMinor = Number(body.priceMinMinor);
+  if (title.length < 3) return NextResponse.json({ error: "title_min_3" }, { status: 400 });
+  if (!categoryId) return NextResponse.json({ error: "category_required" }, { status: 400 });
+  if (!Number.isFinite(priceMinMinor) || priceMinMinor <= 0) return NextResponse.json({ error: "price_invalid" }, { status: 400 });
+
+  const priceMaxMinor = body.priceMaxMinor != null ? Number(body.priceMaxMinor) : null;
+  const description = typeof body.description === "string" ? body.description : null;
+  const images = Array.isArray(body.images) ? (body.images as string[]).filter((x) => typeof x === "string") : [];
 
   const listing = await mockListingsRepo.create({
     vendorId: identity.vendorId,
     title,
     priceMinMinor,
-    priceMaxMinor: priceMaxMinor ?? null,
+    priceMaxMinor: priceMaxMinor != null && Number.isFinite(priceMaxMinor) ? priceMaxMinor : null,
     categoryId,
-    description: description ?? null,
-    images: images ?? [],
+    description,
+    images,
+    isPublished: true,
+    status: "active",
   });
 
-  return NextResponse.json({ ok: true, listingId: listing.id });
+  await logAudit("vendor.listing.create", identity.id, { id: listing.id });
+  return NextResponse.json({ ok: true, listing });
 }

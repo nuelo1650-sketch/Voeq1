@@ -14,14 +14,20 @@ export interface Vendor {
   handle: string;
   campus: string;
   categoryIds: string[];
-  /** VS3.2 (Reversal 7): onboarding lifecycle. pending_listings = account exists, NOT public. live = public. */
-  status: "pending_listings" | "live";
+  /** VS3.2 (Reversal 7): onboarding lifecycle. pending_listings = account exists, NOT public. live = public.
+   *  suspended = staff suspended the STOREFRONT only (browse allowed, edit/message disabled). Distinct
+   *  from Identity.accountStatus='suspended' (account-level, blocks login entirely). VS5.14. */
+  status: "pending_listings" | "live" | "suspended";
   /** VS3.2: business description (Doc 08 §8.4 business layer; min 50 chars enforced at API). */
   description: string;
   /** VS3.2: campus sub-area (hostel/faculty) — optional. */
   subArea: string | null;
   /** VS3.4: profile photo (Cloudinary mock URL). Null until uploaded. */
   profilePhotoUrl: string | null;
+  /** VS5.3: operating hours. Null until set — "Open now" badge only renders when present (honest). */
+  hours?: { open: string; close: string; days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] } | null;
+  /** VS5.3: contact socials (phone allowed; WhatsApp BANNED per Doc 13 §13.13). */
+  socials?: { phone?: string; instagram?: string; twitter?: string; tiktok?: string } | null;
   /** VS3.2: Vendor Agreement version accepted (null until Phase A step 3). */
   agreementVersion: string | null;
   agreementAcceptedAt: string | null;
@@ -70,6 +76,12 @@ export interface Review {
   rating: number; // 1-5
   body: string;
   createdAt: string;
+  /** VS5.10: vendor's response to this review. One response per review, editable ≤24h. */
+  response?: {
+    body: string;
+    createdAt: string;
+    editedAt: string | null;
+  } | null;
 }
 
 export interface Conversation {
@@ -98,6 +110,8 @@ export interface ListingsRepo {
   list(params?: { campus?: string; category?: string }): Promise<Listing[]>;
   getById(id: string): Promise<Listing | null>;
   create(input: Partial<Listing> & { vendorId: string; title: string; priceMinMinor: number; categoryId: string }): Promise<Listing>;
+  /** VS5.7: edit a listing (inline form). Ownership enforced by caller. */
+  update(id: string, patch: Partial<Listing>): Promise<Listing | null>;
   /** Remove a listing (VS3 audit fix: enables visibility reversion on delete). */
   remove(id: string): Promise<boolean>;
 }
@@ -362,6 +376,8 @@ export interface FollowRepo {
   /** Toggle: if following, unfollow; else follow. Returns resulting state. */
   toggle(input: { followerId: string; vendorId: string }): Promise<{ following: boolean; follow?: Follow }>;
   list(followerId: string): Promise<Follow[]>;
+  /** VS5.12: who follows a given vendor (for the vendor's own follower view). */
+  listByVendor(vendorId: string): Promise<Follow[]>;
 }
 
 export interface LikeRepo {
@@ -374,6 +390,8 @@ export interface ReviewRepo {
   create(input: { shopperId: string; vendorId: string; rating: number; body: string }): Promise<Review>;
   listByVendor(vendorId: string): Promise<Review[]>;
   getById(id: string): Promise<Review | null>;
+  /** VS5.10: vendor responds to a review on their own storefront. One response per review. */
+  respond(reviewId: string, vendorId: string, body: string): Promise<Review | null>;
 }
 
 export interface CommentRepo {
@@ -392,4 +410,18 @@ export interface NotificationRepo {
   list(recipientId: string): Promise<Notification[]>;
   markRead(id: string, recipientId: string): Promise<boolean>;
   markAllRead(recipientId: string): Promise<boolean>;
+}
+
+/**
+ * VS5.11 — DERIVED vendor analytics (not stored; computed from existing repos).
+ * No impression log in VS5: counts come from real relationship records.
+ * openNow is derived from Vendor.hours + current time; null if hours unset (honest).
+ */
+export interface VendorAnalytics {
+  vendorId: string;
+  listingCount: number;
+  reviewCount: number;
+  followerCount: number;
+  saveCount: number;
+  openNow: boolean | null;
 }
