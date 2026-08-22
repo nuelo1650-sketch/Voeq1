@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { VendorStorefrontView } from "@voeq/data";
 import { FollowButton } from "@/components/shopper/FollowButton";
 import { ReviewForm } from "@/components/shopper/ReviewForm";
@@ -11,15 +11,37 @@ import { ReportForm } from "@/components/shopper/ReportForm";
 
 /**
  * StorefrontTrust — reviews (real, public-read) + Follow / Message CTAs.
- * Reviews + Follow are LIVE (VS4.3/4.4). Message stays an auth-gate panel:
- * messaging itself is deferred to VS6 (Doc 13 §13.13) — the CTA links to
- * /login?next=<current> so post-auth returns here, consistent with the
- * public-browse, auth-to-act pattern (Doc 03 §3.9).
+ * Reviews + Follow are LIVE (VS4.3/4.4). Message (VS6): an authed shopper
+ * creates the conversation and is routed to the thread; unauthed shoppers see
+ * the /login?next=<current> gate (Doc 03 §3.9 auth-to-act pattern).
  */
 
 export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [gated, setGated] = useState<null | "review" | "message" | "report">(null);
+  const [msgBusy, setMsgBusy] = useState(false);
+
+  async function startConversation() {
+    setMsgBusy(true);
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vendorId: vendor.id }),
+      });
+      if (res.status === 401) {
+        setGated("message"); // unauth -> show login gate
+        return;
+      }
+      const data = await res.json();
+      if (data.conversation?.id) {
+        router.push(`/messages/${data.conversation.id}`);
+      }
+    } finally {
+      setMsgBusy(false);
+    }
+  }
 
   const ctaStyle: React.CSSProperties = {
     fontFamily: "var(--role-font-ui)",
@@ -61,7 +83,8 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
         <FollowButton vendorId={vendor.id} className="storefront-follow-btn" />
         <button
           data-testid="storefront-message-btn"
-          onClick={() => setGated("message")}
+          onClick={startConversation}
+          disabled={msgBusy}
           style={{ ...ctaStyle, background: "transparent", color: "var(--role-accent-strong)" }}
         >
           Message

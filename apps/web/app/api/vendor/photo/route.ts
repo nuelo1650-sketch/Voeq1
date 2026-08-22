@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockVendorRepo, uploadAndModerate, enforceVisibilityAfterMutation } from "@voeq/data";
+import { mockAuthRepo, mockVendorRepo, uploadImage, enforceVisibilityAfterMutation } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
@@ -36,12 +36,12 @@ export async function POST(req: NextRequest) {
   }
   if (!body.fileName) return NextResponse.json({ error: "fileName is required." }, { status: 400 });
 
-  const result = await uploadAndModerate({ fileName: body.fileName, force: body.force });
+  const result = await uploadImage({ fileName: body.fileName, force: body.force, context: "vendor_photo" });
   if (!result.ok) {
     return NextResponse.json({ error: result.reason ?? "Upload rejected." }, { status: 422 });
   }
 
-  const vendor = await mockVendorRepo.patch(auth.vendor.id, { profilePhotoUrl: result.url! });
+  const vendor = await mockVendorRepo.patch(auth.vendor.id, { profilePhotoUrl: result.url });
   return NextResponse.json({ ok: true, profilePhotoUrl: vendor?.profilePhotoUrl });
 }
 

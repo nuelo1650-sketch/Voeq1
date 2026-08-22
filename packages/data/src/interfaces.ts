@@ -88,6 +88,10 @@ export interface Conversation {
   id: string;
   participantIds: string[];
   lastMessageAt: string;
+  /** VS6.4: creation time for ordering + UI. */
+  createdAt: string;
+  /** VS6.16: honest last-seen per participant (identityId -> ISO ts). */
+  lastSeen: Record<string, string>;
 }
 
 export interface Message {
@@ -95,9 +99,16 @@ export interface Message {
   conversationId: string;
   senderId: string;
   body: string;
-  state: "pending" | "sent" | "delivered" | "failed";
+  state: "pending" | "sent" | "delivered" | "read" | "failed";
   createdAt: string;
+  /** VS6.9: read timestamp (recipient perspective). null until read. */
+  readAt?: string | null;
+  /** VS6.6: sender-side idempotency key (Doc 09 §9.8 Tier B). Dedupes rapid resends. */
+  clientMsgId?: string;
 }
+
+/** VS6 — Message lifecycle states (server-authoritative). */
+export type MessageState = "pending" | "sent" | "delivered" | "read" | "failed";
 
 export interface StaffCase {
   id: string;
@@ -340,7 +351,7 @@ export type ReportCategory =
 export interface Report {
   id: string;
   reporterId: string; // = identityId
-  targetType: "listing" | "vendor";
+  targetType: "listing" | "vendor" | "message";
   targetId: string;
   category: ReportCategory;
   body: string | null;
@@ -401,7 +412,7 @@ export interface CommentRepo {
 }
 
 export interface ReportRepo {
-  create(input: { reporterId: string; targetType: "listing" | "vendor"; targetId: string; category: ReportCategory; body: string | null }): Promise<Report>;
+  create(input: { reporterId: string; targetType: "listing" | "vendor" | "message"; targetId: string; category: ReportCategory; body: string | null }): Promise<Report>;
   list(): Promise<Report[]>;
 }
 
@@ -425,3 +436,15 @@ export interface VendorAnalytics {
   saveCount: number;
   openNow: boolean | null;
 }
+
+/**
+ * VS6.1 — Image upload context. Drives context-aware validation/size limits in
+ * the shared `images.ts` module. `message_attachment` is reserved for Phase 1+
+ * (image attachments are OUT of Phase 1 per founder lock — context declared, not wired).
+ */
+export type ImageContext = "vendor_photo" | "listing_photo" | "message_attachment";
+
+/** VS6.1 — Result of a moderated upload. Server-authoritative moderation outcome. */
+export type UploadResult =
+  | { ok: true; url: string; publicId: string; context: ImageContext }
+  | { ok: false; reason: string; retryable: boolean };
