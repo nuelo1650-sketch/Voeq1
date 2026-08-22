@@ -1,0 +1,35 @@
+import { redirect } from "next/navigation";
+import { getCurrentIdentity } from "@/lib/session";
+import { ConversationList, type ConversationRow } from "@/components/messaging/ConversationList";
+
+export const dynamic = "force-dynamic";
+
+export default async function MessagesPage() {
+  const identity = await getCurrentIdentity();
+  if (!identity) redirect("/login?next=/messages");
+
+  const { mockAuthRepo, mockConversationRepo, mockMessageRepo, mockIdentityRepo } = await import("@voeq/data");
+  const conversations = await mockConversationRepo.listForIdentity(identity.id);
+  const rows: ConversationRow[] = await Promise.all(
+    conversations.map(async (c) => {
+      const otherId = c.participantIds.find((p) => p !== identity.id) ?? "";
+      const other = otherId ? await mockIdentityRepo.getById(otherId) : null;
+      const msgs = await mockMessageRepo.listByConversation(c.id, null, 1);
+      const last = msgs[msgs.length - 1];
+      return {
+        id: c.id,
+        name: other?.name ?? "Someone",
+        lastMessagePreview: last?.body ?? "",
+        lastMessageAt: c.lastMessageAt,
+        unread: 0,
+      };
+    }),
+  );
+
+  return (
+    <main style={{ maxWidth: 640, margin: "0 auto", padding: 16 }}>
+      <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h2)" }}>Messages</h1>
+      <ConversationList rows={rows} />
+    </main>
+  );
+}

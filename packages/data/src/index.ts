@@ -11,3 +11,5 @@ export * from "./visibility";
 export * from "./onboarding";
 export * from "./shopper";
 export * from "./analytics";
+export * from "./images";
+export * from "./messaging";
