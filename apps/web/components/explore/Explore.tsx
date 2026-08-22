@@ -24,9 +24,13 @@ import { ExploreSkeleton } from "./ExploreSkeleton";
  *  3. Deep transient accent (UNPROVEN, optional): a brief deep-green flash on the contour line mid-
  *     entrance. Attempted; if it reads as a glitch it is cut. See transition note in code below.
  */
-const CAMPUS = "NMU"; // public, logged-out default (Doc 04: works fully logged-out)
+const DEFAULT_CAMPUS = "NMU"; // public, logged-out default (Doc 04: works fully logged-out)
 
-export function Explore({ categoryPreset }: { categoryPreset?: string }) {
+/**
+ * Explore — the single discover surface. Filters/sort/search/campus all run through
+ * loadExplore (data layer applies them). Campus is passed in (dynamic, VS4.9).
+ */
+export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryPreset?: string; campus?: string }) {
   const [filters, setFilters] = useState<ExploreFilters>({});
   const [query, setQuery] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -42,7 +46,7 @@ export function Explore({ categoryPreset }: { categoryPreset?: string }) {
   }, []);
 
   const { status, data, trending, error, cached, retry } = useExploreData({
-    campus: CAMPUS,
+    campus,
     query,
     categoryPreset,
     forceError,
@@ -78,7 +82,7 @@ export function Explore({ categoryPreset }: { categoryPreset?: string }) {
           Voeq
         </Link>
         <span data-testid="explore-campus-indicator" style={chipStyle}>
-          {CAMPUS}
+          {campus}
         </span>
       </header>
 
@@ -106,7 +110,7 @@ export function Explore({ categoryPreset }: { categoryPreset?: string }) {
 
         {/* Campus indicator (required visible content) */}
         <div data-testid="explore-campus-banner" style={{ ...chipStyle, display: "inline-flex", marginBottom: "var(--space-2)" }}>
-          Showing the marketplace near {CAMPUS}
+          Showing the marketplace near {campus}
         </div>
 
         <SearchBar initial={query} onSearch={setQuery} />
@@ -136,9 +140,9 @@ export function Explore({ categoryPreset }: { categoryPreset?: string }) {
 
             {status === "empty" && (
               <div data-testid="explore-empty" style={stateBox}>
-                <h2 style={{ margin: 0 }}>No vendors yet on {CAMPUS}</h2>
+                <h2 style={{ margin: 0 }}>No vendors yet on {campus}</h2>
                 <p style={{ color: "var(--role-text-muted)" }}>
-                  Be the first to share what you’re selling near {CAMPUS}.
+                  Be the first to share what you’re selling near {campus}.
                 </p>
                 <div style={{ display: "flex", gap: "var(--space-2)" }}>
                   <Link href="/" data-testid="explore-empty-browse" style={primaryBtn}>Browse other campuses</Link>

@@ -29,7 +29,7 @@ export function LandingFooter() {
           <div className="footer-col">
             <h4 className="footer-col-title">Discover</h4>
             <Link href="/explore" className="footer-link">Explore</Link>
-            <Link href="/browse" className="footer-link">Categories</Link>
+            <Link href="/explore" className="footer-link">Categories</Link>
             <Link href="/about" className="footer-link">About</Link>
           </div>
           

@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
-import { mockVendorRepo } from "@voeq/data";
+import { mockVendorRepo, mockUserPrefRepo, campuses } from "@voeq/data";
+import { SettingsForms } from "@/components/shopper/SettingsForms";
 
 /**
- * VS3.6 (Reversal 8) — Settings. The "Become a vendor" CTA is ALWAYS present here,
- * regardless of role/eligibility. If the user already has a vendor account, the
- * CTA points to the dashboard instead of the setup wizard.
+ * VS3.6 (Reversal 8) + VS4.11 — Settings. Account info (read-only) + editable
+ * notification prefs + campus switch. The "Become a vendor" CTA is ALWAYS present
+ * here, regardless of role/eligibility (Reversal 8). If the user already has a
+ * vendor account, the CTA points to the dashboard instead of the setup wizard.
  */
 export default async function SettingsPage() {
   const identity = await getCurrentIdentity();
@@ -14,6 +16,8 @@ export default async function SettingsPage() {
 
   const isVendor = !!identity.vendorId;
   const vendorLabel = isVendor ? (await mockVendorRepo.getById(identity.vendorId!))?.name : null;
+  const prefs = await mockUserPrefRepo.get(identity.id);
+  const notifPrefs = (prefs?.notificationPrefs ?? {}) as Record<string, "email" | "in_app" | "none">;
 
   return (
     <main
@@ -27,6 +31,12 @@ export default async function SettingsPage() {
         <p style={{ color: "var(--role-muted)" }}>Email: {identity.email}</p>
         <p style={{ color: "var(--role-muted)" }}>Role: {identity.role}</p>
       </section>
+
+      <SettingsForms
+        initialPrefs={notifPrefs}
+        initialCampus={identity.campus ?? campuses[0]?.id ?? "NMU"}
+        campuses={campuses.map((c) => ({ id: c.id, name: c.name }))}
+      />
 
       <section
         className="auth-card"

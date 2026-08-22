@@ -14,6 +14,7 @@ import type { Listing, Vendor, Review } from "./interfaces";
 import { MOCK_VENDORS, mockVendorRepo, vendorName, listListingsByVendor, type MockListingExtra } from "./mock";
 import type { ExploreListing } from "./explore";
 import { vendors as showcaseVendors } from "./explore-view";
+import { mockReviewRepo } from "./shopper";
 
 // Local mapper mirroring `toExploreListing` in explore.ts so this module stays
 // independent of that file. Reads the mock-only extras already attached to each listing.
@@ -58,6 +59,7 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
     const listings = listListingsByVendor(fixture.id).map((l) => toExploreListingLocal(l, displayName));
     const rated = listings.filter((m) => typeof m.rating === "number");
     const ratingAvg = rated.length > 0 ? rated.reduce((s, m) => s + (m.rating as number), 0) / rated.length : undefined;
+    const reviews = await mockReviewRepo.listByVendor(fixture.id);
     return {
       ...fixture,
       listings,
@@ -65,7 +67,7 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
       ratingCount: rated.length,
       verifiedCount: listings.filter((m) => m.verified).length,
       listingCount: listings.length,
-      reviews: [],
+      reviews,
     };
   }
 
@@ -73,6 +75,7 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
   //    never a 404. Reuses StorefrontHero/Grid/Trust's honest empty states.
   const showcase = showcaseVendors.find((v) => v.id === idOrSlug || v.slug === idOrSlug);
   if (showcase) {
+    const reviews = await mockReviewRepo.listByVendor(showcase.id);
     return {
       id: showcase.id,
       name: showcase.name,
@@ -92,7 +95,7 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
       ratingCount: showcase.reviewCount,
       verifiedCount: 0,
       listingCount: 0,
-      reviews: [],
+      reviews,
     };
   }
 

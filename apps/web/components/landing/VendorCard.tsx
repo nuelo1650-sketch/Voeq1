@@ -1,7 +1,11 @@
+"use client";
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Heart, Star } from 'lucide-react';
 import type { VendorSummary } from '@voeq/data';
+import { SaveButton } from '@/components/shopper/SaveButton';
+import { FollowButton } from '@/components/shopper/FollowButton';
 
 const RECENT_KEY = 'voeq:recentlyViewed';
 const MAX_RECENT = 12;
@@ -79,16 +83,16 @@ export function VendorCard({ vendor }: VendorCardProps) {
             {statusLabel}
           </span>
           
-          <button 
-            className="vendor-save" 
-            aria-label={`Save ${vendor.name}`}
+          <div
+            className="vendor-save"
             onClick={(e) => {
               e.preventDefault();
-              // TODO: implement save functionality
+              e.stopPropagation();
             }}
           >
-            <Heart size={16} />
-          </button>
+            <SaveButton targetType="vendor" targetId={vendor.id} />
+            <FollowButton vendorId={vendor.id} className="vendor-follow" />
+          </div>
         </div>
         
         <div className="vendor-card-body">

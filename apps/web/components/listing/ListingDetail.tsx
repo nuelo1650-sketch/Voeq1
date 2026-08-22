@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { loadListing, type ExploreListing } from "@voeq/data";
 import { ContourEdge, CampusFingerprint } from "@voeq/contour";
+import { SaveButton } from "@/components/shopper/SaveButton";
+import { CommentForm } from "@/components/shopper/CommentForm";
+import { CommentsList, type DisplayComment } from "@/components/shopper/CommentsList";
+import { ReportForm } from "@/components/shopper/ReportForm";
 
 /**
  * ListingDetail — PG-PUB-005 (Doc 04). The editorial object (Doc 05 B.15.3 Editorial /
@@ -38,26 +43,19 @@ const ctaStyle: React.CSSProperties = {
   textAlign: "center",
 };
 
-const REPORT_REASONS = [
-  "Inappropriate content",
-  "Misleading listing",
-  "Scam or fraud",
-  "Spam",
-  "Other",
-] as const;
-
 export function ListingDetail({ id }: { id: string }) {
   const [status, setStatus] = useState<DetailStatus>("loading");
   const [listing, setListing] = useState<ExploreListing | null>(null);
+  const pathname = usePathname();
 
   // Share
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
   // Report
   const [reportOpen, setReportOpen] = useState(false);
-  const [reportReason, setReportReason] = useState<string>(REPORT_REASONS[0]);
-  const [reportSent, setReportSent] = useState(false);
   // Message — gated (auth deferred to VS2)
   const [msgGated, setMsgGated] = useState(false);
+  // Comments (VS4.5) — public-read; fetched on mount
+  const [comments, setComments] = useState<DisplayComment[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,6 +72,11 @@ export function ListingDetail({ id }: { id: string }) {
       .catch(() => {
         if (!cancelled) setStatus("error");
       });
+    // Fetch public comments independently (flat, newest-first).
+    fetch(`/api/listings/${id}/comments`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (!cancelled && d) setComments(d.comments); })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -183,12 +186,13 @@ export function ListingDetail({ id }: { id: string }) {
             <button data-testid="listing-detail-share" onClick={handleShare} style={{ ...ctaStyle, background: "transparent", color: "var(--role-accent-strong)", padding: "10px 18px", fontSize: "14px", flex: 1 }}>
               {shareState === "copied" ? "Link copied" : "Share"}
             </button>
+            <SaveButton targetType="listing" targetId={listing.id} className="listing-detail-save" />
             <button
               data-testid="listing-detail-report"
               onClick={() => setReportOpen((o) => !o)}
               style={{ background: "transparent", border: "1px solid var(--role-border)", color: "var(--role-text-muted)", borderRadius: "var(--radius)", padding: "10px 18px", fontSize: "14px", fontFamily: "var(--role-font-ui)", cursor: "pointer" }}
             >
-              Report
+              {reportOpen ? "Close" : "Report"}
             </button>
           </div>
 
@@ -198,29 +202,7 @@ export function ListingDetail({ id }: { id: string }) {
               style={{ border: "1px solid var(--role-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-3)", display: "flex", flexDirection: "column", gap: "var(--space-2)", fontFamily: "var(--role-font-ui)" }}
             >
               <strong style={{ color: "var(--role-text)" }}>Report this listing</strong>
-              <select
-                data-testid="listing-detail-report-reason"
-                value={reportReason}
-                onChange={(e) => setReportReason(e.target.value)}
-                style={{ fontFamily: "var(--role-font-ui)", fontSize: "14px", padding: "8px", borderRadius: "var(--radius)", border: "1px solid var(--role-border)", background: "var(--role-surface)", color: "var(--role-text)" }}
-              >
-                {REPORT_REASONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-              {!reportSent ? (
-                <button
-                  data-testid="listing-detail-report-submit"
-                  onClick={() => setReportSent(true)}
-                  style={{ ...ctaStyle, fontSize: "14px", padding: "10px 18px" }}
-                >
-                  Submit report
-                </button>
-              ) : (
-                <div data-testid="listing-detail-report-sent" style={{ fontSize: "13px", color: "var(--role-text-muted)" }}>
-                  Thanks — reports are reviewed by staff. <Link href="/explore" data-testid="listing-detail-report-cta" style={{ color: "var(--role-accent-strong)", fontWeight: 600 }}>Get Started</Link> to track it.
-                </div>
-              )}
+              <ReportForm targetType="listing" targetId={listing.id} onDone={() => setReportOpen(false)} />
             </div>
           )}
         </div>
@@ -314,7 +296,7 @@ export function ListingDetail({ id }: { id: string }) {
                   Sign in to message {listing.vendorName} directly.
                 </span>
                 <Link
-                  href="/explore"
+                  href={`/login?next=${encodeURIComponent(pathname)}`}
                   data-testid="listing-detail-auth-gate-cta"
                   style={{ alignSelf: "flex-start", fontWeight: 600, fontSize: "14px", padding: "10px 18px", borderRadius: "var(--radius)", background: "var(--role-accent-strong)", color: "var(--color-forest, #1f4d33)", textDecoration: "none" }}
                 >
@@ -324,6 +306,13 @@ export function ListingDetail({ id }: { id: string }) {
             )}
           </div>
         </div>
+
+        {/* Comments — flat, public-read (VS4.5). Form is auth-gated. */}
+        <section data-testid="listing-detail-comments" style={{ marginTop: "var(--space-4)", display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+          <CommentsList comments={comments} />
+          <CommentForm listingId={listing.id} />
+        </section>
+
       </div>
 
       {/* Mobile sticky action bar (CSS-only visibility via .listing-detail-sticky). */}
