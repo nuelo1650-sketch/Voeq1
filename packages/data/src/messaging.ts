@@ -154,6 +154,9 @@ export const mockMessageRepo = {
       }
     }
   },
+  async listAll() {
+    return Array.from(messages.values());
+  },
 };
 
 /** Dev/test-only: wipe messaging stores. */

@@ -18,6 +18,8 @@ export interface Vendor {
    *  suspended = staff suspended the STOREFRONT only (browse allowed, edit/message disabled). Distinct
    *  from Identity.accountStatus='suspended' (account-level, blocks login entirely). VS5.14. */
   status: "pending_listings" | "live" | "suspended";
+  /** VS7.8: staff verification flag (distinct from lifecycle status). */
+  verified: boolean;
   /** VS3.2: business description (Doc 08 §8.4 business layer; min 50 chars enforced at API). */
   description: string;
   /** VS3.2: campus sub-area (hostel/faculty) — optional. */
@@ -51,6 +53,10 @@ export interface Listing {
   description: string | null;
   /** VS3.4: listing lifecycle. active = publicly listed. */
   status: "active" | "removed";
+  /** VS7.9: staff feature flag (surfaces listing in highlights). */
+  isFeatured: boolean;
+  /** VS7.9: expiry of the feature (null if not featured). */
+  featuredUntil?: string | null;
 }
 
 export interface VendorRepo {
@@ -82,6 +88,8 @@ export interface Review {
     createdAt: string;
     editedAt: string | null;
   } | null;
+  /** VS7.10: moderation state. visible by default; hidden removes it from public display. */
+  status: "visible" | "hidden";
 }
 
 export interface Conversation {
@@ -115,6 +123,10 @@ export interface StaffCase {
   queue: string;
   decision: string | null;
   consequence: string | null;
+  /** VS7.1: triage/assignment. */
+  status: "open" | "triaged" | "resolved" | "dismissed";
+  assignedTo?: string | null; // identityId of handling staff
+  resolution?: string | null; // free-text resolution
 }
 
 export interface ListingsRepo {
@@ -142,11 +154,16 @@ export interface AuthRepo {
 
 export interface MessagesRepo {
   listConversations(identityId: string): Promise<Conversation[]>;
+  /** VS7.12: list all messages (analytics). */
+  listAll(): Promise<Message[]>;
 }
 
 export interface StaffRepo {
   create(input: { queue: string; decision: string | null; consequence: string | null }): Promise<StaffCase>;
   listCases(queue: string): Promise<StaffCase[]>;
+  /** VS7.1: triage mutations. */
+  assignCase(caseId: string, assignedTo: string): Promise<StaffCase | null>;
+  resolveCase(caseId: string, resolution: string, status?: "resolved" | "dismissed"): Promise<StaffCase | null>;
 }
 
 export interface SearchRepo {
@@ -183,6 +200,8 @@ export interface Identity {
   googleSubject: string | null; // Google "sub"
   method: AuthMethod;
   role: UserRole; // one identity, role property (Doc 07 §7.9)
+  /** VS7.1: staff capability tier. Additive to shopper+vendor; null = not staff. */
+  staffRole?: "moderator" | "admin" | "super_admin" | null;
   intent: "shopper" | "vendor" | null; // registration intent
   accountStatus: AccountStatus;
   emailVerified: boolean;
@@ -236,6 +255,8 @@ export interface AuditEntry {
   type: string;
   identityId: string | null;
   metadata: Record<string, unknown>; // MUST NOT contain PII (email/name/phone)
+  /** VS7.1: marks admin/staff actions for quick filtering in the audit viewer. */
+  adminAction?: boolean;
   at: string;
 }
 
@@ -251,6 +272,8 @@ export interface IdentityRepo {
   getByEmail(email: string): Promise<Identity | null>;
   getById(id: string): Promise<Identity | null>;
   getByGoogleSubject(sub: string): Promise<Identity | null>;
+  /** VS7.12: list all identities (analytics only; mock-backed). */
+  list(): Promise<Identity[]>;
   patch(id: string, patch: Partial<Identity>): Promise<Identity | null>;
   setStatus(id: string, status: AccountStatus): Promise<void>;
 }
@@ -403,6 +426,10 @@ export interface ReviewRepo {
   getById(id: string): Promise<Review | null>;
   /** VS5.10: vendor responds to a review on their own storefront. One response per review. */
   respond(reviewId: string, vendorId: string, body: string): Promise<Review | null>;
+  /** VS7.10: moderation (hide/show) via status patch. */
+  patch(id: string, patch: Partial<Review>): Promise<Review | null>;
+  /** VS7.12: list all reviews (analytics). */
+  listAll(): Promise<Review[]>;
 }
 
 export interface CommentRepo {
@@ -428,6 +455,41 @@ export interface NotificationRepo {
  * No impression log in VS5: counts come from real relationship records.
  * openNow is derived from Vendor.hours + current time; null if hours unset (honest).
  */
+/** VS7.12 — Platform-wide analytics. All counts derived from real records (no fake metrics). */
+export interface PlatformAnalytics {
+  userCount: number;
+  vendorCount: number;
+  listingCount: number;
+  reviewCount: number;
+  openReports: number;
+  messageVolume24h: number;
+  newSignups24h: number;
+  staffCount: number;
+}
+
+/** VS7.19 — Feature flag (mock config). */
+export interface FeatureFlag {
+  key: string;
+  value: boolean;
+  description: string;
+}
+
+/** VS7.18 — Platform agreement version (terms/privacy/etc.). */
+export interface Agreement {
+  id: string;
+  kind: "terms" | "privacy" | "vendor";
+  version: string;
+  body: string;
+  effectiveAt: string;
+  isCurrent: boolean;
+}
+
+export interface AgreementRepo {
+  list(kind?: Agreement["kind"]): Promise<Agreement[]>;
+  create(input: { kind: Agreement["kind"]; version: string; body: string }): Promise<Agreement>;
+  setCurrent(id: string): Promise<Agreement | null>;
+}
+
 export interface VendorAnalytics {
   vendorId: string;
   listingCount: number;

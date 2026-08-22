@@ -83,6 +83,7 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
       campus: showcase.campusId,
       categoryIds: [showcase.categorySlug],
       status: "live",
+      verified: false,
       description: "",
       subArea: null,
       profilePhotoUrl: null,

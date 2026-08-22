@@ -1,6 +1,8 @@
-import type { Vendor, VendorAnalytics } from "./interfaces";
-import { mockVendorRepo, mockListingsRepo } from "./mock";
+import type { Vendor, VendorAnalytics, PlatformAnalytics, Identity, Message, StaffCase } from "./interfaces";
+import { mockVendorRepo, mockListingsRepo, mockStaffRepo } from "./mock";
 import { mockReviewRepo, mockFollowRepo, countSavesByVendor } from "./shopper";
+import { mockIdentityRepo } from "./auth";
+import { mockMessageRepo } from "./messaging";
 
 /**
  * VS5.11 — Derived vendor analytics. Counts come from real relationship records;
@@ -47,3 +49,36 @@ export async function computeVendorAnalytics(vendorId: string): Promise<VendorAn
     openNow,
   };
 }
+
+/**
+ * VS7.12 — Platform-wide analytics. Every figure is derived from real records.
+ * NO fabricated metrics. 24h windows are computed against the current server time.
+ */
+export async function computePlatformAnalytics(): Promise<PlatformAnalytics> {
+  const [identities, vendors, listings, reviews, messages, cases] = await Promise.all([
+    mockIdentityRepo.list(),
+    mockVendorRepo.listVendors(),
+    mockListingsRepo.list(),
+    mockReviewRepo.listAll(),
+    mockMessageRepo.listAll(),
+    mockStaffRepo.listCases(""),
+  ]);
+
+  const since24h = Date.now() - 24 * 3600 * 1000;
+  const newSignups24h = identities.filter((i: Identity) => new Date(i.createdAt).getTime() >= since24h).length;
+  const messageVolume24h = messages.filter((m: Message) => new Date(m.createdAt).getTime() >= since24h).length;
+  const staffCount = identities.filter((i: Identity) => i.staffRole).length;
+  const openReports = cases.filter((c: StaffCase) => c.status === "open" || c.status === "triaged").length;
+
+  return {
+    userCount: identities.length,
+    vendorCount: vendors.length,
+    listingCount: listings.length,
+    reviewCount: reviews.length,
+    openReports,
+    messageVolume24h,
+    newSignups24h,
+    staffCount,
+  };
+}
+

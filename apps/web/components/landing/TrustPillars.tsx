@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { Shield, Eye, Users, Heart } from 'lucide-react';
 
 const pillars = [

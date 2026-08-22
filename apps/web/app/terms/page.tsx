@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { InfoPageShell } from "@/components/info/InfoPageShell";
 
 export const metadata = {

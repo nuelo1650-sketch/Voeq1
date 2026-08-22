@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { mockAuthRepo, type Identity, type UserRole } from "@voeq/data";
+import { hasCapability, type Capability, type StaffRole } from "@voeq/data";
 
 export const SESSION_COOKIE = "sessionId";
 
@@ -10,13 +11,33 @@ export async function getCurrentIdentity(): Promise<Identity | null> {
   return mockAuthRepo.currentIdentity(sessionId);
 }
 
-/** Server-side: redirect to login if not authenticated (used in server components). */
+/** VS7.4: current identity if it holds a staff role, else null. */
+export async function getStaffIdentity(): Promise<(Identity & { staffRole: StaffRole }) | null> {
+  const id = await getCurrentIdentity();
+  if (!id || !id.staffRole) return null;
+  return id as Identity & { staffRole: StaffRole };
+}
+
+/** VS7.4: redirect to login if not authenticated (used in server components). */
 export async function requireAuth(next?: string): Promise<Identity> {
   const id = await getCurrentIdentity();
   if (!id) {
     const url = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
     throw new Response(null, { status: 302, headers: { Location: url } });
   }
+  return id;
+}
+
+/**
+ * VS7.4 — Server-authoritative capability gate for admin route handlers.
+ * Returns the staff identity if it holds `cap`, otherwise throws a 403 Response
+ * (route handlers `catch` via Next's error boundary, or we return it). Callers
+ * should treat a thrown Response as their 403. NEVER trusts client claims.
+ */
+export async function requireCapability(cap: Capability): Promise<Identity & { staffRole: StaffRole }> {
+  const id = await getStaffIdentity();
+  if (!id) throw new Response(null, { status: 401 });
+  if (!hasCapability(id.staffRole, cap)) throw new Response(null, { status: 403 });
   return id;
 }
 

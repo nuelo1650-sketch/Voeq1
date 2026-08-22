@@ -117,6 +117,9 @@ export const mockIdentityRepo: IdentityRepo = {
       await revokeAllSessions(id);
     }
   },
+  async list() {
+    return Array.from(identities.values());
+  },
 };
 
 // ---- SessionRepo -------------------------------------------------------------
@@ -425,4 +428,25 @@ export const mockUserPrefRepo: UserPreferenceRepo = {
 /** Dev/test-only: wipe user-preference store (companion to resetAuthState). */
 export function resetUserPrefs(): void {
   userPrefs.clear();
+}
+
+/**
+ * VS7.24 — Prune expired credentials (OTP codes, magic links, pending tokens).
+ * Real backend (Phase 9) runs this on a schedule; here it's a manual/in-process pass.
+ */
+export function pruneExpiredCredentials(now: number = Date.now()): number {
+  let removed = 0;
+  for (const [key, list] of otpStore) {
+    const live = list.filter((e) => e.expiresAt > now);
+    if (live.length !== list.length) removed += list.length - live.length;
+    if (live.length === 0) otpStore.delete(key);
+    else otpStore.set(key, live);
+  }
+  for (const [token, v] of magicLinks) {
+    if (v.expiresAt <= now || v.used) { magicLinks.delete(token); removed++; }
+  }
+  for (const [token, v] of pendingTokens) {
+    if (new Date(v.expiresAt).getTime() <= now) { pendingTokens.delete(token); removed++; }
+  }
+  return removed;
 }
