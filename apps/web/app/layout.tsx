@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { playfair, inter, jetbrainsMono } from "./fonts";
 import "@voeq/design-tokens/tokens.css";
 import "./globals.css";
+import { NotificationBell } from "@/components/shopper/NotificationBell";
 
 export const metadata: Metadata = {
   title: "Voeq — Find. Connect. Grow.",
@@ -34,7 +35,7 @@ export default function RootLayout({
             fontSize: "var(--fs-sm)",
           }}
         >
-          <nav aria-label="Footer" style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
+          <nav aria-label="Footer" style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap", alignItems: "center" }}>
             <a href="/become-vendor" data-testid="footer-become-vendor" style={{ color: "var(--role-muted)", textDecoration: "none" }}>
               Become a vendor
             </a>
@@ -44,6 +45,7 @@ export default function RootLayout({
             <a href="/terms" style={{ color: "var(--role-muted, var(--role-muted))", textDecoration: "none" }}>
               Terms
             </a>
+            <NotificationBell />
           </nav>
         </footer>
       </body>

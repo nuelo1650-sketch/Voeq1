@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import {
   mockIdentityRepo,
   mockSessionRepo,
+  mockNotificationRepo,
   verifyOtp,
   consumePendingToken,
   checkRateLimit,
@@ -81,5 +82,14 @@ export async function POST(req: NextRequest) {
   });
 
   await logAudit("signup.verified", identity.id, { method: identity.method });
+
+  // Seed one honest system notification (VS4.8) — welcome, not a fake count.
+  await mockNotificationRepo.create({
+    recipientId: identity.id,
+    type: "system",
+    title: "Welcome to Voeq",
+    body: "Your account is verified. Explore campus vendors near you.",
+  });
+
   return NextResponse.json({ ok: true, redirect: "/consent" });
 }

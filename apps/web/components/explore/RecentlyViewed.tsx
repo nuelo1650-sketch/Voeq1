@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import type { VendorSummary } from '@voeq/data';
 import { vendors } from '@voeq/data';
+import { SaveButton } from '@/components/shopper/SaveButton';
 
 const RECENT_KEY = 'voeq:recentlyViewed';
 
@@ -27,7 +28,6 @@ interface RecentlyViewedProps {
 }
 
 export function RecentlyViewed({ vendors: propVendors }: RecentlyViewedProps) {
-  const [saved, setSaved] = useState<Set<string>>(new Set());
   const [recentVendors, setRecentVendors] = useState<VendorSummary[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -46,15 +46,6 @@ export function RecentlyViewed({ vendors: propVendors }: RecentlyViewedProps) {
   if ((!hydrated && (!propVendors || propVendors.length === 0)) || source.length === 0) {
     return null;
   }
-
-  const toggleSave = (vendorId: string) => {
-    setSaved((prev) => {
-      const next = new Set(prev);
-      if (next.has(vendorId)) next.delete(vendorId);
-      else next.add(vendorId);
-      return next;
-    });
-  };
 
   return (
     <section className="recently-viewed">
@@ -98,13 +89,7 @@ export function RecentlyViewed({ vendors: propVendors }: RecentlyViewedProps) {
               </div>
             </Link>
 
-            <button
-              className={`recently-viewed-save ${saved.has(vendor.id) ? 'saved' : ''}`}
-              onClick={() => toggleSave(vendor.id)}
-              aria-label={`Save ${vendor.name}`}
-            >
-              <Heart size={14} fill={saved.has(vendor.id) ? 'currentColor' : 'none'} />
-            </button>
+            <SaveButton targetType="vendor" targetId={vendor.id} className="recently-viewed-save" />
           </div>
         ))}
       </div>

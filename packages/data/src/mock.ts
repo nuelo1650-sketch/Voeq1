@@ -5,6 +5,7 @@ import type {
   MessagesRepo,
   SearchRepo,
   StaffRepo,
+  StaffCase,
   VendorsRepo,
   VendorRepo,
   Listing,
@@ -183,9 +184,19 @@ export const mockMessagesRepo: MessagesRepo = {
   },
 };
 
+const staffCases: StaffCase[] = [];
+
 export const mockStaffRepo: StaffRepo = {
-  async listCases() {
-    return [];
+  async create(input) {
+    const c: StaffCase = {
+      id: `sc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      ...input,
+    };
+    staffCases.push(c);
+    return c;
+  },
+  async listCases(queue) {
+    return staffCases.filter((c) => c.queue === queue);
   },
 };
 

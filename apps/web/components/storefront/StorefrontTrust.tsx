@@ -2,17 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { VendorStorefrontView } from "@voeq/data";
+import { FollowButton } from "@/components/shopper/FollowButton";
+import { ReviewForm } from "@/components/shopper/ReviewForm";
+import { ReviewsList } from "@/components/shopper/ReviewsList";
+import { ReportForm } from "@/components/shopper/ReportForm";
 
 /**
- * StorefrontTrust — reviews (graceful absence, no fake reviews) + Follow /
- * Message CTAs. Auth is deferred to VS2 (Reversal 4), so these are NOT dead
- * no-ops: clicking reveals an honest inline auth-gate that links to Get Started
- * (/explore) — no "Coming soon", no disabled buttons (which would look broken).
+ * StorefrontTrust — reviews (real, public-read) + Follow / Message CTAs.
+ * Reviews + Follow are LIVE (VS4.3/4.4). Message stays an auth-gate panel:
+ * messaging itself is deferred to VS6 (Doc 13 §13.13) — the CTA links to
+ * /login?next=<current> so post-auth returns here, consistent with the
+ * public-browse, auth-to-act pattern (Doc 03 §3.9).
  */
 
 export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
-  const [gated, setGated] = useState<null | "follow" | "message">(null);
+  const pathname = usePathname();
+  const [gated, setGated] = useState<null | "review" | "message" | "report">(null);
 
   const ctaStyle: React.CSSProperties = {
     fontFamily: "var(--role-font-ui)",
@@ -26,46 +33,45 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
     cursor: "pointer",
   };
 
+  const rated = vendor.reviews.filter((r) => typeof r.rating === "number");
+  const ratingAvg = rated.length > 0 ? rated.reduce((s, r) => s + (r.rating as number), 0) / rated.length : null;
+
   return (
     <section
       data-testid="storefront-trust"
       aria-label="Reviews and contact"
       style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}
     >
-      <h2 data-testid="storefront-reviews-heading" style={{ fontFamily: "var(--role-font-display)", fontSize: "1.5rem", margin: 0, color: "var(--role-text)" }}>
-        Reviews
-      </h2>
+      <ReviewsList reviews={vendor.reviews} ratingAvg={ratingAvg} ratingCount={rated.length} />
 
-      {/* Honest graceful absence — never render a fake review. */}
-      {vendor.reviews.length === 0 ? (
-        <p data-testid="storefront-reviews-empty" style={{ color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)", margin: 0 }}>
-          No reviews yet. Be the first to share your experience.
-        </p>
+      {/* Auth-to-act: unauthed shoppers see the form behind a /login?next= gate. */}
+      {gated === "review" ? (
+        <ReviewForm vendorId={vendor.id} />
       ) : (
-        <ul data-testid="storefront-reviews-list" style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-          {vendor.reviews.map((r) => (
-            <li key={r.id} data-testid="storefront-review" style={{ border: "1px solid var(--role-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-2)" }}>
-              <span style={{ color: "var(--role-gold)" }}>★ {r.rating.toFixed(1)}</span>
-              <p style={{ fontFamily: "var(--role-font-ui)", color: "var(--role-text)", margin: "4px 0 0" }}>{r.body}</p>
-            </li>
-          ))}
-        </ul>
+        <button
+          data-testid="storefront-write-review"
+          onClick={() => setGated("review")}
+          style={{ ...ctaStyle, background: "transparent", color: "var(--role-accent-strong)", alignSelf: "flex-start" }}
+        >
+          {vendor.reviews.length > 0 ? "Write a review" : "Be the first to review"}
+        </button>
       )}
 
       <div style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-2)" }}>
-        <button
-          data-testid="storefront-follow-btn"
-          onClick={() => setGated("follow")}
-          style={ctaStyle}
-        >
-          Follow
-        </button>
+        <FollowButton vendorId={vendor.id} className="storefront-follow-btn" />
         <button
           data-testid="storefront-message-btn"
           onClick={() => setGated("message")}
           style={{ ...ctaStyle, background: "transparent", color: "var(--role-accent-strong)" }}
         >
           Message
+        </button>
+        <button
+          data-testid="storefront-report-btn"
+          onClick={() => setGated("report")}
+          style={{ background: "transparent", border: "1px solid var(--role-border)", color: "var(--role-text-muted)", borderRadius: "var(--radius)", padding: "12px 18px", fontSize: "14px", fontFamily: "var(--role-font-ui)", cursor: "pointer" }}
+        >
+          Report
         </button>
       </div>
 
@@ -87,28 +93,34 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
             gap: "var(--space-2)",
           }}
         >
-          <span data-testid="storefront-auth-gate-text">
-            {gated === "follow"
-              ? `Sign in to follow ${vendor.name} and get updates on new listings.`
-              : `Sign in to message ${vendor.name} directly.`}
-          </span>
-          <Link
-            href="/explore"
-            data-testid="storefront-auth-gate-cta"
-            style={{
-              alignSelf: "flex-start",
-              fontFamily: "var(--role-font-ui)",
-              fontWeight: 600,
-              fontSize: "14px",
-              padding: "10px 18px",
-              borderRadius: "var(--radius)",
-              background: "var(--role-accent-strong)",
-              color: "var(--role-on-accent)",
-              textDecoration: "none",
-            }}
-          >
-            Get Started
-          </Link>
+          {gated === "report" ? (
+            <ReportForm targetType="vendor" targetId={vendor.id} onDone={() => setGated(null)} />
+          ) : (
+            <>
+              <span data-testid="storefront-auth-gate-text">
+                {gated === "message"
+                  ? `Sign in to message ${vendor.name} directly.`
+                  : `Sign in to follow ${vendor.name} and get updates on new listings.`}
+              </span>
+              <Link
+                href={`/login?next=${encodeURIComponent(pathname)}`}
+                data-testid="storefront-auth-gate-cta"
+                style={{
+                  alignSelf: "flex-start",
+                  fontFamily: "var(--role-font-ui)",
+                  fontWeight: 600,
+                  fontSize: "14px",
+                  padding: "10px 18px",
+                  borderRadius: "var(--radius)",
+                  background: "var(--role-accent-strong)",
+                  color: "var(--role-on-accent)",
+                  textDecoration: "none",
+                }}
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       )}
     </section>

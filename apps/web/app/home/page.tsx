@@ -1,16 +1,17 @@
 import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
 import { mockUserPrefRepo, campuses } from "@voeq/data";
+import { ShopperDashboard } from "@/components/shopper/ShopperDashboard";
 
 /**
- * VS3.1 — minimal shopper home (placeholder dashboard; full dashboard is VS4).
- * Campus-scoped per Doc 03. Guards the shopper-onboarding gate: if
- * feedPrefsSetAt is not set, bounce to /onboarding/shopper (the last post-auth
- * gate). This is the terminus of the post-auth chain.
+ * VS4.7 — shopper dashboard (PG-SHOP-001).
+ * Campus-scoped per Doc 03. Guards the shopper-onboarding gate, then renders the
+ * real dashboard (Saved / Following / Recommended / Activity / Notifications).
+ * Auth redirect preserves ?next= so post-login returns here (Doc 03 §3.9).
  */
 export default async function HomePage() {
   const identity = await getCurrentIdentity();
-  if (!identity) redirect("/login");
+  if (!identity) redirect(`/login?next=${encodeURIComponent("/home")}`);
 
   const prefs = await mockUserPrefRepo.get(identity.id);
   if (!prefs || !prefs.feedPrefsSetAt) redirect("/onboarding/shopper");
@@ -60,23 +61,7 @@ export default async function HomePage() {
         </a>
       </section>
 
-      <section
-        aria-label="Saved & following"
-        style={{
-          border: "1px solid var(--role-border)",
-          borderRadius: "var(--radius-card)",
-          padding: "var(--space-3)",
-          background: "var(--surface-1)",
-        }}
-      >
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h3)" }}>
-          Your dashboard
-        </h2>
-        <p style={{ color: "var(--role-muted)", marginTop: "var(--space-1)" }}>
-          Saved listings, followed vendors, and messages arrive here. (Full shopper
-          experience ships in VS4.)
-        </p>
-      </section>
+      <ShopperDashboard name={identity.name || "shopper"} />
 
       {!identity.vendorId && (
         <section

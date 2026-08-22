@@ -180,6 +180,9 @@ export const mockAuthRepo = {
     }
     return id;
   },
+  async getIdentityById(id: string): Promise<Identity | null> {
+    return identities.get(id) ?? null;
+  },
 };
 
 // ---- ConsentRepo -------------------------------------------------------------
@@ -404,12 +407,12 @@ export const mockUserPrefRepo: UserPreferenceRepo = {
   async get(identityId) {
     return userPrefs.get(identityId) ?? null;
   },
-  async save({ identityId, campus, interestTags, feedPrefsSetAt }) {
+  async save({ identityId, campus, interestTags, feedPrefsSetAt, notificationPrefs }) {
     const existing = userPrefs.get(identityId);
     const updated: UserPreference = {
       identityId,
       campus: campus ?? existing?.campus ?? "",
-      notificationPrefs: existing?.notificationPrefs ?? {},
+      notificationPrefs: notificationPrefs ?? existing?.notificationPrefs ?? {},
       interestTags: interestTags ?? existing?.interestTags ?? [],
       feedPrefsSetAt: feedPrefsSetAt !== undefined ? feedPrefsSetAt : existing?.feedPrefsSetAt ?? null,
       updatedAt: nowIso(),

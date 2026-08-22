@@ -66,9 +66,10 @@ export interface ActivityEvent {
 export interface Review {
   id: string;
   vendorId: string;
-  authorId: string;
-  rating: number;
+  authorId: string; // = identityId
+  rating: number; // 1-5
   body: string;
+  createdAt: string;
 }
 
 export interface Conversation {
@@ -119,6 +120,7 @@ export interface MessagesRepo {
 }
 
 export interface StaffRepo {
+  create(input: { queue: string; decision: string | null; consequence: string | null }): Promise<StaffCase>;
   listCases(queue: string): Promise<StaffCase[]>;
 }
 
@@ -200,6 +202,7 @@ export interface UserPreferenceRepo {
     campus?: string;
     interestTags?: string[];
     feedPrefsSetAt?: string | null;
+    notificationPrefs?: Record<string, NotificationPref>;
   }): Promise<UserPreference>;
 }
 
@@ -271,4 +274,122 @@ export interface AuditStore {
 // Expanded (was: currentIdentity(): Promise<{ id: string; capabilities: string[] } | null>)
 export interface AuthRepo {
   currentIdentity(sessionId: string | null): Promise<Identity | null>;
+  /** Read-only lookup for attribution (comments/reviews display names). No PII beyond name. */
+  getIdentityById(id: string): Promise<Identity | null>;
+}
+
+// ---- Shopper relationship types (VS4) --------------------------------------
+// Appended net-new (LOCKED interfaces.ts: extend-only). No existing shape modified.
+
+/** Saved listing OR vendor (mutually exclusive per Doc 08 §8.7). */
+export interface WishlistItem {
+  id: string;
+  shopperId: string; // = identityId
+  listingId: string | null;
+  vendorId: string | null;
+  createdAt: string;
+}
+
+export interface Follow {
+  id: string;
+  followerId: string; // = identityId
+  vendorId: string;
+  createdAt: string;
+}
+
+export interface Like {
+  id: string;
+  actorId: string; // = identityId
+  targetId: string;
+  targetType: "listing" | "vendor";
+  createdAt: string;
+}
+
+export interface Comment {
+  id: string;
+  listingId: string;
+  authorId: string; // = identityId
+  body: string;
+  createdAt: string;
+  /** Moderation lifecycle (Doc 13 — honest, no auto-hide of legit content). */
+  status: "published" | "hidden" | "flagged";
+}
+
+export type ReportCategory =
+  | "not_on_campus"
+  | "scam"
+  | "inappropriate"
+  | "impersonation"
+  | "harassment"
+  | "other";
+
+export interface Report {
+  id: string;
+  reporterId: string; // = identityId
+  targetType: "listing" | "vendor";
+  targetId: string;
+  category: ReportCategory;
+  body: string | null;
+  status: "open" | "triaged" | "actioned" | "dismissed";
+  createdAt: string;
+}
+
+export type NotificationType =
+  | "new_message"
+  | "new_review"
+  | "review_response"
+  | "new_follower"
+  | "system";
+
+export interface Notification {
+  id: string;
+  recipientId: string; // = identityId
+  type: NotificationType;
+  title: string;
+  body: string;
+  refId: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface SavedListingRepo {
+  /** Toggle: if saved, remove; else add. Returns the resulting saved state. */
+  toggle(input: { shopperId: string; targetType: "listing" | "vendor"; targetId: string }): Promise<{ saved: boolean; item?: WishlistItem }>;
+  list(shopperId: string): Promise<WishlistItem[]>;
+}
+
+export interface FollowRepo {
+  /** Toggle: if following, unfollow; else follow. Returns resulting state. */
+  toggle(input: { followerId: string; vendorId: string }): Promise<{ following: boolean; follow?: Follow }>;
+  list(followerId: string): Promise<Follow[]>;
+}
+
+export interface LikeRepo {
+  toggle(input: { actorId: string; targetId: string; targetType: "listing" | "vendor" }): Promise<{ liked: boolean; like?: Like }>;
+  list(actorId: string): Promise<Like[]>;
+}
+
+export interface ReviewRepo {
+  /** Upsert: one review per (shopperId, vendorId) per Doc 09 §9.8. */
+  create(input: { shopperId: string; vendorId: string; rating: number; body: string }): Promise<Review>;
+  listByVendor(vendorId: string): Promise<Review[]>;
+  getById(id: string): Promise<Review | null>;
+}
+
+export interface CommentRepo {
+  create(input: { listingId: string; authorId: string; body: string }): Promise<Comment>;
+  listByListing(listingId: string): Promise<Comment[]>;
+  getById(id: string): Promise<Comment | null>;
+}
+
+export interface ReportRepo {
+  create(input: { reporterId: string; targetType: "listing" | "vendor"; targetId: string; category: ReportCategory; body: string | null }): Promise<Report>;
+  list(): Promise<Report[]>;
+}
+
+export interface NotificationRepo {
+  create(input: { recipientId: string; type: NotificationType; title: string; body: string; refId?: string | null }): Promise<Notification>;
+  list(recipientId: string): Promise<Notification[]>;
+  markRead(id: string, recipientId: string): Promise<boolean>;
+  markAllRead(recipientId: string): Promise<boolean>;
 }
