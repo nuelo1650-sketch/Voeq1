@@ -8,6 +8,7 @@ import {
   INVALIDATE_SESSIONS_ON_RESET,
   checkRateLimit,
   logAudit,
+  sendEmail,
 } from "@voeq/data";
 import { z } from "zod";
 
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
   }
 
   await logAudit("reset.completed", identity.id, {});
-  // Security notification (Phase 9: Resend). Mocked here.
-  console.log(`[mock-email] SECURITY: password reset completed for ${email}`);
+  // D.5 — Real security email via Resend (dev fallback logs when RESEND_API_KEY unset).
+  await sendEmail({ to: email, template: "PASSWORD_CHANGED" });
   return NextResponse.json({ ok: true, redirect: "/login" });
 }

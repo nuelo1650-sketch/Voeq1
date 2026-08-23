@@ -5,10 +5,10 @@ import { mockVendorRepo, mockUserPrefRepo, campuses } from "@voeq/data";
 import { SettingsForms } from "@/components/shopper/SettingsForms";
 
 /**
- * VS3.6 (Reversal 8) + VS4.11 — Settings. Account info (read-only) + editable
- * notification prefs + campus switch. The "Become a vendor" CTA is ALWAYS present
- * here, regardless of role/eligibility (Reversal 8). If the user already has a
- * vendor account, the CTA points to the dashboard instead of the setup wizard.
+ * VS3.6 (Reversal 8) + VS4.11 + K3a.2 enhanced. Settings with 4 sections:
+ * Profile (avatar, name, bio), Notifications (toggles, quiet hours), Campus
+ * (selector, sub-area), Account (sessions, danger zone). Sidebar/tab navigation,
+ * inline save, confirmation modals.
  */
 export default async function SettingsPage() {
   const identity = await getCurrentIdentity();
@@ -17,44 +17,134 @@ export default async function SettingsPage() {
   const isVendor = !!identity.vendorId;
   const vendorLabel = isVendor ? (await mockVendorRepo.getById(identity.vendorId!))?.name : null;
   const prefs = await mockUserPrefRepo.get(identity.id);
-  const notifPrefs = (prefs?.notificationPrefs ?? {}) as Record<string, "email" | "in_app" | "none">;
+  const notifPrefs = (prefs?.notificationPrefs ?? {}) as Record<string, "email" | "in_app" | "both" | "off">;
+
+  // Sample session data for UI display
+  const sampleSessions = [
+    { id: "1", browser: "Chrome", os: "Windows", lastActive: "2 minutes ago" },
+    { id: "2", browser: "Safari", os: "iOS", lastActive: "2 days ago" },
+  ];
 
   return (
     <main
       data-testid="settings-page"
-      style={{ minHeight: "100vh", background: "var(--role-bg)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}
+      style={{
+        minHeight: "100vh",
+        background: "var(--color-glass-white)",
+        padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)",
+      }}
     >
-      <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h2)" }}>Settings</h1>
-
-      <section className="auth-card" style={{ marginTop: "var(--space-3)" }} data-testid="settings-account">
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h3)" }}>Account</h2>
-        <p style={{ color: "var(--role-muted)" }}>Email: {identity.email}</p>
-        <p style={{ color: "var(--role-muted)" }}>Role: {identity.role}</p>
-      </section>
+      <h1
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: 36,
+          marginBottom: "var(--space-4)",
+          color: "var(--color-forest)",
+        }}
+      >
+        Settings
+      </h1>
 
       <SettingsForms
+        identity={{
+          id: identity.id,
+          name: identity.name,
+          email: identity.email,
+          role: identity.role,
+          campus: identity.campus,
+        }}
         initialPrefs={notifPrefs}
-        initialCampus={identity.campus ?? campuses[0]?.id ?? "NMU"}
         campuses={campuses.map((c) => ({ id: c.id, name: c.name }))}
+        sessions={sampleSessions}
       />
 
-      <section
-        className="auth-card"
-        style={{ marginTop: "var(--space-3)" }}
-        data-testid="settings-become-vendor"
-      >
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h3)" }}>Selling</h2>
-        {isVendor ? (
-          <p>
-            You're a vendor{ vendorLabel ? `: ${vendorLabel}` : "" }.{" "}
-            <Link href="/vendor/dashboard" className="info-link">Go to dashboard</Link>
+      {!isVendor && (
+        <section
+          style={{
+            marginTop: "var(--space-4)",
+            border: "1px solid var(--color-amber)",
+            borderRadius: 8,
+            padding: "var(--space-3)",
+            background: "var(--color-cream)",
+            maxWidth: 600,
+          }}
+          data-testid="settings-become-vendor"
+        >
+          <h2
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: 22,
+              margin: 0,
+              marginBottom: 8,
+              color: "var(--color-forest)",
+            }}
+          >
+            Selling
+          </h2>
+          <p style={{ color: "var(--color-ink-muted)", marginTop: 0, marginBottom: "var(--space-2)", fontSize: 14 }}>
+            Turn your skills or products into a campus business — free to list.
           </p>
-        ) : (
-          <Link href="/become-vendor" className="auth-submit" data-testid="settings-become-vendor-cta" style={{ textDecoration: "none", display: "inline-block", marginTop: "var(--space-2)" }}>
+          <Link
+            href="/become-vendor"
+            data-testid="settings-become-vendor-cta"
+            style={{
+              display: "inline-block",
+              padding: "10px 20px",
+              background: "var(--color-forest)",
+              color: "var(--color-cream)",
+              textDecoration: "none",
+              borderRadius: 6,
+              fontSize: 14,
+              fontWeight: 500,
+            }}
+          >
             Become a vendor
           </Link>
-        )}
-      </section>
+        </section>
+      )}
+
+      {isVendor && (
+        <section
+          style={{
+            marginTop: "var(--space-4)",
+            border: "1px solid var(--color-forest-light)",
+            borderRadius: 8,
+            padding: "var(--space-3)",
+            background: "var(--color-cream)",
+            maxWidth: 600,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: 22,
+              margin: 0,
+              marginBottom: 8,
+              color: "var(--color-forest)",
+            }}
+          >
+            Your business
+          </h2>
+          <p style={{ fontSize: 14, color: "var(--color-ink-muted)", marginBottom: 12 }}>
+            You're a vendor{vendorLabel ? `: ${vendorLabel}` : ""}.
+          </p>
+          <Link
+            href="/vendor/dashboard"
+            style={{
+              display: "inline-block",
+              padding: "10px 20px",
+              background: "var(--color-forest)",
+              color: "var(--color-cream)",
+              textDecoration: "none",
+              borderRadius: 6,
+              fontSize: 14,
+              fontWeight: 500,
+            }}
+          >
+            Go to dashboard
+          </Link>
+        </section>
+      )}
     </main>
   );
 }

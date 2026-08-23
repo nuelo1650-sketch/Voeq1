@@ -8,7 +8,7 @@ export default async function MessagesPage() {
   const identity = await getCurrentIdentity();
   if (!identity) redirect("/login?next=/messages");
 
-  const { mockAuthRepo, mockConversationRepo, mockMessageRepo, mockIdentityRepo } = await import("@voeq/data");
+  const { mockConversationRepo, mockMessageRepo, mockIdentityRepo } = await import("@voeq/data");
   const conversations = await mockConversationRepo.listForIdentity(identity.id);
   const rows: ConversationRow[] = await Promise.all(
     conversations.map(async (c) => {

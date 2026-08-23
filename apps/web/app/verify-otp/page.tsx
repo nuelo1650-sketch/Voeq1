@@ -1,19 +1,30 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
 
-export default function VerifyOtpPage() {
+function VerifyOtpForm() {
   const router = useRouter();
   const params = useSearchParams();
   const token = params.get("token") ?? "";
-  const purpose = params.get("purpose") ?? "registration";
+  const _purpose = params.get("purpose") ?? "registration";
 
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [resendTimer, setResendTimer] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+
+  useEffect(() => {
+    if (resendTimer <= 0) {
+      setCanResend(true);
+      return;
+    }
+    const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendTimer]);
 
   if (!token) {
     return (
@@ -57,6 +68,26 @@ export default function VerifyOtpPage() {
     }
   }
 
+  async function handleResend() {
+    setError(null);
+    setCanResend(false);
+    setResendTimer(60);
+    try {
+      const res = await fetch("/api/auth/resend-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (!res.ok) {
+        setError("Could not resend code. Please try again.");
+        setCanResend(true);
+      }
+    } catch {
+      setError("Network error.");
+      setCanResend(true);
+    }
+  }
+
   return (
     <InfoPageShell title="Verify your email">
       <div className="auth-card">
@@ -75,6 +106,8 @@ export default function VerifyOtpPage() {
               aria-invalid={Boolean(error)}
               aria-describedby={error ? "code-error" : undefined}
               data-testid="otp-code"
+              className="auth-otp-input"
+              autoFocus
             />
             {error && <span className="auth-error" id="code-error" role="alert">{error}</span>}
           </div>
@@ -83,9 +116,26 @@ export default function VerifyOtpPage() {
           </button>
         </form>
         <p className="auth-alt">
+          {canResend ? (
+            <button type="button" onClick={handleResend} className="auth-link-btn">
+              Resend code
+            </button>
+          ) : (
+            <span>Resend code in {resendTimer}s</span>
+          )}
+        </p>
+        <p className="auth-alt">
           <Link href="/signup">← Use a different email</Link>
         </p>
       </div>
     </InfoPageShell>
+  );
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyOtpForm />
+    </Suspense>
   );
 }

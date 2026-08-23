@@ -3,25 +3,26 @@
 import type { ExploreFilters } from "@voeq/data";
 
 export const CATEGORIES = [
-  { slug: "food", label: "Food" },
-  { slug: "books", label: "Books" },
-  { slug: "beauty", label: "Beauty" },
-  { slug: "apparel", label: "Apparel" },
+  { slug: "food", label: "Food & Drinks" },
+  { slug: "books", label: "Academic" },
+  { slug: "beauty", label: "Beauty & Wellness" },
+  { slug: "apparel", label: "Fashion" },
   { slug: "services", label: "Services" },
+  { slug: "tech", label: "Tech & Electronics" },
+  { slug: "printing", label: "Printing & Copy" },
 ];
 
 const SORTS = [
-  { value: "relevance", label: "Relevance" },
-  { value: "price-asc", label: "Price ↑" },
-  { value: "price-desc", label: "Price ↓" },
+  { value: "relevance", label: "Most popular" },
+  { value: "newest", label: "Newest first" },
+  { value: "price-asc", label: "Price: Low to High" },
+  { value: "price-desc", label: "Price: High to Low" },
   { value: "rating-desc", label: "Top rated" },
 ] as const;
 
 /**
- * Filters — the filter control surface (Doc 04 PG-PUB-002). Rendered as a persistent sidebar
- * on desktop and inside a bottom sheet on mobile (handled by Explore). All changes flow up via
- * onChange with a meaningful transition (D.2/D.4) — no instant snap. `disabled` while a filter
- * is unavailable (e.g. during load).
+ * Filters — modernized filter sidebar for campus marketplace.
+ * Genuine, student-relevant filters only. Clean, modern styling.
  */
 export function Filters({
   value,
@@ -35,117 +36,253 @@ export function Filters({
   const set = (patch: Partial<ExploreFilters>) => onChange({ ...value, ...patch });
 
   return (
-    <div data-testid="explore-filters" style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+    <div data-testid="explore-filters" style={{ 
+      display: "flex", 
+      flexDirection: "column", 
+      gap: "var(--space-4)",
+      background: "var(--color-cream)",
+      border: "1px solid var(--color-ink-subtle)",
+      borderRadius: 12,
+      padding: "var(--space-3)",
+    }}>
+      <h3 style={{ 
+        fontFamily: "var(--font-display)", 
+        fontSize: 18, 
+        margin: 0, 
+        color: "var(--color-forest)",
+        paddingBottom: "var(--space-2)",
+        borderBottom: "1px solid var(--color-ink-subtle)",
+      }}>
+        Filters
+      </h3>
+
+      {/* Category */}
       <Field label="Category">
         <select
           data-testid="filter-category"
           value={presetCategory ?? value.category ?? ""}
           disabled={!!presetCategory}
           onChange={(e) => set({ category: e.target.value || undefined })}
-          style={inputStyle}
+          style={modernSelectStyle}
         >
-          <option value="">All</option>
+          <option value="">All categories</option>
           {CATEGORIES.map((c) => (
             <option key={c.slug} value={c.slug}>{c.label}</option>
           ))}
         </select>
       </Field>
 
-      <Field label="Price min (R)">
-        <input
-          data-testid="filter-min-price"
-          type="number"
-          min={0}
-          value={value.minPrice ?? ""}
-          onChange={(e) => set({ minPrice: e.target.value ? Number(e.target.value) * 100 : undefined })}
-          style={inputStyle}
-        />
-      </Field>
-
-      <Field label="Price max (R)">
-        <input
-          data-testid="filter-max-price"
-          type="number"
-          min={0}
-          value={value.maxPrice ?? ""}
-          onChange={(e) => set({ maxPrice: e.target.value ? Number(e.target.value) * 100 : undefined })}
-          style={inputStyle}
-        />
-      </Field>
-
-      <Field label="Min rating">
-        <input
-          data-testid="filter-min-rating"
-          type="number"
-          min={0}
-          max={5}
-          step={0.5}
-          value={value.minRating ?? ""}
-          onChange={(e) => set({ minRating: e.target.value ? Number(e.target.value) : undefined })}
-          style={inputStyle}
-        />
-      </Field>
-
-      <label style={checkStyle}>
-        <input
-          data-testid="filter-verified"
-          type="checkbox"
-          checked={!!value.verifiedOnly}
-          onChange={(e) => set({ verifiedOnly: e.target.checked })}
-        />
-        Student Vouched only
-      </label>
-
-      <label style={checkStyle}>
-        <input
-          data-testid="filter-featured"
-          type="checkbox"
-          checked={!!value.featuredOnly}
-          onChange={(e) => set({ featuredOnly: e.target.checked })}
-        />
-        Featured only
-      </label>
-
-      <Field label="Sort">
+      {/* Sort */}
+      <Field label="Sort by">
         <select
           data-testid="filter-sort"
           value={value.sort ?? "relevance"}
           onChange={(e) => set({ sort: e.target.value as ExploreFilters["sort"] })}
-          style={inputStyle}
+          style={modernSelectStyle}
         >
           {SORTS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
       </Field>
+
+      {/* Price range */}
+      <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+        <legend style={{ 
+          fontSize: 14, 
+          fontWeight: 600,
+          color: "var(--color-forest)", 
+          fontFamily: "var(--font-body)", 
+          marginBottom: 8 
+        }}>
+          Price range (₦)
+        </legend>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <div>
+            <label style={{ fontSize: 12, color: "var(--color-ink-muted)", marginBottom: 4, display: "block" }}>
+              Minimum
+            </label>
+            <input
+              data-testid="filter-min-price"
+              type="number"
+              min={0}
+              placeholder="0"
+              value={value.minPrice ? value.minPrice / 100 : ""}
+              onChange={(e) => set({ minPrice: e.target.value ? Number(e.target.value) * 100 : undefined })}
+              style={modernInputStyle}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, color: "var(--color-ink-muted)", marginBottom: 4, display: "block" }}>
+              Maximum
+            </label>
+            <input
+              data-testid="filter-max-price"
+              type="number"
+              min={0}
+              placeholder="Any"
+              value={value.maxPrice ? value.maxPrice / 100 : ""}
+              onChange={(e) => set({ maxPrice: e.target.value ? Number(e.target.value) * 100 : undefined })}
+              style={modernInputStyle}
+            />
+          </div>
+        </div>
+        {(value.minPrice || value.maxPrice) && (
+          <p style={{ fontSize: 12, color: "var(--color-forest-mid)", margin: 0, marginTop: 6 }}>
+            {value.minPrice && value.maxPrice 
+              ? `₦${value.minPrice / 100} – ₦${value.maxPrice / 100}`
+              : value.minPrice 
+              ? `From ₦${value.minPrice / 100}`
+              : value.maxPrice
+              ? `Up to ₦${value.maxPrice / 100}`
+              : ""}
+          </p>
+        )}
+      </fieldset>
+
+      {/* Minimum rating */}
+      <Field label="Minimum rating">
+        <select
+          data-testid="filter-min-rating"
+          value={value.minRating ?? ""}
+          onChange={(e) => set({ minRating: e.target.value ? Number(e.target.value) : undefined })}
+          style={modernSelectStyle}
+        >
+          <option value="">Any rating</option>
+          <option value="3">⭐ 3+ stars</option>
+          <option value="4">⭐ 4+ stars</option>
+          <option value="4.5">⭐ 4.5+ stars</option>
+        </select>
+      </Field>
+
+      {/* Divider */}
+      <div style={{ height: 1, background: "var(--color-ink-subtle)", margin: 0 }} />
+
+      {/* Quick filters */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <p style={{ 
+          fontSize: 12, 
+          fontWeight: 600, 
+          color: "var(--color-ink-muted)", 
+          textTransform: "uppercase", 
+          letterSpacing: "0.5px",
+          margin: 0,
+        }}>
+          Quick filters
+        </p>
+
+        {/* Open now */}
+        <label style={modernCheckStyle}>
+          <input
+            data-testid="filter-open-now"
+            type="checkbox"
+            checked={!!value.openNow}
+            onChange={(e) => set({ openNow: e.target.checked || undefined })}
+            style={checkboxStyle}
+          />
+          <span>Open now</span>
+        </label>
+
+        {/* Verified only */}
+        <label style={modernCheckStyle}>
+          <input
+            data-testid="filter-verified"
+            type="checkbox"
+            checked={!!value.verifiedOnly}
+            onChange={(e) => set({ verifiedOnly: e.target.checked || undefined })}
+            style={checkboxStyle}
+          />
+          <span>Verified only</span>
+        </label>
+
+        {/* Has photos */}
+        <label style={modernCheckStyle}>
+          <input
+            data-testid="filter-has-photos"
+            type="checkbox"
+            checked={!!value.hasPhotos}
+            onChange={(e) => set({ hasPhotos: e.target.checked || undefined })}
+            style={checkboxStyle}
+          />
+          <span>Has photos</span>
+        </label>
+      </div>
+
+      {/* Clear all button */}
+      {(value.category || value.minPrice || value.maxPrice || value.minRating || value.openNow || value.verifiedOnly || value.hasPhotos) && (
+        <button
+          onClick={() => onChange({})}
+          style={{
+            padding: "10px",
+            background: "transparent",
+            color: "var(--color-ink-muted)",
+            border: "1px solid var(--color-ink-subtle)",
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: 500,
+            cursor: "pointer",
+            marginTop: "var(--space-2)",
+          }}
+        >
+          Clear all filters
+        </button>
+      )}
     </div>
   );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: "13px", color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
+    <label style={{ 
+      display: "flex", 
+      flexDirection: "column", 
+      gap: 8, 
+      fontSize: 14, 
+      fontWeight: 600,
+      color: "var(--color-forest)", 
+      fontFamily: "var(--font-body)" 
+    }}>
       {label}
       {children}
     </label>
   );
 }
 
-const inputStyle: React.CSSProperties = {
-  padding: "8px 10px",
-  borderRadius: "var(--radius)",
-  border: "1px solid var(--role-border)",
-  background: "var(--role-surface)",
-  color: "var(--role-text)",
-  fontFamily: "var(--role-font-ui)",
-  fontSize: "14px",
+const modernSelectStyle: React.CSSProperties = {
+  padding: "10px 12px",
+  borderRadius: 8,
+  border: "1px solid var(--color-ink-subtle)",
+  background: "var(--color-glass-white)",
+  color: "var(--color-ink)",
+  fontFamily: "var(--font-body)",
+  fontSize: 14,
+  cursor: "pointer",
 };
 
-const checkStyle: React.CSSProperties = {
+const modernInputStyle: React.CSSProperties = {
+  flex: 1,
+  padding: "10px 12px",
+  borderRadius: 8,
+  border: "1px solid var(--color-ink-subtle)",
+  background: "var(--color-glass-white)",
+  color: "var(--color-ink)",
+  fontFamily: "var(--font-body)",
+  fontSize: 14,
+};
+
+const modernCheckStyle: React.CSSProperties = {
   display: "flex",
-  gap: 8,
+  gap: 10,
   alignItems: "center",
-  fontSize: "14px",
-  color: "var(--role-text)",
-  fontFamily: "var(--role-font-ui)",
+  fontSize: 14,
+  color: "var(--color-ink)",
+  fontFamily: "var(--font-body)",
+  cursor: "pointer",
+  padding: "6px 0",
+};
+
+const checkboxStyle: React.CSSProperties = {
+  width: 18,
+  height: 18,
+  cursor: "pointer",
 };

@@ -6,6 +6,7 @@ import {
   mockListingsRepo,
   enforceVisibilityAfterMutation,
   logAudit,
+  MAX_IMAGES_PER_LISTING,
 } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
@@ -45,7 +46,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     patch.priceMaxMinor = Number.isFinite(p) && p > 0 ? p : null;
   }
   if (typeof body.categoryId === "string" && body.categoryId) patch.categoryId = body.categoryId;
-  if (Array.isArray(body.images)) patch.images = (body.images as string[]).filter((x) => typeof x === "string");
+  if (Array.isArray(body.images)) {
+    const imgs = (body.images as string[]).filter((x) => typeof x === "string");
+    if (imgs.length > MAX_IMAGES_PER_LISTING) {
+      return NextResponse.json(
+        { error: `At most ${MAX_IMAGES_PER_LISTING} images per listing.` },
+        { status: 400 },
+      );
+    }
+    patch.images = imgs;
+  }
 
   if (Object.keys(patch).length === 0) return NextResponse.json({ error: "nothing_to_update" }, { status: 400 });
 

@@ -14,6 +14,7 @@ import type {
   Message,
   MessageState,
 } from "./interfaces";
+import { realConversationRepo, realMessageRepo } from "@voeq/db";
 
 const id = (p: string) => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -28,7 +29,7 @@ function pairKey(a: string, b: string): string {
 /** In-memory store of pairKey -> conversationId for idempotent reuse. */
 const pairIndex = new Map<string, string>();
 
-export const mockConversationRepo = {
+const mockConversationRepoImpl = {
   /** Find-or-create a conversation for the (shopper, vendor) pair. Idempotent. */
   async create(input: {
     participantIds: string[];
@@ -77,7 +78,7 @@ export const mockConversationRepo = {
   },
 };
 
-export const mockMessageRepo = {
+const mockMessageRepoImpl = {
   /**
    * Create a message. If clientMsgId is provided and a message with that key
    * already exists in the conversation, return the existing one (idempotent retry).
@@ -165,3 +166,8 @@ export function resetMessagingState(): void {
   messages.clear();
   pairIndex.clear();
 }
+
+// D.2/D.3 — Factory (EOF): real Neon-backed repos when DATABASE_URL is set.
+const USE_REAL = !!process.env.DATABASE_URL;
+export const mockConversationRepo = USE_REAL ? (realConversationRepo as unknown as typeof mockConversationRepoImpl) : mockConversationRepoImpl;
+export const mockMessageRepo = USE_REAL ? (realMessageRepo as unknown as typeof mockMessageRepoImpl) : mockMessageRepoImpl;

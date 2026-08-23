@@ -48,7 +48,7 @@ export default function ForVendorsPage() {
               </div>
               <h3>Direct Contact</h3>
               <p>
-                Students message you through Voeq's secure in-app chat. 
+                Students message you through Voeq&apos;s secure in-app chat. 
                 No middleman. No platform fees.
               </p>
             </div>
@@ -59,7 +59,7 @@ export default function ForVendorsPage() {
               <h3>Grow Your Reach</h3>
               <p>
                 Get seen by students who might not know you exist. Your listing 
-                works 24/7, even when you're not actively promoting.
+                works 24/7, even when you&apos;re not actively promoting.
               </p>
             </div>
           </div>
@@ -83,7 +83,7 @@ export default function ForVendorsPage() {
           </ol>
           <p>
             Update your listing anytime. Add new products. Change your hours. 
-            It's your storefront.
+            It&apos;s your storefront.
           </p>
         </section>
 
@@ -100,7 +100,7 @@ export default function ForVendorsPage() {
             <li>And more</li>
           </ul>
           <p>
-            If it's legal and serves students, you can list it. Check our{' '}
+            If it&apos;s legal and serves students, you can list it. Check our{' '}
             <Link href="/terms" className="info-link">Terms of Service</Link> for 
             full guidelines.
           </p>
@@ -127,7 +127,7 @@ export default function ForVendorsPage() {
           <p>
             Email us at{' '}
             <a href="mailto:vendors@voeq.ng" className="info-link">vendors@voeq.ng</a>. 
-            We're here to help you succeed.
+            We&apos;re here to help you succeed.
           </p>
         </section>
       </div>

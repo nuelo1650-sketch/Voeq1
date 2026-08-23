@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import type { VendorSummary } from '@voeq/data';
 import { SaveButton } from '@/components/shopper/SaveButton';
 import { FollowButton } from '@/components/shopper/FollowButton';

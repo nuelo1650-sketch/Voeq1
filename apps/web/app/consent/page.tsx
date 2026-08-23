@@ -49,6 +49,11 @@ export default function ConsentPage() {
           Before you start, please review our Terms of Service and Privacy Policy.
           Acceptance is recorded and required to use Voeq.
         </p>
+        <div className="auth-consent-versions">
+          <p className="auth-help-text">
+            Terms of Service v1.0 (effective Jan 1, 2026) &middot; Privacy Policy v1.0 (effective Jan 1, 2026)
+          </p>
+        </div>
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <label className="auth-checkbox-row">
             <input

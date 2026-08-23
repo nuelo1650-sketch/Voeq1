@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockIdentityRepo, mockMagicLinkRepo, checkRateLimit, logAudit } from "@voeq/data";
+import { mockIdentityRepo, mockMagicLinkRepo, checkRateLimit, logAudit, sendEmail } from "@voeq/data";
 import { z } from "zod";
 
 const LIMIT = 3;
@@ -32,8 +32,9 @@ export async function POST(req: NextRequest) {
   const identity = await mockIdentityRepo.getByEmail(email);
   if (identity && identity.accountStatus !== "deleted") {
     const token = await mockMagicLinkRepo.issue(email);
-    // Mock delivery (Phase 9: Resend password-reset template, Doc 13 §13.7).
-    console.log(`[mock-email] RESET magic-link token ${token} for ${email}`);
+    // D.5 — Real email via Resend (dev fallback logs when RESEND_API_KEY unset).
+    const link = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://voeq.ng"}/reset-password?token=${token}`;
+    await sendEmail({ to: email, template: "PASSWORD_RESET", vars: { resetLink: link } });
     await logAudit("reset.requested", identity.id, {});
   }
   // Always 200 — never confirm/deny account existence.

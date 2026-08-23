@@ -7,6 +7,7 @@ import {
   issuePendingToken,
   createSession,
   logAudit,
+  sendEmail,
 } from "@voeq/data";
 
 const GOOGLE_STATE_COOKIE = "google_oauth_state";
@@ -73,8 +74,8 @@ export async function GET(req: NextRequest) {
   });
   const otp = await issueOtp(profile.email, "google_verify");
   const pendingToken = await issuePendingToken(profile.email, "google_verify");
-  // Mock delivery (Phase 9: real email/OOB).
-  console.log(`[mock-email] OTP ${otp} for ${profile.email} (google_verify)`);
+  // D.5 — Real email via Resend (dev fallback logs when RESEND_API_KEY unset).
+  await sendEmail({ to: profile.email, template: "OTP_REGISTRATION", vars: { name: profile.name ?? "" , code: otp } });
   await logAudit("google.signup", identity.id, {});
 
   const r = NextResponse.redirect(

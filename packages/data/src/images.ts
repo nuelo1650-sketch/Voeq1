@@ -14,6 +14,9 @@
 import { uploadAndModerate } from "./media";
 import type { ImageContext, UploadResult } from "./interfaces";
 
+/** D.4 — Hard cap on images per listing (defense in depth with listing CRUD). */
+export const MAX_IMAGES_PER_LISTING = 5;
+
 const CONTEXT_MAX_BYTES: Record<ImageContext, number> = {
   vendor_photo: 5 * 1024 * 1024,
   listing_photo: 8 * 1024 * 1024,
@@ -25,10 +28,14 @@ const ALLOWED_EXT = /\.(jpe?g|png|webp|gif|avif)$/i;
 export interface ImageUploadInput {
   fileName: string;
   bytes?: number;
+  /** base64 data URL sent by the web client. */
+  dataUrl?: string;
   mimeType?: string;
   context: ImageContext;
   /** Test/override hook to force a decision (passed through to the mock). */
   force?: "pass" | "fail";
+  /** D.4 — number of images already attached; rejects if this + 1 > cap. */
+  existingCount?: number;
 }
 
 /** Derive a publicId from the filename (sanitized). */
@@ -44,10 +51,21 @@ function publicIdFor(fileName: string): string {
 /**
  * Upload + moderate an image. Returns an UploadResult (ok + url, or rejected
  * with a reason). Validates size/type BEFORE moderation; moderation outcome is
- * server-authoritative.
+ * server-authoritative. Enforces the 5-image cap when existingCount is given.
  */
 export async function uploadImage(input: ImageUploadInput): Promise<UploadResult> {
-  const { fileName, bytes, context, force } = input;
+  const { fileName, bytes, context, force, dataUrl, existingCount } = input;
+
+  // D.4 — 5-image cap (listing photos only; vendor photo is singular).
+  if (context === "listing_photo" && typeof existingCount === "number") {
+    if (existingCount >= MAX_IMAGES_PER_LISTING) {
+      return {
+        ok: false,
+        reason: `You can attach at most ${MAX_IMAGES_PER_LISTING} images per listing.`,
+        retryable: false,
+      };
+    }
+  }
 
   // Context-aware size guard (client sends bytes; server enforces).
   if (typeof bytes === "number" && bytes > CONTEXT_MAX_BYTES[context]) {
@@ -57,7 +75,7 @@ export async function uploadImage(input: ImageUploadInput): Promise<UploadResult
     return { ok: false, reason: "Unsupported image format.", retryable: false };
   }
 
-  const result = await uploadAndModerate({ fileName, bytes, force });
+  const result = await uploadAndModerate({ fileName, bytes, dataUrl, force });
   if (!result.ok) {
     return { ok: false, reason: result.reason ?? "Image did not pass automated content review.", retryable: true };
   }

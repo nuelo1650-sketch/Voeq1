@@ -8,7 +8,7 @@ import { InfoPageShell } from "@/components/info/InfoPageShell";
 const EMAIL_RE = /^[^\\s@]+@[^\\s@]+\.[^\\s@]+$/;
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);

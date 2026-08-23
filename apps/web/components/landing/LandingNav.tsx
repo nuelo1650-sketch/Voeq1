@@ -2,29 +2,40 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Bell } from "lucide-react";
 
 /**
  * LandingNav — slim top nav for Landing (Doc 04 PG-PUB-001 secondary nav, Task B).
- * Wordmark left, secondary links right. Sticky, uses the shared nav-geometry tokens
+ * Wordmark left, auth CTAs right. Sticky, uses the shared nav-geometry tokens
  * (--nav-height / --nav-inline-pad) so Explore's top bar can mirror this position
  * EXACTLY for the D.4.1 shared spatial anchor. Secondary only — never competes with
  * the LOCKED primary hierarchy (Voeq -> context -> proposition -> contour -> enter).
  *
- * Doc 05 A.19 (2026-08-19, founder): at ~375px the 6-text-link + wordmark row overflows,
- * so a hamburger -> full-screen overlay nav is REQUIRED (responsive necessity). The links
- * live in `.landing-nav-links` (inline on desktop, hidden <=768px) and are re-rendered in
- * the overlay (`.landing-nav-overlay`) toggled by the hamburger. CSS for both lives in
- * apps/web/app/globals.css (added in commit 0c47218).
+ * K1.4: Shows "Sign in" + "Get started" when unauthed. When authed, shows messages + avatar.
  */
 
-const NAV_LINKS = [
-  { href: "/login", testid: "nav-login", label: "Login", cta: false },
-  { href: "/signup", testid: "nav-signup", label: "Sign up", cta: true },
-] as const;
-
 export function LandingNav() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [isAuthed, setIsAuthed] = useState<boolean>(false); // Default to false for immediate render
+  const [unreadCount, setUnreadCount] = useState(0);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  // Check auth status on mount
+  useEffect(() => {
+    fetch('/api/auth/status')
+      .then(r => r.json())
+      .then(data => {
+        setIsAuthed(data.authenticated || false);
+        setUnreadCount(data.unreadCount || 0);
+      })
+      .catch(() => setIsAuthed(false));
+  }, []);
+
+  const handleGetStarted = () => {
+    router.push(isAuthed ? '/home' : '/signup');
+  };
 
   // Close overlay + restore focus to the hamburger (keyboard/SR users don't lose place).
   const close = () => {
@@ -95,23 +106,85 @@ export function LandingNav() {
         Voeq
       </Link>
 
-      {/* Desktop: inline links (hidden <=768px via .landing-nav-links in globals.css).
-          Sign up renders as the pill CTA; Login as a plain text link. */}
+      {/* Desktop: auth buttons (hidden <=768px) */}
       <div className="landing-nav-links">
-        {NAV_LINKS.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            data-testid={l.testid}
-            className={l.cta ? "landing-cta landing-cta--sm" : undefined}
-            style={l.cta ? undefined : linkStyle}
-          >
-            {l.label}
-          </Link>
-        ))}
+        {isAuthed ? (
+          <>
+            {/* Messages bell with badge */}
+            <Link
+              href="/messages"
+              data-testid="nav-messages"
+              style={{
+                position: "relative",
+                display: "inline-flex",
+                alignItems: "center",
+                color: "var(--role-text-muted)",
+              }}
+            >
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -4,
+                    right: -4,
+                    background: "var(--color-amber)",
+                    color: "var(--color-forest)",
+                    fontSize: "10px",
+                    fontWeight: 600,
+                    borderRadius: 999,
+                    padding: "2px 5px",
+                    minWidth: "16px",
+                    textAlign: "center",
+                  }}
+                >
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+            {/* Avatar dropdown - simplified for now */}
+            <Link
+              href="/settings"
+              data-testid="nav-settings"
+              style={{
+                fontFamily: "var(--role-font-ui)",
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "var(--role-text-muted)",
+                textDecoration: "none",
+              }}
+            >
+              Settings
+            </Link>
+          </>
+        ) : (
+          <>
+            {/* Unauthed: Sign in (text link) + Get started (amber button) */}
+            <Link
+              href="/login"
+              data-testid="nav-signin"
+              style={{
+                fontFamily: "var(--role-font-ui)",
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "var(--color-ink-muted)",
+                textDecoration: "none",
+              }}
+            >
+              Sign in
+            </Link>
+            <button
+              onClick={handleGetStarted}
+              data-testid="nav-get-started"
+              className="landing-cta landing-cta--sm"
+            >
+              Get started
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Mobile: hamburger (hidden on desktop via .landing-nav-hamburger) */}
+      {/* Mobile: hamburger (hidden on desktop) */}
       <button
         type="button"
         ref={hamburgerRef}
@@ -126,7 +199,7 @@ export function LandingNav() {
         </svg>
       </button>
 
-      {/* Mobile full-screen overlay nav (Doc 05 A.19 REQUIRED) */}
+      {/* Mobile full-screen overlay nav */}
       {open && (
         <div
           data-testid="landing-nav-overlay"
@@ -146,27 +219,22 @@ export function LandingNav() {
               <path d="M1 1l14 14M15 1L1 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
-          {NAV_LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              data-testid={`${l.testid}-overlay`}
-              className={l.cta ? "landing-cta landing-cta--sm" : undefined}
-              onClick={() => setOpen(false)}
-            >
-              {l.label}
-            </Link>
-          ))}
+          {isAuthed ? (
+            <>
+              <Link href="/home" onClick={() => setOpen(false)}>Home</Link>
+              <Link href="/messages" onClick={() => setOpen(false)}>Messages</Link>
+              <Link href="/settings" onClick={() => setOpen(false)}>Settings</Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login" onClick={() => setOpen(false)}>Sign in</Link>
+              <button onClick={() => { handleGetStarted(); setOpen(false); }} className="landing-cta landing-cta--sm">
+                Get started
+              </button>
+            </>
+          )}
         </div>
       )}
     </nav>
   );
 }
-
-const linkStyle: React.CSSProperties = {
-  fontFamily: "var(--role-font-ui)",
-  fontSize: "14px",
-  fontWeight: 600,
-  color: "var(--role-text)",
-  textDecoration: "none",
-};

@@ -1,3 +1,4 @@
+import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingHero } from '@/components/landing/LandingHero';
 import { TrendingRail } from '@/components/landing/TrendingRail';
 import { CategoryGrid } from '@/components/landing/CategoryGrid';
@@ -14,24 +15,28 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
  * framed in liquid-glass panels.
  * 
  * Section hierarchy:
- *   1. Hero (full-bleed with liquid glass panels)
- *   2. Trending vendors rail
- *   3. Category grid
- *   4. How it works (dark forest section)
- *   5. Trust pillars
- *   6. For vendors CTA
- *   7. Footer (wavy organic top)
+ *   1. Nav (sticky top)
+ *   2. Hero (full-bleed with liquid glass panels)
+ *   3. Trending vendors rail
+ *   4. Category grid
+ *   5. How it works (dark forest section)
+ *   6. Trust pillars
+ *   7. For vendors CTA
+ *   8. Footer (wavy organic top)
  */
 export default function Landing() {
   return (
-    <main className="landing-page">
-      <LandingHero />
-      <TrendingRail />
-      <CategoryGrid />
-      <HowItWorks />
-      <TrustPillars />
-      <ForVendorsCTA />
-      <LandingFooter />
-    </main>
+    <>
+      <LandingNav />
+      <main className="landing-page">
+        <LandingHero />
+        <TrendingRail />
+        <CategoryGrid />
+        <HowItWorks />
+        <TrustPillars />
+        <ForVendorsCTA />
+        <LandingFooter />
+      </main>
+    </>
   );
 }

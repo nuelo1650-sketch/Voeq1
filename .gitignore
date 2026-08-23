@@ -4,7 +4,22 @@ dist/
 build/
 coverage/
 *.tsbuildinfo
-.env*
+.env.local
+.env*.local
+!.env.example
 .DS_Store
 playwright-report/
 test-results/
+
+# Local Drizzle config contains DB secret — never commit
+packages/db/drizzle.config.json
+
+# Hermes agent internal artifacts (plans, bug-scans, reports)
+.hermes/
+
+# Stray debug output from curl/manual API probes
+_shop.json
+_vend.json
+_shop_hdr.txt
+_vend_hdr.txt
+apps/web/tests/_png16.txt

@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   const auth = await requireVendor();
   if ("error" in auth) return auth.error;
 
-  let body: { fileName?: string; force?: "pass" | "fail" };
+  let body: { fileName?: string; dataUrl?: string; force?: "pass" | "fail" };
   try {
     body = await req.json();
   } catch {
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
   if (!body.fileName) return NextResponse.json({ error: "fileName is required." }, { status: 400 });
 
-  const result = await uploadImage({ fileName: body.fileName, force: body.force, context: "vendor_photo" });
+  const result = await uploadImage({ fileName: body.fileName, dataUrl: body.dataUrl, force: body.force, context: "vendor_photo" });
   if (!result.ok) {
     return NextResponse.json({ error: result.reason ?? "Upload rejected." }, { status: 422 });
   }

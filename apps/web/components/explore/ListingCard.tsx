@@ -111,7 +111,7 @@ export function ListingCard({ listing, loading }: { listing: ExploreListing; loa
         <div data-testid="listing-trust" style={{ display: "flex", gap: 8, alignItems: "center", fontSize: "12px", color: "var(--role-text-muted)" }}>
           {listing.verified && (
             <span data-testid="listing-verified" style={{ color: "var(--role-accent-strong)" }}>
-              ✓ Student Vouched
+              ✓ Vouched
             </span>
           )}
           {typeof listing.rating === "number" && (
@@ -122,7 +122,16 @@ export function ListingCard({ listing, loading }: { listing: ExploreListing; loa
               Featured
             </span>
           )}
-          <span style={{ marginLeft: "auto", color: "var(--role-text-muted)" }}>{listing.vendorName}</span>
+        </div>
+        
+        {/* Vendor name with location - industrial standard */}
+        <div style={{ fontSize: "12px", color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
+          <span data-testid="listing-vendor-name">{listing.vendorName}</span>
+          {listing.categorySlug && (
+            <span data-testid="listing-location" style={{ marginLeft: 4 }}>
+              • {listing.categorySlug}
+            </span>
+          )}
         </div>
       </div>
     </article>

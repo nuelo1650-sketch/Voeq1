@@ -6,8 +6,10 @@ import {
   issuePendingToken,
   checkRateLimit,
   logAudit,
+  sendEmail,
 } from "@voeq/data";
 import { z } from "zod";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const SIGNUP_LIMIT = 3;
 const SIGNUP_WINDOW_MS = 60 * 60 * 1000; // 3 / hour per IP (anti-enumeration + abuse)
@@ -22,10 +24,36 @@ const schema = z.object({
     .refine((v) => v === true, {
       message: "You must accept the Terms and Privacy Policy.",
     }),
+  // Cloudflare Turnstile response token (D.6). Required in production.
+  turnstileToken: z.string().min(1).optional(),
 });
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
+
+  // D.6 — Bot check BEFORE any work. Fail closed; degrade only when secret unset (dev).
+  const raw = await req.text();
+  let parsed: ReturnType<typeof schema.safeParse>;
+  try {
+    const json = JSON.parse(raw);
+    parsed = schema.safeParse(json);
+    if (parsed.success) {
+      const tv = await verifyTurnstile({
+        token: parsed.data.turnstileToken,
+        clientIp: ip,
+        action: "signup",
+      });
+      if (!tv.ok) {
+        return NextResponse.json(
+          { error: "Verification failed. Please reload and try again." },
+          { status: 403 },
+        );
+      }
+    }
+  } catch {
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  }
+
   const rl = await checkRateLimit(`signup:${ip}`, SIGNUP_LIMIT, SIGNUP_WINDOW_MS);
   if (!rl.allowed) {
     return NextResponse.json(
@@ -34,14 +62,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
-  }
-
-  const parsed = schema.safeParse(body);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
@@ -79,8 +99,8 @@ export async function POST(req: NextRequest) {
   });
 
   const code = await issueOtp(email, "registration");
-  // Mock email delivery (Phase 9: Resend adapter, Doc 13 §13.7).
-  console.log(`[mock-email] OTP ${code} for ${email} (registration)`);
+  // D.5 — Real email via Resend (dev fallback logs when RESEND_API_KEY unset).
+  await sendEmail({ to: email, template: "OTP_REGISTRATION", vars: { name, code } });
 
   const pendingToken = await issuePendingToken(email, "registration");
   await logAudit("signup.initiated", identity.id, { method: "email", intent });

@@ -7,6 +7,7 @@ import { NotificationBell } from "@/components/shopper/NotificationBell";
 export const metadata: Metadata = {
   title: "Voeq — Find. Connect. Grow.",
   description: "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
+  icons: [{ rel: 'icon', url: '/favicon.ico' }],
 };
 
 export default function RootLayout({

@@ -11,7 +11,7 @@ export default function AboutPage() {
       <div className="info-page-content">
         <section className="info-section">
           <p className="info-lead">
-            Voeq (pronounced "voke") is the campus marketplace connecting students 
+            Voeq (pronounced &ldquo;voke&rdquo;) is the campus marketplace connecting students 
             with vendors serving their school — from food delivery to fashion, 
             services to supplies.
           </p>
@@ -25,7 +25,7 @@ export default function AboutPage() {
             time hunting for basics. Voeq brings it all into one place.
           </p>
           <p>
-            Whether you\'re looking for late-night food, a tailor who gets it right, 
+            Whether you&apos;re looking for late-night food, a tailor who gets it right, 
             or someone to print your project, Voeq helps you find and connect with 
             vendors already trusted by students on your campus.
           </p>
@@ -52,7 +52,7 @@ export default function AboutPage() {
             tailored to the vendors and services students actually use.
           </p>
           <p>
-            Interested in bringing Voeq to your campus? Reach out — we\'re listening.
+            Interested in bringing Voeq to your campus? Reach out — we&apos;re listening.
           </p>
         </section>
 

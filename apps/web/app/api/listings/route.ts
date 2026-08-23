@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockVendorRepo, mockListingsRepo, logAudit } from "@voeq/data";
+import { mockAuthRepo, mockVendorRepo, mockListingsRepo, logAudit, MAX_IMAGES_PER_LISTING } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
@@ -32,6 +32,12 @@ export async function POST(req: NextRequest) {
   const priceMaxMinor = body.priceMaxMinor != null ? Number(body.priceMaxMinor) : null;
   const description = typeof body.description === "string" ? body.description : null;
   const images = Array.isArray(body.images) ? (body.images as string[]).filter((x) => typeof x === "string") : [];
+  if (images.length > MAX_IMAGES_PER_LISTING) {
+    return NextResponse.json(
+      { error: `At most ${MAX_IMAGES_PER_LISTING} images per listing.` },
+      { status: 400 },
+    );
+  }
 
   const listing = await mockListingsRepo.create({
     vendorId: identity.vendorId,
