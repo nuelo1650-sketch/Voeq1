@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useExploreData } from "@/lib/useExploreData";
+import { usePullToRefresh } from "@/lib/usePullToRefresh";
+import { useInfiniteScroll } from "@/lib/useInfiniteScroll";
 import type { ExploreFilters, ExploreListing } from "@voeq/data";
 import { ContourEdge } from "@voeq/contour";
 import { ListingCard } from "./ListingCard";
-import { Filters } from "./Filters";
+import { Filters, CATEGORIES } from "./Filters";
 import { SearchBar } from "./SearchBar";
 import { TrendingRail } from "./TrendingRail";
 import { RecentlyViewedRail, useRecentlyViewed } from "./RecentlyViewedRail";
 import { ExploreSkeleton } from "./ExploreSkeleton";
+import { RefreshCw, ChevronDown } from "lucide-react";
 
 /**
  * Explore — PG-PUB-002 (Doc 04). The core discovery surface.
+ * K2.9: Enhanced with pull-to-refresh, infinite scroll, and swipe gestures.
  *
  * Continuity (Doc 05 D.4.1 REPLACEMENT MECHANISM note, 2026-08-18):
  *  1. Contour-carry (PRIMARY): the contour line animates in on mount, carrying the motif from Landing.
@@ -25,6 +30,7 @@ import { ExploreSkeleton } from "./ExploreSkeleton";
  *     entrance. Attempted; if it reads as a glitch it is cut. See transition note in code below.
  */
 const DEFAULT_CAMPUS = "NMU"; // public, logged-out default (Doc 04: works fully logged-out)
+const ITEMS_PER_PAGE = 20; // Pagination size for infinite scroll
 
 /**
  * Explore — the single discover surface. Filters/sort/search/campus all run through
@@ -35,6 +41,7 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
   const [query, setQuery] = useState("");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [forceError, setForceError] = useState(false);
+  const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
   const { ids: recentIds, record } = useRecentlyViewed();
 
   // Sync ?exploreError=1 (dev/test forced-failure path) + ?q= deep links.
@@ -60,8 +67,106 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
 
   const onCardClick = (id: string) => record(id);
 
+  // Reset pagination when filters change (K2.9 #2)
+  useEffect(() => {
+    setDisplayedCount(ITEMS_PER_PAGE);
+  }, [filters, query, campus, categoryPreset]);
+
+  // Paginated data for infinite scroll (K2.9 #2)
+  const displayedData = useMemo(() => 
+    data.slice(0, displayedCount),
+    [data, displayedCount]
+  );
+
+  const hasMore = displayedCount < data.length;
+
+  // Pull-to-refresh handler (K2.9 #1)
+  const handleRefresh = useCallback(async () => {
+    await retry();
+    setDisplayedCount(ITEMS_PER_PAGE);
+  }, [retry]);
+
+  const { pulling, refreshing, pullDistance } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    disabled: status === "loading",
+  });
+
+  // Infinite scroll handler (K2.9 #2)
+  const handleLoadMore = useCallback(async () => {
+    // Simulate network delay for smooth UX
+    await new Promise(resolve => setTimeout(resolve, 300));
+    setDisplayedCount(prev => Math.min(prev + ITEMS_PER_PAGE, data.length));
+  }, [data.length]);
+
+  const { loading: loadingMore, manualLoadMore } = useInfiniteScroll({
+    onLoadMore: handleLoadMore,
+    hasMore,
+    threshold: 0.8,
+    disabled: status !== "success",
+  });
+
+  // Count active filters (excluding sort which is always set)
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.category) count++;
+    if (filters.minPrice) count++;
+    if (filters.maxPrice) count++;
+    if (filters.minRating) count++;
+    if (filters.openNow) count++;
+    if (filters.verifiedOnly) count++;
+    if (filters.hasPhotos) count++;
+    if (filters.recentlyActive) count++;
+    if (filters.featuredOnly) count++;
+    return count;
+  }, [filters]);
+
+  const clearAllFilters = () => {
+    setFilters({ sort: filters.sort }); // Keep sort, clear everything else
+  };
+
+  const removeFilter = (key: keyof ExploreFilters) => {
+    setFilters((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
   return (
-    <div data-testid="explore" style={{ minHeight: "100vh" }}>
+    <div data-testid="explore" style={{ minHeight: "100vh", position: "relative" }}>
+      {/* Pull-to-refresh indicator (K2.9 #1) */}
+      {(pulling || refreshing) && (
+        <div 
+          data-testid="pull-to-refresh-indicator"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: Math.min(pullDistance, 80),
+            background: "var(--role-surface)",
+            borderBottom: "1px solid var(--role-border)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+            transition: refreshing ? "none" : "height 200ms ease-out",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-forest)" }}>
+            <RefreshCw 
+              size={20} 
+              style={{ 
+                animation: refreshing ? "spin 1s linear infinite" : "none",
+              }} 
+            />
+            <span style={{ fontSize: "14px", fontFamily: "var(--role-font-ui)", fontWeight: 500 }}>
+              {refreshing ? "Refreshing..." : pullDistance >= 80 ? "Release to refresh" : "Pull to refresh"}
+            </span>
+          </div>
+        </div>
+      )}
+      
       {/* Shared spatial anchor — mirrors Landing nav geometry exactly (D.4.1 component 2) */}
       <header
         data-testid="explore-topbar"
@@ -79,11 +184,15 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
         }}
       >
         <Link href="/" data-testid="explore-wordmark" style={wordmarkStyle}>
-          Voeq
+          <Image 
+            src="/Logo.png" 
+            alt="Voeq" 
+            width={96} 
+            height={96}
+            priority
+            style={{ display: 'block', width: 64, height: 'auto' }}
+          />
         </Link>
-        <span data-testid="explore-campus-indicator" style={chipStyle}>
-          {campus}
-        </span>
       </header>
 
       <main style={{ padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
@@ -94,26 +203,107 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
           <ContourEdge intensity="whisper" />
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--space-2)", marginBlock: "var(--space-2)" }}>
-          <h1 data-testid="explore-heading" style={headingStyle}>
+        <div style={{ marginBottom: "var(--space-4)" }}>
+          <h1 data-testid="explore-heading" style={{...headingStyle, marginBottom: 8}}>
             {categoryPreset ? `Explore · ${categoryPreset}` : "Explore"}
           </h1>
+          <p style={{ fontSize: 16, color: "var(--role-muted)", margin: 0 }}>
+            Discover vendors, services, and products on campus
+          </p>
+        </div>
+
+        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", marginBottom: "var(--space-3)" }}>
+          <div style={{ flex: 1 }}>
+            <SearchBar initial={query} onSearch={setQuery} />
+          </div>
           <button
             data-testid="explore-filters-toggle"
             className="explore-mobile-only"
             onClick={() => setMobileFiltersOpen(true)}
-            style={ghostBtn}
+            style={{...ghostBtn, position: 'relative', flexShrink: 0}}
           >
             Filters
+            {activeFilterCount > 0 && (
+              <span style={filterBadgeStyle}>{activeFilterCount}</span>
+            )}
           </button>
         </div>
 
-        {/* Campus indicator (required visible content) */}
-        <div data-testid="explore-campus-banner" style={{ ...chipStyle, display: "inline-flex", marginBottom: "var(--space-2)" }}>
-          Showing the marketplace near {campus}
-        </div>
+        {/* Category quick-pills - horizontal scroll */}
+        {!categoryPreset && (
+          <div style={{ marginBlock: "var(--space-3)", overflowX: "auto", whiteSpace: "nowrap" }}>
+            <div style={{ display: "inline-flex", gap: "var(--space-2)" }}>
+              <button
+                onClick={() => removeFilter('category')}
+                style={{
+                  ...categoryPillStyle,
+                  ...(filters.category ? {} : categoryPillActiveStyle),
+                }}
+              >
+                All
+              </button>
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.slug}
+                  onClick={() => setFilters((prev) => ({ ...prev, category: cat.slug }))}
+                  style={{
+                    ...categoryPillStyle,
+                    ...(filters.category === cat.slug ? categoryPillActiveStyle : {}),
+                  }}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-        <SearchBar initial={query} onSearch={setQuery} />
+        {/* Active filter chips bar */}
+        {activeFilterCount > 0 && (
+          <div style={{ marginBlock: "var(--space-2)", display: "flex", flexWrap: "wrap", gap: "var(--space-2)", alignItems: "center" }}>
+            <span style={{ fontSize: "13px", color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
+              Active filters:
+            </span>
+            {filters.category && (
+              <FilterChip label={`Category: ${CATEGORIES.find(c => c.slug === filters.category)?.label}`} onRemove={() => removeFilter('category')} />
+            )}
+            {filters.minPrice && (
+              <FilterChip label={`Min: ₦${filters.minPrice / 100}`} onRemove={() => removeFilter('minPrice')} />
+            )}
+            {filters.maxPrice && (
+              <FilterChip label={`Max: ₦${filters.maxPrice / 100}`} onRemove={() => removeFilter('maxPrice')} />
+            )}
+            {filters.minRating && (
+              <FilterChip label={`${filters.minRating}+ stars`} onRemove={() => removeFilter('minRating')} />
+            )}
+            {filters.openNow && (
+              <FilterChip label="Open now" onRemove={() => removeFilter('openNow')} />
+            )}
+            {filters.verifiedOnly && (
+              <FilterChip label="Verified" onRemove={() => removeFilter('verifiedOnly')} />
+            )}
+            {filters.hasPhotos && (
+              <FilterChip label="Has photos" onRemove={() => removeFilter('hasPhotos')} />
+            )}
+            {filters.recentlyActive && (
+              <FilterChip label="Recently active" onRemove={() => removeFilter('recentlyActive')} />
+            )}
+            {filters.featuredOnly && (
+              <FilterChip label="Featured" onRemove={() => removeFilter('featuredOnly')} />
+            )}
+            <button
+              onClick={clearAllFilters}
+              style={{
+                ...ghostBtn,
+                padding: "4px 10px",
+                fontSize: "12px",
+                color: "var(--role-accent-strong)",
+              }}
+            >
+              Clear all
+            </button>
+          </div>
+        )}
 
         {/* Desktop: persistent filter sidebar + grid. Mobile: bottom-sheet filters. */}
         <div className="explore-layout" style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "var(--space-3)", marginTop: "var(--space-3)" }}>
@@ -153,10 +343,35 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
 
             {status === "success" && (
               <>
+                {/* Results count - industrial standard */}
+                <div 
+                  data-testid="explore-results-count"
+                  style={{
+                    fontSize: "14px",
+                    color: "var(--role-text-muted)",
+                    fontFamily: "var(--role-font-ui)",
+                    marginBottom: "var(--space-3)",
+                  }}
+                >
+                  {data.length === 0 ? (
+                    "No results found"
+                  ) : data.length === 1 ? (
+                    "Showing 1 result"
+                  ) : (
+                    `Showing ${displayedCount} of ${data.length} results`
+                  )}
+                  {activeFilterCount > 0 && ` with ${activeFilterCount} ${activeFilterCount === 1 ? 'filter' : 'filters'} applied`}
+                </div>
+                
+                {/* Featured listings carousel - larger cards, auto-rolling every 5s */}
+                {data.some(l => l.featured) && (
+                  <FeaturedCarousel items={data.filter(l => l.featured)} />
+                )}
+                
                 <TrendingRail items={trending} />
                 {recentItems.length > 0 && <RecentlyViewedRail items={recentItems} />}
                 <div data-testid="explore-grid" style={gridStyle}>
-                  {data.map((l) => (
+                  {displayedData.map((l) => (
                     <Link
                       key={l.id}
                       href={`/listing/${l.id}`}
@@ -168,6 +383,41 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
                     </Link>
                   ))}
                 </div>
+                
+                {/* Infinite scroll: Load more button (K2.9 #2) */}
+                {hasMore && (
+                  <div style={{ 
+                    marginTop: "var(--space-4)", 
+                    display: "flex", 
+                    justifyContent: "center" 
+                  }}>
+                    <button
+                      data-testid="explore-load-more"
+                      onClick={manualLoadMore}
+                      disabled={loadingMore}
+                      style={{
+                        ...primaryBtn,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        minWidth: 200,
+                        justifyContent: "center",
+                      }}
+                    >
+                      {loadingMore ? (
+                        <>
+                          <RefreshCw size={16} style={{ animation: "spin 1s linear infinite" }} />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown size={16} />
+                          Load more ({data.length - displayedCount} remaining)
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -198,6 +448,11 @@ const wordmarkStyle: React.CSSProperties = {
   color: "var(--role-text)",
   textDecoration: "none",
   lineHeight: 1,
+  display: "inline-flex",
+  alignItems: "center",
+  padding: "4px 8px",
+  background: "var(--color-glass-white)",
+  borderRadius: "8px",
 };
 const chipStyle: React.CSSProperties = {
   fontFamily: "var(--role-font-ui)",
@@ -244,8 +499,9 @@ const stateBox: React.CSSProperties = {
 };
 const gridStyle: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-  gap: "var(--space-2)",
+  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+  gap: "var(--space-3)",
+  marginTop: "var(--space-3)",
 };
 const sheetStyle: React.CSSProperties = {
   position: "fixed",
@@ -260,3 +516,273 @@ const sheetStyle: React.CSSProperties = {
   padding: "var(--space-3)",
   boxShadow: "var(--shadow-2)",
 };
+
+const categoryPillStyle: React.CSSProperties = {
+  fontFamily: "var(--role-font-ui)",
+  fontSize: "14px",
+  padding: "6px 14px",
+  borderRadius: 999,
+  border: "1px solid var(--role-border)",
+  background: "var(--role-surface)",
+  color: "var(--role-text)",
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  transition: "all 120ms ease",
+};
+
+const categoryPillActiveStyle: React.CSSProperties = {
+  background: "var(--color-forest)",
+  color: "var(--color-glass-white)",
+  borderColor: "var(--color-forest)",
+};
+
+const filterBadgeStyle: React.CSSProperties = {
+  position: "absolute",
+  top: -4,
+  right: -4,
+  background: "var(--color-amber)",
+  color: "var(--color-ink)",
+  fontSize: "10px",
+  fontWeight: 600,
+  borderRadius: 999,
+  padding: "2px 6px",
+  minWidth: 18,
+  textAlign: "center",
+};
+
+// Filter chip component
+function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <div style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      padding: "4px 10px",
+      background: "var(--role-surface)",
+      border: "1px solid var(--role-border)",
+      borderRadius: 999,
+      fontSize: "13px",
+      fontFamily: "var(--role-font-ui)",
+      color: "var(--role-text)",
+    }}>
+      <span>{label}</span>
+      <button
+        onClick={onRemove}
+        style={{
+          border: "none",
+          background: "transparent",
+          color: "var(--role-text-muted)",
+          cursor: "pointer",
+          padding: 0,
+          display: "flex",
+          alignItems: "center",
+          fontSize: "16px",
+          lineHeight: 1,
+        }}
+        aria-label={`Remove ${label} filter`}
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
+// Featured carousel component - auto-advances every 5 seconds (K2.9 #3: Added swipe gestures)
+function FeaturedCarousel({ items }: { items: ExploreListing[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+
+  // Auto-advance timer
+  useEffect(() => {
+    if (items.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % items.length);
+    }, 5000); // Auto-advance every 5 seconds
+    return () => clearInterval(interval);
+  }, [items.length]);
+
+  if (items.length === 0) return null;
+
+  const currentItem = items[currentIndex];
+
+  // Swipe gesture handlers (K2.9 #3)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && currentIndex < items.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+
+    // Reset
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
+  return (
+    <div style={{ marginBottom: "var(--space-4)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-2)" }}>
+        <h2 style={{ fontSize: "18px", fontWeight: 600, color: "var(--role-text)", fontFamily: "var(--role-font-display)", margin: 0 }}>
+          Featured
+        </h2>
+        {items.length > 1 && (
+          <div style={{ display: "flex", gap: 6 }}>
+            {items.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  border: "none",
+                  background: idx === currentIndex ? "var(--color-amber)" : "var(--role-border)",
+                  cursor: "pointer",
+                  padding: 0,
+                  transition: "background 200ms ease",
+                }}
+                aria-label={`Go to featured listing ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      
+      <Link
+        href={`/listing/${currentItem.id}`}
+        style={{ textDecoration: "none", color: "inherit", display: "block" }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div style={{
+          position: "relative",
+          background: "var(--role-surface)",
+          border: "2px solid var(--color-amber)",
+          borderRadius: "var(--radius-lg)",
+          overflow: "hidden",
+          transition: "transform 200ms ease, box-shadow 200ms ease",
+          cursor: "pointer",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "translateY(-2px)";
+          e.currentTarget.style.boxShadow = "var(--shadow-lg)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = "none";
+        }}
+        >
+          {/* Featured badge */}
+          <div style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            background: "var(--color-amber)",
+            color: "var(--color-ink)",
+            fontSize: "12px",
+            fontWeight: 600,
+            padding: "4px 10px",
+            borderRadius: 999,
+            fontFamily: "var(--role-font-ui)",
+            zIndex: 1,
+          }}>
+            FEATURED
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, minHeight: 280 }} className="featured-carousel-grid">
+            {/* Image side */}
+            <div 
+              className="featured-carousel-image"
+              style={{ 
+                backgroundImage: currentItem.image ? `url(${currentItem.image})` : "none",
+                backgroundColor: currentItem.image ? "transparent" : "var(--role-surface-sunken)",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                minHeight: 280,
+              }} 
+            />
+            
+            {/* Content side */}
+            <div style={{ padding: "var(--space-4)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div>
+                <h3 style={{ 
+                  fontSize: "24px", 
+                  fontWeight: 600, 
+                  margin: "0 0 var(--space-2)", 
+                  fontFamily: "var(--role-font-display)",
+                  color: "var(--role-text)",
+                }}>
+                  {currentItem.title}
+                </h3>
+                {currentItem.vendorName && (
+                  <p style={{ 
+                    fontSize: "14px", 
+                    color: "var(--role-text-muted)", 
+                    margin: "0 0 var(--space-2)",
+                    fontFamily: "var(--role-font-ui)",
+                  }}>
+                    by {currentItem.vendorName}
+                  </p>
+                )}
+                {currentItem.categorySlug && (
+                  <span style={{
+                    display: "inline-block",
+                    fontSize: "12px",
+                    padding: "4px 10px",
+                    background: "var(--role-surface-sunken)",
+                    borderRadius: 999,
+                    color: "var(--role-text-muted)",
+                    fontFamily: "var(--role-font-ui)",
+                  }}>
+                    {CATEGORIES.find(c => c.slug === currentItem.categorySlug)?.label ?? currentItem.categorySlug}
+                  </span>
+                )}
+              </div>
+              
+              <div>
+                {currentItem.rating && (
+                  <div style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: 4, 
+                    marginBottom: "var(--space-2)",
+                    fontSize: "14px",
+                    color: "var(--role-text)",
+                  }}>
+                    <span>⭐</span>
+                    <span style={{ fontWeight: 600 }}>{currentItem.rating.toFixed(1)}</span>
+                  </div>
+                )}
+                <p style={{ 
+                  fontSize: "20px", 
+                  fontWeight: 600, 
+                  color: "var(--color-forest)", 
+                  margin: 0,
+                  fontFamily: "var(--role-font-ui)",
+                }}>
+                  ₦{(currentItem.priceMinor / 100).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+}

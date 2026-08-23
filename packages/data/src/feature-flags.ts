@@ -1,8 +1,9 @@
 /**
- * VS7.19 — Feature flags (mock, in-memory). Phase 9 swaps for real config store.
- * Flags are simple booleans the admin can toggle; defaults are conservative.
+ * VS7.19 — Feature flags. Phase 9 swaps for real config store (Neon-backed).
+ * D.2/D.3 — Factory: when DATABASE_URL is set, uses realFeatureFlagRepo.
  */
 import type { FeatureFlag } from "./interfaces";
+import { realFeatureFlagRepo } from "@voeq/db";
 
 const flags: Record<string, FeatureFlag> = {
   "messaging.enabled": { key: "messaging.enabled", value: true, description: "Enable native buyer-vendor messaging" },
@@ -11,7 +12,7 @@ const flags: Record<string, FeatureFlag> = {
   "signups.enabled": { key: "signups.enabled", value: true, description: "Allow new account registration" },
 };
 
-export const mockFeatureFlagRepo = {
+const mockFeatureFlagRepoImpl = {
   async list(): Promise<FeatureFlag[]> {
     return Object.values(flags);
   },
@@ -22,3 +23,8 @@ export const mockFeatureFlagRepo = {
     return f;
   },
 };
+
+const USE_REAL = !!process.env.DATABASE_URL;
+export const mockFeatureFlagRepo = USE_REAL
+  ? (realFeatureFlagRepo as unknown as typeof mockFeatureFlagRepoImpl)
+  : mockFeatureFlagRepoImpl;

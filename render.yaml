@@ -1,0 +1,64 @@
+# Render Blueprint (D.8) — API + SSE live here.
+# The web (Vercel) proxies /api/* to this service via NEXT_PUBLIC_API_URL.
+#
+# IMPORTANT: set these secrets in the Render dashboard (do NOT commit real
+# values — .env.local is gitignored). The keys below are placeholders for the
+# Blueprint schema; override each in the dashboard's Environment tab.
+#
+# Health check: GET /api/health must return 200 (DB-connected) — see
+# apps/web/app/api/health/route.ts.
+services:
+  - type: web
+    name: voeq-api
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: apps/web
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # set in dashboard (Neon pooled connection string)
+      - key: VOEQ_SESSION_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        value: jq9gwigz
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_UPLOAD_PRESET
+        value: voeq_unsigned
+      - key: SIGHTENGINE_USER
+        value: "382123782"
+      - key: SIGHTENGINE_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: "noreply@voeq.ng"
+      - key: AUTH_GOOGLE_CLIENT_ID
+        sync: false
+      - key: AUTH_GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
+      - key: CORS_ALLOWLIST
+        value: "https://voeq.ng,https://www.voeq.ng,https://voeq-web.vercel.app"
+      - key: SUPER_ADMIN_EMAIL
+        value: "admin@voeq.ng"
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://voeq-api.onrender.com"
+      - key: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+        value: jq9gwigz
+      - key: NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+        value: voeq_unsigned
+      - key: VOEQ_SESSION_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        value: "https://voeq.ng"
+      - key: NEXT_PUBLIC_TURNSTILE_SITE_KEY
+        value: "0x4AAAAAAEZcnQcg6AZ2SqFM"

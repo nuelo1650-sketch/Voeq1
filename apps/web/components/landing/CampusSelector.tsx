@@ -8,7 +8,7 @@ export function CampusSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<Campus[]>(campuses);
-  const [selectedCampus, setSelectedCampus] = useState<Campus>(
+  const [_selectedCampus, setSelectedCampus] = useState<Campus>(
     campuses.find(c => c.isDefault) || campuses[0]
   );
 

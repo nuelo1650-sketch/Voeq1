@@ -11,6 +11,7 @@ import type {
   Listing,
   Vendor,
 } from "./interfaces";
+import { realListingsRepo, realVendorRepo, realActivityRepo, realMessageRepo, realStaffRepo } from "@voeq/db";
 
 /**
  * Trivial in-memory mock. Returns shape-correct data. The EMPTY repos (activity/auth/
@@ -78,7 +79,7 @@ export const MOCK_VENDORS: Vendor[] = [
 const vendorName = (id: string) => MOCK_VENDORS.find((v) => v.id === id)?.name ?? "Vendor";
 
 // ---- Repos ---------------------------------------------------------------------
-export const mockListingsRepo: ListingsRepo = {
+const mockListingsRepoImpl: ListingsRepo = {
   async list(params?: { campus?: string; category?: string }) {
     // Mock: ignore campus (all sample data is "nmu"); filter by category if given.
     const cat = params?.category;
@@ -144,7 +145,7 @@ export const mockListingsRepoThatFails: ListingsRepo = {
   },
 };
 
-export const mockVendorRepo: VendorRepo = {
+const mockVendorRepoImpl: VendorRepo = {
   async listVendors() {
     return MOCK_VENDORS;
   },
@@ -182,7 +183,7 @@ export const mockVendorRepo: VendorRepo = {
   },
 };
 
-export const mockActivityRepo: ActivityRepo = {
+const mockActivityRepoImpl: ActivityRepo = {
   async recent() {
     return [];
   },
@@ -190,7 +191,7 @@ export const mockActivityRepo: ActivityRepo = {
 
 // mockAuthRepo lives in auth.ts (full Identity & Access impl, VS2).
 
-export const mockMessagesRepo: MessagesRepo = {
+const mockMessagesRepoImpl: MessagesRepo = {
   async listConversations() {
     return [];
   },
@@ -201,7 +202,7 @@ export const mockMessagesRepo: MessagesRepo = {
 
 const staffCases: StaffCase[] = [];
 
-export const mockStaffRepo: StaffRepo = {
+const mockStaffRepoImpl: StaffRepo = {
   async create(input) {
     const c: StaffCase = {
       id: `sc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -241,11 +242,11 @@ export const mockSearchRepo: SearchRepo = {
 };
 
 export const mockRepos = {
-  listings: mockListingsRepo,
-  vendors: mockVendorRepo,
-  activity: mockActivityRepo,
-  messages: mockMessagesRepo,
-  staff: mockStaffRepo,
+  listings: mockListingsRepoImpl,
+  vendors: mockVendorRepoImpl,
+  activity: mockActivityRepoImpl,
+  messages: mockMessagesRepoImpl,
+  staff: mockStaffRepoImpl,
   search: mockSearchRepo,
 };
 
@@ -254,3 +255,11 @@ export const listListingsByVendor = (vendorId: string): (Listing & MockListingEx
   MOCK_EXPLORE_LISTINGS.filter((l) => l.vendorId === vendorId);
 
 export { vendorName };
+
+// D.2/D.3 — Factory (EOF): real Neon-backed repos when DATABASE_URL is set.
+const USE_REAL = !!process.env.DATABASE_URL;
+export const mockListingsRepo = USE_REAL ? (realListingsRepo as unknown as ListingsRepo) : mockListingsRepoImpl;
+export const mockVendorRepo = USE_REAL ? (realVendorRepo as unknown as VendorRepo) : mockVendorRepoImpl;
+export const mockActivityRepo = USE_REAL ? (realActivityRepo as unknown as ActivityRepo) : mockActivityRepoImpl;
+export const mockMessagesRepo = USE_REAL ? (realMessageRepo as unknown as MessagesRepo) : mockMessagesRepoImpl;
+export const mockStaffRepo = USE_REAL ? (realStaffRepo as unknown as StaffRepo) : mockStaffRepoImpl;

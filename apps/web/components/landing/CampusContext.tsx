@@ -17,7 +17,7 @@ export const CAMPUS_OPTIONS = [
   { id: "futo", label: "FUTO" },
 ] as const;
 
-type CampusOption = (typeof CAMPUS_OPTIONS)[number];
+type _CampusOption = (typeof CAMPUS_OPTIONS)[number];
 
 export function CampusContext({
   campus,

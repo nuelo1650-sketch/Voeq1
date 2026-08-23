@@ -12,7 +12,7 @@ export default function HelpPage() {
       questions: [
         {
           q: 'How do I find vendors on my campus?',
-          a: 'Select your campus from the homepage, then browse by category or search for specific vendors or services. All listings are organized by campus to show you what\'s available near you.'
+          a: 'Select your campus from the homepage, then browse by category or search for specific vendors or services. All listings are organized by campus to show you what&apos;s available near you.'
         },
         {
           q: 'Do I need an account to browse?',
@@ -29,15 +29,15 @@ export default function HelpPage() {
       questions: [
         {
           q: 'How do I contact a vendor?',
-          a: 'Each vendor listing includes a "Message" button. Click it to start a conversation through Voeq\'s in-app chat. All communication happens securely within the platform.'
+          a: 'Each vendor listing includes a "Message" button. Click it to start a conversation through Voeq&apos;s in-app chat. All communication happens securely within the platform.'
         },
         {
           q: 'Can I filter by category?',
           a: 'Yes. Use the category filter on the Explore page to narrow your search to Food, Fashion, Services, Tech, Health & Beauty, Stationery, or any other category.'
         },
         {
-          q: 'What if a vendor isn\'t responding?',
-          a: 'Vendors manage their own availability. If you don\'t get a response, try reaching out through an alternative contact method or browse similar vendors in the same category.'
+          q: 'What if a vendor isn&apos;t responding?',
+          a: 'Vendors manage their own availability. If you don&apos;t get a response, try reaching out through an alternative contact method or browse similar vendors in the same category.'
         },
         {
           q: 'How do payments work?',
@@ -54,10 +54,10 @@ export default function HelpPage() {
         },
         {
           q: 'Does Voeq take a commission?',
-          a: 'No. Voeq is free for vendors. We don\'t take commissions, transaction fees, or charge for listings. You keep 100% of what you earn.'
+          a: 'No. Voeq is free for vendors. We don&apos;t take commissions, transaction fees, or charge for listings. You keep 100% of what you earn.'
         },
         {
-          q: 'Can I update my listing after it\'s live?',
+          q: 'Can I update my listing after it&apos;s live?',
           a: 'Yes. Log into your vendor account to edit your business details, contact information, or operating hours anytime.'
         },
         {
@@ -88,7 +88,7 @@ export default function HelpPage() {
       questions: [
         {
           q: 'Which campuses does Voeq support?',
-          a: 'Voeq is currently expanding across Nigerian universities. Select your campus on the homepage to see if it\'s available. Don\'t see yours? Let us know — we\'re adding new campuses regularly.'
+          a: 'Voeq is currently expanding across Nigerian universities. Select your campus on the homepage to see if it&apos;s available. Don&apos;t see yours? Let us know — we&apos;re adding new campuses regularly.'
         },
         {
           q: 'Is there a mobile app?',
@@ -113,8 +113,8 @@ export default function HelpPage() {
       <div className="info-page-content">
         <section className="info-section">
           <p>
-            Find answers to common questions about using Voeq. Can\'t find what 
-            you\'re looking for? Email us at{' '}
+            Find answers to common questions about using Voeq. Can&apos;t find what 
+            you&apos;re looking for? Email us at{' '}
             <a href="mailto:support@voeq.ng" className="info-link">support@voeq.ng</a>.
           </p>
         </section>

@@ -4,7 +4,7 @@ import { mockUserPrefRepo, campuses } from "@voeq/data";
 import { ShopperDashboard } from "@/components/shopper/ShopperDashboard";
 
 /**
- * VS4.7 — shopper dashboard (PG-SHOP-001).
+ * VS4.7 — shopper dashboard (PG-SHOP-001). K3a.1 enhanced.
  * Campus-scoped per Doc 03. Guards the shopper-onboarding gate, then renders the
  * real dashboard (Saved / Following / Recommended / Activity / Notifications).
  * Auth redirect preserves ?next= so post-login returns here (Doc 03 §3.9).
@@ -25,43 +25,11 @@ export default async function HomePage() {
       data-testid="shopper-home"
       style={{
         minHeight: "100vh",
-        background: "var(--role-bg)",
+        background: "var(--color-glass-white)",
         padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)",
       }}
     >
-      <header style={{ marginBottom: "var(--space-3)" }}>
-        <h1
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "var(--fs-h2)",
-            color: "var(--role-fg)",
-          }}
-        >
-          Welcome, {identity.name || "shopper"}
-        </h1>
-        <p style={{ color: "var(--role-muted)", marginTop: "var(--space-1)" }}>
-          Showing what’s open near {campusLabel}.
-        </p>
-      </header>
-
-      <section
-        aria-label="Quick actions"
-        style={{
-          display: "flex",
-          gap: "var(--space-2)",
-          flexWrap: "wrap",
-          marginBottom: "var(--space-4)",
-        }}
-      >
-        <a href="/explore" className="auth-submit" style={{ textDecoration: "none" }} data-testid="home-explore">
-          Browse {campusLabel}
-        </a>
-        <a href="/c/food-drinks" className="auth-secondary" style={{ textDecoration: "none" }} data-testid="home-food">
-          Food &amp; Drinks
-        </a>
-      </section>
-
-      <ShopperDashboard name={identity.name || "shopper"} />
+      <ShopperDashboard name={identity.name || "shopper"} campus={campusLabel} />
 
       {!identity.vendorId && (
         <section
@@ -69,22 +37,30 @@ export default async function HomePage() {
           data-testid="home-become-vendor-banner"
           style={{
             marginTop: "var(--space-4)",
-            border: "1px solid var(--color-accent-gold)",
-            borderRadius: "var(--radius-card)",
+            border: "1px solid var(--color-amber)",
+            borderRadius: 8,
             padding: "var(--space-3)",
-            background: "var(--surface-1)",
+            background: "var(--color-cream)",
           }}
         >
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h3)" }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, margin: 0, marginBottom: 8, color: "var(--color-forest)" }}>
             Got something to sell?
           </h2>
-          <p style={{ color: "var(--role-muted)", marginTop: "var(--space-1)" }}>
+          <p style={{ color: "var(--color-ink-muted)", marginTop: 0, marginBottom: "var(--space-2)", fontSize: 14 }}>
             Turn your skills or products into a campus business — free to list.
           </p>
           <a
             href="/become-vendor"
-            className="auth-submit"
-            style={{ textDecoration: "none", display: "inline-block", marginTop: "var(--space-2)" }}
+            style={{
+              display: "inline-block",
+              padding: "10px 20px",
+              background: "var(--color-forest)",
+              color: "var(--color-cream)",
+              textDecoration: "none",
+              borderRadius: 6,
+              fontSize: 14,
+              fontWeight: 500,
+            }}
             data-testid="home-become-vendor-cta"
           >
             Become a vendor

@@ -29,7 +29,7 @@ export default async function BecomeVendorPage() {
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">What you'll set up</h2>
+          <h2 className="info-heading">What you&apos;ll set up</h2>
           <ol className="info-list info-list-numbered">
             <li>
               <strong>Account</strong> — your business name, description, campus,

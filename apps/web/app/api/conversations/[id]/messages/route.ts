@@ -9,6 +9,7 @@ import {
   logAudit,
 } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
+import { broadcastMessage, broadcastStateChange, pushNotification } from "@/lib/sse-bus";
 
 /**
  * VS6.6 / VS6.7 / VS6.8 — Conversation messages.
@@ -43,6 +44,12 @@ export async function GET(
   const messages = await mockMessageRepo.listByConversation(convId, null, 50);
   // Mark delivered for the recipient (not the sender) on fetch.
   await mockMessageRepo.markDelivered(convId, identity.id);
+  // T3 — reflect delivered transitions on the sender's stream (per message).
+  for (const m of messages) {
+    if (m.senderId !== identity.id && m.state === "delivered") {
+      broadcastStateChange(convId, m.id, "delivered", m.readAt ?? null);
+    }
+  }
   await mockConversationRepo.touchLastSeen(convId, identity.id);
   return NextResponse.json({ ok: true, messages });
 }
@@ -99,6 +106,8 @@ export async function POST(
     body: text,
     clientMsgId: body.clientMsgId,
   });
+  // T3 — push to every connected participant in this conversation.
+  broadcastMessage(convId, message);
   await mockConversationRepo.updateLastMessageAt(convId, message.createdAt);
   await mockConversationRepo.touchLastSeen(convId, identity.id);
   await logAudit("message.sent", identity.id, { conversationId: convId, messageId: message.id });
@@ -109,13 +118,15 @@ export async function POST(
     const { mockNotificationRepo } = await import("@voeq/data");
     const { mockIdentityRepo } = await import("@voeq/data");
     const other = await mockIdentityRepo.getById(otherId);
-    await mockNotificationRepo.create({
+    const notification = await mockNotificationRepo.create({
       recipientId: otherId,
       type: "new_message",
       title: `New message from ${other?.name ?? "Someone"}`,
       body: "Tap to view",
       refId: convId,
     });
+    // T4 — push to the recipient's user stream if connected.
+    pushNotification(notification);
   }
 
   return NextResponse.json({ ok: true, message }, { status: 200 });

@@ -5,15 +5,13 @@ import {
   listListingsByVendor,
   canVendorBePublic,
   mockReviewRepo,
+  campuses,
 } from "@voeq/data";
 import { VendorDashboardClient } from "@/components/vendor/VendorDashboardClient";
-import { ListingCreateForm } from "@/components/vendor/ListingCreateForm";
 
 /**
- * VS3.4 / VS5 — Vendor dashboard (single-scroll, one-identity).
- * Shopper capabilities (saved / following / notifications) stay at the TOP;
- * vendor builder capabilities are BELOW, in the stateful VendorDashboardClient
- * which owns live-preview draft state (VS5.4).
+ * VS3.4 / VS5 + K3b.1 — Vendor dashboard (single-scroll, one-identity).
+ * Enhanced with modern header, attention queue indicators, and quick actions.
  */
 export default async function VendorDashboardPage() {
   const identity = await getCurrentIdentity();
@@ -38,40 +36,79 @@ export default async function VendorDashboardPage() {
     ratingCount > 0 ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / ratingCount) * 10) / 10 : 0;
   const verifiedCount = listings.filter((l) => (l as { verified?: boolean }).verified).length;
 
+  const campus = campuses.find((c) => c.id === vendor.campus);
+  const campusName = campus?.name || vendor.campus;
+
+  // Time-aware greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
+  // Status badge
+  const statusBadge = vendor.status === "suspended" 
+    ? { label: "Suspended", color: "var(--color-danger)" }
+    : live 
+    ? { label: "Live", color: "var(--color-status-live)" }
+    : { label: "Pending listings", color: "var(--color-status-pending)" };
+
   return (
-    <main data-testid="vendor-dashboard" style={{ minHeight: "100vh", background: "var(--role-bg)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
-      <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h2)" }}>{vendor.name}</h1>
-      <p data-testid="vendor-status" style={{ color: "var(--role-muted)" }}>
-        Status: {live ? "Public" : "Account ready — not yet public"}
-      </p>
+    <main data-testid="vendor-dashboard" style={{ minHeight: "100vh", background: "var(--color-glass-white)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
+      {/* K3b.1 Header */}
+      <header style={{ marginBottom: "var(--space-4)" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 36, margin: 0, marginBottom: 12, color: "var(--color-forest)" }}>
+          {greeting}, {vendor.name}
+        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <span style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 12px",
+            background: statusBadge.color,
+            color: "var(--color-cream)",
+            borderRadius: 6,
+            fontSize: 14,
+            fontWeight: 600,
+          }}>
+            {statusBadge.label}
+          </span>
+          <span style={{ color: "var(--color-ink-muted)", fontSize: 14 }}>
+            On {campusName}
+          </span>
+        </div>
+      </header>
 
       {vendor.status === "suspended" && (
-        <div data-testid="vendor-suspended-banner" role="alert" style={{ background: "var(--role-danger-soft, #fdecea)", color: "var(--role-danger)", border: "1px solid var(--role-danger)", borderRadius: "var(--radius)", padding: "var(--space-2) var(--space-3)", marginBottom: "var(--space-3)" }}>
-          Your storefront is suspended by staff. You can browse, but editing listings and messaging are disabled. Contact support for details.
+        <div data-testid="vendor-suspended-banner" role="alert" style={{ background: "var(--color-danger)", color: "var(--color-cream)", padding: "var(--space-3)", borderRadius: 8, marginBottom: "var(--space-3)" }}>
+          Your storefront is suspended. Contact support@voeq.ng for details.
         </div>
       )}
 
-      <ol className="wizard-steps" aria-label="Phase B progress" data-testid="phase-b-steps">
-        <li className={vendor.profilePhotoUrl ? "is-active" : ""} data-testid="step-photo">
-          1. Profile photo {vendor.profilePhotoUrl ? "✓" : ""}
-        </li>
-        <li className={listings.length > 0 ? "is-active" : ""} data-testid="step-listing">
-          2. First listing {listings.length > 0 ? `✓ (${listings.length})` : ""}
-        </li>
-        <li className={live ? "is-active" : ""} data-testid="step-live">
-          3. Go live {live ? "✓" : ""}
-        </li>
-      </ol>
-
-      <div data-testid="can-go-live" style={{ marginTop: "var(--space-2)" }}>
-        {live ? (
-          <p style={{ color: "var(--color-accent-gold)" }}>Your storefront is live. 🎉</p>
-        ) : (
-          <p style={{ color: "var(--role-muted)" }}>
-            Complete the photo and first listing to go public.
-          </p>
-        )}
-      </div>
+      {/* K3b.1 Attention queue indicators */}
+      <section style={{ background: "var(--color-cream)", border: "1px solid var(--color-ink-subtle)", borderRadius: 12, padding: "var(--space-4)", marginBottom: "var(--space-4)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0, marginBottom: "var(--space-3)", color: "var(--color-forest)" }}>
+          Needs your attention
+        </h2>
+        <ol className="wizard-steps" aria-label="Phase B progress" data-testid="phase-b-steps">
+          <li className={vendor.profilePhotoUrl ? "is-active" : ""} data-testid="step-photo">
+            1. Profile photo {vendor.profilePhotoUrl ? "✓" : ""}
+          </li>
+          <li className={listings.length > 0 ? "is-active" : ""} data-testid="step-listing">
+            2. First listing {listings.length > 0 ? `✓ (${listings.length})` : ""}
+          </li>
+          <li className={live ? "is-active" : ""} data-testid="step-live">
+            3. Go live {live ? "✓" : ""}
+          </li>
+        </ol>
+        <div data-testid="can-go-live" style={{ marginTop: "var(--space-2)" }}>
+          {live ? (
+            <p style={{ color: "var(--color-forest-mid)", margin: 0 }}>All caught up! Your storefront is live. 🎉</p>
+          ) : (
+            <p style={{ color: "var(--color-ink-muted)", margin: 0 }}>
+              Complete the photo and first listing to go public.
+            </p>
+          )}
+        </div>
+      </section>
 
       <hr style={{ border: 0, borderTop: "1px solid var(--role-border)", margin: "var(--space-4) 0" }} />
 

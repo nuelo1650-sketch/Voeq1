@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { LandingFooter } from '../landing/LandingFooter';
 
@@ -14,7 +15,14 @@ export function InfoPageShell({ children, title }: InfoPageShellProps) {
       <nav className="info-page-nav">
         <div className="info-page-nav-content">
           <Link href="/" className="info-page-logo">
-            Voeq
+            <Image 
+              src="/Logo.png" 
+              alt="Voeq" 
+              width={96} 
+              height={96}
+              priority
+              style={{ display: 'block', width: 96, height: 'auto', background: 'var(--color-forest)', padding: 8, borderRadius: 8 }}
+            />
           </Link>
           <Link href="/" className="info-page-back">
             <ArrowLeft size={16} />

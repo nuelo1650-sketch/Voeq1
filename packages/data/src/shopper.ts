@@ -29,6 +29,7 @@ import type {
   NotificationRepo as INotificationRepo,
 } from "./interfaces";
 import { mockStaffRepo, mockListingsRepo } from "./mock";
+import { realSavedListingRepo, realFollowRepo, realLikeRepo, realReviewRepo, realCommentRepo, realReportRepo, realNotificationRepo } from "@voeq/db";
 
 const nowIso = () => new Date().toISOString();
 const id = (p: string) => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -43,7 +44,7 @@ const reports = new Map<string, Report>();
 const notifications = new Map<string, Notification>();
 
 // ---- SavedListingRepo -------------------------------------------------------
-export const mockSavedListingRepo: SavedListingRepo = {
+const mockSavedListingRepoImpl: SavedListingRepo = {
   async toggle({ shopperId, targetType, targetId }) {
     const existing = [...savedItems.values()].find(
       (s) =>
@@ -80,7 +81,7 @@ export async function countSavesByVendor(vendorId: string): Promise<number> {
 }
 
 // ---- FollowRepo --------------------------------------------------------------
-export const mockFollowRepo: FollowRepo = {
+const mockFollowRepoImpl: FollowRepo = {
   async toggle({ followerId, vendorId }) {
     const existing = [...follows.values()].find(
       (f) => f.followerId === followerId && f.vendorId === vendorId,
@@ -102,7 +103,7 @@ export const mockFollowRepo: FollowRepo = {
 };
 
 // ---- LikeRepo ----------------------------------------------------------------
-export const mockLikeRepo: LikeRepo = {
+const mockLikeRepoImpl: LikeRepo = {
   async toggle({ actorId, targetId, targetType }) {
     const existing = [...likes.values()].find(
       (l) => l.actorId === actorId && l.targetId === targetId && l.targetType === targetType,
@@ -121,7 +122,7 @@ export const mockLikeRepo: LikeRepo = {
 };
 
 // ---- ReviewRepo (upsert 1 per shopper-vendor) -------------------------------
-export const mockReviewRepo: ReviewRepo = {
+const mockReviewRepoImpl: ReviewRepo = {
   async create({ shopperId, vendorId, rating, body }) {
     const existing = [...reviews.values()].find(
       (r) => r.authorId === shopperId && r.vendorId === vendorId,
@@ -176,7 +177,7 @@ export const mockReviewRepo: ReviewRepo = {
 };
 
 // ---- CommentRepo -------------------------------------------------------------
-export const mockCommentRepo: CommentRepo = {
+const mockCommentRepoImpl: CommentRepo = {
   async create({ listingId, authorId, body }) {
     const comment: Comment = {
       id: id("c"),
@@ -200,7 +201,7 @@ export const mockCommentRepo: CommentRepo = {
 };
 
 // ---- ReportRepo (creates a staff case) --------------------------------------
-export const mockReportRepo: IReportRepo = {
+const mockReportRepoImpl: IReportRepo = {
   async create({ reporterId, targetType, targetId, category, body }) {
     const report: Report = {
       id: id("rp"),
@@ -227,7 +228,7 @@ export const mockReportRepo: IReportRepo = {
 };
 
 // ---- NotificationRepo --------------------------------------------------------
-export const mockNotificationRepo: INotificationRepo = {
+const mockNotificationRepoImpl: INotificationRepo = {
   async create({ recipientId, type, title, body, refId }) {
     const n: Notification = {
       id: id("n"),
@@ -271,3 +272,13 @@ export function resetShopperState(): void {
   reports.clear();
   notifications.clear();
 }
+
+// D.2/D.3 — Factory (EOF): real Neon-backed repos when DATABASE_URL is set.
+const USE_REAL = !!process.env.DATABASE_URL;
+export const mockSavedListingRepo = USE_REAL ? (realSavedListingRepo as unknown as SavedListingRepo) : mockSavedListingRepoImpl;
+export const mockFollowRepo = USE_REAL ? (realFollowRepo as unknown as FollowRepo) : mockFollowRepoImpl;
+export const mockLikeRepo = USE_REAL ? (realLikeRepo as unknown as LikeRepo) : mockLikeRepoImpl;
+export const mockReviewRepo = USE_REAL ? (realReviewRepo as unknown as ReviewRepo) : mockReviewRepoImpl;
+export const mockCommentRepo = USE_REAL ? (realCommentRepo as unknown as CommentRepo) : mockCommentRepoImpl;
+export const mockReportRepo = USE_REAL ? (realReportRepo as unknown as IReportRepo) : mockReportRepoImpl;
+export const mockNotificationRepo = USE_REAL ? (realNotificationRepo as unknown as INotificationRepo) : mockNotificationRepoImpl;

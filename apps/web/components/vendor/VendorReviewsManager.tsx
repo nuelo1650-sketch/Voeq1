@@ -21,7 +21,7 @@ const HOUR = 60 * 60 * 1000;
  * Server re-validates the window regardless.
  */
 export function VendorReviewsManager() {
-  const router = useRouter();
+  const _router = useRouter();
   const [reviews, setReviews] = useState<ReviewView[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 

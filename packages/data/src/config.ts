@@ -5,6 +5,7 @@
  * In-memory; swaps cleanly for real Postgres in Phase 9. No PII.
  */
 import type { Agreement, AgreementRepo } from "./interfaces";
+import { realCategoryRepo, realCampusRepo, realAgreementRepo } from "@voeq/db";
 import type { Campus, Category } from "./explore-view";
 import { campuses, categories, submitNewCampus } from "./explore-view";
 
@@ -22,7 +23,7 @@ export interface CampusRepo {
 }
 
 // ---- Categories (reuse explore-view `categories`) ----------------------------
-export const mockCategoryRepo: CategoryRepo = {
+const mockCategoryRepoImpl: CategoryRepo = {
   async list() {
     return [...categories];
   },
@@ -55,7 +56,7 @@ function findBySlug(slugOrName: string): Campus | undefined {
   return campuses.find((c) => c.id.toLowerCase() === q || c.name.toLowerCase() === q);
 }
 
-export const mockCampusRepo: CampusRepo = {
+const mockCampusRepoImpl: CampusRepo = {
   async list() {
     return [...campuses];
   },
@@ -82,7 +83,7 @@ const agreements: Agreement[] = [
   { id: "agr-privacy-1", kind: "privacy", version: "1.0", body: "Voeq Privacy Policy v1.0.", effectiveAt: new Date().toISOString(), isCurrent: true },
 ];
 
-export const mockAgreementRepo: AgreementRepo = {
+const mockAgreementRepoImpl: AgreementRepo = {
   async list(kind) {
     return kind ? agreements.filter((a) => a.kind === kind) : [...agreements];
   },
@@ -101,3 +102,9 @@ export const mockAgreementRepo: AgreementRepo = {
     return target;
   },
 };
+
+// D.2/D.3 — Factory (EOF): real Neon-backed repos when DATABASE_URL is set.
+const USE_REAL = !!process.env.DATABASE_URL;
+export const mockCategoryRepo = USE_REAL ? (realCategoryRepo as unknown as CategoryRepo) : mockCategoryRepoImpl;
+export const mockCampusRepo = USE_REAL ? (realCampusRepo as unknown as CampusRepo) : mockCampusRepoImpl;
+export const mockAgreementRepo = USE_REAL ? (realAgreementRepo as unknown as AgreementRepo) : mockAgreementRepoImpl;

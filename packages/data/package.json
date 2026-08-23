@@ -18,5 +18,10 @@
     "eslint": "^9.13.0",
     "typescript": "^5.6.3",
     "vitest": "^2.1.4"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "@voeq/db": "*",
+    "drizzle-orm": "^0.45.2"
   }
 }

@@ -22,7 +22,7 @@ import { LandingProofRow } from "./LandingProofRow";
  * (the buyer's actual location), not a hero pre-filter.
  */
 export function LandingShell() {
-  const [campus, setCampus] = useState("nmu");
+  const [_campus, _setCampus] = useState("nmu");
 
   return (
     <>
@@ -50,7 +50,7 @@ export function LandingShell() {
         <LandingHowItWorks />
         <LandingCategories />
         <LandingFAQ />
-        <LandingFinalCTA campus={campus} />
+        <LandingFinalCTA campus={_campus} />
         <LandingFooter />
       </div>
     </>

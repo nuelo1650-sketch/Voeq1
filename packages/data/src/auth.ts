@@ -8,6 +8,15 @@
  * They must never be conflated.
  */
 import { randomUUID, randomBytes, randomInt } from "crypto";
+import {
+  realIdentityRepo,
+  realSessionRepo,
+  realOtpRepo,
+  realMagicLinkRepo,
+  realConsentRepo,
+  realAuthRepo,
+  realUserPreferenceRepo,
+} from "@voeq/db";
 import type {
   Identity,
   IdentityRepo,
@@ -15,6 +24,7 @@ import type {
   SessionRepo,
   ConsentAcceptance,
   ConsentRepo,
+  AuthRepo,
   OtpPurpose,
   OtpRepo,
   MagicLinkRepo,
@@ -62,7 +72,7 @@ const normalizeEmail = (e: string) => e.trim().toLowerCase();
 const nowIso = () => new Date().toISOString();
 
 // ---- IdentityRepo ------------------------------------------------------------
-export const mockIdentityRepo: IdentityRepo = {
+const mockIdentityRepoImpl: IdentityRepo = {
   async createPending(input) {
     const id = randomUUID();
     const intent = input.intent ?? null;
@@ -123,7 +133,7 @@ export const mockIdentityRepo: IdentityRepo = {
 };
 
 // ---- SessionRepo -------------------------------------------------------------
-export const mockSessionRepo: SessionRepo = {
+const mockSessionRepoImpl: SessionRepo = {
   async create(identityId) {
     const id = randomUUID();
     const now = Date.now();
@@ -166,7 +176,7 @@ export async function revokeAllSessions(identityId: string): Promise<void> {
 }
 
 // ---- AuthRepo (current identity from session) --------------------------------
-export const mockAuthRepo = {
+const mockAuthRepoImpl = {
   async currentIdentity(sessionId: string | null): Promise<Identity | null> {
     if (!sessionId) return null;
     const s = await mockSessionRepo.get(sessionId);
@@ -176,8 +186,11 @@ export const mockAuthRepo = {
       sessions.delete(s.id);
       return null;
     }
-    if (id.accountStatus !== "active") {
-      // suspended / banned / deleted / pending -> no access
+    // Only hard-block statuses that must never hold a session.
+    // `pending_verification` (post-signup, pre-OTP/consent) MUST keep its
+    // session so the user can complete the consent gate — blocking it logs
+    // the very first signup out of the flow they're supposed to be in.
+    if (id.accountStatus === "suspended" || id.accountStatus === "banned" || id.accountStatus === "deleted") {
       sessions.delete(s.id);
       return null;
     }
@@ -189,7 +202,7 @@ export const mockAuthRepo = {
 };
 
 // ---- ConsentRepo -------------------------------------------------------------
-export const mockConsentRepo: ConsentRepo = {
+const mockConsentRepoImpl: ConsentRepo = {
   async accept(identityId, method) {
     const id = identities.get(identityId);
     if (!id) return;
@@ -229,7 +242,7 @@ export async function isConsentCurrent(identityId: string) {
 }
 
 // ---- OTP (registration / google_verify / email_change) -----------------------
-export const mockOtpRepo: OtpRepo = {
+const mockOtpRepoImpl: OtpRepo = {
   async issue(email, purpose) {
     return issueOtp(email, purpose);
   },
@@ -289,7 +302,7 @@ export function peekOtp(email: string, purpose: OtpPurpose): string | null {
 }
 
 // ---- Magic link (reset ONLY — distinct from OTP) -----------------------------
-export const mockMagicLinkRepo: MagicLinkRepo = {
+const mockMagicLinkRepoImpl: MagicLinkRepo = {
   async issue(email) {
     return issueMagicLink(email);
   },
@@ -406,7 +419,7 @@ export function resetAuthState(): void {
 // ---- UserPreferenceRepo (VS3.1) ---------------------------------------------
 const userPrefs = new Map<string, UserPreference>();
 
-export const mockUserPrefRepo: UserPreferenceRepo = {
+const mockUserPrefRepoImpl: UserPreferenceRepo = {
   async get(identityId) {
     return userPrefs.get(identityId) ?? null;
   },
@@ -450,3 +463,15 @@ export function pruneExpiredCredentials(now: number = Date.now()): number {
   }
   return removed;
 }
+
+// D.2/D.3 — Factory (appended at EOF so all `Impl` consts are declared above).
+// When DATABASE_URL is set, the `mock*` names transparently resolve to the real
+// Neon-backed repos. No route imports change.
+const USE_REAL = !!process.env.DATABASE_URL;
+export const mockIdentityRepo = USE_REAL ? (realIdentityRepo as unknown as IdentityRepo) : mockIdentityRepoImpl;
+export const mockSessionRepo = USE_REAL ? (realSessionRepo as unknown as SessionRepo) : mockSessionRepoImpl;
+export const mockOtpRepo = USE_REAL ? (realOtpRepo as unknown as OtpRepo) : mockOtpRepoImpl;
+export const mockMagicLinkRepo = USE_REAL ? (realMagicLinkRepo as unknown as MagicLinkRepo) : mockMagicLinkRepoImpl;
+export const mockConsentRepo = USE_REAL ? (realConsentRepo as unknown as ConsentRepo) : mockConsentRepoImpl;
+export const mockAuthRepo = USE_REAL ? (realAuthRepo as unknown as AuthRepo) : mockAuthRepoImpl;
+export const mockUserPrefRepo = USE_REAL ? (realUserPreferenceRepo as unknown as UserPreferenceRepo) : mockUserPrefRepoImpl;

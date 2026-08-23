@@ -1,6 +1,27 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
+ * CORS allowlist for /api/* (D.7/D.8). Defense-in-depth: the primary
+ * cross-origin path is the Vercel→Render rewrite (browser sees same-origin),
+ * but direct browser→Render calls (SSE, future native apps) are permitted from
+ * approved origins only.
+ */
+function corsHeaders(origin: string | null): HeadersInit {
+  const allowlist = (process.env.CORS_ALLOWLIST ?? "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const allowed = origin && allowlist.includes(origin) ? origin : allowlist[0] ?? "";
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Max-Age": "86400",
+  };
+}
+
+/**
  * Edge middleware: a CHEAP guard for authed subpaths only (D3).
  * It does NOT do identity/db lookups — that happens server-side via
  * lib/session.getCurrentIdentity(). Here we only check the session cookie is
@@ -30,6 +51,17 @@ const PUBLIC_EXACT = new Set([
 ]);
 
 export function middleware(req: NextRequest) {
+  // CORS preflight + header injection for API routes.
+  if (req.nextUrl.pathname.startsWith("/api")) {
+    const headers = corsHeaders(req.headers.get("origin"));
+    if (req.method === "OPTIONS") {
+      return new NextResponse(null, { status: 204, headers });
+    }
+    const res = NextResponse.next();
+    for (const [k, v] of Object.entries(headers)) res.headers.set(k, v as string);
+    return res;
+  }
+
   const { pathname, search } = req.nextUrl;
 
   // Guarded?
@@ -52,6 +84,7 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/api/:path*",
     "/onboarding/:path*",
     "/shopper/:path*",
     "/home/:path*",
