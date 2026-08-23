@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, uploadImage, logAudit } from "@voeq/data";
+import { mockAuthRepo, uploadImage, logAudit } from "@voeq/data/server";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**

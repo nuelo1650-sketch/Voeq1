@@ -8,7 +8,7 @@ import {
   createSession,
   logAudit,
   sendEmail,
-} from "@voeq/data";
+} from "@voeq/data/server";
 
 const GOOGLE_STATE_COOKIE = "google_oauth_state";
 

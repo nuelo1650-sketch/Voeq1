@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockIdentityRepo, mockMagicLinkRepo, checkRateLimit, logAudit, sendEmail } from "@voeq/data";
+import { mockIdentityRepo, mockMagicLinkRepo, checkRateLimit, logAudit, sendEmail } from "@voeq/data/server";
 import { z } from "zod";
 
 const LIMIT = 3;

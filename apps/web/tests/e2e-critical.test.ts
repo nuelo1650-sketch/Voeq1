@@ -21,13 +21,12 @@ import {
   mockConversationRepo,
   mockMessageRepo,
   checkRateLimit,
-  sendEmail,
-  uploadImage,
-  MAX_IMAGES_PER_LISTING,
   validateEnv,
   EMAIL_TEMPLATES,
   renderEmail,
 } from "@voeq/data";
+// Server-only functions (node:crypto / server fetch) live in the /server entry.
+import { sendEmail, uploadImage, MAX_IMAGES_PER_LISTING } from "@voeq/data/server";
 import { realVendorRepo, realListingsRepo } from "@voeq/db";
 
 const PNG = readFileSync(new URL("./_png16.txt", import.meta.url), "utf8").trim();
@@ -133,8 +132,7 @@ describe("email: real Resend + 11 templates", () => {
   });
 
   it("11. unknown template returns error (no silent drop)", async () => {
-    // @ts-expect-error intentional bad template
-    const r = await sendEmail({ to: "noreply@voeq.ng", template: "NOPE_X" });
+    const r = await sendEmail({ to: "noreply@voeq.ng", template: "NOPE_X" } as any);
     expect(r.ok).toBe(false);
     expect(r.error).toMatch(/unknown_template/);
   });

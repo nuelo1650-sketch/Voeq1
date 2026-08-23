@@ -7,7 +7,7 @@ import {
   enforceVisibilityAfterMutation,
   logAudit,
   MAX_IMAGES_PER_LISTING,
-} from "@voeq/data";
+} from "@voeq/data/server";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**

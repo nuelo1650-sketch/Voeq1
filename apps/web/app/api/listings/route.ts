@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockVendorRepo, mockListingsRepo, logAudit, MAX_IMAGES_PER_LISTING } from "@voeq/data";
+import { mockAuthRepo, mockVendorRepo, mockListingsRepo, logAudit, MAX_IMAGES_PER_LISTING } from "@voeq/data/server";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
