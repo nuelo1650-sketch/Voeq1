@@ -7,7 +7,7 @@ import {
   checkRateLimit,
   logAudit,
   sendEmail,
-} from "@voeq/data";
+} from "@voeq/data/server";
 import { z } from "zod";
 import { verifyTurnstile } from "@/lib/turnstile";
 
