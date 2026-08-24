@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BrandLogo } from './BrandLogo';
 
 export function LandingFooter() {
   return (
@@ -19,7 +20,7 @@ export function LandingFooter() {
       <div className="footer-content">
         <div className="footer-grid">
           <div className="footer-brand">
-            <h2 className="footer-logo">Voeq</h2>
+            <BrandLogo width={120} color="var(--color-glass-white)" />
             <p className="footer-tagline">Find. Connect. Grow.</p>
             <p className="footer-description">
               The campus marketplace connecting Nigerian students with verified vendors.
