@@ -53,6 +53,13 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   const def = EMAIL_TEMPLATES[template];
   if (!def) return { ok: false, error: `unknown_template:${template}` };
 
+  console.log("[BUG1-TRACE] sendEmail called:", {
+    to,
+    template,
+    vars: Object.keys(vars),
+    hasApiKey: !!process.env.RESEND_API_KEY,
+  });
+
   const rendered = renderEmail(def, vars);
   const apiKey = process.env.RESEND_API_KEY;
   // Resolve From: explicit override > env override > context-default > verified default.
@@ -65,6 +72,14 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
     process.env.RESEND_FROM_EMAIL ||
     contextFrom;
 
+  console.log("[BUG1-TRACE] Email details:", {
+    from,
+    to,
+    subject: rendered.subject,
+    hasHtml: !!rendered.html,
+    hasText: !!rendered.text,
+  });
+
   // Dev fallback: no key configured.
   if (!apiKey) {
     // eslint-disable-next-line no-console
@@ -72,6 +87,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
     return { ok: true, dev: true };
   }
 
+  console.log("[BUG1-TRACE] Making Resend API call...");
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -88,13 +104,21 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
         text: rendered.text,
       }),
     });
+    console.log("[BUG1-TRACE] Resend API response:", {
+      status: r.status,
+      ok: r.ok,
+      statusText: r.statusText,
+    });
     if (!r.ok) {
       const body = await r.text().catch(() => "");
+      console.error("[BUG1-TRACE] Resend API error body:", body);
       return { ok: false, error: `resend_http_${r.status}: ${body.slice(0, 200)}` };
     }
     const json = (await r.json().catch(() => ({}))) as { id?: string };
+    console.log("[BUG1-TRACE] Resend API success:", json);
     return { ok: true, id: json.id };
   } catch (e) {
+    console.error("[BUG1-TRACE] Resend API exception:", e);
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
 }

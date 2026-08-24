@@ -100,6 +100,17 @@ export async function POST(req: NextRequest) {
 
   const code = await issueOtp(email, "registration");
   
+  // BUG 1 TRACE: Log everything about the email send attempt
+  console.log("[BUG1-TRACE] About to send OTP email:", {
+    timestamp: new Date().toISOString(),
+    recipientEmail: email,
+    recipientName: name,
+    otpCode: code,
+    hasResendApiKey: !!process.env.RESEND_API_KEY,
+    resendApiKeyLength: process.env.RESEND_API_KEY?.length || 0,
+    template: "OTP_REGISTRATION",
+  });
+  
   // Dev helper: log OTP for easy testing when email is disabled
   if (!process.env.RESEND_API_KEY) {
     console.log(`\n🔐 [DEV] OTP Code for ${email}: ${code}\n`);
@@ -107,7 +118,20 @@ export async function POST(req: NextRequest) {
   
   // D.5 — Real email via Resend. Surface delivery failures instead of lying to
   // the user that a code was sent when it wasn't.
-  const sent = await sendEmail({ to: email, template: "OTP_REGISTRATION", vars: { name, code } });
+  let sent;
+  try {
+    sent = await sendEmail({ to: email, template: "OTP_REGISTRATION", vars: { name, code } });
+    console.log("[BUG1-TRACE] sendEmail returned:", {
+      ok: sent.ok,
+      dev: sent.dev,
+      id: sent.id,
+      error: sent.error,
+    });
+  } catch (err) {
+    console.error("[BUG1-TRACE] sendEmail threw exception:", err);
+    throw err;
+  }
+  
   if (!sent.ok) {
     console.error("[signup] OTP email failed:", {
       error: sent.error,
@@ -124,6 +148,8 @@ export async function POST(req: NextRequest) {
       { status: 502 },
     );
   }
+  
+  console.log("[BUG1-TRACE] Email sent successfully, returning success response");
 
   const pendingToken = await issuePendingToken(email, "registration");
   await logAudit("signup.initiated", identity.id, { method: "email", intent });
