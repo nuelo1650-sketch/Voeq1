@@ -120,6 +120,12 @@ export async function GET(req: NextRequest) {
     googleSubject: profile.sub,
   });
   const otp = await issueOtp(profile.email, "google_verify");
+  
+  // Dev helper: log OTP for easy testing
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`\n🔐 [DEV] Google OTP for ${profile.email}: ${otp}\n`);
+  }
+  
   const pendingToken = await issuePendingToken(profile.email, "google_verify");
   await sendEmail({
     to: profile.email,

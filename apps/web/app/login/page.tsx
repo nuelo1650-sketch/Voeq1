@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
@@ -15,8 +15,17 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // FIX #4: Listen for Turnstile success
+  useEffect(() => {
+    const handler = (e: CustomEvent) => setTurnstileToken(e.detail);
+    document.addEventListener("turnstile-success", handler as EventListener);
+    return () => document.removeEventListener("turnstile-success", handler as EventListener);
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -29,12 +38,16 @@ function LoginForm() {
       setError("Enter your password.");
       return;
     }
+    if (!turnstileToken) {
+      setError("Please complete the bot verification.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, remember, next }),
+        body: JSON.stringify({ email, password, remember, next, turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -89,6 +102,29 @@ function LoginForm() {
             <span>Keep me signed in</span>
           </label>
           {error && <div className="auth-form-error" id="login-error" role="alert">{error}</div>}
+          
+          {/* FIX #4: Cloudflare Turnstile widget for bot protection */}
+          {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+            <div className="auth-turnstile">
+              <div
+                className="cf-turnstile"
+                data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                data-callback="onTurnstileSuccess"
+                data-action="login"
+              />
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    window.onTurnstileSuccess = function(token) {
+                      window.turnstileToken = token;
+                      document.dispatchEvent(new CustomEvent('turnstile-success', { detail: token }));
+                    };
+                  `,
+                }}
+              />
+            </div>
+          )}
+          
           <button type="submit" className="auth-submit" disabled={submitting} data-testid="login-submit">
             {submitting ? "Signing in…" : "Sign in"}
           </button>
@@ -98,11 +134,30 @@ function LoginForm() {
           <span>or</span>
         </div>
 
+        {/* FIX #3: Consent checkbox required before Google OAuth */}
+        <label className="auth-consent" style={{ marginBottom: "var(--space-3)" }}>
+          <input
+            type="checkbox"
+            checked={consentChecked}
+            onChange={(e) => setConsentChecked(e.target.checked)}
+            data-testid="google-consent-checkbox"
+          />
+          <span>
+            I agree to the <Link href="/terms" target="_blank">Terms</Link> and{" "}
+            <Link href="/privacy" target="_blank">Privacy Policy</Link>
+          </span>
+        </label>
+
         <button
           type="button"
           onClick={() => window.location.href = '/api/auth/google'}
           className="auth-google-btn"
+          disabled={!consentChecked}
           data-testid="google-login"
+          style={{
+            opacity: consentChecked ? 1 : 0.5,
+            cursor: consentChecked ? "pointer" : "not-allowed",
+          }}
         >
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
             <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>

@@ -29,6 +29,20 @@ export async function requireAuth(next?: string): Promise<Identity> {
 }
 
 /**
+ * FIX #2: Hard gate for consent acceptance.
+ * Redirects to /consent if user is authenticated but hasn't accepted consent yet.
+ * Use this on all protected routes that require consent (home, onboarding, etc).
+ */
+export async function requireConsent(next?: string): Promise<Identity> {
+  const id = await requireAuth(next);
+  if (!id.consent || id.consent.length === 0) {
+    const url = next ? `/consent?next=${encodeURIComponent(next)}` : "/consent";
+    throw new Response(null, { status: 302, headers: { Location: url } });
+  }
+  return id;
+}
+
+/**
  * VS7.4 — Server-authoritative capability gate for admin route handlers.
  * Returns the staff identity if it holds `cap`, otherwise throws a 403 Response
  * (route handlers `catch` via Next's error boundary, or we return it). Callers

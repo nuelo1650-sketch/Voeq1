@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentIdentity } from "@/lib/session";
+import { requireConsent } from "@/lib/session";
 import { mockUserPrefRepo, campuses } from "@voeq/data";
 import { ShopperDashboard } from "@/components/shopper/ShopperDashboard";
 
@@ -8,10 +8,10 @@ import { ShopperDashboard } from "@/components/shopper/ShopperDashboard";
  * Campus-scoped per Doc 03. Guards the shopper-onboarding gate, then renders the
  * real dashboard (Saved / Following / Recommended / Activity / Notifications).
  * Auth redirect preserves ?next= so post-login returns here (Doc 03 §3.9).
+ * FIX #2: Now enforces consent acceptance before allowing access.
  */
 export default async function HomePage() {
-  const identity = await getCurrentIdentity();
-  if (!identity) redirect(`/login?next=${encodeURIComponent("/home")}`);
+  const identity = await requireConsent("/home");
 
   const prefs = await mockUserPrefRepo.get(identity.id);
   if (!prefs || !prefs.feedPrefsSetAt) redirect("/onboarding/shopper");

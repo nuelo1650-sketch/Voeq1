@@ -99,13 +99,28 @@ export async function POST(req: NextRequest) {
   });
 
   const code = await issueOtp(email, "registration");
+  
+  // Dev helper: log OTP for easy testing when email is disabled
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`\n🔐 [DEV] OTP Code for ${email}: ${code}\n`);
+  }
+  
   // D.5 — Real email via Resend. Surface delivery failures instead of lying to
   // the user that a code was sent when it wasn't.
   const sent = await sendEmail({ to: email, template: "OTP_REGISTRATION", vars: { name, code } });
   if (!sent.ok) {
-    console.error("[signup] OTP email failed:", sent.error);
+    console.error("[signup] OTP email failed:", {
+      error: sent.error,
+      email: email,
+      dev: sent.dev,
+      hasApiKey: !!process.env.RESEND_API_KEY,
+    });
     return NextResponse.json(
-      { error: "We couldn't send your verification code. Please try again shortly." },
+      { 
+        error: sent.dev 
+          ? "Email is disabled in development. Check console for OTP code."
+          : "We couldn't send your verification code. Please try again or contact support@voeq.ng." 
+      },
       { status: 502 },
     );
   }

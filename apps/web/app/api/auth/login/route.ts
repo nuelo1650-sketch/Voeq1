@@ -7,18 +7,23 @@ import {
   logAudit,
 } from "@voeq/data";
 import { z } from "zod";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const LOGIN_LIMIT = 5;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 5 / email / 15min
 
+// FIX #4: Added Turnstile bot protection
 const schema = z.object({
   email: z.string().email().transform((s) => s.trim().toLowerCase()),
   password: z.string().min(1),
   remember: z.boolean().optional(),
   next: z.string().optional(),
+  turnstileToken: z.string().min(1, "Bot protection required"),
 });
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
+  
   let body: unknown;
   try {
     body = await req.json();
@@ -30,7 +35,18 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Enter your email and password." }, { status: 400 });
   }
-  const { email, password, remember, next } = parsed.data;
+  const { email, password, remember, next, turnstileToken } = parsed.data;
+
+  // FIX #4: Verify Turnstile first (bot protection before rate-limit check)
+  const cfOk = await verifyTurnstile({
+    token: turnstileToken,
+    clientIp: ip,
+    action: "login",
+  });
+  if (!cfOk.ok) {
+    await logAudit("login.failed", null, { reason: "turnstile_failed", email });
+    return NextResponse.json({ error: "Bot verification failed. Please try again." }, { status: 403 });
+  }
 
   // Uniform rate-limit keyed by email (anti-enumeration + brute-force).
   const rl = await checkRateLimit(`login:${email}`, LOGIN_LIMIT, LOGIN_WINDOW_MS);
