@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AlertCircle, CheckCircle, Flag, User, X, Check } from "lucide-react";
 import type { Capability } from "@voeq/data";
@@ -22,7 +22,8 @@ interface ModerationQueueProps {
 
 type Tab = "reports" | "verifications" | "content" | "users";
 
-// Mock data structures
+// Real case shape (from /api/staff/cases). The backend stores generic cases;
+// we surface queue + status + decision honestly (no invented reporter names).
 interface Report {
   id: string;
   type: "vendor" | "listing" | "review" | "message";
@@ -41,6 +42,7 @@ interface VerificationRequest {
   vendorName: string;
   requestDate: Date;
   submittedInfo: string;
+  status: "open" | "triaged" | "resolved" | "dismissed";
 }
 
 export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
@@ -52,49 +54,55 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
     itemId: string;
   } | null>(null);
   const [actionReason, setActionReason] = useState("");
+  const [reports, setReports] = useState<Report[]>([]);
+  const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
-  const mockReports: Report[] = [
-    {
-      id: "r1",
-      type: "listing",
-      targetId: "l1",
-      targetName: "Suspicious Product Listing",
-      reporterName: "John D.",
-      category: "Inappropriate Content",
-      date: new Date(Date.now() - 2 * 3600000),
-      status: "open",
-      description: "This listing contains misleading information and potentially fraudulent claims.",
-    },
-    {
-      id: "r2",
-      type: "review",
-      targetId: "rev1",
-      targetName: "Abusive Review",
-      reporterName: "Sarah M.",
-      category: "Harassment",
-      date: new Date(Date.now() - 5 * 3600000),
-      status: "triaged",
-      description: "Review contains personal attacks and offensive language.",
-    },
-  ];
-
-  const mockVerifications: VerificationRequest[] = [
-    {
-      id: "v1",
-      vendorId: "vendor1",
-      vendorName: "Campus Cafe",
-      requestDate: new Date(Date.now() - 24 * 3600000),
-      submittedInfo: "Business registration: CAC123456, Operating license attached",
-    },
-    {
-      id: "v2",
-      vendorId: "vendor2",
-      vendorName: "Tech Repairs Plus",
-      requestDate: new Date(Date.now() - 48 * 3600000),
-      submittedInfo: "Verified business address, tax ID provided",
-    },
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([
+      fetch("/api/staff/cases?queue=reports").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/staff/cases?queue=verifications").then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([rep, ver]) => {
+        if (cancelled) return;
+        if (rep?.ok) {
+          setReports(
+            (rep.cases as Array<{ id: string; queue: string; status: string; resolution?: string | null }>).map((c) => ({
+              id: c.id,
+              type: (c.queue as Report["type"]) ?? "listing",
+              targetId: c.id,
+              targetName: `Case ${c.id.slice(0, 8)}`,
+              reporterName: "—",
+              category: c.queue,
+              date: new Date(),
+              status: c.status as Report["status"],
+              description: c.resolution ?? "No description recorded.",
+            })),
+          );
+        }
+        if (ver?.ok) {
+          setVerifications(
+            (ver.cases as Array<{ id: string; queue: string; status: string; resolution?: string | null }>).map(
+              (c) => ({
+                id: c.id,
+                vendorId: c.id,
+                vendorName: `Vendor ${c.id.slice(0, 8)}`,
+                requestDate: new Date(),
+                submittedInfo: c.resolution ?? "Pending review.",
+                status: c.status as VerificationRequest["status"],
+              }),
+            ),
+          );
+        }
+      })
+      .catch(() => {})
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const toggleSelection = (id: string) => {
     const newSelection = new Set(selectedItems);
@@ -108,9 +116,9 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
 
   const selectAll = () => {
     if (activeTab === "reports") {
-      setSelectedItems(new Set(mockReports.map(r => r.id)));
+      setSelectedItems(new Set(reports.map((r) => r.id)));
     } else if (activeTab === "verifications") {
-      setSelectedItems(new Set(mockVerifications.map(v => v.id)));
+      setSelectedItems(new Set(verifications.map((v) => v.id)));
     }
   };
 
@@ -125,15 +133,35 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
 
   const confirmAction = async () => {
     if (!actionModal) return;
-
-    console.log("[ModerationQueue] Action:", actionModal.action, "Item:", actionModal.itemId, "Reason:", actionReason);
-    
-    // In production: POST to API, log to audit
-    // await fetch("/api/staff/moderate", { method: "POST", body: JSON.stringify({ ...actionModal, reason: actionReason }) });
-    
+    const caseId = actionModal.itemId;
+    // Map UI action to triage action; resolution required by backend.
+    const triageAction =
+      actionModal.action === "approve" || actionModal.action === "resolve"
+        ? "resolve"
+        : actionModal.action === "deny" || actionModal.action === "dismiss"
+          ? "dismiss"
+          : "assign";
+    try {
+      await fetch("/api/staff/cases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caseId,
+          action: triageAction,
+          resolution: actionReason || `${actionModal.action} via moderation queue`,
+        }),
+      });
+      // Optimistically clear selection for the acted item.
+      setSelectedItems((prev) => {
+        const n = new Set(prev);
+        n.delete(caseId);
+        return n;
+      });
+    } catch {
+      // swallow — UI reflects server state on next load
+    }
     setActionModal(null);
     setActionReason("");
-    alert(`Action "${actionModal.action}" completed. (Mock)`);
   };
 
   return (
@@ -203,7 +231,7 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         {/* Content */}
         {activeTab === "reports" && (
           <ReportsTab 
-            reports={mockReports} 
+            reports={reports} 
             selectedItems={selectedItems} 
             onToggleSelection={toggleSelection} 
             onSelectAll={selectAll}
@@ -214,7 +242,7 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
 
         {activeTab === "verifications" && (
           <VerificationsTab 
-            verifications={mockVerifications} 
+            verifications={verifications} 
             selectedItems={selectedItems} 
             onToggleSelection={toggleSelection} 
             onSelectAll={selectAll}

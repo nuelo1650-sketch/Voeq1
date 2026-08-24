@@ -1,0 +1,36 @@
+import fs from "fs";
+import path from "path";
+
+// Load DATABASE_URL from .env.local (same source the app uses)
+const envPath = path.resolve(process.cwd(), ".env.local");
+if (fs.existsSync(envPath)) {
+  for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
+    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim();
+  }
+}
+
+console.log("DATABASE_URL set:", !!process.env.DATABASE_URL);
+
+// Import AFTER env is set so USE_REAL flips true
+const { mockCommentRepo } = await import("@voeq/data");
+
+const listingId = "verify-" + Date.now();
+const authorId = "verify-author";
+const body = "integration round-trip " + Date.now();
+
+console.log("=== CREATE ===");
+const created = await mockCommentRepo.create({ listingId, authorId, body });
+console.log("created id:", created.id, "| listingId:", created.listingId, "| body:", created.body);
+
+console.log("=== READ BACK ===");
+const list = await mockCommentRepo.listByListing(listingId);
+const found = list.find((c) => c.id === created.id);
+console.log("list length:", list.length, "| found our comment:", !!found);
+
+if (found && found.body === body) {
+  console.log("RESULT: PASS — comment persisted to real DB and read back");
+} else {
+  console.log("RESULT: FAIL — comment not persisted (mock path or DB write failed)");
+  process.exitCode = 1;
+}

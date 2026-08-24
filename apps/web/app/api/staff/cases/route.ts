@@ -7,6 +7,18 @@ import { requireCapability } from "@/lib/session";
  * assign -> set assignedTo (status open->triaged); resolve/dismiss -> set resolution + status.
  * Resolution text required (no empty resolutions). Audited.
  */
+export async function GET(req: NextRequest) {
+  try {
+    await requireCapability("case.review");
+  } catch (e) {
+    if (e instanceof Response) return new NextResponse(null, { status: e.status });
+    throw e;
+  }
+  const queue = req.nextUrl.searchParams.get("queue") ?? "";
+  const cases = await mockStaffRepo.listCases(queue);
+  return NextResponse.json({ ok: true, cases }, { status: 200 });
+}
+
 export async function POST(req: NextRequest) {
   let actor;
   try {

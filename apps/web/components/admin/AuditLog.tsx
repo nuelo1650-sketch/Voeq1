@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, Filter } from "lucide-react";
 
@@ -25,49 +25,56 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [entries, setEntries] = useState<AuditEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock audit data
-  const mockEntries: AuditEntry[] = [
-    {
-      id: "a1",
-      actor: "admin@voeq.ng",
-      actorRole: "super_admin",
-      action: "vendor.verify",
-      targetType: "vendor",
-      targetId: "v123",
-      timestamp: new Date(Date.now() - 2 * 3600000),
-      reason: "Verified business registration documents",
-    },
-    {
-      id: "a2",
-      actor: "moderator@voeq.ng",
-      actorRole: "moderator",
-      action: "case.resolve",
-      targetType: "report",
-      targetId: "r456",
-      timestamp: new Date(Date.now() - 5 * 3600000),
-      reason: "Resolved as false report after investigation",
-    },
-    {
-      id: "a3",
-      actor: "admin@voeq.ng",
-      actorRole: "super_admin",
-      action: "config.update",
-      targetType: "category",
-      targetId: "cat-food",
-      timestamp: new Date(Date.now() - 24 * 3600000),
-      reason: "Updated category display name",
-    },
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch("/api/staff/audit")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d?.ok) return;
+        setEntries(
+          (d.entries as Array<{
+            id: string;
+            type: string;
+            identityId: string | null;
+            metadata: Record<string, unknown>;
+            adminAction?: boolean;
+            at: string;
+          }>).map((e) => ({
+            id: e.id,
+            actor: e.identityId ?? "system",
+            actorRole: e.adminAction ? "staff" : "user",
+            action: e.type,
+            targetType: (e.metadata?.targetType as string) ?? e.type,
+            targetId: (e.metadata?.targetId as string) ?? e.id,
+            timestamp: new Date(e.at),
+            reason: (e.metadata?.reason as string) ?? undefined,
+            metadata: e.metadata,
+          })),
+        );
+      })
+      .catch(() => {})
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const filteredEntries = mockEntries.filter(entry => {
+  const filteredEntries = entries.filter((entry) => {
     if (filterType !== "all" && entry.targetType !== filterType) return false;
-    if (searchQuery && !entry.action.toLowerCase().includes(searchQuery.toLowerCase()) && 
-        !entry.actor.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (
+      searchQuery &&
+      !entry.action.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !entry.actor.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      return false;
     return true;
   });
 
-  const detailEntry = detailId ? mockEntries.find(e => e.id === detailId) : null;
+  const detailEntry = detailId ? entries.find((e) => e.id === detailId) : null;
 
   return (
     <div style={{ minHeight: "100vh", background: "#F5F5F5", padding: "var(--space-4)" }}>

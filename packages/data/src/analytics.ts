@@ -39,6 +39,9 @@ export async function computeVendorAnalytics(vendorId: string): Promise<VendorAn
   const saveCount = await countSavesByVendor(vendorId);
   const vendor = await mockVendorRepo.getById(vendorId);
   const openNow = vendor ? isOpenNow(vendor.hours ?? null) : null;
+  const ratingAvg = reviews.length > 0
+    ? Math.round((reviews.reduce((s, r) => s + (r.rating ?? 0), 0) / reviews.length) * 10) / 10
+    : 0;
 
   return {
     vendorId,
@@ -46,6 +49,7 @@ export async function computeVendorAnalytics(vendorId: string): Promise<VendorAn
     reviewCount: reviews.length,
     followerCount: follows.length,
     saveCount,
+    ratingAvg,
     openNow,
   };
 }

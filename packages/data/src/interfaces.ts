@@ -498,6 +498,7 @@ export interface VendorAnalytics {
   reviewCount: number;
   followerCount: number;
   saveCount: number;
+  ratingAvg: number;
   openNow: boolean | null;
 }
 

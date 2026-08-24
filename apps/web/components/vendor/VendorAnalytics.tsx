@@ -66,9 +66,6 @@ export function VendorAnalytics({
     openNow: null,
   };
 
-  // Mock recent activity (would come from API in production)
-  const recentActivity: ActivityEvent[] = [];
-
   return (
     <div style={{ minHeight: "100vh", background: "var(--color-glass-white)", padding: "var(--space-4)" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -345,56 +342,4 @@ function Insight({
   );
 }
 
-// Helper functions
-function getActivityColor(type: ActivityEvent["type"]): string {
-  const colors = {
-    view: "var(--color-forest-mid)",
-    message: "var(--color-amber-dark)",
-    save: "#EF4444",
-    review: "var(--color-forest)",
-    follow: "#8B5CF6",
-  };
-  return colors[type];
-}
 
-function getActivityIcon(type: ActivityEvent["type"]): React.ReactNode {
-  const icons = {
-    view: <Eye size={18} />,
-    message: <MessageCircle size={18} />,
-    save: <Heart size={18} />,
-    review: <Star size={18} />,
-    follow: <Users size={18} />,
-  };
-  return icons[type];
-}
-
-function getActivityText(event: ActivityEvent): string {
-  switch (event.type) {
-    case "view":
-      return `Someone viewed ${event.listingTitle ?? "your listing"}`;
-    case "message":
-      return `${event.userName ?? "A student"} sent you a message`;
-    case "save":
-      return `${event.userName ?? "Someone"} saved ${event.listingTitle ?? "your listing"}`;
-    case "review":
-      return `${event.userName ?? "A student"} left a ${event.rating}-star review`;
-    case "follow":
-      return `${event.userName ?? "Someone"} followed your storefront`;
-    default:
-      return "Activity";
-  }
-}
-
-function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString();
-}
