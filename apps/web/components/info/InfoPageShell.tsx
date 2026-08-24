@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
+import { BrandLogo } from '../landing/BrandLogo';
 import { LandingFooter } from '../landing/LandingFooter';
 
 interface InfoPageShellProps {
@@ -14,15 +14,8 @@ export function InfoPageShell({ children, title }: InfoPageShellProps) {
       {/* Simple top nav */}
       <nav className="info-page-nav">
         <div className="info-page-nav-content">
-          <Link href="/" className="info-page-logo">
-            <Image 
-              src="/Logo.png" 
-              alt="Voeq" 
-              width={96} 
-              height={96}
-              priority
-              style={{ display: 'block', width: 96, height: 'auto', background: 'var(--color-forest)', padding: 8, borderRadius: 8 }}
-            />
+          <Link href="/" className="info-page-logo" aria-label="Voeq">
+            <BrandLogo width={64} />
           </Link>
           <Link href="/" className="info-page-back">
             <ArrowLeft size={16} />

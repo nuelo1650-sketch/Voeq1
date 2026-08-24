@@ -30,14 +30,15 @@ export function LandingHero() {
 
       {/* Content layer */}
       <div className="hero-content">
-        {/* Voeq wordmark above headline — sized to rhyme with Find. Connect. Grow. */}
+        {/* Voeq wordmark above headline — sized to match Find. Connect. Grow. */}
         <div
+          className="hero-wordmark"
           style={{
-            marginBottom: "var(--space-2)",
+            marginBottom: "var(--space-3)",
             lineHeight: 1,
           }}
         >
-          <BrandLogo width={220} />
+          <BrandLogo width={180} />
         </div>
         
         {/* Main headline */}

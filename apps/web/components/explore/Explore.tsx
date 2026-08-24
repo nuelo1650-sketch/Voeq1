@@ -8,6 +8,7 @@ import { usePullToRefresh } from "@/lib/usePullToRefresh";
 import { useInfiniteScroll } from "@/lib/useInfiniteScroll";
 import type { ExploreFilters, ExploreListing } from "@voeq/data";
 import { ContourEdge } from "@voeq/contour";
+import { BrandLogo } from "../landing/BrandLogo";
 import { ListingCard } from "./ListingCard";
 import { Filters, CATEGORIES } from "./Filters";
 import { SearchBar } from "./SearchBar";
@@ -183,15 +184,8 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
           borderBottom: "1px solid var(--nav-border)",
         }}
       >
-        <Link href="/" data-testid="explore-wordmark" style={wordmarkStyle}>
-          <Image 
-            src="/Logo.png" 
-            alt="Voeq" 
-            width={96} 
-            height={96}
-            priority
-            style={{ display: 'block', width: 64, height: 'auto' }}
-          />
+        <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}>
+          <BrandLogo width={64} />
         </Link>
       </header>
 
