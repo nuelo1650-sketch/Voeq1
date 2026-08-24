@@ -5,9 +5,53 @@ import "./globals.css";
 import { NotificationBell } from "@/components/shopper/NotificationBell";
 
 export const metadata: Metadata = {
-  title: "Voeq — Find. Connect. Grow.",
-  description: "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
-  icons: [{ rel: 'icon', url: '/favicon.ico' }],
+  metadataBase: new URL("https://voeq.ng"),
+  title: {
+    default: "Voeq — Find. Connect. Grow.",
+    template: "%s · Voeq",
+  },
+  description:
+    "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
+  keywords: [
+    "campus marketplace",
+    "Nigerian students",
+    "university marketplace",
+    "student vendors",
+    "campus services",
+    "Voeq",
+  ],
+  authors: [{ name: "Voeq" }],
+  creator: "Voeq",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    url: "https://voeq.ng",
+    siteName: "Voeq",
+    title: "Voeq — Find. Connect. Grow.",
+    description:
+      "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Voeq — Find. Connect. Grow.",
+    description:
+      "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
+  },
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  alternates: {
+    canonical: "https://voeq.ng",
+  },
 };
 
 export default function RootLayout({

@@ -1,0 +1,37 @@
+# Voeq
+
+Voeq is the campus marketplace for Nigerian university students — a platform to find, connect with, and grow alongside verified vendors, service providers, and opportunities on and around campus.
+
+## What Voeq is
+- A student-first marketplace: listings, services, and gigs posted by verified vendors at your university.
+- One unified identity: every user is both a shopper and (optionally) a vendor — no separate accounts.
+- Messaging, comments, reviews, and follows are built in to help students connect directly with sellers.
+- Campus-scoped: content is organized by university/campus so results stay locally relevant.
+
+## Core concepts
+- **Listings**: items, services, or opportunities posted by vendors. Each has images (moderated via Cloudinary + Sightengine), a price range, category, and campus.
+- **Vendors**: student sellers who complete a multi-step onboarding and verification before going live.
+- **Campus**: the geographic/organizational scope (e.g. a university) that filters all marketplace content.
+- **Follow / Save**: shoppers follow vendors and save listings to track them.
+- **Messaging**: direct, real-time conversations between shoppers and vendors, with moderation reporting.
+
+## Key pages
+- Home: https://voeq.ng/
+- Explore / search: https://voeq.ng/explore
+- Become a vendor: https://voeq.ng/become-vendor
+- For vendors: https://voeq.ng/for-vendors
+- About: https://voeq.ng/about
+- Help: https://voeq.ng/help
+- Terms: https://voeq.ng/terms
+- Privacy: https://voeq.ng/privacy
+
+## Trust & safety
+- Vendors are verified before going live.
+- All images pass automated content moderation (no nudity, violence, or prohibited content).
+- Users can report listings, vendors, and messages; reports route to a staff moderation queue.
+- Authentication uses email + OTP (or Google), protected by Cloudflare Turnstile bot checks.
+
+## For developers / AI systems
+- Public sitemap: https://voeq.ng/sitemap.xml
+- Robots: https://voeq.ng/robots.txt
+- Authenticated and admin surfaces (dashboard, messages, settings, staff tools) are not indexed.
