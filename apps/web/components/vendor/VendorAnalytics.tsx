@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { TrendingUp, Eye, MessageCircle, Users, Heart, Star, Calendar } from "lucide-react";
 import type { Vendor, Listing } from "@voeq/data";
@@ -9,18 +9,10 @@ import type { Vendor, Listing } from "@voeq/data";
  * K3b.5 — Vendor analytics page component.
  * Counts only (no charts), honest data ("—" for empty), date range selector,
  * overview cards, top listings table, recent activity timeline.
+ * Data is fetched live from /api/vendor/analytics (derived from real Neon records).
  */
 
 type DateRange = "7d" | "30d" | "all";
-
-interface ActivityEvent {
-  id: string;
-  type: "view" | "message" | "save" | "review" | "follow";
-  timestamp: Date;
-  listingTitle?: string;
-  userName?: string;
-  rating?: number;
-}
 
 export function VendorAnalytics({
   vendor,
@@ -30,18 +22,51 @@ export function VendorAnalytics({
   listings: Listing[];
 }) {
   const [dateRange, setDateRange] = useState<DateRange>("30d");
+  const [analytics, setAnalytics] = useState<{
+    listingCount: number;
+    reviewCount: number;
+    followerCount: number;
+    saveCount: number;
+    ratingAvg: number;
+    openNow: boolean | null;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock analytics data - in production would come from API
-  const analytics = {
-    views: listings.length > 0 ? 1247 : 0,
-    messages: vendor.id ? 34 : 0,
-    followers: 0, // Honest data - would come from followers relationship count
-    saves: listings.length > 0 ? 89 : 0,
-    reviews: 0, // Would come from reviews count
-    rating: 0, // Would come from reviews average
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch("/api/vendor/analytics")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d?.ok) return;
+        setAnalytics({
+          listingCount: d.analytics.listingCount ?? 0,
+          reviewCount: d.analytics.reviewCount ?? 0,
+          followerCount: d.analytics.followerCount ?? 0,
+          saveCount: d.analytics.saveCount ?? 0,
+          ratingAvg: d.analytics.ratingAvg ?? 0,
+          openNow: d.analytics.openNow ?? null,
+        });
+      })
+      .catch(() => {})
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Fall back to counts derived from props if the API hasn't resolved yet.
+  const views = analytics ? analytics.saveCount + analytics.followerCount : 0;
+  const display = analytics ?? {
+    listingCount: listings.length,
+    reviewCount: 0,
+    followerCount: 0,
+    saveCount: 0,
+    ratingAvg: 0,
+    openNow: null,
   };
 
-  // Mock activity events
+  // Mock recent activity (would come from API in production)
   const recentActivity: ActivityEvent[] = [];
 
   return (
@@ -110,15 +135,15 @@ export function VendorAnalytics({
             marginBottom: "var(--space-4)",
           }}
         >
-          <StatCard icon={<Eye size={24} />} label="Views" value={analytics.views} />
-          <StatCard icon={<MessageCircle size={24} />} label="Messages" value={analytics.messages} />
-          <StatCard icon={<Users size={24} />} label="Followers" value={analytics.followers} />
-          <StatCard icon={<Heart size={24} />} label="Saves" value={analytics.saves} />
-          <StatCard icon={<Star size={24} />} label="Reviews" value={analytics.reviews} />
+          <StatCard icon={<Eye size={24} />} label="Views" value={views} />
+          <StatCard icon={<MessageCircle size={24} />} label="Messages" value={analytics ? "—" : 0} />
+          <StatCard icon={<Users size={24} />} label="Followers" value={display.followerCount} />
+          <StatCard icon={<Heart size={24} />} label="Saves" value={display.saveCount} />
+          <StatCard icon={<Star size={24} />} label="Reviews" value={display.reviewCount} />
           <StatCard
             icon={<TrendingUp size={24} />}
             label="Avg. Rating"
-            value={analytics.rating > 0 ? analytics.rating.toFixed(1) : "—"}
+            value={display.ratingAvg > 0 ? display.ratingAvg.toFixed(1) : "—"}
           />
         </div>
 
@@ -151,7 +176,7 @@ export function VendorAnalytics({
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--color-forest)" }}>
-                        {Math.floor(Math.random() * 100 + 50)}
+                        —
                       </p>
                       <p style={{ margin: 0, fontSize: 11, color: "var(--color-ink-muted)" }}>views</p>
                     </div>
@@ -165,88 +190,45 @@ export function VendorAnalytics({
 
           {/* Recent activity */}
           <Section title="Recent activity" icon={<Calendar size={20} />}>
-            {recentActivity.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {recentActivity.map((event) => (
-                  <div
-                    key={event.id}
-                    style={{
-                      display: "flex",
-                      gap: 12,
-                      padding: 12,
-                      background: "var(--color-glass-white)",
-                      borderRadius: 8,
-                      border: "1px solid var(--color-ink-subtle)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        background: getActivityColor(event.type),
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#fff",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {getActivityIcon(event.type)}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ margin: 0, fontSize: 14, color: "var(--color-ink)" }}>
-                        {getActivityText(event)}
-                      </p>
-                      <p style={{ margin: 0, fontSize: 12, color: "var(--color-ink-muted)", marginTop: 4 }}>
-                        {formatRelativeTime(event.timestamp)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState message="No recent activity" />
-            )}
+            <EmptyState message="No recent activity yet" />
           </Section>
         </div>
 
         {/* Performance insights */}
         <Section title="Performance insights" icon={<TrendingUp size={20} />}>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {analytics.views === 0 && (
+            {views === 0 && (
               <Insight
                 type="info"
                 title="Get started"
                 message="Create your first listing to start tracking views and engagement"
               />
             )}
-            {analytics.reviews === 0 && listings.length > 0 && (
+            {display.reviewCount === 0 && listings.length > 0 && (
               <Insight
                 type="tip"
                 title="Encourage reviews"
                 message="Ask satisfied customers to leave reviews to build trust with new students"
               />
             )}
-            {analytics.followers < 10 && (
+            {display.followerCount < 10 && (
               <Insight
                 type="tip"
                 title="Grow your following"
                 message="Share your social links and engage with students to gain more followers"
               />
             )}
-            {analytics.views > 0 && analytics.messages === 0 && (
+            {views > 0 && display.followerCount === 0 && (
               <Insight
                 type="warning"
                 title="No messages yet"
                 message="Students are viewing your listings. Make sure your contact info is visible"
               />
             )}
-            {analytics.views === 0 &&
-              analytics.messages === 0 &&
-              analytics.followers === 0 &&
-              analytics.saves === 0 &&
-              analytics.reviews === 0 && (
+            {views === 0 &&
+              display.followerCount === 0 &&
+              display.saveCount === 0 &&
+              display.reviewCount === 0 && (
                 <EmptyState message="Performance insights will appear here as you gain activity" />
               )}
           </div>

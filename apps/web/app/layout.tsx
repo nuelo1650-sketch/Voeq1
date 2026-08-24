@@ -96,36 +96,18 @@ export default function RootLayout({
               href="/become-vendor" 
               data-testid="footer-become-vendor" 
               className="site-footer-link"
-              style={{ 
-                color: "var(--role-text-muted)", 
-                textDecoration: "none",
-                fontWeight: 500,
-                transition: "color 0.2s ease",
-              }}
             >
               Become a vendor
             </a>
             <a 
               href="/for-vendors" 
               className="site-footer-link"
-              style={{ 
-                color: "var(--role-text-muted)", 
-                textDecoration: "none",
-                fontWeight: 500,
-                transition: "color 0.2s ease",
-              }}
             >
               For Vendors
             </a>
             <a 
               href="/terms" 
               className="site-footer-link"
-              style={{ 
-                color: "var(--role-text-muted)", 
-                textDecoration: "none",
-                fontWeight: 500,
-                transition: "color 0.2s ease",
-              }}
             >
               Terms
             </a>

@@ -4092,3 +4092,15 @@
 .pull-to-refresh-indicator {
   transition: height 200ms ease-out;
 }
+
+/* Site-wide footer link styling */
+.site-footer-link {
+  color: var(--role-text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.site-footer-link:hover {
+  color: var(--role-text);
+}
