@@ -1051,6 +1051,16 @@
   gap: var(--space-lg);
 }
 
+.hero-wordmark {
+  /* Responsive sizing to match headline (120px mobile → 180px desktop) */
+  width: clamp(120px, 20vw, 180px);
+  display: inline-block;
+}
+.hero-wordmark > span {
+  width: 100% !important;
+  height: auto !important;
+}
+
 .hero-headline {
   font-family: var(--role-font-display);
   font-size: var(--text-display-xl);
