@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
   const title = `${listing.title} — Voeq`;
   const description = (listing.description || listing.title).slice(0, 160);
   const image = listing.images?.[0] || '/og-default.png';
-  const url = `https://voeq.africa/listing/${listing.id}`;
+  const url = `https://voeq.ng/listing/${listing.id}`;
 
   return {
     title,

@@ -36,7 +36,7 @@ export default async function AccountStatePage({
         <p className="auth-lede">{copy.body}</p>
         {copy.canAppeal && (
           <p className="auth-alt">
-            <a href="mailto:support@voeq.africa?subject=Account%20review%20request">
+            <a href="mailto:support@voeq.ng?subject=Account%20review%20request">
               Contact support to appeal
             </a>
           </p>

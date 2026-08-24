@@ -36,7 +36,7 @@ export async function seed(): Promise<void> {
   await db.insert(s.campuses).values(CAMPUSSES).onConflictDoNothing();
   await db.insert(s.categories).values(CATEGORIES).onConflictDoNothing();
 
-  const superEmail = process.env.SUPER_ADMIN_EMAIL ?? process.env.VOEQ_SUPER_ADMIN_EMAIL ?? "admin@voeq.africa";
+  const superEmail = process.env.SUPER_ADMIN_EMAIL ?? process.env.VOEQ_SUPER_ADMIN_EMAIL ?? "admin@voeq.ng";
   if (!(await realIdentityRepo.getByEmail(superEmail))) {
     await realIdentityRepo.createPending({
       email: superEmail,

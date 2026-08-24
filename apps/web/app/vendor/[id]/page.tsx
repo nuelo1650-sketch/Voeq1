@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: StorefrontPageProps): Promise
     ? vendor.description.slice(0, 160)
     : `Discover ${vendor.name} on Voeq — student-vouched listings at ${vendor.campus}.`;
   const image = vendor.profilePhotoUrl || '/og-default.png';
-  const url = `https://voeq.africa/vendor/${vendor.id}`;
+  const url = `https://voeq.ng/vendor/${vendor.id}`;
 
   return {
     title,
