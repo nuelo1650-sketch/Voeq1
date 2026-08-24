@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@voeq/db";
+import { getDb, schemaRef } from "@voeq/db";
 
 /**
  * D.9 — Liveness + readiness probe.
@@ -14,7 +14,7 @@ export async function GET() {
   let dbError: string | null = null;
   if (db) {
     try {
-      await db.execute("select 1");
+      await db.select().from(schemaRef.identities).limit(1);
       dbOk = true;
     } catch (e) {
       dbError = e instanceof Error ? e.message : String(e);
