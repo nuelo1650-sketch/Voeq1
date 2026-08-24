@@ -7,15 +7,25 @@ import { campuses } from "@voeq/data";
  * Renders the loadExplore-driven Explore component (filters/sort/search/campus all
  * real). Campus is dynamic: resolved from the session identity when authed, else the
  * public default. VS4.9 — no longer a hardcoded NMU; no duplicated browse grid.
+ * 
+ * Now reads URL params: ?q= (search query) and ?category= (category slug)
  */
-export default async function ExplorePage() {
+export default async function ExplorePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; category?: string }>;
+}) {
   const identity = await getCurrentIdentity();
-  const campus =
-    identity?.campus ?? campuses[0]?.id ?? "NMU";
+  const campus = identity?.campus ?? campuses[0]?.id ?? "NMU";
+  const params = await searchParams;
 
   return (
     <div className="explore-page">
-      <Explore campus={campus} />
+      <Explore 
+        campus={campus} 
+        initialQuery={params.q}
+        categoryPreset={params.category}
+      />
     </div>
   );
 }

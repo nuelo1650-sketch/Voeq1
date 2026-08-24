@@ -1,5 +1,6 @@
 import type { ExploreListing } from "@voeq/data";
 import { CampusFingerprint } from "@voeq/contour";
+import { Heart } from "lucide-react";
 
 /**
  * ListingCard — THE identity-defining component (Doc 05 C.3.1, Compact/Editorial hybrid for
@@ -7,6 +8,8 @@ import { CampusFingerprint } from "@voeq/contour";
  * (always legible, never recedes), availability chip, trust row (verified/rating/featured).
  * States: missing image -> contour monogram (NOT broken-image icon); sold-out -> struck/muted;
  * loading -> shimmer in frame.
+ * 
+ * Now includes bookmark heart icon (top-right corner).
  */
 function formatPrice(minor: number): string {
   return `₦ ${(minor / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
@@ -15,8 +18,27 @@ function formatPrice(minor: number): string {
 const AVAIL_LABEL: Record<string, string> = { open: "Open now", closed: "Sold out", soon: "Opening soon" };
 const AVAIL_TONE: Record<string, string> = { open: "success", closed: "error", soon: "warning" };
 
-export function ListingCard({ listing, loading }: { listing: ExploreListing; loading?: boolean }) {
+export function ListingCard({ 
+  listing, 
+  loading,
+  isBookmarked,
+  onToggleBookmark,
+}: { 
+  listing: ExploreListing; 
+  loading?: boolean;
+  isBookmarked?: boolean;
+  onToggleBookmark?: (listingId: string) => void;
+}) {
   const img = listing.image;
+  
+  const handleBookmarkClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onToggleBookmark) {
+      onToggleBookmark(listing.id);
+    }
+  };
+
   return (
     <article
       data-testid="listing-card"
@@ -57,6 +79,46 @@ export function ListingCard({ listing, loading }: { listing: ExploreListing; loa
             activity={[0.6, 0.3, 0.8]}
             style={{ width: 56, height: 56 }}
           />
+        )}
+        
+        {/* Bookmark heart icon (top-right corner) */}
+        {!loading && onToggleBookmark && (
+          <button
+            onClick={handleBookmarkClick}
+            data-testid="bookmark-button"
+            aria-label={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+            style={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              background: "rgba(255, 255, 255, 0.9)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              border: "none",
+              borderRadius: "50%",
+              width: 36,
+              height: 36,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+          >
+            <Heart
+              size={18}
+              fill={isBookmarked ? "var(--color-forest)" : "none"}
+              stroke={isBookmarked ? "var(--color-forest)" : "var(--color-ink-muted)"}
+              strokeWidth={2}
+            />
+          </button>
         )}
       </div>
 

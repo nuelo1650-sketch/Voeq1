@@ -14,6 +14,7 @@ export const CATEGORIES = [
 
 const SORTS = [
   { value: "relevance", label: "Most popular" },
+  { value: "distance", label: "Distance (nearest first)" },
   { value: "newest", label: "Newest first" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },

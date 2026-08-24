@@ -6,15 +6,18 @@ import Image from "next/image";
 import { useExploreData } from "@/lib/useExploreData";
 import { usePullToRefresh } from "@/lib/usePullToRefresh";
 import { useInfiniteScroll } from "@/lib/useInfiniteScroll";
+import { useBookmarks } from "@/lib/useBookmarks";
 import type { ExploreFilters, ExploreListing } from "@voeq/data";
 import { ContourEdge } from "@voeq/contour";
 import { BrandLogo } from "../landing/BrandLogo";
+import { CampusSelector } from "./CampusSelector";
 import { ListingCard } from "./ListingCard";
 import { Filters, CATEGORIES } from "./Filters";
 import { SearchBar } from "./SearchBar";
 import { TrendingRail } from "./TrendingRail";
 import { RecentlyViewedRail, useRecentlyViewed } from "./RecentlyViewedRail";
 import { ExploreSkeleton } from "./ExploreSkeleton";
+import { EmptyState } from "./EmptyState";
 import { RefreshCw, ChevronDown } from "lucide-react";
 
 /**
@@ -36,21 +39,39 @@ const ITEMS_PER_PAGE = 20; // Pagination size for infinite scroll
 /**
  * Explore — the single discover surface. Filters/sort/search/campus all run through
  * loadExplore (data layer applies them). Campus is passed in (dynamic, VS4.9).
+ * initialQuery: pre-fill search from URL param (hero search support)
+ * Campus can be switched via CampusSelector (persists to localStorage)
  */
-export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryPreset?: string; campus?: string }) {
+export function Explore({ 
+  categoryPreset, 
+  campus: initialCampus = DEFAULT_CAMPUS,
+  initialQuery,
+}: { 
+  categoryPreset?: string; 
+  campus?: string;
+  initialQuery?: string;
+}) {
   const [filters, setFilters] = useState<ExploreFilters>({});
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery || "");
+  const [campus, setCampus] = useState(initialCampus);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [forceError, setForceError] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
   const { ids: recentIds, record } = useRecentlyViewed();
+  const { toggle: toggleBookmark, isBookmarked } = useBookmarks();
 
-  // Sync ?exploreError=1 (dev/test forced-failure path) + ?q= deep links.
+  // Load preferred campus from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("voeq:preferred-campus");
+    if (stored) {
+      setCampus(stored);
+    }
+  }, []);
+
+  // Sync ?exploreError=1 (dev/test forced-failure path)
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     setForceError(p.get("exploreError") === "1");
-    const q = p.get("q");
-    if (q) setQuery(q);
   }, []);
 
   const { status, data, trending, error, cached, retry } = useExploreData({
@@ -187,6 +208,9 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
         <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}>
           <BrandLogo width={64} />
         </Link>
+        
+        {/* Campus selector - right side */}
+        <CampusSelector currentCampus={campus} onChange={setCampus} />
       </header>
 
       <main style={{ padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
@@ -348,13 +372,13 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
                   }}
                 >
                   {data.length === 0 ? (
-                    "No results found"
+                    <EmptyState currentCategory={categoryPreset || filters.category} searchQuery={query} />
                   ) : data.length === 1 ? (
                     "Showing 1 result"
                   ) : (
                     `Showing ${displayedCount} of ${data.length} results`
                   )}
-                  {activeFilterCount > 0 && ` with ${activeFilterCount} ${activeFilterCount === 1 ? 'filter' : 'filters'} applied`}
+                  {data.length > 0 && activeFilterCount > 0 && ` with ${activeFilterCount} ${activeFilterCount === 1 ? 'filter' : 'filters'} applied`}
                 </div>
                 
                 {/* Featured listings carousel - larger cards, auto-rolling every 5s */}
@@ -373,7 +397,11 @@ export function Explore({ categoryPreset, campus = DEFAULT_CAMPUS }: { categoryP
                       onClick={() => onCardClick(l.id)}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
-                      <ListingCard listing={l} />
+                      <ListingCard 
+                        listing={l} 
+                        isBookmarked={isBookmarked(l.id)}
+                        onToggleBookmark={toggleBookmark}
+                      />
                     </Link>
                   ))}
                 </div>
