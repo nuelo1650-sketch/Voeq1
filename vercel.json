@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm install && npm run build --workspace @voeq/web",
+  "installCommand": "npm install",
+  "outputDirectory": "apps/web/.next",
+  "regions": ["sin1"]
+}
