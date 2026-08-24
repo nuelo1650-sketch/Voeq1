@@ -109,7 +109,7 @@ export default function ShopperOnboardingPage() {
       <div
         style={{
           width: "100%",
-          maxWidth: 560,
+          maxWidth: 680,
           background: "var(--color-cream)",
           border: "1px solid var(--color-ink-subtle)",
           borderRadius: 16,
@@ -160,12 +160,7 @@ export default function ShopperOnboardingPage() {
 
         {/* Interest tag grid */}
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 12,
-            marginBottom: "var(--space-4)",
-          }}
+          className="interest-grid"
           role="group"
           aria-label="Interest categories"
         >
@@ -234,17 +229,25 @@ export default function ShopperOnboardingPage() {
           })}
         </div>
 
-        {/* Desktop: 5 columns for larger screens */}
+        {/* Responsive grid: 2 cols mobile, 3 tablet, 5 desktop — scoped, no !important hack */}
         <style>{`
-          @media (min-width: 768px) {
-            [role="group"] {
-              grid-template-columns: repeat(3, 1fr) !important;
-            }
+          .interest-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: var(--space-4);
           }
-          @media (min-width: 1024px) {
-            [role="group"] {
-              grid-template-columns: repeat(5, 1fr) !important;
-            }
+          @media (min-width: 600px) {
+            .interest-grid { grid-template-columns: repeat(3, 1fr); }
+          }
+          @media (min-width: 900px) {
+            .interest-grid { grid-template-columns: repeat(5, 1fr); }
+          }
+          .interest-grid > button { min-width: 0; }
+          .interest-grid span {
+            min-width: 0;
+            word-break: break-word;
+            overflow-wrap: anywhere;
           }
         `}</style>
 
