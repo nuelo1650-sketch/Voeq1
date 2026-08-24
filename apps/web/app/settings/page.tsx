@@ -126,7 +126,7 @@ export default async function SettingsPage() {
             Your business
           </h2>
           <p style={{ fontSize: 14, color: "var(--color-ink-muted)", marginBottom: 12 }}>
-            You're a vendor{vendorLabel ? `: ${vendorLabel}` : ""}.
+            You&apos;re a vendor{vendorLabel ? `: ${vendorLabel}` : ""}.
           </p>
           <Link
             href="/vendor/dashboard"

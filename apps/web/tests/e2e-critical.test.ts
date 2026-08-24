@@ -97,7 +97,7 @@ describe("images: real Cloudinary + Sightengine (fail-closed)", () => {
     const r = await uploadImage({ fileName: "t.png", dataUrl: PNG, context: "listing_photo" });
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.url).toMatch(/^https:\/\/res\.cloudinary\.com\//);
-  });
+  }, 30000);
 
   it("7. too-small image is rejected by Sightengine (fail-closed)", async () => {
     const tiny = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/2wAAAAASUVORK5CYII=";

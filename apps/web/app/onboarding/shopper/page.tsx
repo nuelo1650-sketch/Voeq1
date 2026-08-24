@@ -150,7 +150,7 @@ export default function ShopperOnboardingPage() {
             lineHeight: 1.5,
           }}
         >
-          Pick a few — we'll show you vendors that match. You can always change these later.
+          Pick a few — we&apos;ll show you vendors that match. You can always change these later.
         </p>
 
         {/* Interest tag grid */}

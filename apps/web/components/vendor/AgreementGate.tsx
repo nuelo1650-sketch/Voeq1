@@ -146,7 +146,7 @@ export function AgreementGate({
             Updated Vendor Agreement
           </h1>
           <p style={{ fontSize: 16, color: "var(--color-ink-muted)", margin: 0, marginTop: 12 }}>
-            We've updated our vendor agreement. Please review and accept to continue.
+            We&apos;ve updated our vendor agreement. Please review and accept to continue.
           </p>
         </div>
 

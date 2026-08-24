@@ -553,7 +553,7 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
             }}
           >
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0, marginBottom: 12, color: "var(--color-forest)" }}>
-              Delete "{title}"?
+              Delete &quot;{title}&quot;?
             </h2>
             <p style={{ margin: 0, marginBottom: "var(--space-4)", color: "var(--color-ink)", lineHeight: 1.5 }}>
               This cannot be undone. Your listing will be removed from search and your storefront.

@@ -639,7 +639,7 @@ function VerificationSection({ vendor }: { vendor: Vendor }) {
       {!vendor.verified && (
         <>
           {error && <ErrorMessage>{error}</ErrorMessage>}
-          {success && <SuccessMessage>Verification request submitted! We'll review it soon.</SuccessMessage>}
+          {success && <SuccessMessage>Verification request submitted! We&apos;ll review it soon.</SuccessMessage>}
 
           <button
             onClick={requestVerification}

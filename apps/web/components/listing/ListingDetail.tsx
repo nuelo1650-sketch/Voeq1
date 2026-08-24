@@ -271,7 +271,7 @@ export function ListingDetail({ id }: { id: string }) {
   if (status === "error" || !listing) {
     return (
       <div data-testid="listing-detail-error" role="alert" style={{ padding: "var(--space-8) var(--nav-inline-pad)", color: "var(--role-danger)", fontFamily: "var(--role-font-ui)" }}>
-        Couldn't load this listing.
+        Couldn&apos;t load this listing.
       </div>
     );
   }
