@@ -30,8 +30,15 @@ export function NotificationBell() {
   const [loaded, setLoaded] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
 
-  // Load notifications
+  // Load notifications — only when a session exists (avoids 401 noise on
+  // public/auth pages where there is no logged-in user).
   useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!document.cookie.includes("sessionId=")) {
+      setLoaded(true);
+      setIsAuthed(false);
+      return;
+    }
     let cancelled = false;
     fetch("/api/notifications")
       .then((r) => {
