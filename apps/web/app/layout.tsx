@@ -95,40 +95,37 @@ export default function RootLayout({
             <a 
               href="/become-vendor" 
               data-testid="footer-become-vendor" 
+              className="site-footer-link"
               style={{ 
                 color: "var(--role-text-muted)", 
                 textDecoration: "none",
                 fontWeight: 500,
                 transition: "color 0.2s ease",
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "var(--role-text)"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "var(--role-text-muted)"}
             >
               Become a vendor
             </a>
             <a 
               href="/for-vendors" 
+              className="site-footer-link"
               style={{ 
                 color: "var(--role-text-muted)", 
                 textDecoration: "none",
                 fontWeight: 500,
                 transition: "color 0.2s ease",
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "var(--role-text)"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "var(--role-text-muted)"}
             >
               For Vendors
             </a>
             <a 
               href="/terms" 
+              className="site-footer-link"
               style={{ 
                 color: "var(--role-text-muted)", 
                 textDecoration: "none",
                 fontWeight: 500,
                 transition: "color 0.2s ease",
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "var(--role-text)"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "var(--role-text-muted)"}
             >
               Terms
             </a>
@@ -144,6 +141,11 @@ export default function RootLayout({
             © 2026 Voeq · Powered by Legacy LM
           </div>
         </footer>
+        <style>{`
+          .site-footer-link:hover {
+            color: var(--role-text) !important;
+          }
+        `}</style>
       </body>
     </html>
   );

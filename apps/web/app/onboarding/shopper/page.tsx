@@ -1,5 +1,10 @@
 "use client";
 
+// This page is fully interactive (interest-tag selection, hover handlers).
+// Mark it dynamic so Next does not attempt static prerender of the Client
+// Component (inline event handlers cannot be serialized to static HTML).
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Utensils, Shirt, Laptop, Sparkles, BookOpen, Printer, Camera, Scissors, Package, MoreHorizontal, Check } from "lucide-react";

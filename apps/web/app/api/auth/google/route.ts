@@ -7,6 +7,12 @@ const GOOGLE_AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 // Public site origin (voeq.ng) — the browser stays on this domain through the
 // whole flow (Vercel proxies /api/* to Render), so the state cookie matches.
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://voeq.ng";
+// Public OAuth client ID. This is a non-secret, publicly-visible value (it
+// appears in the browser's redirect URL and Google Cloud Console). Provided as
+// a fallback so initiation works on platforms (e.g. Vercel) that may not carry
+// the env var; the real secret is only used in the callback (Render).
+const FALLBACK_GOOGLE_CLIENT_ID =
+  "296084254850-0v864trsdv6mvl0erc0p0c88e5t72mae.apps.googleusercontent.com";
 
 /**
  * VS2.6 — Google OAuth 2.0 initiation (PRODUCTION).
@@ -22,14 +28,7 @@ const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://voeq.ng";
  * verify via a 6-digit OTP (purpose: google_verify) and accept consent.
  */
 export async function GET(req: NextRequest) {
-  const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
-  if (!clientId) {
-    return NextResponse.json(
-      { error: "Google sign-in is not configured." },
-      { status: 503 },
-    );
-  }
-
+  const clientId = process.env.AUTH_GOOGLE_CLIENT_ID || FALLBACK_GOOGLE_CLIENT_ID;
   const state = randomBytes(16).toString("hex");
   const redirectUri = `${SITE_ORIGIN}/api/auth/google/callback`;
 
