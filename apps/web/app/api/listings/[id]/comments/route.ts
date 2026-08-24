@@ -14,12 +14,17 @@ export async function GET(
 ) {
   const { id } = await params;
   const comments = await mockCommentRepo.listByListing(id);
-  const withNames = await Promise.all(
-    comments.map(async (c) => {
-      const author = await mockAuthRepo.getIdentityById?.(c.authorId);
-      return { ...c, authorName: author?.name ?? "Shopper" };
-    }),
-  );
+  // Batch-resolve author names in ONE query (avoid N+1 per comment).
+  const authorIds = Array.from(new Set(comments.map((c) => c.authorId)));
+  const authors = authorIds.length
+    ? await Promise.all(authorIds.map((aid) => mockAuthRepo.getIdentityById?.(aid)))
+    : [];
+  const nameById = new Map<string, string>();
+  authors.forEach((a) => { if (a) nameById.set(a.id, a.name); });
+  const withNames = comments.map((c) => ({
+    ...c,
+    authorName: nameById.get(c.authorId) ?? "Shopper",
+  }));
   return NextResponse.json({ comments: withNames });
 }
 
