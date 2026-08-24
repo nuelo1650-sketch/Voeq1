@@ -29,7 +29,9 @@ const FALLBACK_GOOGLE_CLIENT_ID =
  */
 export async function GET(req: NextRequest) {
   const clientId = process.env.AUTH_GOOGLE_CLIENT_ID || FALLBACK_GOOGLE_CLIENT_ID;
-  const state = randomBytes(16).toString("hex");
+  // State is generated + set as a browser cookie by the client (lib/googleOAuth.ts)
+  // so it survives the Vercel→Render rewrite (which strips upstream Set-Cookie).
+  const state = req.nextUrl.searchParams.get("state") || randomBytes(16).toString("hex");
   const redirectUri = `${SITE_ORIGIN}/api/auth/google/callback`;
 
   const params = new URLSearchParams({
@@ -43,13 +45,8 @@ export async function GET(req: NextRequest) {
   });
 
   const res = NextResponse.redirect(`${GOOGLE_AUTH_ENDPOINT}?${params.toString()}`);
-  res.cookies.set(GOOGLE_STATE_COOKIE, state, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 600,
-  });
+  // NOTE: the google_oauth_state cookie is set by the client (lib/googleOAuth.ts)
+  // before navigating here, so it survives the Vercel→Render rewrite.
   await logAudit("google.initiate", null, {});
   return res;
 }

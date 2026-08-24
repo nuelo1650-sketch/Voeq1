@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
+import { startGoogleOAuth } from "@/lib/googleOAuth";
 
 const EMAIL_RE = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
 
@@ -150,7 +151,7 @@ function LoginForm() {
 
         <button
           type="button"
-          onClick={() => window.location.href = '/api/auth/google'}
+          onClick={() => startGoogleOAuth()}
           className="auth-google-btn"
           disabled={!consentChecked}
           data-testid="google-login"

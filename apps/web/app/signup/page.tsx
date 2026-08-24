@@ -4,6 +4,7 @@ import { useState, type FormEvent, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
+import { startGoogleOAuth } from "@/lib/googleOAuth";
 
 const EMAIL_RE = /^[^\\s@]+@[^\\s@]+\.[^\\s@]+$/;
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
@@ -216,7 +217,7 @@ export default function SignupPage() {
         {/* FIX #3: Google button now respects consent checkbox */}
         <button
           type="button"
-          onClick={() => window.location.href = '/api/auth/google'}
+          onClick={() => startGoogleOAuth()}
           className="auth-google-btn"
           disabled={!consent}
           data-testid="google-signup"
