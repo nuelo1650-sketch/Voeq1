@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 /**
- * BrandLogo — the Voeq wordmark (public/logo.png), recolored to forest green
+ * BrandLogo — the Voeq wordmark (public/Logo.png), recolored to forest green
  * via CSS mask (text only, transparent — NO green background). The PNG's alpha
  * channel is used as a mask filled with --color-forest, so the word "voeq" reads
  * in brand green on any surface (cream, white, dark) without a colored box.
@@ -31,8 +31,8 @@ export function BrandLogo({
         height,
         // Recolor transparent PNG to the requested color using its own alpha as a mask.
         backgroundColor: color,
-        WebkitMaskImage: "url('/logo.png')",
-        maskImage: "url('/logo.png')",
+        WebkitMaskImage: "url('/Logo.png')",
+        maskImage: "url('/Logo.png')",
         WebkitMaskRepeat: 'no-repeat',
         maskRepeat: 'no-repeat',
         WebkitMaskSize: 'contain',
