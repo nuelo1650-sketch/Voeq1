@@ -59,6 +59,7 @@ export const identities = pgTable("identities", {
     { termsVersion: string; privacyVersion: string; acceptedAt: string; method: "email" | "google" }[]
   >().notNull().default([]),
   vendorId: text("vendor_id"),
+  avatarUrl: text("avatar_url"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

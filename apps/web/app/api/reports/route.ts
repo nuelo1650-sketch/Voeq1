@@ -22,14 +22,23 @@ export async function POST(req: Request) {
   const category = body?.category as ReportCategory | undefined;
   const text = typeof body?.body === "string" ? body.body.trim() : null;
 
+  const VALID_CATEGORIES: ReportCategory[] = [
+    "not_on_campus",
+    "scam",
+    "inappropriate",
+    "impersonation",
+    "harassment",
+    "other",
+  ];
+
   if (targetType !== "listing" && targetType !== "vendor") {
     return NextResponse.json({ error: "invalid targetType" }, { status: 400 });
   }
   if (typeof targetId !== "string" || !targetId) {
     return NextResponse.json({ error: "invalid targetId" }, { status: 400 });
   }
-  if (!category) {
-    return NextResponse.json({ error: "category required" }, { status: 400 });
+  if (!category || !VALID_CATEGORIES.includes(category)) {
+    return NextResponse.json({ error: "invalid category" }, { status: 400 });
   }
 
   // IDOR/self-report guard: cannot report your own item.

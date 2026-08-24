@@ -61,6 +61,7 @@ function mapIdentity(r: typeof s.identities.$inferSelect): Identity {
     campus: r.campus ?? null,
     consent: r.consent ?? [],
     vendorId: r.vendorId ?? null,
+    avatarUrl: r.avatarUrl ?? null,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   };
@@ -125,6 +126,7 @@ export const realIdentityRepo = {
     if (p.campus !== undefined) update.campus = p.campus;
     if (p.consent !== undefined) update.consent = p.consent;
     if (p.vendorId !== undefined) update.vendorId = p.vendorId;
+    if (p.avatarUrl !== undefined) update.avatarUrl = p.avatarUrl;
     await getDb().update(s.identities).set(update).where(eq(s.identities.id, iid));
     return this.getById(iid);
   },

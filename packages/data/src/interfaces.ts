@@ -209,6 +209,8 @@ export interface Identity {
   consent: ConsentAcceptance[];
   /** VS3.2/3.6: the linked Vendor record (null until Phase A complete). Role widens to 'vendor' on canGoLive. */
   vendorId: string | null;
+  /** Profile picture URL (Cloudinary), set via account settings. null = default avatar. */
+  avatarUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }
