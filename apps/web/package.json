@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@node-rs/argon2": "^2.1.0",
+    "@tailwindcss/postcss": "^4.0.0",
     "@voeq/contour": "file:../packages/contour",
     "@voeq/data": "file:../packages/data",
     "@voeq/design-tokens": "file:../packages/design-tokens",
@@ -20,22 +21,21 @@
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.33.0",
     "next": "^15.1.0",
+    "postcss": "^8.4.47",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
-    "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.13.0",
     "eslint-config-next": "^15.1.0",
-    "postcss": "^8.4.47",
-    "tailwindcss": "^4.0.0",
     "typescript": "^5.6.3",
     "vitest": "^2.1.4"
   }
