@@ -99,8 +99,16 @@ export async function POST(req: NextRequest) {
   });
 
   const code = await issueOtp(email, "registration");
-  // D.5 — Real email via Resend (dev fallback logs when RESEND_API_KEY unset).
-  await sendEmail({ to: email, template: "OTP_REGISTRATION", vars: { name, code } });
+  // D.5 — Real email via Resend. Surface delivery failures instead of lying to
+  // the user that a code was sent when it wasn't.
+  const sent = await sendEmail({ to: email, template: "OTP_REGISTRATION", vars: { name, code } });
+  if (!sent.ok) {
+    console.error("[signup] OTP email failed:", sent.error);
+    return NextResponse.json(
+      { error: "We couldn't send your verification code. Please try again shortly." },
+      { status: 502 },
+    );
+  }
 
   const pendingToken = await issuePendingToken(email, "registration");
   await logAudit("signup.initiated", identity.id, { method: "email", intent });

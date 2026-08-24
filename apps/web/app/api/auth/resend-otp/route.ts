@@ -29,11 +29,18 @@ export async function POST(req: NextRequest) {
   }
 
   const code = await issueOtp(pending.email, pending.purpose);
-  await sendEmail({
+  const sent = await sendEmail({
     to: pending.email,
     template: pending.purpose === "google_verify" ? "OTP_REGISTRATION" : "OTP_REGISTRATION",
     vars: { name: pending.email.split("@")[0], code },
   });
+  if (!sent.ok) {
+    console.error("[resend-otp] OTP email failed:", sent.error);
+    return NextResponse.json(
+      { error: "We couldn't send your verification code. Please try again shortly." },
+      { status: 502 },
+    );
+  }
   await logAudit("otp.resent", null, { email: pending.email, purpose: pending.purpose });
 
   // Same token remains valid for verify; the new OTP code is what changed.
