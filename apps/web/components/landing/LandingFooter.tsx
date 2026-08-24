@@ -1,7 +1,12 @@
+"use client";
+
 import Link from 'next/link';
 import { BrandLogo } from './BrandLogo';
 
 export function LandingFooter() {
+  // Smart WhatsApp link: whatsapp.com domain works better on mobile
+  const whatsappLink = 'https://www.whatsapp.com/channel/0029Vb8u4Md6mYPON8gMpi3i';
+
   return (
     <footer className="landing-footer">
       {/* Wavy organic top */}
@@ -99,7 +104,7 @@ export function LandingFooter() {
               </svg>
             </a>
             <a 
-              href="https://whatsapp.com/channel/0029Vb8u4Md6mYPON8gMpi3i" 
+              href={whatsappLink} 
               target="_blank" 
               rel="noopener noreferrer"
               className="footer-social-link"

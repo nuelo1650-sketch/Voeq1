@@ -78,23 +78,71 @@ export default function RootLayout({
           data-testid="site-footer"
           style={{
             borderTop: "1px solid var(--role-border)",
-            padding: "var(--space-3) var(--nav-inline-pad)",
-            color: "var(--role-muted)",
-            fontSize: "var(--fs-sm)",
+            padding: "var(--space-4) var(--nav-inline-pad)",
+            color: "var(--role-text-muted)",
+            fontSize: "14px",
+            background: "var(--role-surface)",
           }}
         >
-          <nav aria-label="Footer" style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap", alignItems: "center" }}>
-            <a href="/become-vendor" data-testid="footer-become-vendor" style={{ color: "var(--role-muted)", textDecoration: "none" }}>
+          <nav aria-label="Footer" style={{ 
+            display: "flex", 
+            gap: "var(--space-4)", 
+            flexWrap: "wrap", 
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: "var(--space-2)",
+          }}>
+            <a 
+              href="/become-vendor" 
+              data-testid="footer-become-vendor" 
+              style={{ 
+                color: "var(--role-text-muted)", 
+                textDecoration: "none",
+                fontWeight: 500,
+                transition: "color 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "var(--role-text)"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "var(--role-text-muted)"}
+            >
               Become a vendor
             </a>
-            <a href="/for-vendors" style={{ color: "var(--role-muted)", textDecoration: "none" }}>
+            <a 
+              href="/for-vendors" 
+              style={{ 
+                color: "var(--role-text-muted)", 
+                textDecoration: "none",
+                fontWeight: 500,
+                transition: "color 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "var(--role-text)"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "var(--role-text-muted)"}
+            >
               For Vendors
             </a>
-            <a href="/terms" style={{ color: "var(--role-muted, var(--role-muted))", textDecoration: "none" }}>
+            <a 
+              href="/terms" 
+              style={{ 
+                color: "var(--role-text-muted)", 
+                textDecoration: "none",
+                fontWeight: 500,
+                transition: "color 0.2s ease",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "var(--role-text)"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "var(--role-text-muted)"}
+            >
               Terms
             </a>
             <NotificationBell />
           </nav>
+          <div style={{
+            textAlign: "center",
+            color: "var(--role-text-muted)",
+            fontSize: "13px",
+            paddingTop: "var(--space-2)",
+            borderTop: "1px solid var(--role-border)",
+          }}>
+            © 2026 Voeq · Powered by Legacy LM
+          </div>
         </footer>
       </body>
     </html>
