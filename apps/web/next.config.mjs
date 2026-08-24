@@ -1,8 +1,18 @@
 /** @type {import('next').NextConfig} */
+import path from "path";
+
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  webpack: (config) => {
+    // Monorepo alias fix: ensure "@/..." resolves to THIS app dir (apps/web)
+    // regardless of where Next.js computes baseUrl (Vercel runs the workspace
+    // build from the repo root, which makes "@/x" resolve to repo-root/x and
+    // fail on Linux). Map "@" -> apps/web explicitly.
+    config.resolve.alias["@"] = path.resolve(process.cwd(), ".");
+    return config;
   },
   images: {
     remotePatterns: [
