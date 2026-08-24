@@ -189,6 +189,12 @@
   --nav-border: var(--role-border);
 }
 
+@media (max-width: 768px) {
+  :root {
+    --nav-inline-pad: 12px; /* Tighter padding on mobile for more content space */
+  }
+}
+
 /* ---- D.4.1 Landing->Explore continuity entrance (REPLACEMENT MECHANISM, 2026-08-18) ----
    Single directional move; 600-900ms first arrival, 320ms subsequent (Doc 06 §2).
    Not a hard cut, not a generic fade-to-white. Reduced-motion neutralized above. */

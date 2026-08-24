@@ -213,15 +213,15 @@ export function Explore({
         <CampusSelector currentCampus={campus} onChange={setCampus} />
       </header>
 
-      <main style={{ padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
+      <main style={{ padding: "var(--space-3) 0 var(--space-8)" }}>
         {/* Continuity entrance: contour carries in (component 1). Shared anchor bar above (component 2).
             Component 3 (Deep transient flash) was PROTOTYPED and CUT — it read as a glitch on a 1px
             hairline rather than continuity; per Doc 05 D.4.1 note it is optional/unproven and removed. */}
-        <div data-testid="explore-contour-anchor" className="explore-entrance">
+        <div data-testid="explore-contour-anchor" className="explore-entrance" style={{ paddingInline: "var(--nav-inline-pad)" }}>
           <ContourEdge intensity="whisper" />
         </div>
 
-        <div style={{ marginBottom: "var(--space-4)" }}>
+        <div style={{ marginBottom: "var(--space-4)", paddingInline: "var(--nav-inline-pad)" }}>
           <h1 data-testid="explore-heading" style={{...headingStyle, marginBottom: 8}}>
             {categoryPreset ? `Explore · ${categoryPreset}` : "Explore"}
           </h1>
@@ -230,7 +230,7 @@ export function Explore({
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", marginBottom: "var(--space-3)" }}>
+        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", marginBottom: "var(--space-3)", paddingInline: "var(--nav-inline-pad)" }}>
           <div style={{ flex: 1 }}>
             <SearchBar initial={query} onSearch={setQuery} />
           </div>
@@ -249,7 +249,7 @@ export function Explore({
 
         {/* Category quick-pills - horizontal scroll */}
         {!categoryPreset && (
-          <div style={{ marginBlock: "var(--space-3)", overflowX: "auto", whiteSpace: "nowrap" }}>
+          <div style={{ marginBlock: "var(--space-3)", overflowX: "auto", whiteSpace: "nowrap", paddingInline: "var(--nav-inline-pad)" }}>
             <div style={{ display: "inline-flex", gap: "var(--space-2)" }}>
               <button
                 onClick={() => removeFilter('category')}
@@ -278,7 +278,7 @@ export function Explore({
 
         {/* Active filter chips bar */}
         {activeFilterCount > 0 && (
-          <div style={{ marginBlock: "var(--space-2)", display: "flex", flexWrap: "wrap", gap: "var(--space-2)", alignItems: "center" }}>
+          <div style={{ marginBlock: "var(--space-2)", display: "flex", flexWrap: "wrap", gap: "var(--space-2)", alignItems: "center", paddingInline: "var(--nav-inline-pad)" }}>
             <span style={{ fontSize: "13px", color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
               Active filters:
             </span>
@@ -324,7 +324,7 @@ export function Explore({
         )}
 
         {/* Desktop: persistent filter sidebar + grid. Mobile: bottom-sheet filters. */}
-        <div className="explore-layout" style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "var(--space-3)", marginTop: "var(--space-3)" }}>
+        <div className="explore-layout" style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "var(--space-3)", marginTop: "var(--space-3)", paddingInline: "var(--nav-inline-pad)" }}>
           <aside data-testid="explore-sidebar" className="explore-desktop-only" style={{ display: "block" }}>
             <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} />
           </aside>

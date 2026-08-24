@@ -48,8 +48,10 @@
 .landing-nav-overlay {
   position: fixed;
   inset: 0;
-  z-index: 100;
-  background: var(--role-bg);
+  z-index: 9999;
+  background: rgba(var(--color-cream-rgb, 245, 241, 232), 0.98);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2268,11 +2270,31 @@
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 768px) {
   .hero-content {
-    padding: var(--space-2xl) var(--space-md);
+    padding: var(--space-lg) var(--space-md);
+    gap: var(--space-md);
+  }
+  
+  .hero-wordmark {
+    margin-bottom: var(--space-2);
+  }
+  
+  .hero-headline {
+    font-size: 2.75rem;
+    margin-bottom: var(--space-1);
+  }
+  
+  .hero-subheadline {
+    font-size: 1rem;
+    margin-bottom: var(--space-3);
+  }
+  
+  .hero-search-panel {
+    padding: var(--space-md);
   }
 
   .hero-search-bar {
     flex-direction: column;
+    gap: var(--space-2);
   }
 
   .hero-search-input-wrapper,
@@ -2285,6 +2307,8 @@
   .hero-ctas {
     flex-direction: column;
     width: 100%;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
   }
 
   .btn-primary,
