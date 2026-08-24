@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
+import { BrandLogo } from './BrandLogo';
 
 /**
  * LandingNav — slim top nav for Landing (Doc 04 PG-PUB-001 secondary nav, Task B).
@@ -94,16 +95,10 @@ export function LandingNav() {
       <Link
         href="/"
         data-testid="wordmark"
-        style={{
-          fontFamily: "var(--role-font-display)",
-          fontSize: "20px",
-          fontWeight: 600,
-          color: "var(--role-text)",
-          textDecoration: "none",
-          lineHeight: 1,
-        }}
+        aria-label="Voeq"
+        style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}
       >
-        Voeq
+        <BrandLogo width={94} />
       </Link>
 
       {/* Desktop: auth buttons (hidden <=768px) */}

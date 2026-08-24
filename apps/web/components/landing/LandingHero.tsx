@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { LiquidGlassPanel } from './LiquidGlassPanel';
 import { HeroVisual } from './HeroVisual';
+import { BrandLogo } from './BrandLogo';
 import { categories } from '@voeq/data';
 
 export function LandingHero() {
@@ -29,16 +30,14 @@ export function LandingHero() {
 
       {/* Content layer */}
       <div className="hero-content">
-        {/* Voeq wordmark above headline */}
-        <div style={{
-          fontFamily: "var(--role-font-display)",
-          fontSize: "clamp(2rem, 5vw, 3rem)",
-          fontWeight: 600,
-          color: "var(--color-forest)",
-          marginBottom: "var(--space-2)",
-          letterSpacing: "0.02em",
-        }}>
-          Voeq
+        {/* Voeq wordmark above headline — sized to rhyme with Find. Connect. Grow. */}
+        <div
+          style={{
+            marginBottom: "var(--space-2)",
+            lineHeight: 1,
+          }}
+        >
+          <BrandLogo width={220} />
         </div>
         
         {/* Main headline */}

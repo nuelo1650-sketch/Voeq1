@@ -1580,24 +1580,10 @@
   position: absolute;
   bottom: var(--space-md);
   right: var(--space-md);
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: var(--radius-pill);
-  color: var(--color-ink-muted);
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: all 160ms var(--motion-ease);
-}
-
-.vendor-save:hover {
-  background: var(--color-white);
-  color: var(--color-amber);
-  transform: scale(1.1);
+  gap: var(--space-xs);
+  z-index: 3;
 }
 
 .vendor-card-body {
