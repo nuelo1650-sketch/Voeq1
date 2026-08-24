@@ -1,15 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "cd .. && npm install && npm run build --workspace @voeq/web",
   "outputDirectory": ".next",
   "regions": ["sin1"],
   "env": {
-    "NEXT_PUBLIC_API_URL": "@voeq-api-url",
+    "NEXT_PUBLIC_API_URL": "https://voeq1.onrender.com",
     "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "jq9gwigz",
-    "NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "voeq_unsigned",
     "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAEZcnQcg6AZ2SqFM",
-    "VOEQ_SESSION_SECRET": "@voeq-session-secret",
     "NEXT_PUBLIC_SITE_URL": "https://voeq.ng"
   }
 }
