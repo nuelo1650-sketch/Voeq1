@@ -37,6 +37,7 @@ const PROTECTED_PREFIXES = [
   "/vendor/dashboard",
   "/messages",
   "/staff",
+  "/admin",
 ];
 
 const PUBLIC_EXACT = new Set([
