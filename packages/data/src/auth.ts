@@ -372,6 +372,13 @@ export function consumePendingToken(token: string): PendingToken | null {
   return t;
 }
 
+/** Non-consuming read of a pending token (used by resend-otp to re-issue a code). */
+export function peekPendingToken(token: string): PendingToken | null {
+  const t = pendingTokens.get(token);
+  if (!t || t.used || Date.now() > new Date(t.expiresAt).getTime()) return null;
+  return t;
+}
+
 // ---- Dev helper (Q5): skip the full flow during testing ----------------------
 export async function devSignInAs(
   role: "shopper" | "vendor" | "admin",
