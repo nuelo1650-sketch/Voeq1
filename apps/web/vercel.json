@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
+  "framework": "other",
   "buildCommand": "cd .. && npm install && npm run build --workspace @voeq/web",
   "outputDirectory": ".next",
   "regions": ["sin1"],
