@@ -17,7 +17,29 @@ export interface SendEmailInput {
   template: EmailTemplateName;
   /** Variables for {{placeholder}} interpolation (e.g. { code, name, link }). */
   vars?: Record<string, string>;
+  /**
+   * Optional override for the From address. Must be a Resend-verified sender
+   * (hello@voeq.ng, support@voeq.ng, career@voeq.ng, press@voeq.ng). Falls back
+   * to RESEND_FROM_EMAIL / RESEND_FROM, then the verified default below.
+   */
+  from?: string;
 }
+
+// Verified Resend sender identities for voeq.ng. Sending FROM any other address
+// (e.g. an unverified noreply@) is rejected/suppressed by Resend.
+const VERIFIED_SENDERS = {
+  default: "hello@voeq.ng",
+  support: "support@voeq.ng",
+  career: "career@voeq.ng",
+  press: "press@voeq.ng",
+} as const;
+
+// Templates that should originate from the support identity.
+const SUPPORT_TEMPLATES = new Set<EmailTemplateName>([
+  "ACCOUNT_SUSPENDED",
+  "ACCOUNT_BANNED",
+  "VENDOR_APPLICATION_REJECTED",
+]);
 
 export interface SendEmailResult {
   ok: boolean;
@@ -27,13 +49,21 @@ export interface SendEmailResult {
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-  const { to, template, vars = {} } = input;
+  const { to, template, vars = {}, from: fromOverride } = input;
   const def = EMAIL_TEMPLATES[template];
   if (!def) return { ok: false, error: `unknown_template:${template}` };
 
   const rendered = renderEmail(def, vars);
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM || process.env.RESEND_FROM_EMAIL || "Voeq <noreply@voeq.ng>";
+  // Resolve From: explicit override > env override > context-default > verified default.
+  const contextFrom = SUPPORT_TEMPLATES.has(template)
+    ? `Voeq Support <${VERIFIED_SENDERS.support}>`
+    : `Voeq <${VERIFIED_SENDERS.default}>`;
+  const from =
+    fromOverride ||
+    process.env.RESEND_FROM ||
+    process.env.RESEND_FROM_EMAIL ||
+    contextFrom;
 
   // Dev fallback: no key configured.
   if (!apiKey) {
