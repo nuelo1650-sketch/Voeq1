@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /messages
+Disallow: /settings
+Disallow: /notifications
+Disallow: /onboarding
+Disallow: /select-campus
+Disallow: /consent
+Disallow: /vendor/dashboard
+Disallow: /vendor/listings
+Disallow: /vendor/analytics
+Disallow: /vendor/reviews
+Disallow: /staff
+Disallow: /account-state
+Disallow: /verify-otp
+
+Sitemap: https://voeq.ng/sitemap.xml
