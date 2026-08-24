@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
 
-const EMAIL_RE = /^[^\\s@]+@[^\\s@]+\.[^\\s@]+$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ForgotPasswordPage() {
   const _router = useRouter();
@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!EMAIL_RE.test(email)) {
+    if (!EMAIL_RE.test(email.trim())) {
       setError("Enter a valid email address.");
       return;
     }

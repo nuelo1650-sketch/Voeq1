@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
 import {
   mockVendorRepo,
-  listListingsByVendor,
+  mockListingsRepo,
   canVendorBePublic,
   mockReviewRepo,
   campuses,
@@ -21,14 +21,17 @@ export default async function VendorDashboardPage() {
   const vendor = await mockVendorRepo.getById(identity.vendorId);
   if (!vendor) redirect("/onboarding/vendor");
 
-  const listings = listListingsByVendor(vendor.id).map((l) => ({
-    ...l,
-    vendorName: vendor.name,
-    rating: undefined,
-    verified: (l as { verified?: boolean }).verified,
-    categorySlug: l.categoryId,
-    image: l.images?.[0],
-  }));
+  const allListings = await mockListingsRepo.list();
+  const listings = allListings
+    .filter((l) => l.vendorId === vendor.id)
+    .map((l) => ({
+      ...l,
+      vendorName: vendor.name,
+      rating: undefined,
+      verified: (l as { verified?: boolean }).verified,
+      categorySlug: l.categoryId,
+      image: l.images?.[0],
+    }));
   const live = canVendorBePublic(vendor);
   const reviews = await mockReviewRepo.listByVendor(vendor.id);
   const ratingCount = reviews.length;

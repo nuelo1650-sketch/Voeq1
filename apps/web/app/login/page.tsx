@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
 import { startGoogleOAuth } from "@/lib/googleOAuth";
 
-const EMAIL_RE = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function LoginForm() {
   const router = useRouter();
@@ -31,7 +31,7 @@ function LoginForm() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!EMAIL_RE.test(email)) {
+    if (!EMAIL_RE.test(email.trim())) {
       setError("Enter a valid email address.");
       return;
     }

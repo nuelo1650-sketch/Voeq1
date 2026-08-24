@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
 import { startGoogleOAuth } from "@/lib/googleOAuth";
 
-const EMAIL_RE = /^[^\\s@]+@[^\\s@]+\.[^\\s@]+$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 type FieldErrors = Record<string, string>;
@@ -59,7 +59,7 @@ export default function SignupPage() {
   function validate(): FieldErrors {
     const next: FieldErrors = {};
     if (!name.trim()) next.name = "Enter your name.";
-    if (!EMAIL_RE.test(email)) next.email = "Enter a valid email address.";
+    if (!EMAIL_RE.test(email.trim())) next.email = "Enter a valid email address.";
     if (password.length < 8) next.password = "Password must be at least 8 characters.";
     return next;
   }
