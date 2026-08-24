@@ -100,7 +100,7 @@ function LoginForm() {
 
         <button
           type="button"
-          onClick={() => window.location.href = '/api/auth/google/login'}
+          onClick={() => window.location.href = '/api/auth/google'}
           className="auth-google-btn"
           data-testid="google-login"
         >

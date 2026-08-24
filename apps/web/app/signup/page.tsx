@@ -215,7 +215,7 @@ export default function SignupPage() {
 
         <button
           type="button"
-          onClick={() => window.location.href = '/api/auth/google/signup'}
+          onClick={() => window.location.href = '/api/auth/google'}
           className="auth-google-btn"
           data-testid="google-signup"
         >

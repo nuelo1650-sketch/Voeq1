@@ -11,20 +11,27 @@ import {
 } from "@voeq/data/server";
 
 const GOOGLE_STATE_COOKIE = "google_oauth_state";
+const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://voeq.ng";
+const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+const USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 
-// Dev-only mock Google profile (Phase 9: real token exchange).
-const MOCK_GOOGLE_PROFILE = {
-  sub: "mock-sub-123",
-  email: "test@gmail.com",
-  name: "Mock Google User",
-};
+interface GoogleProfile {
+  sub: string;
+  email: string;
+  name?: string;
+  picture?: string;
+}
 
 /**
- * VS2.6 — Google OAuth callback (DEV MOCK).
- * Verifies CSRF state, resolves the (mocked) profile, then:
- *  - existing Google identity -> create session, go to consent
- *  - new Google identity -> createPending, issue OTP (google_verify), issue
- *    pending token, route to /verify-otp?purpose=google_verify
+ * VS2.6 — Google OAuth callback (PRODUCTION).
+ *
+ * 1. Verify CSRF state cookie matches the `state` param.
+ * 2. Exchange `code` for tokens at oauth2.googleapis.com/token.
+ * 3. Fetch the user profile from openidconnect.googleapis.com/v1/userinfo.
+ * 4. Resolve identity by googleSubject:
+ *    - existing -> create session, go to /consent (unless suspended/banned)
+ *    - new -> createPending (method google), issue OTP (google_verify),
+ *      route to /verify-otp
  */
 export async function GET(req: NextRequest) {
   const store = await cookies();
@@ -34,14 +41,54 @@ export async function GET(req: NextRequest) {
   const expectedState = store.get(GOOGLE_STATE_COOKIE)?.value;
 
   if (!code || !state || !expectedState || state !== expectedState) {
-    return NextResponse.json({ error: "Invalid OAuth state." }, { status: 400 });
+    return NextResponse.redirect(new URL("/login?error=google_state", req.url));
   }
 
   // Consume state cookie (single-use).
   const res = NextResponse.next();
   res.cookies.delete(GOOGLE_STATE_COOKIE);
 
-  const profile = MOCK_GOOGLE_PROFILE;
+  const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.AUTH_GOOGLE_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    return NextResponse.redirect(new URL("/login?error=google_config", req.url));
+  }
+
+  let profile: GoogleProfile;
+  try {
+    const tokenRes = await fetch(TOKEN_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: `${SITE_ORIGIN}/api/auth/google/callback`,
+        grant_type: "authorization_code",
+      }),
+    });
+    if (!tokenRes.ok) {
+      return NextResponse.redirect(new URL("/login?error=google_token", req.url));
+    }
+    const tokens = (await tokenRes.json()) as { access_token?: string };
+    if (!tokens.access_token) {
+      return NextResponse.redirect(new URL("/login?error=google_token", req.url));
+    }
+    const infoRes = await fetch(USERINFO_ENDPOINT, {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    });
+    if (!infoRes.ok) {
+      return NextResponse.redirect(new URL("/login?error=google_profile", req.url));
+    }
+    profile = (await infoRes.json()) as GoogleProfile;
+  } catch {
+    return NextResponse.redirect(new URL("/login?error=google_network", req.url));
+  }
+
+  if (!profile.sub || !profile.email) {
+    return NextResponse.redirect(new URL("/login?error=google_profile", req.url));
+  }
+
   const existing = await mockIdentityRepo.getByGoogleSubject(profile.sub);
 
   if (existing) {
@@ -66,7 +113,7 @@ export async function GET(req: NextRequest) {
   // New Google user: create pending, verify via OTP (NOT magic link).
   const identity = await mockIdentityRepo.createPending({
     email: profile.email,
-    name: profile.name,
+    name: profile.name ?? profile.email.split("@")[0],
     passwordHash: null,
     method: "google",
     intent: null,
@@ -74,12 +121,14 @@ export async function GET(req: NextRequest) {
   });
   const otp = await issueOtp(profile.email, "google_verify");
   const pendingToken = await issuePendingToken(profile.email, "google_verify");
-  // D.5 — Real email via Resend (dev fallback logs when RESEND_API_KEY unset).
-  await sendEmail({ to: profile.email, template: "OTP_REGISTRATION", vars: { name: profile.name ?? "" , code: otp } });
+  await sendEmail({
+    to: profile.email,
+    template: "OTP_REGISTRATION",
+    vars: { name: profile.name ?? "", code: otp },
+  });
   await logAudit("google.signup", identity.id, {});
 
-  const r = NextResponse.redirect(
+  return NextResponse.redirect(
     new URL(`/verify-otp?token=${pendingToken}&purpose=google_verify`, req.url),
   );
-  return r;
 }
