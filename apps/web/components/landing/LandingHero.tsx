@@ -79,6 +79,66 @@ export function LandingHero() {
           </form>
         </LiquidGlassPanel>
 
+        {/* Popular category chips */}
+        <div style={{ 
+          display: "flex", 
+          flexWrap: "wrap", 
+          gap: 8, 
+          justifyContent: "center",
+          marginTop: "var(--space-3)",
+          marginBottom: "var(--space-4)",
+        }}>
+          <span style={{ 
+            fontSize: 13, 
+            color: "var(--color-ink-muted)", 
+            marginRight: 4,
+            alignSelf: "center",
+          }}>
+            Popular:
+          </span>
+          {[
+            { emoji: "🍔", name: "Food", slug: "food-drinks" },
+            { emoji: "👗", name: "Fashion", slug: "fashion" },
+            { emoji: "💻", name: "Tech Repair", slug: "tech-repairs" },
+            { emoji: "💇", name: "Beauty", slug: "beauty-care" },
+            { emoji: "📚", name: "Academic", slug: "academic-services" },
+          ].map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/explore?category=${cat.slug}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 14px",
+                background: "var(--glass-bg)",
+                backdropFilter: "var(--glass-blur)",
+                WebkitBackdropFilter: "var(--glass-blur)",
+                border: "1px solid var(--glass-border)",
+                borderRadius: 999,
+                fontSize: 14,
+                fontWeight: 500,
+                color: "var(--color-ink-deep)",
+                textDecoration: "none",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--color-cream)";
+                e.currentTarget.style.borderColor = "var(--color-forest)";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "var(--glass-bg)";
+                e.currentTarget.style.borderColor = "var(--glass-border)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <span>{cat.emoji}</span>
+              <span>{cat.name}</span>
+            </Link>
+          ))}
+        </div>
+
         {/* CTA buttons */}
         <div className="hero-ctas">
           <Link href="/explore" className="btn-primary btn-lg">
