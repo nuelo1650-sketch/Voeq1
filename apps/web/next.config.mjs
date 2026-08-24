@@ -21,12 +21,14 @@ const nextConfig = {
     ],
   },
   // D.7/D.8 — Vercel↔Render split.
-  // When NEXT_PUBLIC_API_URL is set (Vercel web deploy), proxy /api/* to the
-  // Render API origin server-side. The browser still calls same-origin /api/*
-  // so no client code changes and no CORS on the hot path. On Render itself
-  // this var is the Render URL (or unset) so /api is served natively.
+  // When API_PROXY_URL (or NEXT_PUBLIC_API_URL) is set (Vercel web deploy),
+  // proxy /api/* to the Render API origin server-side. The browser still calls
+  // same-origin /api/* so no client code changes and no CORS on the hot path.
+  // On Render itself this var is unset so /api is served natively.
+  // NOTE: Vercel does not reliably expose NEXT_PUBLIC_* to next.config at build
+  // time, so we prefer the plain API_PROXY_URL (available to build config).
   async rewrites() {
-    const api = process.env.NEXT_PUBLIC_API_URL;
+    const api = process.env.API_PROXY_URL || process.env.NEXT_PUBLIC_API_URL;
     if (!api) return [];
     return [
       {
