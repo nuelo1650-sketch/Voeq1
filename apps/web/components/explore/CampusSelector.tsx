@@ -17,12 +17,24 @@ interface CampusSelectorProps {
 export function CampusSelector({ currentCampus, onChange }: CampusSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    
+    // Check if mobile viewport
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const currentCampusData = campuses.find(c => c.id === currentCampus) || campuses[0];
+  
+  // Abbreviate long campus names on mobile
+  const displayName = isMobile && currentCampusData.name.length > 20
+    ? currentCampusData.name.split(' ').map(w => w[0]).join('')
+    : currentCampusData.name;
 
   const handleSelect = (campusId: string) => {
     if (mounted) {
@@ -62,7 +74,7 @@ export function CampusSelector({ currentCampus, onChange }: CampusSelectorProps)
         }}
       >
         <MapPin size={16} style={{ color: "var(--color-forest)" }} />
-        <span>{currentCampusData?.name}</span>
+        <span>{displayName}</span>
         <ChevronDown 
           size={16} 
           style={{ 

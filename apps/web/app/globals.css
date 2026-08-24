@@ -57,7 +57,8 @@
   gap: var(--space-4);
   padding: var(--space-4);
 }
-.landing-nav-overlay a { font-family: var(--role-font-display); font-size: 28px; color: var(--role-text); text-decoration: none; }
+.landing-nav-overlay a,
+.landing-nav-overlay button { font-family: var(--role-font-display); font-size: 28px; color: var(--role-text); text-decoration: none; background: transparent; border: none; cursor: pointer; padding: 0; }
 .landing-nav-overlay-close {
   position: absolute;
   top: var(--space-3);

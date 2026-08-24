@@ -61,6 +61,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" data-env="cream" className={`${playfair.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+      </head>
       <body
         style={{
           margin: 0,
