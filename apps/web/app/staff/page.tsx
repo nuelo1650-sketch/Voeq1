@@ -1,6 +1,13 @@
 import { redirect } from "next/navigation";
 import { getStaffIdentity } from "@/lib/session";
-import { mockVendorRepo, mockListingsRepo, mockIdentityRepo, ROLE_CAPABILITIES, type StaffRole } from "@voeq/data";
+import {
+  mockVendorRepo,
+  mockListingsRepo,
+  mockIdentityRepo,
+  computePlatformAnalytics,
+  ROLE_CAPABILITIES,
+  type StaffRole,
+} from "@voeq/data";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 
 export const dynamic = "force-dynamic";
@@ -15,38 +22,33 @@ export default async function StaffDashboardPage() {
 
   const caps = ROLE_CAPABILITIES[staff.staffRole as StaffRole];
 
-  // Fetch platform data
-  const [allVendors, allListings, allIdentities] = await Promise.all([
+  // Fetch real platform data (no fake numbers).
+  const [allVendors, allListings, allIdentities, platform] = await Promise.all([
     mockVendorRepo.listVendors(),
     mockListingsRepo.list({}),
     mockIdentityRepo.list(),
+    computePlatformAnalytics(),
   ]);
 
-  // Calculate metrics
   const totalUsers = allIdentities.length;
   const totalVendors = allVendors.length;
   const totalListings = allListings.length;
-  const pendingVerifications = allVendors.filter(v => !v.verified).length;
-  const suspendedAccounts = allVendors.filter(v => v.status === "suspended").length;
-
-  // Mock data for other metrics (would come from real repos in production)
-  const openReports = 3;
-  const messagesLast24h = 147;
-  const systemErrors = 0;
+  const pendingVerifications = allVendors.filter((v) => !v.verified).length;
+  const suspendedAccounts = allVendors.filter((v) => v.status === "suspended").length;
 
   return (
-    <AdminDashboard 
+    <AdminDashboard
       staff={staff}
       capabilities={caps}
       metrics={{
         totalUsers,
         totalVendors,
         totalListings,
-        messagesLast24h,
-        openReports,
+        openReports: platform.openReports,
+        messageVolume24h: platform.messageVolume24h,
+        newSignups24h: platform.newSignups24h,
         pendingVerifications,
         suspendedAccounts,
-        systemErrors,
       }}
     />
   );

@@ -20,11 +20,11 @@ interface AdminDashboardProps {
     totalUsers: number;
     totalVendors: number;
     totalListings: number;
-    messagesLast24h: number;
+    messageVolume24h: number;
+    newSignups24h: number;
     openReports: number;
     pendingVerifications: number;
     suspendedAccounts: number;
-    systemErrors: number;
   };
 }
 
@@ -130,20 +130,9 @@ export function AdminDashboard({ staff, capabilities, metrics }: AdminDashboardP
                 color="#F44336"
               />
             )}
-            {metrics.systemErrors > 0 && (
-              <AttentionCard
-                icon={<Activity size={24} />}
-                title="System Errors"
-                count={metrics.systemErrors}
-                description="Last 24 hours"
-                href="/staff/analytics"
-                color="#D32F2F"
-              />
-            )}
-            {metrics.openReports === 0 && 
-             metrics.pendingVerifications === 0 && 
-             metrics.suspendedAccounts === 0 && 
-             metrics.systemErrors === 0 && (
+            {metrics.openReports === 0 &&
+             metrics.pendingVerifications === 0 &&
+             metrics.suspendedAccounts === 0 && (
               <div style={{
                 padding: "var(--space-3)",
                 background: "#E8F5E9",
@@ -178,11 +167,10 @@ export function AdminDashboard({ staff, capabilities, metrics }: AdminDashboardP
             <MetricCard label="Users" value={metrics.totalUsers} icon={<Users size={20} />} />
             <MetricCard label="Vendors" value={metrics.totalVendors} icon={<Package size={20} />} />
             <MetricCard label="Listings" value={metrics.totalListings} icon={<Package size={20} />} />
-            <MetricCard label="Messages (24h)" value={metrics.messagesLast24h} icon={<MessageSquare size={20} />} />
+            <MetricCard label="Messages (24h)" value={metrics.messageVolume24h} icon={<MessageSquare size={20} />} />
             {canReviewCases && <MetricCard label="Open Reports" value={metrics.openReports} icon={<AlertCircle size={20} />} color={metrics.openReports > 0 ? "#EF5350" : undefined} />}
             {canVerifyVendors && <MetricCard label="Pending Verify" value={metrics.pendingVerifications} icon={<CheckCircle size={20} />} color={metrics.pendingVerifications > 0 ? "#FF9800" : undefined} />}
-            <MetricCard label="Suspended" value={metrics.suspendedAccounts} icon={<AlertTriangle size={20} />} color={metrics.suspendedAccounts > 0 ? "#F44336" : undefined} />
-            <MetricCard label="Errors (24h)" value={metrics.systemErrors} icon={<Activity size={20} />} color={metrics.systemErrors > 0 ? "#D32F2F" : undefined} />
+            <MetricCard label="New Signups (24h)" value={metrics.newSignups24h} icon={<Activity size={20} />} />
           </div>
         </section>
 
