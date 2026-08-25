@@ -11,6 +11,8 @@ interface HomeData {
   reviewCount: number;
   notifications: Array<{ id: string; title: string; body: string; read: boolean; createdAt: string }>;
   unreadNotifications: number;
+  unreadMessages: number;
+  followingVendors: Array<{ vendorId: string; vendorName: string }>;
   recommended: Array<{ id: string; title: string; vendorName: string; vendorId: string; priceMinor: number; image?: string; categorySlug?: string }>;
 }
 
@@ -81,7 +83,7 @@ export function ShopperDashboard({ name, campus }: { name: string; campus?: stri
 
   const savedCount = data.savedListings.length + data.savedVendors.length;
   const followingCount = data.following.length;
-  const unreadMessages = 0; // Will come from API later
+  const unreadMessages = data.unreadMessages;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
@@ -191,7 +193,7 @@ export function ShopperDashboard({ name, campus }: { name: string; campus?: stri
 
       {/* Vendors you follow */}
       <Section title="Vendors you follow" testid="home-following-vendors" seeAllHref="/explore">
-        {data.following.length === 0 ? (
+        {data.followingVendors.length === 0 ? (
           <EmptyState
             icon={<Heart size={24} />}
             text="Follow vendors to see their latest here"
@@ -200,12 +202,14 @@ export function ShopperDashboard({ name, campus }: { name: string; campus?: stri
           />
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-            {data.following.slice(0, 3).map((vendorId) => (
+            {data.followingVendors.slice(0, 3).map((vendor) => (
               <Link
-                key={vendorId}
-                href={`/vendor/${vendorId}`}
+                key={vendor.vendorId}
+                href={`/vendor/${vendor.vendorId}`}
                 style={{
-                  display: "block",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--space-2)",
                   padding: "var(--space-2)",
                   border: "1px solid var(--color-ink-subtle)",
                   borderRadius: 8,
@@ -222,7 +226,7 @@ export function ShopperDashboard({ name, campus }: { name: string; campus?: stri
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
-                <strong>{vendorId}</strong>
+                <strong>{vendor.vendorName}</strong>
               </Link>
             ))}
           </div>

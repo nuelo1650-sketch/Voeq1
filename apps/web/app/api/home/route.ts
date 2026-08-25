@@ -6,6 +6,9 @@ import {
   mockFollowRepo,
   mockReviewRepo,
   mockNotificationRepo,
+  mockConversationRepo,
+  mockMessageRepo,
+  mockVendorRepo,
   loadExplore,
   campuses,
 } from "@voeq/data";
@@ -30,7 +33,24 @@ export async function GET() {
     .flat()
     .filter((r) => r.authorId === identity.id);
   const notifications = await mockNotificationRepo.list(identity.id);
-  const unread = notifications.filter((n) => !n.read).length;
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
+
+  // Real message-thread unread count (mirrors messages page B6: unread = messages
+  // from other senders not yet marked read).
+  const conversations = await mockConversationRepo.listForIdentity(identity.id);
+  let unreadMessages = 0;
+  for (const c of conversations) {
+    const msgs = await mockMessageRepo.listByConversation(c.id, null, 200);
+    unreadMessages += msgs.filter((m) => m.senderId !== identity.id && m.state !== "read").length;
+  }
+
+  // Enrich followed vendors with their display name (no raw IDs in the UI).
+  const followingVendors = await Promise.all(
+    following.map(async (f) => {
+      const v = await mockVendorRepo.getById(f.vendorId);
+      return { vendorId: f.vendorId, vendorName: v?.name ?? f.vendorId };
+    })
+  );
 
   // Recommended: campus-wide trending (graceful if no campus set).
   const explore = await loadExplore({
@@ -42,9 +62,11 @@ export async function GET() {
     savedListings: saved.filter((s) => s.listingId).map((s) => s.listingId),
     savedVendors: saved.filter((s) => s.vendorId).map((s) => s.vendorId),
     following: following.map((f) => f.vendorId),
+    followingVendors,
     reviewCount: myReviews.length,
     notifications: notifications.slice(0, 5),
-    unreadNotifications: unread,
+    unreadNotifications,
+    unreadMessages,
     recommended: explore.trending ?? explore.data ?? [],
   });
 }
