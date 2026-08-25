@@ -47,7 +47,7 @@ export default async function BecomeVendorPage() {
 
         <section className="info-section">
           <div className="vendor-cta-group" data-testid="become-vendor-cta">
-            <Link href="/onboarding/vendor" className="vendor-cta-primary">
+            <Link href="/signup?next=/onboarding/vendor" className="vendor-cta-primary">
               Start vendor setup
             </Link>
             <Link href="/for-vendors" className="vendor-cta-secondary">
