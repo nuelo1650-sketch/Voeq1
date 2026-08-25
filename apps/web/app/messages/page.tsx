@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
 import { ConversationList, type ConversationRow } from "@/components/messaging/ConversationList";
+import { AppShell } from "@/components/shell/AppShell";
 
 export const dynamic = "force-dynamic";
 
@@ -31,9 +32,11 @@ export default async function MessagesPage() {
   );
 
   return (
-    <main style={{ maxWidth: 640, margin: "0 auto", padding: 16 }}>
-      <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h2)" }}>Messages</h1>
-      <ConversationList rows={rows} />
-    </main>
+    <AppShell role="shopper" userName={identity.name}>
+      <main style={{ maxWidth: 640, margin: "0 auto", padding: 16 }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h2)" }}>Messages</h1>
+        <ConversationList rows={rows} />
+      </main>
+    </AppShell>
   );
 }

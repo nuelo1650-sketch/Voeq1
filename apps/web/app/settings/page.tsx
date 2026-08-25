@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentIdentity, SESSION_COOKIE } from "@/lib/session";
 import { mockVendorRepo, mockUserPrefRepo, mockSessionRepo, campuses } from "@voeq/data";
 import { SettingsForms } from "@/components/shopper/SettingsForms";
+import { AppShell } from "@/components/shell/AppShell";
 
 /**
  * VS3.6 (Reversal 8) + VS4.11 + K3a.2 enhanced. Settings with 4 sections:
@@ -32,14 +33,15 @@ export default async function SettingsPage() {
   }));
 
   return (
-    <main
-      data-testid="settings-page"
-      style={{
-        minHeight: "100vh",
-        background: "var(--color-glass-white)",
-        padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)",
-      }}
-    >
+    <AppShell role="shopper" userName={identity.name}>
+      <main
+        data-testid="settings-page"
+        style={{
+          minHeight: "100vh",
+          background: "var(--color-glass-white)",
+          padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)",
+        }}
+      >
       <h1
         style={{
           fontFamily: "var(--font-display)",
@@ -152,5 +154,6 @@ export default async function SettingsPage() {
         </section>
       )}
     </main>
+    </AppShell>
   );
 }

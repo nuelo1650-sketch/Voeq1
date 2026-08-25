@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
 import { mockVendorRepo } from "@voeq/data";
 import { VendorReviewsManagement } from "@/components/vendor/VendorReviewsManagement";
+import { AppShell } from "@/components/shell/AppShell";
 
 /**
  * K3b.6 — Vendor reviews management page.
@@ -15,5 +16,9 @@ export default async function ReviewsPage() {
   const vendor = await mockVendorRepo.getById(identity.vendorId);
   if (!vendor) redirect("/onboarding/vendor");
 
-  return <VendorReviewsManagement vendor={vendor} disabled={vendor.status === "suspended"} />;
+  return (
+    <AppShell role="vendor" userName={vendor.name}>
+      <VendorReviewsManagement vendor={vendor} disabled={vendor.status === "suspended"} />
+    </AppShell>
+  );
 }

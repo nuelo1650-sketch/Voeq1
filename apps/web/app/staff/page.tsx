@@ -9,6 +9,7 @@ import {
   type StaffRole,
 } from "@voeq/data";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { AppShell } from "@/components/shell/AppShell";
 
 export const dynamic = "force-dynamic";
 
@@ -37,19 +38,21 @@ export default async function StaffDashboardPage() {
   const suspendedAccounts = allVendors.filter((v) => v.status === "suspended").length;
 
   return (
-    <AdminDashboard
-      staff={staff}
-      capabilities={caps}
-      metrics={{
-        totalUsers,
-        totalVendors,
-        totalListings,
-        openReports: platform.openReports,
-        messageVolume24h: platform.messageVolume24h,
-        newSignups24h: platform.newSignups24h,
-        pendingVerifications,
-        suspendedAccounts,
-      }}
-    />
+    <AppShell role="staff" userName={staff.email}>
+      <AdminDashboard
+        staff={staff}
+        capabilities={caps}
+        metrics={{
+          totalUsers,
+          totalVendors,
+          totalListings,
+          openReports: platform.openReports,
+          messageVolume24h: platform.messageVolume24h,
+          newSignups24h: platform.newSignups24h,
+          pendingVerifications,
+          suspendedAccounts,
+        }}
+      />
+    </AppShell>
   );
 }

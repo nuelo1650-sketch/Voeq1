@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
 import { mockVendorRepo } from "@voeq/data";
 import { StorefrontManagement } from "@/components/vendor/StorefrontManagement";
+import { AppShell } from "@/components/shell/AppShell";
 
 /**
  * K3b.4 — Storefront management page.
@@ -15,5 +16,9 @@ export default async function StorefrontPage() {
   const vendor = await mockVendorRepo.getById(identity.vendorId);
   if (!vendor) redirect("/onboarding/vendor");
 
-  return <StorefrontManagement vendor={vendor} disabled={vendor.status === "suspended"} />;
+  return (
+    <AppShell role="vendor" userName={vendor.name}>
+      <StorefrontManagement vendor={vendor} disabled={vendor.status === "suspended"} />
+    </AppShell>
+  );
 }

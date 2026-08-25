@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requireConsent } from "@/lib/session";
 import { mockUserPrefRepo, campuses } from "@voeq/data";
 import { ShopperDashboard } from "@/components/shopper/ShopperDashboard";
+import { AppShell } from "@/components/shell/AppShell";
 
 /**
  * VS4.7 — shopper dashboard (PG-SHOP-001). K3a.1 enhanced.
@@ -21,52 +22,47 @@ export default async function HomePage() {
     : "your campus";
 
   return (
-    <main
-      data-testid="shopper-home"
-      style={{
-        minHeight: "100vh",
-        background: "var(--color-glass-white)",
-        padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)",
-      }}
-    >
-      <ShopperDashboard name={identity.name || "shopper"} campus={campusLabel} />
+    <AppShell role="shopper" userName={identity.name}>
+      <div data-testid="shopper-home">
+        <ShopperDashboard name={identity.name || "shopper"} campus={campusLabel} />
 
-      {!identity.vendorId && (
-        <section
-          aria-label="Become a vendor"
-          data-testid="home-become-vendor-banner"
-          style={{
-            marginTop: "var(--space-4)",
-            border: "1px solid var(--color-amber)",
-            borderRadius: 8,
-            padding: "var(--space-3)",
-            background: "var(--color-cream)",
-          }}
-        >
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, margin: 0, marginBottom: 8, color: "var(--color-forest)" }}>
-            Got something to sell?
-          </h2>
-          <p style={{ color: "var(--color-ink-muted)", marginTop: 0, marginBottom: "var(--space-2)", fontSize: 14 }}>
-            Turn your skills or products into a campus business — free to list.
-          </p>
-          <a
-            href="/become-vendor"
+        {!identity.vendorId && (
+          <section
+            aria-label="Become a vendor"
+            data-testid="home-become-vendor-banner"
             style={{
-              display: "inline-block",
-              padding: "10px 20px",
-              background: "var(--color-forest)",
-              color: "var(--color-cream)",
-              textDecoration: "none",
-              borderRadius: 6,
-              fontSize: 14,
-              fontWeight: 500,
+              marginTop: "var(--space-4)",
+              border: "1px solid var(--color-amber)",
+              borderRadius: 8,
+              padding: "var(--space-3)",
+              background: "var(--color-cream)",
             }}
-            data-testid="home-become-vendor-cta"
           >
-            Become a vendor
-          </a>
-        </section>
-      )}
-    </main>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, margin: 0, marginBottom: 8, color: "var(--color-forest)" }}>
+              Got something to sell?
+            </h2>
+            <p style={{ color: "var(--color-ink-muted)", marginTop: 0, marginBottom: "var(--space-2)", fontSize: 14 }}>
+              Turn your skills or products into a campus business — free to list.
+            </p>
+            <a
+              href="/become-vendor"
+              style={{
+                display: "inline-block",
+                padding: "10px 20px",
+                background: "var(--color-forest)",
+                color: "var(--color-cream)",
+                textDecoration: "none",
+                borderRadius: 6,
+                fontSize: 14,
+                fontWeight: 500,
+              }}
+              data-testid="home-become-vendor-cta"
+            >
+              Become a vendor
+            </a>
+          </section>
+        )}
+      </div>
+    </AppShell>
   );
 }

@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
 import { mockListingsRepo } from "@voeq/data";
 import { ListingEditPage } from "@/components/vendor/ListingEditPage";
+import { AppShell } from "@/components/shell/AppShell";
 
 /**
  * K3b.3 — Listing edit page.
@@ -21,5 +22,9 @@ export default async function EditListingRoute({ params }: { params: Promise<{ i
     redirect("/vendor/dashboard");
   }
 
-  return <ListingEditPage listing={listing} />;
+  return (
+    <AppShell role="vendor" userName={identity.name}>
+      <ListingEditPage listing={listing} />
+    </AppShell>
+  );
 }

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
 import { ListingCreatePage } from "@/components/vendor/ListingCreatePage";
+import { AppShell } from "@/components/shell/AppShell";
 
 /**
  * K3b.2 — Listing create form page.
@@ -11,5 +12,9 @@ export default async function CreateListingRoute() {
   if (!identity) redirect("/login?next=/vendor/listings/create");
   if (!identity.vendorId) redirect("/onboarding/vendor");
 
-  return <ListingCreatePage />;
+  return (
+    <AppShell role="vendor" userName={identity.name}>
+      <ListingCreatePage />
+    </AppShell>
+  );
 }

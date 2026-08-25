@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
 import { mockVendorRepo, mockListingsRepo } from "@voeq/data";
 import { VendorAnalytics } from "@/components/vendor/VendorAnalytics";
+import { AppShell } from "@/components/shell/AppShell";
 
 /**
  * K3b.5 — Vendor analytics page.
@@ -21,9 +22,11 @@ export default async function AnalyticsPage() {
   const listings = allListings.filter(l => l.vendorId === vendor.id);
 
   return (
-    <VendorAnalytics 
-      vendor={vendor} 
-      listings={listings}
-    />
+    <AppShell role="vendor" userName={vendor.name}>
+      <VendorAnalytics
+        vendor={vendor}
+        listings={listings}
+      />
+    </AppShell>
   );
 }

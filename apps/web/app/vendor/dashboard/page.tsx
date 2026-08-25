@@ -8,6 +8,7 @@ import {
   campuses,
 } from "@voeq/data";
 import { VendorDashboardClient } from "@/components/vendor/VendorDashboardClient";
+import { AppShell } from "@/components/shell/AppShell";
 
 /**
  * VS3.4 / VS5 + K3b.1 — Vendor dashboard (single-scroll, one-identity).
@@ -53,7 +54,8 @@ export default async function VendorDashboardPage() {
     : { label: "Pending listings", color: "var(--color-status-pending)" };
 
   return (
-    <main data-testid="vendor-dashboard" style={{ minHeight: "100vh", background: "var(--color-glass-white)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
+    <AppShell role="vendor" userName={vendor.name}>
+      <div data-testid="vendor-dashboard" style={{ minHeight: "100vh", background: "var(--color-glass-white)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
       {/* K3b.1 Header */}
       <header style={{ marginBottom: "var(--space-4)" }}>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 36, margin: 0, marginBottom: 12, color: "var(--color-forest)" }}>
@@ -123,6 +125,7 @@ export default async function VendorDashboardPage() {
         reviews={reviews}
         disabled={vendor.status === "suspended"}
       />
-    </main>
+      </div>
+    </AppShell>
   );
 }

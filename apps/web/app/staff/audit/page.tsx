@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getStaffIdentity } from "@/lib/session";
 import { ROLE_CAPABILITIES, type StaffRole } from "@voeq/data";
 import { AuditLog } from "@/components/admin/AuditLog";
+import { AppShell } from "@/components/shell/AppShell";
 
 export const dynamic = "force-dynamic";
 
@@ -16,5 +17,9 @@ export default async function AuditPage() {
   const caps = ROLE_CAPABILITIES[staff.staffRole as StaffRole];
   if (!caps.includes("audit.read")) redirect("/staff");
 
-  return <AuditLog staff={staff} />;
+  return (
+    <AppShell role="staff" userName={staff.email}>
+      <AuditLog staff={staff} />
+    </AppShell>
+  );
 }

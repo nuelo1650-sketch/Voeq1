@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getStaffIdentity } from "@/lib/session";
 import { mockVendorRepo, mockListingsRepo, mockIdentityRepo, ROLE_CAPABILITIES, type StaffRole, campuses } from "@voeq/data";
 import Link from "next/link";
+import { AppShell } from "@/components/shell/AppShell";
 
 export const dynamic = "force-dynamic";
 
@@ -40,8 +41,9 @@ export default async function AnalyticsPage() {
   }));
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F5F5", padding: "var(--space-4)" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+    <AppShell role="staff" userName={staff.email}>
+      <div style={{ minHeight: "100vh", background: "#F5F5F5", padding: "var(--space-4)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <Link href="/staff" style={{ fontSize: 14, color: "#1976D2", textDecoration: "none", marginBottom: 12, display: "inline-block" }}>
           ← Back to dashboard
         </Link>
@@ -94,6 +96,7 @@ export default async function AnalyticsPage() {
         </section>
       </div>
     </div>
+    </AppShell>
   );
 }
 

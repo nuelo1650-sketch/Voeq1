@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getStaffIdentity } from "@/lib/session";
 import { ROLE_CAPABILITIES, type StaffRole } from "@voeq/data";
 import { ModerationQueue } from "@/components/admin/ModerationQueue";
+import { AppShell } from "@/components/shell/AppShell";
 
 export const dynamic = "force-dynamic";
 
@@ -20,5 +21,9 @@ export default async function ModerationPage() {
     redirect("/staff");
   }
 
-  return <ModerationQueue staff={staff} capabilities={caps} />;
+  return (
+    <AppShell role="staff" userName={staff.email}>
+      <ModerationQueue staff={staff} capabilities={caps} />
+    </AppShell>
+  );
 }
