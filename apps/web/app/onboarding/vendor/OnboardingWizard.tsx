@@ -31,9 +31,10 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
 
   // Step 1: Business identity
   const [name, setName] = useState(initial.name);
-  const [oneLineDesc, setOneLineDesc] = useState("");
   const [description, setDescription] = useState(initial.description);
   const [categoryId, setCategoryId] = useState(initial.categoryId);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Step 2: Campus & presence
   const [campusResults, setCampusResults] = useState<Campus[]>(campuses);
@@ -50,14 +51,14 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (!raw) return;
-      const d = JSON.parse(raw) as Partial<Initial> & { step?: number; agreed?: boolean; oneLineDesc?: string };
+      const d = JSON.parse(raw) as Partial<Initial> & { step?: number; agreed?: boolean; profilePhotoUrl?: string | null };
       if (typeof d.step === "number" && d.step >= 1 && d.step <= 3) setStep(d.step as Step);
       if (d.name) setName(d.name);
-      if (d.oneLineDesc) setOneLineDesc(d.oneLineDesc);
       if (d.description) setDescription(d.description);
       if (d.categoryId) setCategoryId(d.categoryId);
       if (d.subArea) setSubArea(d.subArea);
       if (d.agreed) setAgreed(true);
+      if (d.profilePhotoUrl) setProfilePhotoUrl(d.profilePhotoUrl);
     } catch {
       /* ignore corrupt draft */
     }
@@ -68,12 +69,12 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
     try {
       localStorage.setItem(
         DRAFT_KEY,
-        JSON.stringify({ step, name, oneLineDesc, description, categoryId, subArea, agreed })
+        JSON.stringify({ step, name, description, categoryId, subArea, agreed, profilePhotoUrl })
       );
     } catch {
       /* storage may be unavailable */
     }
-  }, [step, name, oneLineDesc, description, categoryId, subArea, agreed]);
+  }, [step, name, description, categoryId, subArea, agreed, profilePhotoUrl]);
 
   const post = async (path: string, body: unknown) => {
     const res = await fetch(path, {
@@ -93,6 +94,41 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
     }
   };
 
+  const uploadPhoto = async (file: File): Promise<string | null> => {
+    setUploading(true);
+    setError(null);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch("/api/images/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          context: "vendor_photo",
+          mimeType: file.type,
+          bytes: file.size,
+          dataUrl,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.url) {
+        setError(result.error ?? "Photo upload failed. You can add it later in settings.");
+        return null;
+      }
+      return result.url as string;
+    } catch {
+      setError("Photo upload failed. You can add it later in settings.");
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const submitStep1 = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -100,10 +136,6 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
     // Validation
     if (name.trim().length < 2) {
       setError("Business name must be at least 2 characters.");
-      return;
-    }
-    if (oneLineDesc.trim().length === 0 || oneLineDesc.trim().length > 80) {
-      setError("One-line description must be between 1 and 80 characters.");
       return;
     }
     if (description.trim().length < 50) {
@@ -121,6 +153,7 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
         name,
         description,
         categoryId,
+        profilePhotoUrl,
       });
       if (!res.ok) {
         setError(data.error ?? "Could not save.");
@@ -290,24 +323,31 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
                 />
               </Field>
 
-              <Field
-                label="One-line description"
-                required
-                hint="The short version a student would tell a friend"
-              >
-                <input
-                  type="text"
-                  value={oneLineDesc}
-                  onChange={(e) => setOneLineDesc(e.target.value)}
-                  placeholder="e.g. Authentic Nigerian dishes near campus"
-                  style={inputStyle}
-                  required
-                  maxLength={80}
-                  data-testid="vendor-one-line"
-                />
-                <span style={{ fontSize: 12, color: "var(--color-ink-muted)", marginTop: 4 }}>
-                  {oneLineDesc.length}/80
-                </span>
+              <Field label="Business photo" hint="Shown on your storefront. Optional — add later in settings.">
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  {profilePhotoUrl ? (
+                    <img src={profilePhotoUrl} alt="Business" style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: "1px solid var(--color-ink-subtle)" }} />
+                  ) : (
+                    <div style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--color-forest-light)", color: "var(--color-cream)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 600 }}>
+                      {name.trim().charAt(0).toUpperCase() || "?"}
+                    </div>
+                  )}
+                  <label style={{ ...inputStyle, display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer", flex: 1 }}>
+                    {uploading ? "Uploading…" : profilePhotoUrl ? "Change photo" : "Upload photo"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      data-testid="vendor-photo"
+                      style={{ display: "none" }}
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        const url = await uploadPhoto(f);
+                        if (url) setProfilePhotoUrl(url);
+                      }}
+                    />
+                  </label>
+                </div>
               </Field>
 
               <Field label="Detailed description" required>

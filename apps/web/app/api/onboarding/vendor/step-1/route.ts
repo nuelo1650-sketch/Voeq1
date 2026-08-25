@@ -12,6 +12,7 @@ const schema = z.object({
   name: z.string().trim().min(2, "Business name is required."),
   description: z.string().trim().min(50, "Description must be at least 50 characters."),
   categoryId: z.string().min(1, "Choose a category."),
+  profilePhotoUrl: z.string().url().optional().or(z.literal("")),
 });
 
 export async function POST(req: NextRequest) {
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Validation failed", fieldErrors: parsed.error.flatten().fieldErrors }, { status: 400 });
   }
-  const { name, description, categoryId } = parsed.data;
+  const { name, description, categoryId, profilePhotoUrl } = parsed.data;
 
   // Create or reuse the vendor linked to this identity.
   let vendor = identity.vendorId ? await mockVendorRepo.getById(identity.vendorId) : null;
@@ -37,11 +38,12 @@ export async function POST(req: NextRequest) {
       campus: identity.campus ?? "nmu",
       categoryIds: [categoryId],
       description,
+      profilePhotoUrl: profilePhotoUrl || null,
       status: "pending_listings",
     });
     await mockIdentityRepo.patch(identity.id, { vendorId: vendor.id });
   } else {
-    await mockVendorRepo.patch(vendor.id, { name, description, categoryIds: [categoryId] });
+    await mockVendorRepo.patch(vendor.id, { name, description, categoryIds: [categoryId], profilePhotoUrl: profilePhotoUrl || null });
   }
 
   return NextResponse.json({ ok: true, nextStep: 2, vendorId: vendor.id });
