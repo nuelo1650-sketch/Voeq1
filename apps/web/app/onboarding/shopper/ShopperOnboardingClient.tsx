@@ -84,12 +84,25 @@ export default function ShopperOnboardingPage() {
         style={{
           minHeight: "100vh",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          gap: "var(--space-3)",
           background: "var(--color-glass-white)",
         }}
       >
-        <p style={{ color: "var(--color-ink-muted)" }}>Loading…</p>
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            border: "3px solid var(--color-ink-subtle)",
+            borderTopColor: "var(--color-forest)",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }}
+        />
+        <p style={{ color: "var(--color-ink-muted)" }}>Loading your preferences…</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -182,12 +195,12 @@ export default function ShopperOnboardingPage() {
                   justifyContent: "center",
                   gap: 8,
                   padding: "20px 16px",
-                  background: isSelected ? "var(--color-forest)" : "var(--color-glass-white)",
-                  color: isSelected ? "var(--color-cream)" : "var(--color-forest)",
+                  background: isSelected ? "var(--color-forest-light)" : "var(--color-glass-white)",
+                  color: "var(--color-forest)",
                   border: isSelected ? "2px solid var(--color-forest)" : "2px solid var(--color-ink-subtle)",
                   borderRadius: 12,
                   cursor: "pointer",
-                  transition: "all 0.2s ease",
+                  transition: "transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease",
                   position: "relative",
                   minHeight: 100,
                 }}
