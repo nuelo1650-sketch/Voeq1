@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useRef, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
+import { AuthHeader } from "@/components/auth/AuthHeader";
 import { startGoogleOAuth } from "@/lib/googleOAuth";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -101,7 +102,7 @@ function LoginForm() {
   return (
     <InfoPageShell title="Sign in">
       <div className="auth-card">
-        <p className="auth-lede">Welcome back. Sign in to continue to Voeq.</p>
+        <AuthHeader lede="Welcome back. Sign in to continue to Voeq." />
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="auth-field">
             <label htmlFor="email">Email</label>

@@ -4,6 +4,8 @@ import { Suspense, useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
+import { AuthHeader } from "@/components/auth/AuthHeader";
+import { OtpInput } from "@/components/auth/OtpInput";
 
 function VerifyOtpForm() {
   const router = useRouter();
@@ -91,27 +93,44 @@ function VerifyOtpForm() {
   return (
     <InfoPageShell title="Verify your email">
       <div className="auth-card">
-        <p className="auth-lede">
-          We sent a 6-digit code to your email. Enter it below to finish creating your account.
-        </p>
+        <AuthHeader lede="Enter the 6-digit code we sent to your email to finish creating your account." />
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="auth-field">
-            <label htmlFor="code">6-digit code</label>
-            <input
-              id="code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
+            <label htmlFor="code" className="sr-only">6-digit code</label>
+            <OtpInput
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              aria-invalid={Boolean(error)}
-              aria-describedby={error ? "code-error" : undefined}
-              data-testid="otp-code"
-              className="auth-otp-input"
-              autoFocus
+              onChange={(next) => setCode(next)}
+              onComplete={(c) => {
+                setCode(c);
+                // auto-submit when all 6 entered
+                void (async () => {
+                  setError(null);
+                  setSubmitting(true);
+                  try {
+                    const res = await fetch("/api/auth/verify-otp", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ token, code: c }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                      setError(data.error ?? "Verification failed.");
+                      return;
+                    }
+                    router.push(data.redirect ?? "/consent");
+                  } catch {
+                    setError("Network error. Please try again.");
+                  } finally {
+                    setSubmitting(false);
+                  }
+                })();
+              }}
+              disabled={submitting}
+              error={Boolean(error)}
             />
             {error && <span className="auth-error" id="code-error" role="alert">{error}</span>}
           </div>
-          <button type="submit" className="auth-submit" disabled={submitting} data-testid="otp-submit">
+          <button type="submit" className="auth-submit" disabled={submitting || code.length !== 6} data-testid="otp-submit">
             {submitting ? "Verifying…" : "Verify"}
           </button>
         </form>

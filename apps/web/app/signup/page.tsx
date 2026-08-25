@@ -4,6 +4,7 @@ import { useState, type FormEvent, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
+import { AuthHeader } from "@/components/auth/AuthHeader";
 import { startGoogleOAuth } from "@/lib/googleOAuth";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -102,10 +103,7 @@ export default function SignupPage() {
   return (
     <InfoPageShell title="Create your account">
       <div className="auth-card">
-        <p className="auth-lede">
-          One account for shopping and selling on campus. Choose how you&rsquo;re getting started.
-        </p>
-
+        <AuthHeader lede="One account for shopping and selling on campus. Choose how you're getting started." />
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           {/* Intent toggle */}
           <fieldset className="auth-intent" aria-label="Account type">

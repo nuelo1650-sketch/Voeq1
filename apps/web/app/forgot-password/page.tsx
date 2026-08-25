@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
+import { AuthHeader } from "@/components/auth/AuthHeader";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -46,19 +47,14 @@ export default function ForgotPasswordPage() {
       <div className="auth-card">
         {done ? (
           <>
-            <p className="auth-lede">
-              If an account exists for that email, we&rsquo;ve sent a reset link. Check your inbox
-              (and spam) for a message from Voeq.
-            </p>
+            <AuthHeader lede="If an account exists for that email, we've sent a reset link. Check your inbox (and spam) for a message from Voeq." />
             <p className="auth-alt">
               <Link href="/login">← Back to sign in</Link>
             </p>
           </>
         ) : (
           <>
-            <p className="auth-lede">
-              Enter your email and we&rsquo;ll send a secure link to reset your password.
-            </p>
+            <AuthHeader lede="Enter your email and we'll send a secure link to reset your password." />
             <form className="auth-form" onSubmit={handleSubmit} noValidate>
               <div className="auth-field">
                 <label htmlFor="email">Email</label>

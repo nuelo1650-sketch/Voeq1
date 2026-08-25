@@ -4,6 +4,7 @@ import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
+import { AuthHeader } from "@/components/auth/AuthHeader";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -19,9 +20,10 @@ function ResetPasswordForm() {
     return (
       <InfoPageShell title="Reset your password">
         <div className="auth-card">
-          <div className="auth-form-error" role="alert">
+          <AuthHeader lede="This reset link is missing or invalid." />
+          <p className="auth-form-error" role="alert">
             This reset link is missing or invalid.
-          </div>
+          </p>
           <p className="auth-alt">
             <Link href="/forgot-password">Request a new link</Link>
           </p>
@@ -64,7 +66,7 @@ function ResetPasswordForm() {
   return (
     <InfoPageShell title="Choose a new password">
       <div className="auth-card">
-        <p className="auth-lede">Enter a new password for your account.</p>
+        <AuthHeader lede="Enter a new password for your account." />
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="auth-field">
             <label htmlFor="password">New password</label>
