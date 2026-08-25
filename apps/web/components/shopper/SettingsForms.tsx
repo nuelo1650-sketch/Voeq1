@@ -16,7 +16,7 @@ interface SettingsProps {
   };
   initialPrefs: Record<string, "email" | "in_app" | "both" | "off">;
   campuses: { id: string; name: string }[];
-  sessions: Array<{ id: string; browser: string; os: string; lastActive: string }>;
+  sessions: Array<{ id: string; createdAt: string; expiresAt: string; current: boolean }>;
 }
 
 const NOTIF_TYPES = [
@@ -414,10 +414,25 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
                       >
                         <div>
                           <div style={{ fontSize: 14, fontWeight: 500 }}>
-                            {session.browser} on {session.os}
+                            Session {session.id.slice(0, 8)}…
+                            {session.current && (
+                              <span
+                                style={{
+                                  marginLeft: 8,
+                                  fontSize: 11,
+                                  fontWeight: 600,
+                                  padding: "2px 6px",
+                                  background: "var(--color-amber)",
+                                  color: "var(--color-forest)",
+                                  borderRadius: 4,
+                                }}
+                              >
+                                This device
+                              </span>
+                            )}
                           </div>
                           <div style={{ fontSize: 12, color: "var(--color-ink-muted)" }}>
-                            Last active: {session.lastActive}
+                            Signed in {new Date(session.createdAt).toLocaleString()} · expires {new Date(session.expiresAt).toLocaleDateString()}
                           </div>
                         </div>
                         <button
@@ -431,7 +446,7 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
                             color: "var(--color-forest)",
                           }}
                         >
-                          Sign out
+                          {session.current ? "Sign out" : "Revoke"}
                         </button>
                       </div>
                     ))}

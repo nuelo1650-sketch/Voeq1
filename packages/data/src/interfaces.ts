@@ -283,6 +283,7 @@ export interface IdentityRepo {
 export interface SessionRepo {
   create(identityId: string): Promise<Session>;
   get(id: string): Promise<Session | null>;
+  listForIdentity(identityId: string): Promise<Session[]>;
   revoke(id: string): Promise<void>;
   revokeAllForIdentity(identityId: string): Promise<void>;
 }

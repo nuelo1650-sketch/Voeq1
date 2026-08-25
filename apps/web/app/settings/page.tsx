@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getCurrentIdentity } from "@/lib/session";
-import { mockVendorRepo, mockUserPrefRepo, campuses } from "@voeq/data";
+import { getCurrentIdentity, SESSION_COOKIE } from "@/lib/session";
+import { mockVendorRepo, mockUserPrefRepo, mockSessionRepo, campuses } from "@voeq/data";
 import { SettingsForms } from "@/components/shopper/SettingsForms";
 
 /**
@@ -19,11 +20,16 @@ export default async function SettingsPage() {
   const prefs = await mockUserPrefRepo.get(identity.id);
   const notifPrefs = (prefs?.notificationPrefs ?? {}) as Record<string, "email" | "in_app" | "both" | "off">;
 
-  // Sample session data for UI display
-  const sampleSessions = [
-    { id: "1", browser: "Chrome", os: "Windows", lastActive: "2 minutes ago" },
-    { id: "2", browser: "Safari", os: "iOS", lastActive: "2 days ago" },
-  ];
+  // Real sessions from the session repo (no more hardcoded samples).
+  const store = await cookies();
+  const currentSessionId = store.get(SESSION_COOKIE)?.value ?? null;
+  const realSessions = await mockSessionRepo.listForIdentity(identity.id);
+  const sessions = realSessions.map((s) => ({
+    id: s.id,
+    createdAt: s.createdAt,
+    expiresAt: s.expiresAt,
+    current: s.id === currentSessionId,
+  }));
 
   return (
     <main
@@ -55,7 +61,7 @@ export default async function SettingsPage() {
         }}
         initialPrefs={notifPrefs}
         campuses={campuses.map((c) => ({ id: c.id, name: c.name }))}
-        sessions={sampleSessions}
+        sessions={sessions}
       />
 
       {!isVendor && (

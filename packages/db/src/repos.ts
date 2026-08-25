@@ -158,6 +158,16 @@ export const realSessionRepo = {
     }
     return row[0];
   },
+  async listForIdentity(identityId: string): Promise<Session[]> {
+    const now = Date.now();
+    const rows = await getDb()
+      .select()
+      .from(s.sessions)
+      .where(eq(s.sessions.identityId, identityId));
+    return rows
+      .filter((r) => now <= new Date(r.expiresAt).getTime())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  },
   async revoke(sid: string): Promise<void> {
     await getDb().delete(s.sessions).where(eq(s.sessions.id, sid));
   },

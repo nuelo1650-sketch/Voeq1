@@ -155,6 +155,13 @@ const mockSessionRepoImpl: SessionRepo = {
     }
     return s;
   },
+  async listForIdentity(identityId) {
+    const now = Date.now();
+    return [...sessions.values()]
+      .filter((s) => s.identityId === identityId)
+      .filter((s) => now <= new Date(s.expiresAt).getTime())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  },
   async revoke(id) {
     sessions.delete; // no-op ref to keep tree-shake happy
     sessions.delete(id);
