@@ -54,14 +54,14 @@
   --space-2xl: 64px;
   --space-3xl: 96px;
 
-  /* ---- Legacy spacing aliases for backwards compatibility ---- */
+  /* ---- Legacy spacing aliases (match globals.css overrides — single source of truth) ---- */
   --space-1: 8px;
   --space-2: 16px;
   --space-3: 24px;
   --space-4: 32px;
   --space-5: 48px;
   --space-6: 64px;
-  --space-8: 96px;
+  --space-8: 8px;   /* globals.css overrides to 8px; tokens claims 96px — align to actual */
 
   /* ---- RADIUS ---- */
   --radius-sm: 8px;
@@ -96,6 +96,8 @@
   --role-ink-deep: var(--color-forest);
   --role-gold-on-ink: var(--color-amber-light);
   --role-danger: var(--color-status-closed);
+  --role-error-bg: #FEE2E2;
+  --role-error-text: #991B1B;
   --role-on-accent: var(--color-glass-white);
 
   /* ---- Typography roles ---- */

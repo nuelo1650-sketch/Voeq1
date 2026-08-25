@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { mockAuthRepo, type Identity, type UserRole } from "@voeq/data";
 import { hasCapability, type Capability, type StaffRole } from "@voeq/data";
 
@@ -23,7 +24,10 @@ export async function requireAuth(next?: string): Promise<Identity> {
   const id = await getCurrentIdentity();
   if (!id) {
     const url = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
-    throw new Response(null, { status: 302, headers: { Location: url } });
+    // D1-P0-2: use next/navigation redirect() — throwing a raw Response from a
+    // server component surfaces as an unhandled error (500 "[object Response]")
+    // in Next 15 instead of a redirect.
+    redirect(url);
   }
   return id;
 }
@@ -37,7 +41,7 @@ export async function requireConsent(next?: string): Promise<Identity> {
   const id = await requireAuth(next);
   if (!id.consent || id.consent.length === 0) {
     const url = next ? `/consent?next=${encodeURIComponent(next)}` : "/consent";
-    throw new Response(null, { status: 302, headers: { Location: url } });
+    redirect(url);
   }
   return id;
 }
@@ -59,7 +63,7 @@ export async function requireCapability(cap: Capability): Promise<Identity & { s
 export async function requireRole(role: UserRole): Promise<Identity> {
   const id = await requireAuth();
   if (id.role !== role) {
-    throw new Response(null, { status: 302, headers: { Location: "/account-state?status=forbidden" } });
+    redirect("/account-state?status=forbidden");
   }
   return id;
 }

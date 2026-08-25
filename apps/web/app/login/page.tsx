@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useState, useEffect, type FormEvent } from "react";
+import { Suspense, useState, useEffect, useRef, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
 import { startGoogleOAuth } from "@/lib/googleOAuth";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 function LoginForm() {
   const router = useRouter();
@@ -20,12 +21,42 @@ function LoginForm() {
   const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const widgetRef = useRef<HTMLDivElement | null>(null);
+  const widgetIdRef = useRef<string | null>(null);
 
-  // FIX #4: Listen for Turnstile success
+  // D1-P0-1: render the Turnstile widget the same way /signup does — inject the
+  // API script once, then render into a ref'd div. The old markup never loaded
+  // the script, so the token could never be set and password login was dead.
   useEffect(() => {
-    const handler = (e: CustomEvent) => setTurnstileToken(e.detail);
-    document.addEventListener("turnstile-success", handler as EventListener);
-    return () => document.removeEventListener("turnstile-success", handler as EventListener);
+    if (!TURNSTILE_SITE_KEY || !widgetRef.current) return;
+    let cancelled = false;
+
+    const render = () => {
+      if (cancelled || !widgetRef.current || !window.turnstile) return;
+      widgetIdRef.current = window.turnstile.render(widgetRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        action: "login",
+        callback: (token: string) => setTurnstileToken(token),
+        "expired-callback": () => setTurnstileToken(""),
+        "error-callback": () => setTurnstileToken(""),
+      });
+    };
+
+    if (window.turnstile) {
+      render();
+    } else {
+      const s = document.createElement("script");
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+      s.async = true;
+      s.onload = render;
+      document.head.appendChild(s);
+    }
+    return () => {
+      cancelled = true;
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+      }
+    };
   }, []);
 
   async function handleSubmit(e: FormEvent) {
@@ -104,25 +135,10 @@ function LoginForm() {
           </label>
           {error && <div className="auth-form-error" id="login-error" role="alert">{error}</div>}
           
-          {/* FIX #4: Cloudflare Turnstile widget for bot protection */}
-          {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          {/* D1-P0-1: Cloudflare Turnstile widget for bot protection (rendered via useEffect) */}
+          {TURNSTILE_SITE_KEY && (
             <div className="auth-turnstile">
-              <div
-                className="cf-turnstile"
-                data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                data-callback="onTurnstileSuccess"
-                data-action="login"
-              />
-              <script
-                dangerouslySetInnerHTML={{
-                  __html: `
-                    window.onTurnstileSuccess = function(token) {
-                      window.turnstileToken = token;
-                      document.dispatchEvent(new CustomEvent('turnstile-success', { detail: token }));
-                    };
-                  `,
-                }}
-              />
+              <div ref={widgetRef} data-testid="login-turnstile" />
             </div>
           )}
           

@@ -638,8 +638,8 @@ function ErrorMessage({ children }: { children: React.ReactNode }) {
       role="alert"
       style={{
         padding: 12,
-        background: "#FEE2E2",
-        color: "#991B1B",
+        background: "var(--role-error-bg)",
+        color: "var(--role-error-text)",
         borderRadius: 8,
         fontSize: 14,
         marginTop: "var(--space-3)",
