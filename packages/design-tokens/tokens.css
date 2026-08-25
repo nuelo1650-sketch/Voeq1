@@ -92,12 +92,17 @@
   --role-border: rgba(15, 42, 29, 0.12);
   --role-accent: var(--color-forest-mid);
   --role-accent-strong: var(--color-forest);
+  --role-accent-subtle: #E8F0EA;
   --role-gold: var(--color-amber);
   --role-ink-deep: var(--color-forest);
   --role-gold-on-ink: var(--color-amber-light);
   --role-danger: var(--color-status-closed);
+  --role-warning: var(--color-status-closing);
   --role-error-bg: #FEE2E2;
   --role-error-text: #991B1B;
+  --role-success-bg: #E8F5E9;
+  --role-success-border: #C8E6C9;
+  --role-success-text: #2E7D32;
   --role-on-accent: var(--color-glass-white);
 
   /* ---- Typography roles ---- */

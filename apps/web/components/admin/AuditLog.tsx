@@ -7,6 +7,7 @@ import { Search, Filter } from "lucide-react";
 /**
  * K3c.7 — Audit log component.
  * Searchable, filterable staff action history.
+ * Token-driven (no raw hex).
  */
 
 interface AuditEntry {
@@ -77,22 +78,22 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
   const detailEntry = detailId ? entries.find((e) => e.id === detailId) : null;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F5F5", padding: "var(--space-4)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--role-surface-sunken, #FAF6EC)", padding: "var(--space-4)" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <Link href="/staff" style={{ fontSize: 14, color: "#1976D2", textDecoration: "none", marginBottom: 12, display: "inline-block" }}>
+        <Link href="/staff" style={{ fontSize: 14, color: "var(--role-accent-strong, #0F2A1D)", textDecoration: "none", marginBottom: 12, display: "inline-block" }}>
           ← Back to dashboard
         </Link>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, margin: 0, color: "#212121", fontWeight: 700 }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, margin: 0, color: "var(--color-forest, #0F2A1D)", fontWeight: 700 }}>
           Audit Log
         </h1>
-        <p style={{ margin: "4px 0 24px", fontSize: 14, color: "#666" }}>
+        <p style={{ margin: "4px 0 24px", fontSize: 14, color: "var(--role-text-muted, #5b6b60)" }}>
           All staff actions are logged here
         </p>
 
         {/* Search and Filter */}
-        <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
-          <div style={{ flex: 1, position: "relative" }}>
-            <Search size={18} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#999" }} />
+        <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+          <div style={{ flex: 1, position: "relative", minWidth: 200 }}>
+            <Search size={18} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--role-text-muted, #5b6b60)" }} />
             <input
               type="search"
               placeholder="Search by action or actor..."
@@ -102,9 +103,10 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
                 width: "100%",
                 padding: "10px 12px 10px 40px",
                 fontSize: 14,
-                border: "1px solid #E0E0E0",
+                border: "1px solid var(--role-border, rgba(15,42,29,0.12))",
                 borderRadius: 6,
-                background: "#fff",
+                background: "var(--role-surface, #fff)",
+                fontFamily: "var(--role-font-ui)",
               }}
             />
           </div>
@@ -114,10 +116,11 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
             style={{
               padding: "10px 32px 10px 12px",
               fontSize: 14,
-              border: "1px solid #E0E0E0",
+              border: "1px solid var(--role-border, rgba(15,42,29,0.12))",
               borderRadius: 6,
-              background: "#fff",
+              background: "var(--role-surface, #fff)",
               cursor: "pointer",
+              fontFamily: "var(--role-font-ui)",
             }}
           >
             <option value="all">All types</option>
@@ -129,15 +132,15 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
         </div>
 
         {/* Results count */}
-        <p style={{ fontSize: 14, color: "#666", marginBottom: 16 }}>
-          Showing {filteredEntries.length} {filteredEntries.length === 1 ? "entry" : "entries"}
+        <p style={{ fontSize: 14, color: "var(--role-text-muted, #5b6b60)", marginBottom: 16 }}>
+          {loading ? "Loading…" : `Showing ${filteredEntries.length} ${filteredEntries.length === 1 ? "entry" : "entries"}`}
         </p>
 
         {/* Entries table */}
-        <div style={{ background: "#fff", border: "1px solid #E0E0E0", borderRadius: 8, overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div style={{ background: "var(--role-surface, #fff)", border: "1px solid var(--role-border, rgba(15,42,29,0.12))", borderRadius: 8, overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
             <thead>
-              <tr style={{ background: "#F5F5F5", borderBottom: "1px solid #E0E0E0" }}>
+              <tr style={{ background: "var(--role-surface-sunken, #FAF6EC)", borderBottom: "1px solid var(--role-border, rgba(15,42,29,0.12))" }}>
                 <th style={thStyle}>Actor</th>
                 <th style={thStyle}>Action</th>
                 <th style={thStyle}>Target</th>
@@ -147,15 +150,15 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
             </thead>
             <tbody>
               {filteredEntries.map((entry) => (
-                <tr key={entry.id} style={{ borderBottom: "1px solid #F5F5F5" }}>
+                <tr key={entry.id} style={{ borderBottom: "1px solid var(--role-surface-sunken, #FAF6EC)" }}>
                   <td style={tdStyle}>
                     <div>
-                      <div style={{ fontSize: 14, color: "#212121", fontWeight: 500 }}>{entry.actor}</div>
-                      <div style={{ fontSize: 12, color: "#999", textTransform: "capitalize" }}>{entry.actorRole.replace("_", " ")}</div>
+                      <div style={{ fontSize: 14, color: "var(--color-forest, #0F2A1D)", fontWeight: 500 }}>{entry.actor}</div>
+                      <div style={{ fontSize: 12, color: "var(--role-text-muted, #5b6b60)", textTransform: "capitalize" }}>{entry.actorRole.replace("_", " ")}</div>
                     </div>
                   </td>
                   <td style={tdStyle}>
-                    <span style={{ ...badgeStyle, background: "#E3F2FD", color: "#1976D2" }}>
+                    <span style={{ ...badgeStyle, background: "var(--role-accent-subtle, #E8F0EA)", color: "var(--role-accent-strong, #0F2A1D)" }}>
                       {entry.action}
                     </span>
                   </td>
@@ -168,12 +171,12 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
                       onClick={() => setDetailId(entry.id)}
                       style={{
                         background: "transparent",
-                        border: "1px solid #E0E0E0",
+                        border: "1px solid var(--role-border, rgba(15,42,29,0.12))",
                         borderRadius: 6,
                         padding: "6px 12px",
                         fontSize: 13,
                         cursor: "pointer",
-                        color: "#1976D2",
+                        color: "var(--role-accent-strong, #0F2A1D)",
                       }}
                     >
                       View
@@ -181,6 +184,13 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
                   </td>
                 </tr>
               ))}
+              {!loading && filteredEntries.length === 0 && (
+                <tr>
+                  <td colSpan={5} style={{ ...tdStyle, textAlign: "center", padding: 32, color: "var(--role-text-muted, #5b6b60)" }}>
+                    No audit entries yet.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -194,7 +204,7 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
               left: 0,
               right: 0,
               bottom: 0,
-              background: "rgba(0,0,0,0.5)",
+              background: "rgba(15,42,29,0.4)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -205,7 +215,7 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
             <div
               onClick={(e) => e.stopPropagation()}
               style={{
-                background: "#fff",
+                background: "var(--role-surface, #fff)",
                 borderRadius: 8,
                 padding: 24,
                 maxWidth: 600,
@@ -214,7 +224,7 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
                 overflow: "auto",
               }}
             >
-              <h2 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 16px", color: "#212121" }}>
+              <h2 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 16px", color: "var(--color-forest, #0F2A1D)" }}>
                 Audit Entry Details
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -233,8 +243,8 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
                 style={{
                   marginTop: 24,
                   padding: "10px 20px",
-                  background: "#1976D2",
-                  color: "#fff",
+                  background: "var(--role-accent-strong, #0F2A1D)",
+                  color: "var(--role-on-accent, #F5F1E8)",
                   border: "none",
                   borderRadius: 6,
                   fontSize: 14,
@@ -253,9 +263,9 @@ export function AuditLog({ staff }: { staff: { email: string } }) {
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div style={{ borderBottom: "1px solid #F5F5F5", paddingBottom: 8 }}>
-      <div style={{ fontSize: 12, color: "#999", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 14, color: "#212121" }}>{value}</div>
+    <div style={{ borderBottom: "1px solid var(--role-surface-sunken, #FAF6EC)", paddingBottom: 8 }}>
+      <div style={{ fontSize: 12, color: "var(--role-text-muted, #5b6b60)", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 14, color: "var(--color-forest, #0F2A1D)" }}>{value}</div>
     </div>
   );
 }
@@ -277,7 +287,7 @@ const thStyle: React.CSSProperties = {
   textAlign: "left",
   fontSize: 12,
   fontWeight: 600,
-  color: "#666",
+  color: "var(--role-text-muted, #5b6b60)",
   textTransform: "uppercase",
   letterSpacing: "0.5px",
 };
@@ -285,7 +295,7 @@ const thStyle: React.CSSProperties = {
 const tdStyle: React.CSSProperties = {
   padding: 12,
   fontSize: 14,
-  color: "#212121",
+  color: "var(--color-forest, #0F2A1D)",
 };
 
 const badgeStyle: React.CSSProperties = {

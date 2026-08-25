@@ -165,23 +165,23 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F5F5", padding: "var(--space-4)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--role-surface-sunken)", padding: "var(--space-4)" }}>
       <div style={{ maxWidth: 1400, margin: "0 auto" }}>
         {/* Header */}
         <header style={{ marginBottom: "var(--space-4)" }}>
-          <Link href="/staff" style={{ fontSize: 14, color: "#1976D2", textDecoration: "none", marginBottom: 12, display: "inline-block" }}>
+          <Link href="/staff" style={{ fontSize: 14, color: "var(--role-accent-strong)", textDecoration: "none", marginBottom: 12, display: "inline-block" }}>
             ← Back to dashboard
           </Link>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, margin: 0, color: "#212121", fontWeight: 700 }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, margin: 0, color: "var(--color-forest)", fontWeight: 700 }}>
             Moderation Queue
           </h1>
-          <p style={{ margin: 0, marginTop: 4, fontSize: 14, color: "#666" }}>
+          <p style={{ margin: 0, marginTop: 4, fontSize: 14, color: "var(--role-text-muted)" }}>
             Review reports, verify vendors, moderate content
           </p>
         </header>
 
         {/* Tabs */}
-        <div style={{ marginBottom: "var(--space-3)", borderBottom: "2px solid #E0E0E0", display: "flex", gap: 24 }}>
+        <div style={{ marginBottom: "var(--space-3)", borderBottom: "2px solid var(--role-border)", display: "flex", gap: 24 }}>
           <TabButton active={activeTab === "reports"} onClick={() => setActiveTab("reports")} icon={<Flag size={16} />}>
             Reports
           </TabButton>
@@ -199,8 +199,8 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         {/* Bulk actions bar */}
         {selectedItems.size > 0 && (
           <div style={{
-            background: "#1976D2",
-            color: "#fff",
+            background: "var(--role-accent-strong)",
+            color: "var(--role-on-accent)",
             padding: 12,
             borderRadius: 8,
             marginBottom: 16,
@@ -290,10 +290,10 @@ function ReportsTab({
   onAction: (action: string, id: string) => void;
 }) {
   return (
-    <div style={{ background: "#fff", border: "1px solid #E0E0E0", borderRadius: 8, overflow: "hidden" }}>
+    <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, overflow: "hidden" }}>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ background: "#F5F5F5", borderBottom: "1px solid #E0E0E0" }}>
+          <tr style={{ background: "var(--role-surface-sunken)", borderBottom: "1px solid var(--role-border)" }}>
             <th style={thStyle}>
               <input 
                 type="checkbox" 
@@ -313,7 +313,7 @@ function ReportsTab({
         </thead>
         <tbody>
           {reports.map((report) => (
-            <tr key={report.id} style={{ borderBottom: "1px solid #F5F5F5" }}>
+            <tr key={report.id} style={{ borderBottom: "1px solid var(--role-surface-sunken)" }}>
               <td style={tdStyle}>
                 <input 
                   type="checkbox" 
@@ -323,7 +323,7 @@ function ReportsTab({
                 />
               </td>
               <td style={tdStyle}>
-                <span style={{ ...badgeStyle, background: "#E3F2FD", color: "#1976D2" }}>
+                <span style={{ ...badgeStyle, background: "var(--role-accent-subtle)", color: "var(--role-accent-strong)" }}>
                   {report.type}
                 </span>
               </td>
@@ -372,10 +372,10 @@ function VerificationsTab({
   onAction: (action: string, id: string) => void;
 }) {
   return (
-    <div style={{ background: "#fff", border: "1px solid #E0E0E0", borderRadius: 8, overflow: "hidden" }}>
+    <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, overflow: "hidden" }}>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ background: "#F5F5F5", borderBottom: "1px solid #E0E0E0" }}>
+          <tr style={{ background: "var(--role-surface-sunken)", borderBottom: "1px solid var(--role-border)" }}>
             <th style={thStyle}>
               <input 
                 type="checkbox" 
@@ -392,7 +392,7 @@ function VerificationsTab({
         </thead>
         <tbody>
           {verifications.map((verification) => (
-            <tr key={verification.id} style={{ borderBottom: "1px solid #F5F5F5" }}>
+            <tr key={verification.id} style={{ borderBottom: "1px solid var(--role-surface-sunken)" }}>
               <td style={tdStyle}>
                 <input 
                   type="checkbox" 
@@ -410,11 +410,11 @@ function VerificationsTab({
               <td style={tdStyle}>{verification.submittedInfo}</td>
               <td style={tdStyle}>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button onClick={() => onAction("approve", verification.id)} style={{ ...actionButtonStyle, color: "#4CAF50" }}>
+                  <button onClick={() => onAction("approve", verification.id)} style={{ ...actionButtonStyle, color: "var(--role-success-text)" }}>
                     <Check size={16} />
                     Approve
                   </button>
-                  <button onClick={() => onAction("deny", verification.id)} style={{ ...actionButtonStyle, color: "#F44336" }}>
+                  <button onClick={() => onAction("deny", verification.id)} style={{ ...actionButtonStyle, color: "var(--role-danger)" }}>
                     <X size={16} />
                     Deny
                   </button>
@@ -431,12 +431,12 @@ function VerificationsTab({
 function EmptyTab({ message }: { message: string }) {
   return (
     <div style={{
-      background: "#fff",
-      border: "1px solid #E0E0E0",
+      background: "var(--role-surface)",
+      border: "1px solid var(--role-border)",
       borderRadius: 8,
       padding: "var(--space-6)",
       textAlign: "center",
-      color: "#999",
+      color: "var(--role-text-muted)",
     }}>
       <p style={{ margin: 0, fontSize: 14 }}>{message}</p>
     </div>
@@ -465,8 +465,8 @@ function TabButton({
         padding: "12px 0",
         background: "transparent",
         border: "none",
-        borderBottom: active ? "2px solid #1976D2" : "2px solid transparent",
-        color: active ? "#1976D2" : "#666",
+        borderBottom: active ? "2px solid var(--role-accent-strong)" : "2px solid transparent",
+        color: active ? "var(--role-accent-strong)" : "var(--role-text-muted)",
         cursor: "pointer",
         fontSize: 15,
         fontWeight: active ? 600 : 400,
@@ -506,16 +506,16 @@ function ActionModal({
       zIndex: 1000,
     }} onClick={onCancel}>
       <div onClick={(e) => e.stopPropagation()} style={{
-        background: "#fff",
+        background: "var(--role-surface)",
         borderRadius: 8,
         padding: "var(--space-4)",
         maxWidth: 480,
         width: "90%",
       }}>
-        <h2 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 16px 0", color: "#212121" }}>
+        <h2 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 16px 0", color: "var(--color-forest)" }}>
           Confirm {action}
         </h2>
-        <p style={{ margin: "0 0 16px 0", fontSize: 14, color: "#666" }}>
+        <p style={{ margin: "0 0 16px 0", fontSize: 14, color: "var(--role-text-muted)" }}>
           Please provide a reason for this action. This will be logged in the audit trail.
         </p>
         <textarea
@@ -527,7 +527,7 @@ function ActionModal({
             minHeight: 100,
             padding: 12,
             fontSize: 14,
-            border: "1px solid #E0E0E0",
+            border: "1px solid var(--role-border)",
             borderRadius: 6,
             fontFamily: "var(--font-body)",
             resize: "vertical",
@@ -571,9 +571,9 @@ function formatRelativeTime(date: Date): string {
 function getStatusBadge(status: string): React.CSSProperties {
   const colors: Record<string, { bg: string; color: string }> = {
     open: { bg: "#FFF3E0", color: "#E65100" },
-    triaged: { bg: "#E3F2FD", color: "#1976D2" },
+    triaged: { bg: "var(--role-accent-subtle)", color: "var(--role-accent-strong)" },
     resolved: { bg: "#E8F5E9", color: "#2E7D32" },
-    dismissed: { bg: "#F5F5F5", color: "#666" },
+    dismissed: { bg: "var(--role-surface-sunken)", color: "var(--role-text-muted)" },
   };
 
   const style = colors[status] || colors.open;
@@ -590,7 +590,7 @@ const thStyle: React.CSSProperties = {
   textAlign: "left",
   fontSize: 12,
   fontWeight: 600,
-  color: "#666",
+  color: "var(--role-text-muted)",
   textTransform: "uppercase",
   letterSpacing: "0.5px",
 };
@@ -598,7 +598,7 @@ const thStyle: React.CSSProperties = {
 const tdStyle: React.CSSProperties = {
   padding: 12,
   fontSize: 14,
-  color: "#212121",
+  color: "var(--color-forest)",
 };
 
 const badgeStyle: React.CSSProperties = {
@@ -613,7 +613,7 @@ const badgeStyle: React.CSSProperties = {
 const linkButton: React.CSSProperties = {
   background: "none",
   border: "none",
-  color: "#1976D2",
+  color: "var(--role-accent-strong)",
   textDecoration: "underline",
   cursor: "pointer",
   padding: 0,
@@ -624,7 +624,7 @@ const linkButton: React.CSSProperties = {
 
 const actionButtonStyle: React.CSSProperties = {
   background: "transparent",
-  border: "1px solid #E0E0E0",
+  border: "1px solid var(--role-border)",
   borderRadius: 6,
   padding: "6px 12px",
   fontSize: 13,
@@ -632,14 +632,14 @@ const actionButtonStyle: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   gap: 4,
-  color: "#666",
+  color: "var(--role-text-muted)",
   transition: "all 120ms ease",
 };
 
 const bulkActionBtn: React.CSSProperties = {
   background: "rgba(255,255,255,0.2)",
   border: "none",
-  color: "#fff",
+  color: "var(--role-on-accent)",
   padding: "6px 14px",
   borderRadius: 6,
   fontSize: 13,
@@ -648,8 +648,8 @@ const bulkActionBtn: React.CSSProperties = {
 };
 
 const primaryButton: React.CSSProperties = {
-  background: "#1976D2",
-  color: "#fff",
+  background: "var(--role-accent-strong)",
+  color: "var(--role-on-accent)",
   border: "none",
   borderRadius: 6,
   fontSize: 14,
@@ -659,8 +659,8 @@ const primaryButton: React.CSSProperties = {
 
 const secondaryButton: React.CSSProperties = {
   background: "transparent",
-  color: "#666",
-  border: "1px solid #E0E0E0",
+  color: "var(--role-text-muted)",
+  border: "1px solid var(--role-border)",
   borderRadius: 6,
   fontSize: 14,
   cursor: "pointer",
