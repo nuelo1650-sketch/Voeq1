@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentIdentity } from "@/lib/session";
+import { requireConsent } from "@/lib/session";
 import { mockVendorRepo } from "@voeq/data";
 import { OnboardingWizard } from "./OnboardingWizard";
 
@@ -9,7 +9,7 @@ import { OnboardingWizard } from "./OnboardingWizard";
  * blind. Phase B progress (photo/listing) lives on the dashboard, not here.
  */
 export default async function VendorOnboardingPage() {
-  const identity = await getCurrentIdentity();
+  const identity = await requireConsent("/onboarding/vendor");
   if (!identity) redirect("/login?next=/onboarding/vendor");
 
   let initialStep = 1;

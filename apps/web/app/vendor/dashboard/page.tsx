@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentIdentity } from "@/lib/session";
+import { requireConsent } from "@/lib/session";
 import {
   mockVendorRepo,
   mockListingsRepo,
@@ -14,8 +14,7 @@ import { VendorDashboardClient } from "@/components/vendor/VendorDashboardClient
  * Enhanced with modern header, attention queue indicators, and quick actions.
  */
 export default async function VendorDashboardPage() {
-  const identity = await getCurrentIdentity();
-  if (!identity) redirect("/login");
+  const identity = await requireConsent("/vendor/dashboard");
   if (!identity.vendorId) redirect("/onboarding/vendor");
 
   const vendor = await mockVendorRepo.getById(identity.vendorId);
