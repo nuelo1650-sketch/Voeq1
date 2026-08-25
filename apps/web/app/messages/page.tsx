@@ -16,12 +16,16 @@ export default async function MessagesPage() {
       const other = otherId ? await mockIdentityRepo.getById(otherId) : null;
       const msgs = await mockMessageRepo.listByConversation(c.id, null, 1);
       const last = msgs[msgs.length - 1];
+      const allMsgs = await mockMessageRepo.listByConversation(c.id, null, 200);
+      const unread = allMsgs.filter(
+        (m) => m.senderId !== identity.id && m.state !== "read",
+      ).length;
       return {
         id: c.id,
         name: other?.name ?? "Someone",
         lastMessagePreview: last?.body ?? "",
         lastMessageAt: c.lastMessageAt,
-        unread: 0,
+        unread,
       };
     }),
   );
