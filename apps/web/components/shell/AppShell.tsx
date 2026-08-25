@@ -4,9 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, Bell, LogOut, X } from "lucide-react";
-import { AppRole, PRIMARY_NAV, CENTER_NAV, STAFF_SIDE_NAV, NavItem } from "./navItems";
+import { AppRole, PRIMARY_NAV, CENTER_NAV, STAFF_SIDE_NAV, SIDE_NAV, NavItem } from "./navItems";
 
 const SHELL_CSS = {
+  root: {
+    minHeight: "100vh",
+    display: "flex" as const,
+    flexDirection: "column" as const,
+  },
   topbar: {
     position: "sticky" as const,
     top: 0,
@@ -28,20 +33,21 @@ const SHELL_CSS = {
     textDecoration: "none",
   },
   centerLinks: {
-    display: "flex",
+    display: "flex" as const,
     gap: 4,
-    alignItems: "center",
+    alignItems: "center" as const,
   },
   navLink: {
     display: "flex",
     alignItems: "center",
-    gap: 6,
-    padding: "8px 12px",
+    gap: 8,
+    padding: "10px 12px",
     borderRadius: "var(--radius, 8px)",
     color: "var(--role-muted, #5b6b60)",
     textDecoration: "none",
     fontSize: 14,
     fontWeight: 500,
+    whiteSpace: "nowrap" as const,
   },
   navLinkActive: {
     background: "var(--color-cream, #F5F3EF)",
@@ -84,7 +90,7 @@ const SHELL_CSS = {
     left: 0,
     right: 0,
     zIndex: 50,
-    display: "flex",
+    display: "flex" as const,
     borderTop: "1px solid var(--role-border, #e6e1d6)",
     background: "var(--color-glass-white, #fff)",
     paddingBottom: "env(safe-area-inset-bottom, 0)",
@@ -101,11 +107,11 @@ const SHELL_CSS = {
     fontSize: 11,
   },
   sideNav: {
-    width: 220,
+    width: 240,
     flexShrink: 0,
     borderRight: "1px solid var(--role-border, #e6e1d6)",
     background: "var(--color-glass-white, #fff)",
-    padding: 16,
+    padding: "var(--space-3, 16px)",
     display: "flex",
     flexDirection: "column" as const,
     gap: 4,
@@ -156,9 +162,11 @@ export function AppShell({
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
 
-  const center = CENTER_NAV[role];
   const primary = PRIMARY_NAV[role];
+  const center = CENTER_NAV[role];
   const isStaff = role === "staff";
+  // Desktop sidebar items: staff uses STAFF_SIDE_NAV, shopper/vendor use SIDE_NAV
+  const sideItems = isStaff ? STAFF_SIDE_NAV : SIDE_NAV[role as Exclude<AppRole, "staff">];
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -167,30 +175,37 @@ export function AppShell({
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: isStaff ? "flex" : "block" }}>
+    <div style={SHELL_CSS.root}>
       <style>{`
+        .app-shell-sidebar { display: none !important; }
+        .app-shell-bottom { display: flex !important; }
+        .app-shell-hamburger { display: flex !important; }
         .app-shell-center { display: none !important; }
-        @media (min-width: 768px) {
+        @media (min-width: 1024px) {
+          .app-shell-sidebar { display: flex !important; }
+          .app-shell-bottom { display: none !important; }
+          .app-shell-hamburger { display: none !important; }
           .app-shell-center { display: flex !important; }
         }
       `}</style>
-      {/* Top bar */}
+
+      {/* Top bar (all roles, all sizes) */}
       <header style={SHELL_CSS.topbar}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {!isStaff && (
-            <button
-              aria-label="Open menu"
-              style={SHELL_CSS.iconBtn}
-              onClick={() => setDrawerOpen(true)}
-            >
-              <Menu size={20} />
-            </button>
-          )}
+          <button
+            aria-label="Open menu"
+            className="app-shell-hamburger"
+            style={SHELL_CSS.iconBtn}
+            onClick={() => setDrawerOpen(true)}
+          >
+            <Menu size={20} />
+          </button>
           <Link href="/" style={SHELL_CSS.logo}>
             voeq
           </Link>
         </div>
 
+        {/* Center nav (desktop ≥1024px only; sidebar handles <1024px) */}
         {center.length > 0 && (
           <nav className="app-shell-center" style={SHELL_CSS.centerLinks}>
             {center.map((item) => (
@@ -209,67 +224,64 @@ export function AppShell({
         </div>
       </header>
 
-      {/* Staff: sidebar layout */}
-      {isStaff && (
-        <div style={{ display: "flex", flex: 1 }}>
-          <nav style={SHELL_CSS.sideNav}>
-            {STAFF_SIDE_NAV.map((item) => (
-              <NavLink key={item.href} item={item} active={isActive(item.href)} />
-            ))}
-          </nav>
-          <main style={{ flex: 1, padding: "var(--space-3, 16px) var(--nav-inline-pad, 16px)", minWidth: 0 }}>
-            {children}
-          </main>
-        </div>
+      {/* Body: sidebar (desktop) + content */}
+      <div style={{ display: "flex", flex: 1, minHeight: "calc(100vh - 56px)" }}>
+        {/* Left sidebar — desktop ≥1024px (all roles) */}
+        <nav className="app-shell-sidebar" style={SHELL_CSS.sideNav}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--role-muted)", textTransform: "uppercase", letterSpacing: "0.5px", padding: "0 12px 8px", marginTop: 4 }}>
+            {isStaff ? "Admin" : role === "vendor" ? "Vendor" : "Shopper"}
+          </span>
+          {sideItems.map((item) => (
+            <NavLink key={item.href} item={item} active={isActive(item.href)} />
+          ))}
+          <button
+            onClick={logout}
+            style={{ ...SHELL_CSS.navLink, marginTop: "auto", color: "var(--role-danger, #b3261e)" }}
+          >
+            <LogOut size={18} />
+            <span>Sign out</span>
+          </button>
+        </nav>
+
+        {/* Main content */}
+        <main style={{ flex: 1, padding: "var(--space-3, 16px) var(--nav-inline-pad, 16px)", minWidth: 0, paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
+          {children}
+        </main>
+      </div>
+
+      {/* Bottom tab — mobile <1024px only */}
+      {primary.length > 0 && (
+        <nav className="app-shell-bottom" style={SHELL_CSS.bottomTab}>
+          {primary.map((item) => (
+            <BottomItem key={item.href} item={item} active={isActive(item.href)} />
+          ))}
+        </nav>
       )}
 
-      {/* Non-staff: top-bar + content + bottom-tab */}
-      {!isStaff && (
-        <>
-          <main
-            style={{
-              padding: "var(--space-3, 16px) var(--nav-inline-pad, 16px)",
-              paddingBottom: primary.length > 0 ? 72 : 24,
-              minHeight: "calc(100vh - 56px)",
-            }}
-          >
-            {children}
-          </main>
-
-          {primary.length > 0 && (
-            <nav style={SHELL_CSS.bottomTab}>
-              {primary.map((item) => (
-                <BottomItem key={item.href} item={item} active={isActive(item.href)} />
-              ))}
-            </nav>
-          )}
-
-          {/* Mobile drawer */}
-          {drawerOpen && (
-            <div style={SHELL_CSS.drawer} onClick={() => setDrawerOpen(false)}>
-              <div style={SHELL_CSS.drawerPanel} onClick={(e) => e.stopPropagation()}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <span style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--color-forest, #0F2A1D)" }}>
-                    {userName || "voeq"}
-                  </span>
-                  <button aria-label="Close menu" style={SHELL_CSS.iconBtn} onClick={() => setDrawerOpen(false)}>
-                    <X size={20} />
-                  </button>
-                </div>
-                {CENTER_NAV[role].map((item) => (
-                  <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={() => setDrawerOpen(false)} />
-                ))}
-                <button
-                  onClick={logout}
-                  style={{ ...SHELL_CSS.navLink, marginTop: "auto", color: "var(--role-danger, #b3261e)" }}
-                >
-                  <LogOut size={18} />
-                  <span>Sign out</span>
-                </button>
-              </div>
+      {/* Mobile drawer — hamburger menu (<1024px) */}
+      {drawerOpen && (
+        <div style={SHELL_CSS.drawer} onClick={() => setDrawerOpen(false)}>
+          <div style={SHELL_CSS.drawerPanel} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--color-forest, #0F2A1D)" }}>
+                {userName || "voeq"}
+              </span>
+              <button aria-label="Close menu" style={SHELL_CSS.iconBtn} onClick={() => setDrawerOpen(false)}>
+                <X size={20} />
+              </button>
             </div>
-          )}
-        </>
+            {(isStaff ? STAFF_SIDE_NAV : CENTER_NAV[role]).map((item) => (
+              <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={() => setDrawerOpen(false)} />
+            ))}
+            <button
+              onClick={logout}
+              style={{ ...SHELL_CSS.navLink, marginTop: "auto", color: "var(--role-danger, #b3261e)" }}
+            >
+              <LogOut size={18} />
+              <span>Sign out</span>
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

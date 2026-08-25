@@ -31,6 +31,24 @@ export const PRIMARY_NAV: Record<AppRole, NavItem[]> = {
   staff: [],
 };
 
+/** Desktop left-sidebar nav per role (shopper + vendor). Mirrors PRIMARY_NAV. */
+export const SIDE_NAV: Record<Exclude<AppRole, "staff">, NavItem[]> = {
+  shopper: [
+    { href: "/home", label: "Home", icon: Home },
+    { href: "/explore", label: "Explore", icon: Search },
+    { href: "/saved", label: "Saved", icon: Bookmark },
+    { href: "/messages", label: "Messages", icon: MessageSquare },
+    { href: "/settings", label: "You", icon: User },
+  ],
+  vendor: [
+    { href: "/vendor/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/vendor/listings/create", label: "Listings", icon: Package },
+    { href: "/vendor/analytics", label: "Analytics", icon: BarChart3 },
+    { href: "/messages", label: "Messages", icon: MessageSquare },
+    { href: "/settings", label: "You", icon: User },
+  ],
+};
+
 /** Center (desktop top-bar) nav per role. */
 export const CENTER_NAV: Record<AppRole, NavItem[]> = {
   shopper: [
