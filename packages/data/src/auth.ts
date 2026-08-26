@@ -16,6 +16,7 @@ import {
   realConsentRepo,
   realAuthRepo,
   realUserPreferenceRepo,
+  realPendingTokenRepo,
 } from "@voeq/db";
 import type {
   Identity,
@@ -249,19 +250,22 @@ export async function isConsentCurrent(identityId: string) {
 }
 
 // ---- OTP (registration / google_verify / email_change) -----------------------
+// In-memory impl (dev / no DATABASE_URL). In production (USE_REAL) the standalone
+// issueOtp/verifyOtp below dispatch to realOtpRepo (Neon) instead, so OTPs survive
+// cold starts and are consistent across serverless instances.
 const mockOtpRepoImpl: OtpRepo = {
   async issue(email, purpose) {
-    return issueOtp(email, purpose);
+    return issueOtpInMemory(email, purpose);
   },
   async verify(email, code, purpose) {
-    return verifyOtp(email, code, purpose);
+    return verifyOtpInMemory(email, code, purpose);
   },
   async revoke(email, purpose) {
     otpStore.delete(`${normalizeEmail(email)}:${purpose}`);
   },
 };
 
-export async function issueOtp(email: string, purpose: OtpPurpose): Promise<string> {
+function issueOtpInMemory(email: string, purpose: OtpPurpose): string {
   const key = `${normalizeEmail(email)}:${purpose}`;
   const list = otpStore.get(key) ?? [];
   const code = String(randomInt(100000, 1000000));
@@ -271,11 +275,7 @@ export async function issueOtp(email: string, purpose: OtpPurpose): Promise<stri
   return code;
 }
 
-export async function verifyOtp(
-  email: string,
-  code: string,
-  purpose: OtpPurpose,
-): Promise<boolean> {
+function verifyOtpInMemory(email: string, code: string, purpose: OtpPurpose): boolean {
   const key = `${normalizeEmail(email)}:${purpose}`;
   const list = otpStore.get(key);
   if (!list) return false;
@@ -292,6 +292,17 @@ export async function verifyOtp(
   list.splice(idx, 1); // single-use
   if (list.length === 0) otpStore.delete(key);
   return true;
+}
+
+export async function issueOtp(email: string, purpose: OtpPurpose): Promise<string> {
+  return (USE_REAL ? realOtpRepo : mockOtpRepoImpl).issue(email, purpose);
+}
+export async function verifyOtp(
+  email: string,
+  code: string,
+  purpose: OtpPurpose,
+): Promise<boolean> {
+  return (USE_REAL ? realOtpRepo : mockOtpRepoImpl).verify(email, code, purpose);
 }
 
 export async function revokeOtp(email: string, purpose: OtpPurpose): Promise<void> {
@@ -356,34 +367,70 @@ export function peekMagicLink(email: string): string | null {
 }
 
 // ---- Pending token (D1: opaque, never raw email in URL) ----------------------
+// In-memory impl (dev). In production (USE_REAL) the standalone issuePendingToken/
+// consumePendingToken/peekPendingToken dispatch to realPendingTokenRepo (Neon),
+// so pending tokens survive cold starts and are consistent across instances.
+interface PendingTokenRepoLike {
+  issue(email: string, purpose: OtpPurpose): Promise<string>;
+  consume(token: string): Promise<PendingToken | null>;
+  peek(token: string): Promise<PendingToken | null>;
+}
+
+const mockPendingTokenRepoImpl: PendingTokenRepoLike = {
+  async issue(email, purpose) {
+    const token = randomBytes(16).toString("hex");
+    pendingTokens.set(token, {
+      token,
+      email: normalizeEmail(email),
+      purpose,
+      createdAt: nowIso(),
+      expiresAt: new Date(Date.now() + PENDING_TTL_MS).toISOString(),
+      used: false,
+    });
+    return token;
+  },
+  async consume(token) {
+    const t = pendingTokens.get(token);
+    if (!t || t.used || Date.now() > new Date(t.expiresAt).getTime()) return null;
+    t.used = true;
+    return t;
+  },
+  async peek(token) {
+    const t = pendingTokens.get(token);
+    if (!t || t.used || Date.now() > new Date(t.expiresAt).getTime()) return null;
+    return t;
+  },
+};
+
+const realPendingTokenRepoLike: PendingTokenRepoLike = {
+  async issue(email, purpose) {
+    const pt = await realPendingTokenRepo.create({ email, purpose });
+    return pt.token;
+  },
+  async consume(token) {
+    const ok = await realPendingTokenRepo.consume(token);
+    if (!ok) return null;
+    return realPendingTokenRepo.get(token);
+  },
+  async peek(token) {
+    return realPendingTokenRepo.get(token);
+  },
+};
+
 export async function issuePendingToken(
   email: string,
   purpose: OtpPurpose,
 ): Promise<string> {
-  const token = randomBytes(16).toString("hex");
-  pendingTokens.set(token, {
-    token,
-    email: normalizeEmail(email),
-    purpose,
-    createdAt: nowIso(),
-    expiresAt: new Date(Date.now() + PENDING_TTL_MS).toISOString(),
-    used: false,
-  });
-  return token;
+  return (USE_REAL ? realPendingTokenRepoLike : mockPendingTokenRepoImpl).issue(email, purpose);
 }
-
 export function consumePendingToken(token: string): PendingToken | null {
-  const t = pendingTokens.get(token);
-  if (!t || t.used || Date.now() > new Date(t.expiresAt).getTime()) return null;
-  t.used = true;
-  return t;
+  // Synchronous in dev (Map), async-shaped in prod; callers await.
+  const repo = USE_REAL ? realPendingTokenRepoLike : mockPendingTokenRepoImpl;
+  return repo.consume(token) as PendingToken | null;
 }
-
-/** Non-consuming read of a pending token (used by resend-otp to re-issue a code). */
 export function peekPendingToken(token: string): PendingToken | null {
-  const t = pendingTokens.get(token);
-  if (!t || t.used || Date.now() > new Date(t.expiresAt).getTime()) return null;
-  return t;
+  const repo = USE_REAL ? realPendingTokenRepoLike : mockPendingTokenRepoImpl;
+  return repo.peek(token) as PendingToken | null;
 }
 
 // ---- Dev helper (Q5): skip the full flow during testing ----------------------
