@@ -4,7 +4,6 @@ import {
   mockIdentityRepo,
   mockMagicLinkRepo,
   mockSessionRepo,
-  magicLinkEntries,
   INVALIDATE_SESSIONS_ON_RESET,
   checkRateLimit,
   logAudit,
@@ -56,13 +55,6 @@ export async function POST(req: NextRequest) {
   const identity = await mockIdentityRepo.getByEmail(email);
   if (!identity || identity.accountStatus === "deleted") {
     return NextResponse.json({ error: "Account not found." }, { status: 404 });
-  }
-
-  // Invalidate any OTHER outstanding reset tokens for this email (single-use + freshness).
-  // consume() already single-used the presented token; the loop below drops any
-  // other still-valid tokens so a stale link can't be reused.
-  for (const [t, v] of magicLinkEntries()) {
-    if (v.email === email && t !== token && !v.used) v.used = true;
   }
 
   const passwordHash = await hash(password);
