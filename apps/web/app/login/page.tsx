@@ -7,7 +7,7 @@ import { InfoPageShell } from "@/components/info/InfoPageShell";
 import { AuthHeader } from "@/components/auth/AuthHeader";
 import { startGoogleOAuth } from "@/lib/googleOAuth";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 function LoginForm() {

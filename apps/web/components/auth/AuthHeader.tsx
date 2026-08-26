@@ -9,7 +9,7 @@ export function AuthHeader({ lede }: { lede?: string }) {
   return (
     <div className="auth-header">
       <Link href="/" aria-label="Voeq home" className="auth-header-logo">
-        <BrandLogo width={56} />
+        <BrandLogo />
       </Link>
       {lede && <p className="auth-header-lede">{lede}</p>}
     </div>

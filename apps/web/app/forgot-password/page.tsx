@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
 import { AuthHeader } from "@/components/auth/AuthHeader";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export default function ForgotPasswordPage() {
   const _router = useRouter();
