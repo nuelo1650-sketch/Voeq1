@@ -28,7 +28,16 @@ const FALLBACK_GOOGLE_CLIENT_ID =
  * verify via a 6-digit OTP (purpose: google_verify) and accept consent.
  */
 export async function GET(req: NextRequest) {
-  const clientId = process.env.AUTH_GOOGLE_CLIENT_ID || FALLBACK_GOOGLE_CLIENT_ID;
+  // In production, require the real client ID from env. Silently falling back to
+  // the hardcoded ID here would let prod OAuth silently break (redirect_uri /
+  // client_id mismatch in Google Console) instead of failing loudly.
+  const clientId =
+    process.env.AUTH_GOOGLE_CLIENT_ID ??
+    (process.env.NODE_ENV === "production"
+      ? (() => {
+          throw new Error("AUTH_GOOGLE_CLIENT_ID is not set in production");
+        })()
+      : FALLBACK_GOOGLE_CLIENT_ID);
   // State is generated + set as a browser cookie by the client (lib/googleOAuth.ts)
   // so it survives the Vercel→Render rewrite (which strips upstream Set-Cookie).
   const state = req.nextUrl.searchParams.get("state") || randomBytes(16).toString("hex");
