@@ -11,7 +11,7 @@
  */
 
 import type { Listing, Vendor, Review } from "./interfaces";
-import { MOCK_VENDORS, mockVendorRepo, vendorName, listListingsByVendor, type MockListingExtra } from "./mock";
+import { MOCK_VENDORS, mockVendorRepo, mockListingsRepo, vendorName, listListingsByVendor, type MockListingExtra } from "./mock";
 import type { ExploreListing } from "./explore";
 import { vendors as showcaseVendors } from "./explore-view";
 import { mockReviewRepo } from "./shopper";
@@ -96,6 +96,29 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
       ratingCount: showcase.reviewCount,
       verifiedCount: 0,
       listingCount: 0,
+      reviews,
+    };
+  }
+
+  // 3) Real vendor from Neon (Phase 9 path) — resolves real vendors, not just
+  //    mock fixtures. The page's canVendorBePublic() gate still decides 404 vs
+  //    render, so the visibility precondition (status === "live") is preserved.
+  const real = await mockVendorRepo.getById(idOrSlug);
+  if (real) {
+    const campusListings = await mockListingsRepo.list({ campus: real.campus });
+    const listings = campusListings
+      .filter((l) => l.vendorId === real.id)
+      .map((l) => toExploreListingLocal(l as Listing & MockListingExtra, real.name ?? vendorName(real.id)));
+    const rated = listings.filter((m) => typeof m.rating === "number");
+    const ratingAvg = rated.length > 0 ? rated.reduce((s, m) => s + (m.rating as number), 0) / rated.length : undefined;
+    const reviews = await mockReviewRepo.listByVendor(real.id);
+    return {
+      ...real,
+      listings,
+      ratingAvg,
+      ratingCount: rated.length,
+      verifiedCount: listings.filter((m) => m.verified).length,
+      listingCount: listings.length,
       reviews,
     };
   }

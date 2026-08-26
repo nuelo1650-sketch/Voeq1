@@ -1,5 +1,5 @@
 import type { Listing, Vendor } from "./interfaces";
-import { mockListingsRepo, mockVendorRepo, mockSearchRepo, mockListingsRepoThatFails, vendorName } from "./mock";
+import { mockListingsRepo, mockVendorRepo, mockListingsRepoThatFails, vendorName } from "./mock";
 
 /**
  * Explore data boundary (Doc 04 PG-PUB-002/003, Doc 07 §7.7).
@@ -157,9 +157,10 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
 
     if (params.query) {
       const q = params.query.trim().toLowerCase();
-      const searched = await mockSearchRepo.search(params.query);
-      const searchedIds = new Set(searched.map((s) => s.id));
-      mapped = mapped.filter((m) => searchedIds.has(m.id) || m.title.toLowerCase().includes(q));
+      // Real search: filter the already-fetched Neon listings by title.
+      // (Previously used mockSearchRepo over a fake dev dataset — removed so
+      // production search never touches MOCK_EXPLORE_LISTINGS.)
+      mapped = mapped.filter((m) => m.title.toLowerCase().includes(q));
     }
 
     const filtered = applySort(applyFilters(mapped, { ...params, category }), params.sort);
