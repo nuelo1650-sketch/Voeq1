@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { VendorStorefrontView } from "@voeq/data";
 import { FollowButton } from "@/components/shopper/FollowButton";
+import { LikeButton } from "@/components/shopper/LikeButton";
 import { ReviewForm } from "@/components/shopper/ReviewForm";
-import { ReviewsList } from "@/components/shopper/ReviewsList";
 import { ReportForm } from "@/components/shopper/ReportForm";
 
 /**
@@ -81,6 +81,7 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
 
       <div style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-2)" }}>
         <FollowButton vendorId={vendor.id} className="storefront-follow-btn" />
+        <LikeButton targetType="vendor" targetId={vendor.id} className="storefront-like-btn" />
         <button
           data-testid="storefront-message-btn"
           onClick={startConversation}

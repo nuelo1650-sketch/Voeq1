@@ -97,8 +97,9 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
 
   const handleFileSelect = async (files: FileList | null) => {
     if (!files) return;
-    if (photos.length + files.length > 5) {
-      setErrors({ ...errors, photos: "Maximum 5 photos allowed" });
+    const room = 5 - photos.length;
+    if (files.length > room) {
+      setErrors({ ...errors, photos: `Maximum 5 photos allowed (${room} more)` });
       return;
     }
 
@@ -107,15 +108,41 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
       if (!file.type.startsWith("image/")) continue;
 
       const id = `photo-${Date.now()}-${i}`;
-      const tempUrl = URL.createObjectURL(file);
-      
-      setPhotos((prev) => [...prev, { id, url: tempUrl, alt: "", uploading: true }]);
+      // Show a local preview immediately; replaced by the real Cloudinary URL after upload.
+      const preview = URL.createObjectURL(file);
+      setPhotos((prev) => [...prev, { id, url: preview, alt: "", uploading: true }]);
 
-      setTimeout(() => {
+      try {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        const res = await fetch("/api/images/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: file.name,
+            context: "listing_photo",
+            mimeType: file.type,
+            bytes: file.size,
+            dataUrl,
+            existingCount: photos.length,
+          }),
+        });
+        const result = await res.json();
+        if (!res.ok || !result.url) {
+          throw new Error(result.error ?? "Upload failed");
+        }
+        URL.revokeObjectURL(preview);
         setPhotos((prev) =>
-          prev.map((p) => (p.id === id ? { ...p, uploading: false } : p))
+          prev.map((p) => (p.id === id ? { ...p, url: result.url as string, uploading: false } : p)),
         );
-      }, 1000);
+      } catch (e) {
+        setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false } : p)));
+        setErrors({ ...errors, photos: e instanceof Error ? e.message : "Image upload failed" });
+      }
     }
   };
 

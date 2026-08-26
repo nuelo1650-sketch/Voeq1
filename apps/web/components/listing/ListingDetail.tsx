@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { loadListing, loadExplore, type ExploreListing } from "@voeq/data";
 import { ContourEdge, CampusFingerprint } from "@voeq/contour";
 import { SaveButton } from "@/components/shopper/SaveButton";
+import { LikeButton } from "@/components/shopper/LikeButton";
 import { CommentForm } from "@/components/shopper/CommentForm";
 import { CommentsList, type DisplayComment } from "@/components/shopper/CommentsList";
 import { ReportForm } from "@/components/shopper/ReportForm";
@@ -518,6 +519,7 @@ export function ListingDetail({ id }: { id: string }) {
               )}
             </div>
             <SaveButton targetType="listing" targetId={listing.id} className="listing-detail-save" />
+            <LikeButton targetType="listing" targetId={listing.id} className="listing-detail-like" />
             <button
               data-testid="listing-detail-report"
               onClick={() => setReportOpen((o) => !o)}
