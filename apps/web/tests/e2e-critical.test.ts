@@ -119,16 +119,35 @@ describe("images: real Cloudinary + Sightengine (fail-closed)", () => {
 });
 
 // ───────────────────────── EMAIL (Resend) ─────────────────────────
+// Real-send tests (#9/#10) fire a REAL Resend send ONLY when SEND_REAL_EMAIL_TESTS
+// is set. Default (no flag): render the template locally and assert shape — no
+// network call, so a watch-mode / CI / per-run loop never spams the Resend API.
+const SEND_REAL_EMAIL = !!process.env.SEND_REAL_EMAIL_TESTS;
+
 describe("email: real Resend + 11 templates", () => {
   it("9. sendEmail OTP_REGISTRATION performs a real send (id returned)", async () => {
-    const r = await sendEmail({ to: "otp-test@voeq.ng", template: "OTP_REGISTRATION", vars: { name: "T", code: "123456" } });
-    expect(r.ok).toBe(true);
-    expect(r.id).toBeTruthy();
+    if (SEND_REAL_EMAIL) {
+      const r = await sendEmail({ to: "otp-test@voeq.ng", template: "OTP_REGISTRATION", vars: { name: "T", code: "123456" } });
+      expect(r.ok).toBe(true);
+      expect(r.id).toBeTruthy();
+    } else {
+      // Local render check — does NOT call Resend.
+      const rendered = renderEmail(EMAIL_TEMPLATES.OTP_REGISTRATION, { name: "T", code: "123456" });
+      expect(rendered.subject).toMatch(/verification code/i);
+      expect(rendered.html).toContain("123456");
+    }
   });
 
   it("10. sendEmail PASSWORD_RESET renders resetLink", async () => {
-    const r = await sendEmail({ to: "reset-test@voeq.ng", template: "PASSWORD_RESET", vars: { resetLink: "https://voeq.ng/reset?t=x" } });
-    expect(r.ok).toBe(true);
+    if (SEND_REAL_EMAIL) {
+      const r = await sendEmail({ to: "reset-test@voeq.ng", template: "PASSWORD_RESET", vars: { resetLink: "https://voeq.ng/reset?t=x" } });
+      expect(r.ok).toBe(true);
+    } else {
+      // Local render check — does NOT call Resend.
+      const rendered = renderEmail(EMAIL_TEMPLATES.PASSWORD_RESET, { resetLink: "https://voeq.ng/reset?t=x" });
+      expect(rendered.subject).toMatch(/reset/i);
+      expect(rendered.html).toContain("https://voeq.ng/reset?t=x");
+    }
   });
 
   it("11. unknown template returns error (no silent drop)", async () => {
