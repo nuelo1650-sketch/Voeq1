@@ -7,6 +7,7 @@ import type { VendorStorefrontView } from "@voeq/data";
 import { FollowButton } from "@/components/shopper/FollowButton";
 import { LikeButton } from "@/components/shopper/LikeButton";
 import { ReviewForm } from "@/components/shopper/ReviewForm";
+import { ReviewsList } from "@/components/shopper/ReviewsList";
 import { ReportForm } from "@/components/shopper/ReportForm";
 
 /**

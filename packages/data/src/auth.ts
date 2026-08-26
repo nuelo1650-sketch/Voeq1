@@ -423,14 +423,13 @@ export async function issuePendingToken(
 ): Promise<string> {
   return (USE_REAL ? realPendingTokenRepoLike : mockPendingTokenRepoImpl).issue(email, purpose);
 }
-export function consumePendingToken(token: string): PendingToken | null {
-  // Synchronous in dev (Map), async-shaped in prod; callers await.
+export async function consumePendingToken(token: string): Promise<PendingToken | null> {
   const repo = USE_REAL ? realPendingTokenRepoLike : mockPendingTokenRepoImpl;
-  return repo.consume(token) as PendingToken | null;
+  return repo.consume(token);
 }
-export function peekPendingToken(token: string): PendingToken | null {
+export async function peekPendingToken(token: string): Promise<PendingToken | null> {
   const repo = USE_REAL ? realPendingTokenRepoLike : mockPendingTokenRepoImpl;
-  return repo.peek(token) as PendingToken | null;
+  return repo.peek(token);
 }
 
 // ---- Dev helper (Q5): skip the full flow during testing ----------------------

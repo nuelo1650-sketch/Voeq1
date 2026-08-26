@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
   const { token, code } = parsed.data;
 
-  const pending = consumePendingToken(token);
+  const pending = await consumePendingToken(token);
   if (!pending) {
     return NextResponse.json(
       { error: "This verification link is invalid or has expired. Please sign up again." },

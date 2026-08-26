@@ -22,6 +22,7 @@ export interface CanGoLiveResult {
 /** Pure precondition check — does this vendor satisfy Phase A + Phase B? */
 export async function canGoLive(vendor: {
   id: string;
+  campus: string;
   agreementAcceptedAt: string | null;
   profilePhotoUrl: string | null;
   status: "pending_listings" | "live" | "suspended";
