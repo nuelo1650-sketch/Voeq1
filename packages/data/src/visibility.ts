@@ -13,7 +13,7 @@
  */
 
 import type { Vendor } from "./interfaces";
-import { mockVendorRepo, listListingsByVendor } from "./mock";
+import { mockVendorRepo, mockListingsRepo, listListingsByVendor } from "./mock";
 import { canGoLive } from "./onboarding";
 
 export interface VisibilityCheck {
@@ -24,7 +24,7 @@ export interface VisibilityCheck {
   reasons: string[];
 }
 
-export function assessVendorVisibility(vendor: Vendor | null): VisibilityCheck {
+export async function assessVendorVisibility(vendor: Vendor | null): Promise<VisibilityCheck> {
   const reasons: string[] = [];
   if (!vendor) {
     return {
@@ -39,7 +39,8 @@ export function assessVendorVisibility(vendor: Vendor | null): VisibilityCheck {
   const phaseAComplete = !!vendor.agreementAcceptedAt;
   if (!phaseAComplete) reasons.push("phase_a_incomplete");
 
-  const hasListing = listListingsByVendor(vendor.id).length > 0;
+  const hasListing =
+    (await mockListingsRepo.list({ campus: vendor.campus })).filter((l) => l.vendorId === vendor.id).length > 0;
   const phaseBComplete = !!vendor.profilePhotoUrl && hasListing;
   if (!vendor.profilePhotoUrl) reasons.push("profile_photo_missing");
   if (!hasListing) reasons.push("no_listing");
@@ -73,7 +74,7 @@ export function canVendorBePublic(vendor: Vendor | null): boolean {
 export async function enforceVisibilityAfterMutation(vendorId: string): Promise<void> {
   const vendor = await mockVendorRepo.getById(vendorId);
   if (!vendor || vendor.status !== "live") return; // nothing to revert if not public
-  const stillValid = canGoLive(vendor).ok;
+  const stillValid = (await canGoLive(vendor)).ok;
   if (!stillValid) {
     await mockVendorRepo.patch(vendorId, { status: "pending_listings" });
   }

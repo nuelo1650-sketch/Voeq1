@@ -101,9 +101,13 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
   }
 
   // 3) Real vendor from Neon (Phase 9 path) — resolves real vendors, not just
-  //    mock fixtures. The page's canVendorBePublic() gate still decides 404 vs
-  //    render, so the visibility precondition (status === "live") is preserved.
-  const real = await mockVendorRepo.getById(idOrSlug);
+  //    mock fixtures. Resolves by id OR slug (VendorCard/Explore link by slug).
+  //    The page's canVendorBePublic() gate still decides 404 vs render, so the
+  //    visibility precondition (status === "live") is preserved.
+  let real = await mockVendorRepo.getById(idOrSlug);
+  if (!real) {
+    real = (await mockVendorRepo.listVendors()).find((v) => v.slug === idOrSlug) ?? null;
+  }
   if (real) {
     const campusListings = await mockListingsRepo.list({ campus: real.campus });
     const listings = campusListings

@@ -11,7 +11,7 @@
  */
 
 import { mockIdentityRepo } from "./auth";
-import { mockVendorRepo, listListingsByVendor } from "./mock";
+import { mockVendorRepo, mockListingsRepo, listListingsByVendor } from "./mock";
 
 export interface CanGoLiveResult {
   ok: boolean;
@@ -20,15 +20,20 @@ export interface CanGoLiveResult {
 }
 
 /** Pure precondition check — does this vendor satisfy Phase A + Phase B? */
-export function canGoLive(vendor: {
+export async function canGoLive(vendor: {
   id: string;
   agreementAcceptedAt: string | null;
   profilePhotoUrl: string | null;
   status: "pending_listings" | "live" | "suspended";
-}): CanGoLiveResult {
+}): Promise<CanGoLiveResult> {
   const reasons: string[] = [];
   if (!vendor.agreementAcceptedAt) reasons.push("phase_a_incomplete");
-  const hasListing = listListingsByVendor(vendor.id).length > 0;
+  // Real listings live in Neon (mockListingsRepo switches to realListingsRepo on
+  // USE_REAL). listListingsByVendor only checks the in-memory dev dataset, so it
+  // returns [] for real vendors and would falsely block go-live. Count real
+  // listings by vendorId instead.
+  const hasListing =
+    (await mockListingsRepo.list({ campus: vendor.campus })).filter((l) => l.vendorId === vendor.id).length > 0;
   if (!vendor.profilePhotoUrl) reasons.push("profile_photo_missing");
   if (!hasListing) reasons.push("no_listing");
   return {
@@ -49,7 +54,7 @@ export async function goLive(identityId: string): Promise<CanGoLiveResult | null
   const vendor = await mockVendorRepo.getById(identity.vendorId);
   if (!vendor) return null;
 
-  const assessment = canGoLive(vendor);
+  const assessment = await canGoLive(vendor);
   if (!assessment.ok) return assessment;
 
   await mockVendorRepo.patch(vendor.id, { status: "live" });

@@ -2,7 +2,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { VendorCard } from './VendorCard';
-import { vendors } from '@voeq/data';
+import type { VendorSummary } from '@voeq/data';
 
 type FilterTab = 'popular' | 'new' | 'topRated' | 'trending';
 
@@ -18,6 +18,19 @@ export function TrendingRail() {
   const [activeTab, setActiveTab] = useState<FilterTab>('popular');
   const [isRotating, setIsRotating] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const [vendors, setVendors] = useState<VendorSummary[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  // F-A9: fetch REAL vendors from /api/vendors (Neon in prod, showcase in dev).
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/vendors')
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled) setVendors(d.vendors ?? []); })
+      .catch(() => { /* leave empty; honest empty state */ })
+      .finally(() => { if (!cancelled) setLoaded(true); });
+    return () => { cancelled = true; };
+  }, []);
 
   // Auto-rotation every 7 seconds
   useEffect(() => {
@@ -46,8 +59,10 @@ export function TrendingRail() {
     setIsRotating(false); // Stop rotation when user manually clicks
   };
 
-  // Filter vendors based on active tab
+  // Filter vendors based on active tab (real vendors rarely carry curated tags;
+  // fall back to showing all when a tab has no matches so the rail is never empty).
   const filteredVendors = vendors.filter(vendor => vendor.tags.includes(activeTab));
+  const displayVendors = filteredVendors.length > 0 ? filteredVendors : vendors;
 
   return (
     <section 
@@ -94,15 +109,15 @@ export function TrendingRail() {
 
       <div className="trending-rail-scroll" ref={scrollRef}>
         <div className="trending-rail-content">
-          {filteredVendors.length > 0 ? (
-            filteredVendors.map((vendor) => (
+          {displayVendors.length > 0 ? (
+            displayVendors.map((vendor) => (
               <div key={vendor.id} className="trending-rail-item">
                 <VendorCard vendor={vendor} />
               </div>
             ))
           ) : (
             <div className="trending-rail-empty">
-              <p>No vendors in this category yet.</p>
+              <p>{loaded ? 'No vendors in this category yet.' : 'Loading vendors…'}</p>
             </div>
           )}
         </div>
