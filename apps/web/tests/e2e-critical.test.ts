@@ -121,13 +121,13 @@ describe("images: real Cloudinary + Sightengine (fail-closed)", () => {
 // ───────────────────────── EMAIL (Resend) ─────────────────────────
 describe("email: real Resend + 11 templates", () => {
   it("9. sendEmail OTP_REGISTRATION performs a real send (id returned)", async () => {
-    const r = await sendEmail({ to: "owidavid2002@gmail.com", template: "OTP_REGISTRATION", vars: { name: "T", code: "123456" } });
+    const r = await sendEmail({ to: "otp-test@voeq.ng", template: "OTP_REGISTRATION", vars: { name: "T", code: "123456" } });
     expect(r.ok).toBe(true);
     expect(r.id).toBeTruthy();
   });
 
   it("10. sendEmail PASSWORD_RESET renders resetLink", async () => {
-    const r = await sendEmail({ to: "owidavid2002@gmail.com", template: "PASSWORD_RESET", vars: { resetLink: "https://voeq.ng/reset?t=x" } });
+    const r = await sendEmail({ to: "reset-test@voeq.ng", template: "PASSWORD_RESET", vars: { resetLink: "https://voeq.ng/reset?t=x" } });
     expect(r.ok).toBe(true);
   });
 
