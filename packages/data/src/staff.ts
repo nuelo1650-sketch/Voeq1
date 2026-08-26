@@ -121,7 +121,7 @@ export async function bootstrapSuperAdmin(): Promise<{
   identityId?: string;
   reason?: string;
 }> {
-  const envEmail = process.env.VOEQ_SUPER_ADMIN_EMAIL;
+  const envEmail = process.env.SUPER_ADMIN_EMAIL ?? process.env.VOEQ_SUPER_ADMIN_EMAIL;
   if (!envEmail) return { ok: false, reason: "VOEQ_SUPER_ADMIN_EMAIL_not_set" };
   const { mockIdentityRepo } = await import("./auth");
   const email = envEmail.trim().toLowerCase();
