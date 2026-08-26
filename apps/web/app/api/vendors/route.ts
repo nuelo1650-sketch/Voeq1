@@ -24,16 +24,15 @@ export async function GET(req: NextRequest) {
 
   const summary: VendorSummary[] = await Promise.all(
     realVendors.map(async (v) => {
-      const listings = mockListingsRepo.list({ campus: v.campus }).filter((l) => l.vendorId === v.id);
-      const rated = listings.filter((l) => typeof l.rating === "number");
-      const rating = rated.length > 0 ? rated.reduce((s, l) => s + (l.rating as number), 0) / rated.length : 0;
+      const cat = categories.find((c) => c.id === v.categoryIds[0]);
+      const listings = (await mockListingsRepo.list({ campus: v.campus })).filter((l) => l.vendorId === v.id);
+      const reviews = await mockReviewRepo.listByVendor(v.id);
+      const rating = reviews.length > 0 ? reviews.reduce((s, r) => s + (r.rating as number), 0) / reviews.length : 0;
       const prices = listings.flatMap((l) => [l.priceMinMinor, l.priceMaxMinor].filter((p): p is number => typeof p === "number"));
       const priceRange =
         prices.length > 0
           ? { min: Math.min(...prices), max: Math.max(...prices), currency: "NGN" }
           : undefined;
-      const cat = categories.find((c) => c.id === v.categoryIds[0]);
-      const reviews = await mockReviewRepo.listByVendor(v.id);
       return {
         id: v.id,
         slug: v.slug,
