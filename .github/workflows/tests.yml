@@ -1,0 +1,33 @@
+# Critical E2E test suite — MANUAL ONLY.
+#
+# Intentionally NOT triggered on push / PR. Running the full suite hits real
+# external services (Neon, Resend, Cloudinary). The Resend email tests send real
+# mail ONLY when SEND_REAL_EMAIL_TESTS=1 (default off), so a manual run still
+# will not spam inboxes. Trigger explicitly:
+#   Actions → Critical E2E → Run workflow
+name: Critical E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      send_real_email:
+        description: "Set to 'true' to perform REAL Resend sends (emails go to @voeq.ng test addrs only). Leave empty for local render-only checks."
+        required: false
+        default: ""
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      # Real sends are OFF unless the human explicitly opts in via the input above.
+      SEND_REAL_EMAIL_TESTS: ${{ github.event.inputs.send_real_email == 'true' && '1' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+      - run: npx vitest run
