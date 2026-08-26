@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "e2e": "playwright test"
   },
   "dependencies": {
@@ -36,6 +37,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
+    "@vitest/coverage-v8": "^2.1.4",
     "eslint": "^9.13.0",
     "eslint-config-next": "^15.1.0"
   }

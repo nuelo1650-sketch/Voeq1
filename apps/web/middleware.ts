@@ -92,5 +92,6 @@ export const config = {
     "/vendor/dashboard/:path*",
     "/messages/:path*",
     "/staff/:path*",
+    "/admin/:path*",
   ],
 };

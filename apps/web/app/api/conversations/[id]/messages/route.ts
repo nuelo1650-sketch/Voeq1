@@ -88,17 +88,6 @@ export async function POST(
   if (text.length < 1) return NextResponse.json({ error: "body_empty" }, { status: 400 });
   if (text.length > 4000) return NextResponse.json({ error: "body_too_long" }, { status: 400 });
 
-  // Mock failure trigger (VS6.8): explicit failure, never silent loss.
-  if (text === "FAIL_TEST") {
-    const failed = await mockMessageRepo.create({
-      conversationId: convId,
-      senderId: identity.id,
-      body: text,
-      clientMsgId: body.clientMsgId,
-    });
-    await mockMessageRepo.updateState(failed.id, "failed");
-    return NextResponse.json({ ok: false, failed: true, message: failed }, { status: 503 });
-  }
 
   const message = await mockMessageRepo.create({
     conversationId: convId,
