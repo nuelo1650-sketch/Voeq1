@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { Search, TrendingUp } from "lucide-react";
+import { Search, TrendingUp, FilterX } from "lucide-react";
+import type { ExploreListing } from "@voeq/data";
+import { ListingCard } from "./ListingCard";
 
 /**
  * EmptyState — enhanced empty state with category suggestions.
- * Shows when no results found, suggests trying other categories.
+ * Two modes:
+ *  - Filtered-empty (hasActiveFilters): user's filters yielded 0 results.
+ *    Offer "remove a filter" / "browse all" + show 3 closest (unfiltered) matches.
+ *  - Campus-empty (no active filters): the original "be the first" CTA.
  */
-
 const CATEGORY_SUGGESTIONS = [
   { emoji: "🍔", name: "Food & Drinks", slug: "food-drinks" },
   { emoji: "👗", name: "Fashion", slug: "fashion" },
@@ -19,12 +23,143 @@ const CATEGORY_SUGGESTIONS = [
 interface EmptyStateProps {
   currentCategory?: string;
   searchQuery?: string;
+  hasActiveFilters?: boolean;
+  onClearAll?: () => void;
+  onRemoveOneFilter?: () => void;
+  closestMatches?: ExploreListing[];
 }
 
-export function EmptyState({ currentCategory, searchQuery }: EmptyStateProps) {
+export function EmptyState({
+  currentCategory,
+  searchQuery,
+  hasActiveFilters,
+  onClearAll,
+  onRemoveOneFilter,
+  closestMatches,
+}: EmptyStateProps) {
   // Filter out current category from suggestions
-  const suggestions = CATEGORY_SUGGESTIONS.filter(c => c.slug !== currentCategory);
+  const suggestions = CATEGORY_SUGGESTIONS.filter((c) => c.slug !== currentCategory);
 
+  // ---- Filtered-empty variant (PassA-7) ----
+  if (hasActiveFilters) {
+    const topMatches = (closestMatches ?? []).slice(0, 3);
+    return (
+      <div
+        data-testid="empty-filtered"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "var(--space-8) var(--space-4)",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            background: "var(--color-cream)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: "var(--space-4)",
+          }}
+        >
+          <FilterX size={36} style={{ color: "var(--color-ink-muted)" }} />
+        </div>
+
+        <h2
+          style={{
+            fontFamily: "var(--role-font-display)",
+            fontSize: 24,
+            fontWeight: 600,
+            color: "var(--color-ink-deep)",
+            margin: 0,
+            marginBottom: "var(--space-2)",
+          }}
+        >
+          {searchQuery ? `No results for "${searchQuery}"` : "No results match your filters"}
+        </h2>
+
+        <p
+          style={{
+            fontFamily: "var(--role-font-ui)",
+            fontSize: 16,
+            color: "var(--color-ink-muted)",
+            margin: 0,
+            marginBottom: "var(--space-4)",
+            maxWidth: 440,
+          }}
+        >
+          Try widening your filters or browse what's available on campus.
+        </p>
+
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: "var(--space-6)" }}>
+          <button
+            data-testid="empty-suggestion"
+            onClick={onRemoveOneFilter}
+            style={{
+              padding: "12px 24px",
+              background: "var(--color-forest)",
+              color: "white",
+              border: "none",
+              borderRadius: 8,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Try removing a filter
+          </button>
+          <button
+            data-testid="empty-clear"
+            onClick={onClearAll}
+            style={{
+              padding: "12px 24px",
+              background: "transparent",
+              color: "var(--color-forest)",
+              border: "1px solid var(--color-forest)",
+              borderRadius: 8,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Browse all listings
+          </button>
+        </div>
+
+        {topMatches.length > 0 && (
+          <div style={{ width: "100%", maxWidth: 720 }}>
+            <p
+              style={{
+                fontFamily: "var(--role-font-ui)",
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--color-forest)",
+                margin: "0 0 var(--space-3)",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+              }}
+            >
+              You might also like
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "var(--space-3)" }}>
+              {topMatches.map((l) => (
+                <Link key={l.id} href={`/listing/${l.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                  <ListingCard listing={l} />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ---- Campus-empty variant (original) ----
   return (
     <div
       data-testid="explore-empty-state"
@@ -217,3 +352,4 @@ export function EmptyState({ currentCategory, searchQuery }: EmptyStateProps) {
     </div>
   );
 }
+

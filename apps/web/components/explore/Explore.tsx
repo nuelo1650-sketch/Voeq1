@@ -166,6 +166,23 @@ export function Explore({
     setFilters({ sort: filters.sort }); // Keep sort, clear everything else
   };
 
+  // PassA-7: remove a single filter (used by the filtered-empty "Try removing a filter" CTA).
+  // Clears the first present filter field so the user gets somewhere to go.
+  const removeOneFilter = () => {
+    const next: ExploreFilters = { ...filters };
+    const order: (keyof ExploreFilters)[] = [
+      "category", "minPrice", "maxPrice", "minRating",
+      "openNow", "verifiedOnly", "hasPhotos", "recentlyActive", "featuredOnly",
+    ];
+    for (const key of order) {
+      if (key !== "sort" && next[key] !== undefined) {
+        delete next[key];
+        break;
+      }
+    }
+    setFilters(next);
+  };
+
   const removeFilter = (key: keyof ExploreFilters) => {
     setFilters((prev) => {
       const next = { ...prev };
@@ -394,7 +411,14 @@ export function Explore({
               <>
                 {/* Results header: count (left) + sort (right) */}
                 {data.length === 0 ? (
-                  <EmptyState currentCategory={categoryPreset || filters.category} searchQuery={query} />
+                  <EmptyState
+                    currentCategory={categoryPreset || filters.category}
+                    searchQuery={query}
+                    hasActiveFilters={activeFilterCount > 0}
+                    onClearAll={clearAllFilters}
+                    onRemoveOneFilter={removeOneFilter}
+                    closestMatches={trending}
+                  />
                 ) : (
                   <div
                     style={{
