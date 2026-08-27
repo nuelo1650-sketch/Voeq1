@@ -8,7 +8,7 @@
  * (matching the mock layer's convention).
  */
 import { randomUUID } from "crypto";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { getDb } from "./client";
 import * as s from "./schema";
 import type {
@@ -40,6 +40,8 @@ import type {
   NotificationType,
   Agreement,
   FeatureFlag,
+  Campus,
+  CampusRepo,
 } from "@voeq/data";
 
 const now = () => new Date().toISOString();
@@ -834,15 +836,101 @@ export const realActivityRepo = {
   },
 };
 
-export const realCampusRepo = {
-  async list(): Promise<{ id: string; name: string; slug: string; region?: string | null }[]> {
-    return getDb().select().from(s.campuses);
+export const realCampusRepo: CampusRepo = {
+  async list(viewerIdentityId?: string): Promise<Campus[]> {
+    const rows = await getDb().select().from(s.campuses);
+    return visibleCampusRows(rows, viewerIdentityId);
   },
-  async getBySlug(slug: string) {
+  async searchByName(query: string, viewerIdentityId?: string): Promise<Campus[]> {
+    const q = query.trim().toLowerCase();
+    const all = await getDb().select().from(s.campuses);
+    const matched = q ? all.filter((c) => c.name.toLowerCase().includes(q)) : all;
+    return visibleCampusRows(matched, viewerIdentityId);
+  },
+  async getBySlug(slug: string, viewerIdentityId?: string): Promise<Campus | null> {
     const row = await getDb().select().from(s.campuses).where(eq(s.campuses.slug, slug)).limit(1);
-    return row[0] ?? null;
+    const c = row[0];
+    if (!c) return null;
+    if (c.status === "verified") return c;
+    if (viewerIdentityId != null && c.createdByUserId === viewerIdentityId) return c;
+    return null;
+  },
+  async create(
+    input: { name: string; slug?: string; city?: string | null; state?: string | null; lat?: number | null; lng?: number | null },
+    creatorIdentityId: string,
+  ): Promise<Campus> {
+    const slug = (input.slug ?? input.name.trim().toLowerCase().replace(/\s+/g, "-")).replace(/[^a-z0-9-]/g, "");
+    if (!slug) throw new Error("invalid_campus_slug");
+    const existing = await getDb().select({ id: s.campuses.id }).from(s.campuses).where(eq(s.campuses.slug, slug)).limit(1);
+    if (existing.length > 0) throw new Error("duplicate_slug");
+    const rec = {
+      id: `campus-${Date.now()}`,
+      slug,
+      name: input.name.trim(),
+      city: input.city ?? null,
+      state: input.state ?? null,
+      region: null,
+      lat: input.lat ?? null,
+      lng: input.lng ?? null,
+      source: "user-added" as const,
+      status: "unverified" as const,
+      createdByUserId: creatorIdentityId,
+      createdAt: new Date().toISOString(),
+    };
+    await getDb().insert(s.campuses).values(rec);
+    return rec;
+  },
+  async setStatus(slug: string, status: "verified" | "unverified", actorIdentityId: string): Promise<Campus | null> {
+    const existing = await getDb().select().from(s.campuses).where(eq(s.campuses.slug, slug)).limit(1);
+    if (existing.length === 0) return null;
+    await getDb().update(s.campuses).set({ status }).where(eq(s.campuses.slug, slug));
+    await getDb().insert(s.auditLog).values({
+      id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      type: "campus.status_changed",
+      identityId: actorIdentityId,
+      metadata: { slug, status },
+      at: new Date().toISOString(),
+    });
+    return { ...existing[0], status };
   },
 };
+
+/** Shared visibility filter (D-1): verified + viewer's own unverified. */
+function visibleCampusRows(rows: Campus[], viewerIdentityId?: string): Campus[] {
+  return rows.filter(
+    (c) => c.status === "verified" || (viewerIdentityId != null && c.createdByUserId === viewerIdentityId),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Nominatim throttle (shared DB-backed 1 req/sec gate)
+// Single row in `nominatim_throttle` is claimed atomically via
+// `UPDATE ... WHERE now() - last_request_at >= interval '1100 ms' RETURNING`.
+// Shared across all instances/processes (Render multi-instance + Vercel proxy).
+// ---------------------------------------------------------------------------
+
+/**
+ * Attempt to claim the Nominatim 1 req/sec slot. Polls up to `maxWaitMs` (default
+ * 2500ms). Returns true if the slot was claimed (caller may now call Nominatim);
+ * false if it timed out (caller should surface a graceful "search busy" message).
+ */
+export async function acquireNominatimSlot(
+  requester: string,
+  maxWaitMs = 2500,
+): Promise<boolean> {
+  const deadline = Date.now() + maxWaitMs;
+  while (Date.now() < deadline) {
+    const result = await getDb()
+      .update(s.nominatimThrottle)
+      .set({ lastRequestAt: new Date(), lastRequestBy: requester })
+      .where(sql`now() - ${s.nominatimThrottle.lastRequestAt} >= interval '1100 milliseconds'`)
+      .returning({ id: s.nominatimThrottle.id });
+    if (result.length > 0) return true;
+    // slot not free yet; wait a short tick and retry
+    await new Promise((r) => setTimeout(r, 150));
+  }
+  return false;
+}
 
 export const realCategoryRepo = {
   async list(): Promise<{ id: string; name: string; slug: string }[]> {

@@ -17,6 +17,9 @@ import {
   jsonb,
   primaryKey,
   pgEnum,
+  doublePrecision,
+  uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 
 // ---- Enums (mirror interface unions) ----------------------------------------
@@ -273,11 +276,42 @@ export const activityEvents = pgTable("activity_events", {
   ts: text("ts").notNull(),
 });
 
-export const campuses = pgTable("campuses", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull(),
-  region: text("region"),
+// ---- Campuses (extended for user-extensible, geocoded data) ----------------
+// NOTE: `slug` is UNIQUE (enforced by SQL migration 0002_campus_overhaul).
+export const campusSource = pgEnum("campus_source", ["seeded", "user-added"]);
+export const campusStatus = pgEnum("campus_status", ["verified", "unverified"]);
+
+export const campuses = pgTable(
+  "campuses",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    region: text("region"),
+    // Extended fields (migration 0002_campus_overhaul)
+    city: text("city"),
+    state: text("state"),
+    lat: doublePrecision("lat"),
+    lng: doublePrecision("lng"),
+    source: campusSource("source").notNull().default("seeded"),
+    status: campusStatus("status").notNull().default("verified"),
+    createdByUserId: text("created_by_user_id"),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => ({
+    slugUnique: uniqueIndex("campuses_slug_unique").on(t.slug),
+    statusSlugIdx: index("campuses_status_slug_idx").on(t.status, t.slug),
+  }),
+);
+
+// ---- Nominatim throttle (server-side shared 1 req/sec gate) -----------------
+// Single-row table. The route handler atomically claims the slot via
+// `UPDATE ... WHERE now() - last_request_at >= interval '1100 ms' RETURNING`.
+// Shared across all instances/processes (Render multi-instance + Vercel proxy).
+export const nominatimThrottle = pgTable("nominatim_throttle", {
+  id: integer("id").primaryKey().default(1),
+  lastRequestAt: timestamp("last_request_at", { withTimezone: true }).notNull().default(new Date(0)),
+  lastRequestBy: text("last_request_by"),
 });
 
 export const categories = pgTable("categories", {

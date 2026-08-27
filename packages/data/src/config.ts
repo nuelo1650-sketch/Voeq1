@@ -7,7 +7,7 @@
 import type { Agreement, AgreementRepo } from "./interfaces";
 import { realCategoryRepo, realCampusRepo, realAgreementRepo } from "@voeq/db";
 import type { Campus, Category } from "./explore-view";
-import { campuses, categories, submitNewCampus } from "./explore-view";
+import { campuses, categories } from "./explore-view";
 
 export interface CategoryRepo {
   list(): Promise<Category[]>;
@@ -16,10 +16,19 @@ export interface CategoryRepo {
 }
 
 export interface CampusRepo {
-  list(): Promise<Campus[]>;
-  create(input: { slug: string; name: string }): Promise<Campus>;
-  verify(slug: string, isVerified: boolean): Promise<Campus | null>;
-  promote(slug: string): Promise<Campus | null>;
+  /** Verified campuses + (if viewerIdentityId provided) the viewer's own unverified campuses. */
+  list(viewerIdentityId?: string): Promise<Campus[]>;
+  /** Same visibility scope as list(); name/alias substring match. */
+  searchByName(query: string, viewerIdentityId?: string): Promise<Campus[]>;
+  /** Returns the campus if verified OR owned by viewerIdentityId; else null. */
+  getBySlug(slug: string, viewerIdentityId?: string): Promise<Campus | null>;
+  /** Create a user-added campus. Always owned by creatorIdentityId. */
+  create(
+    input: { name: string; slug?: string; city?: string | null; state?: string | null; lat?: number | null; lng?: number | null },
+    creatorIdentityId: string,
+  ): Promise<Campus>;
+  /** Staff/admin: set verification status. */
+  setStatus(slug: string, status: "verified" | "unverified", actorIdentityId: string): Promise<Campus | null>;
 }
 
 // ---- Categories (reuse explore-view `categories`) ----------------------------
@@ -50,29 +59,64 @@ const mockCategoryRepoImpl: CategoryRepo = {
   },
 };
 
-// ---- Campuses (reuse explore-view `campuses`, status field) ------------------
+// ---- Campuses (in-memory fixture mirror of realCampusRepo; dev parity) --------
 function findBySlug(slugOrName: string): Campus | undefined {
   const q = slugOrName.trim().toLowerCase();
-  return campuses.find((c) => c.id.toLowerCase() === q || c.name.toLowerCase() === q);
+  return campuses.find((c) => c.slug.toLowerCase() === q || c.id.toLowerCase() === q || c.name.toLowerCase() === q);
+}
+
+/** Visibility filter: verified rows + (if viewer) viewer's own unverified rows. */
+function visible(campusesIn: Campus[], viewerIdentityId?: string): Campus[] {
+  return campusesIn.filter(
+    (c) => c.status === "verified" || (viewerIdentityId != null && c.createdByUserId === viewerIdentityId),
+  );
 }
 
 const mockCampusRepoImpl: CampusRepo = {
-  async list() {
-    return [...campuses];
+  async list(viewerIdentityId?: string) {
+    return visible([...campuses], viewerIdentityId);
   },
-  async create(input) {
-    return submitNewCampus(input.name.trim());
+  async searchByName(query: string, viewerIdentityId?: string) {
+    const q = query.trim().toLowerCase();
+    if (!q) return visible([...campuses], viewerIdentityId);
+    const matched = campuses.filter(
+      (c) => c.name.toLowerCase().includes(q),
+    );
+    return visible(matched, viewerIdentityId);
   },
-  async verify(slug, isVerified) {
+  async getBySlug(slug: string, viewerIdentityId?: string) {
     const c = findBySlug(slug);
     if (!c) return null;
-    c.status = isVerified ? "verified" : "unverified";
-    return c;
+    if (c.status === "verified") return c;
+    if (viewerIdentityId != null && c.createdByUserId === viewerIdentityId) return c;
+    return null;
   },
-  async promote(slug) {
+  async create(input, creatorIdentityId: string) {
+    const slug = (input.slug ?? input.name.trim().toLowerCase().replace(/\s+/g, "-")).replace(/[^a-z0-9-]/g, "");
+    const existing = campuses.find((c) => c.slug === slug);
+    if (existing) return existing;
+    const now = new Date().toISOString();
+    const campus: Campus = {
+      id: `campus-${Date.now()}`,
+      slug,
+      name: input.name.trim(),
+      city: input.city ?? null,
+      state: input.state ?? null,
+      region: null,
+      lat: input.lat ?? null,
+      lng: input.lng ?? null,
+      source: "user-added",
+      status: "unverified",
+      createdByUserId: creatorIdentityId,
+      createdAt: now,
+    };
+    campuses.push(campus);
+    return campus;
+  },
+  async setStatus(slug: string, status: "verified" | "unverified"): Promise<Campus | null> {
     const c = findBySlug(slug);
     if (!c) return null;
-    c.status = "verified";
+    c.status = status;
     return c;
   },
 };

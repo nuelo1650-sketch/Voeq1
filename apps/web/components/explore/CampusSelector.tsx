@@ -2,39 +2,51 @@
 
 import { useState, useEffect } from "react";
 import { MapPin, ChevronDown } from "lucide-react";
-import { campuses } from "@voeq/data";
+import { mockCampusRepo, type Campus } from "@voeq/data";
 
 /**
  * CampusSelector — dropdown to switch campus on explore page.
  * Persists selection to localStorage and triggers page reload with new campus context.
+ * Reads via mockCampusRepo so the D-1 visibility filter (verified + viewer's own
+ * unverified) is applied everywhere, not just on the server.
  */
 
 interface CampusSelectorProps {
   currentCampus: string;
   onChange: (campusId: string) => void;
+  viewerIdentityId?: string;
 }
 
-export function CampusSelector({ currentCampus, onChange }: CampusSelectorProps) {
+export function CampusSelector({ currentCampus, onChange, viewerIdentityId }: CampusSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [list, setList] = useState<Campus[]>([]);
 
   useEffect(() => {
     setMounted(true);
-    
-    // Check if mobile viewport
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const currentCampusData = campuses.find(c => c.id === currentCampus) || campuses[0];
-  
-  // Abbreviate long campus names on mobile
-  const displayName = isMobile && currentCampusData.name.length > 20
-    ? currentCampusData.name.split(' ').map(w => w[0]).join('')
-    : currentCampusData.name;
+  useEffect(() => {
+    let active = true;
+    mockCampusRepo.list(viewerIdentityId).then((rows) => {
+      if (active) setList(rows);
+    });
+    return () => {
+      active = false;
+    };
+  }, [viewerIdentityId]);
+
+  const currentCampusData = list.find((c) => c.id === currentCampus) || list[0];
+
+  const displayName =
+    currentCampusData && isMobile && currentCampusData.name.length > 20
+      ? currentCampusData.name.split(" ").map((w) => w[0]).join("")
+      : currentCampusData?.name ?? currentCampus;
 
   const handleSelect = (campusId: string) => {
     if (mounted) {
@@ -46,7 +58,6 @@ export function CampusSelector({ currentCampus, onChange }: CampusSelectorProps)
 
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
-      {/* Trigger button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         data-testid="campus-selector-trigger"
@@ -75,19 +86,17 @@ export function CampusSelector({ currentCampus, onChange }: CampusSelectorProps)
       >
         <MapPin size={16} style={{ color: "var(--color-forest)" }} />
         <span>{displayName}</span>
-        <ChevronDown 
-          size={16} 
-          style={{ 
+        <ChevronDown
+          size={16}
+          style={{
             transform: isOpen ? "rotate(180deg)" : "rotate(0)",
-            transition: "transform 0.2s ease"
-          }} 
+            transition: "transform 0.2s ease",
+          }}
         />
       </button>
 
-      {/* Dropdown menu */}
       {isOpen && (
         <>
-          {/* Backdrop */}
           <div
             onClick={() => setIsOpen(false)}
             style={{
@@ -99,8 +108,7 @@ export function CampusSelector({ currentCampus, onChange }: CampusSelectorProps)
               zIndex: 999,
             }}
           />
-          
-          {/* Menu */}
+
           <div
             data-testid="campus-selector-menu"
             style={{
@@ -118,7 +126,7 @@ export function CampusSelector({ currentCampus, onChange }: CampusSelectorProps)
               padding: 8,
             }}
           >
-            {campuses.map((campus) => (
+            {list.map((campus) => (
               <button
                 key={campus.id}
                 onClick={() => handleSelect(campus.id)}
@@ -140,7 +148,7 @@ export function CampusSelector({ currentCampus, onChange }: CampusSelectorProps)
                   }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 
+                  e.currentTarget.style.background =
                     campus.id === currentCampus ? "var(--color-cream)" : "transparent";
                 }}
               >

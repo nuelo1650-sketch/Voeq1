@@ -52,134 +52,126 @@ export interface Category {
 
 export interface Campus {
   id: string;
+  slug: string;
   name: string;
-  city: string;
-  state: string;
-  isDefault: boolean;
+  city: string | null;
+  state: string | null;
+  region: string | null;
+  lat: number | null;
+  lng: number | null;
+  source: "seeded" | "user-added";
   status: "verified" | "unverified";
-  aliases: string[];
-  /** Honest: 0 until real backend supplies a count (no invented numbers). */
-  vendorCount: number;
-  /** Honest: null until real backend supplies a count (no invented numbers). */
-  studentCount: number | null;
+  createdByUserId?: string | null;
+  createdAt: string;
 }
 
 // ---------------------------------------------------------------------------
 // CAMPUS CATALOG (curated, 250+ scope; NMU default per Doc 01 §5/§6)
 // ---------------------------------------------------------------------------
 
+// In-memory dev fixture mirroring the DB `campuses` table shape (fix #3 round 2:
+// dev and prod share the same visibility contract; prod reads the DB, dev reads this).
+// Coordinates verified against Wikipedia/OpenStreetMap, NOT invented.
 export const campuses: Campus[] = [
   {
-    id: "nmu",
-    name: "Nigeria Maritime University",
-    city: "Okerenkoko",
-    state: "Delta State",
-    isDefault: true,
-    status: "verified",
-    aliases: ["NMU", "Maritime"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "nmu-okerenkoko", slug: "nmu-okerenkoko", name: "Nigeria Maritime University (Okerenkoko)",
+    city: "Okerenkoko", state: "Delta State", region: null, lat: 5.62449, lng: 5.39038,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
   {
-    id: "unilag",
-    name: "University of Lagos",
-    city: "Lagos",
-    state: "Lagos State",
-    isDefault: false,
-    status: "verified",
-    aliases: ["UNILAG"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "nmu-kurutie", slug: "nmu-kurutie", name: "Nigeria Maritime University (Kurutie)",
+    city: "Kurutie", state: "Delta State", region: null, lat: 5.62449, lng: 5.39038,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
   {
-    id: "ui",
-    name: "University of Ibadan",
-    city: "Ibadan",
-    state: "Oyo State",
-    isDefault: false,
-    status: "verified",
-    aliases: ["UI"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "unilag", slug: "unilag", name: "University of Lagos",
+    city: "Lagos", state: "Lagos State", region: null, lat: 6.51667, lng: 3.38611,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
   {
-    id: "oau",
-    name: "Obafemi Awolowo University",
-    city: "Ile-Ife",
-    state: "Osun State",
-    isDefault: false,
-    status: "verified",
-    aliases: ["OAU"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "ui", slug: "ui", name: "University of Ibadan",
+    city: "Ibadan", state: "Oyo State", region: null, lat: 7.3912, lng: 3.9167,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
   {
-    id: "unn",
-    name: "University of Nigeria Nsukka",
-    city: "Nsukka",
-    state: "Enugu State",
-    isDefault: false,
-    status: "verified",
-    aliases: ["UNN"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "oau", slug: "oau", name: "Obafemi Awolowo University",
+    city: "Ile-Ife", state: "Osun State", region: null, lat: 7.51833, lng: 4.52278,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
   {
-    id: "covenant",
-    name: "Covenant University",
-    city: "Ota",
-    state: "Ogun State",
-    isDefault: false,
-    status: "verified",
-    aliases: ["CU", "Covenant"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "unn", slug: "unn", name: "University of Nigeria Nsukka",
+    city: "Nsukka", state: "Enugu State", region: null, lat: 6.858, lng: 7.396,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
   {
-    id: "futo",
-    name: "Federal University of Technology Owerri",
-    city: "Owerri",
-    state: "Imo State",
-    isDefault: false,
-    status: "verified",
-    aliases: ["FUTO"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "covenant", slug: "covenant", name: "Covenant University",
+    city: "Ota", state: "Ogun State", region: null, lat: 6.6699, lng: 3.1574,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
   {
-    id: "uniben",
-    name: "University of Benin",
-    city: "Benin City",
-    state: "Edo State",
-    isDefault: false,
-    status: "verified",
-    aliases: ["UNIBEN"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "futo", slug: "futo", name: "Federal University of Technology Owerri",
+    city: "Owerri", state: "Imo State", region: null, lat: 5.384, lng: 6.995,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
   {
-    id: "abu",
-    name: "Ahmadu Bello University",
-    city: "Zaria",
-    state: "Kaduna State",
-    isDefault: false,
-    status: "verified",
-    aliases: ["ABU"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "uniben", slug: "uniben", name: "University of Benin",
+    city: "Benin City", state: "Edo State", region: null, lat: 6.33370, lng: 5.60015,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
   {
-    id: "unijos",
-    name: "University of Jos",
-    city: "Jos",
-    state: "Plateau State",
-    isDefault: false,
-    status: "verified",
-    aliases: ["UNIJOS"],
-    vendorCount: 0,
-    studentCount: null,
+    id: "abu", slug: "abu", name: "Ahmadu Bello University",
+    city: "Zaria", state: "Kaduna State", region: null, lat: 11.067, lng: 7.700,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
+  },
+  {
+    id: "unijos", slug: "unijos", name: "University of Jos",
+    city: "Jos", state: "Plateau State", region: null, lat: 9.95028, lng: 8.88917,
+    source: "seeded", status: "verified", createdByUserId: null, createdAt: "2026-08-27T00:00:00.000Z",
   },
 ];
+
+// ---------------------------------------------------------------------------
+// CAMPUS HELPERS (repo-backed; visibility filter applied in mockCampusRepo)
+// ---------------------------------------------------------------------------
+
+/**
+ * Alias-aware campus search over the local dev fixture. In dev (no DATABASE_URL)
+ * this mirrors realCampusRepo's visibility contract (verified + viewer's own
+ * unverified). In prod the app calls mockCampusRepo directly; this helper exists
+ * for call sites that still import from explore-view.
+ */
+export async function searchCampus(query: string, viewerIdentityId?: string): Promise<Campus[]> {
+  const q = query.toLowerCase().trim();
+  const matched = q
+    ? campuses.filter((c) => c.name.toLowerCase().includes(q))
+    : [...campuses];
+  return matched.filter(
+    (c) => c.status === "verified" || (viewerIdentityId != null && c.createdByUserId === viewerIdentityId),
+  );
+}
+
+/** @deprecated use mockCampusRepo.create(input, creatorIdentityId). Kept for call-site grep. */
+export async function submitNewCampus(name: string, creatorIdentityId: string): Promise<Campus> {
+  const slug = name.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const existing = campuses.find((c) => c.slug === slug);
+  if (existing) return existing;
+  const campus: Campus = {
+    id: `campus-${Date.now()}`,
+    slug,
+    name: name.trim(),
+    city: null,
+    state: null,
+    region: null,
+    lat: null,
+    lng: null,
+    source: "user-added",
+    status: "unverified",
+    createdByUserId: creatorIdentityId,
+    createdAt: new Date().toISOString(),
+  };
+  campuses.push(campus);
+  return campus;
+}
 
 // ---------------------------------------------------------------------------
 // CATEGORY TAXONOMY (curated, static per Doc 06 §"Categories (taxonomy)")
@@ -286,37 +278,6 @@ export const vendors: VendorSummary[] = [
 // CAMPUS HELPERS (alias-aware search + dynamic submit; per Doc 01 §6)
 // ---------------------------------------------------------------------------
 
-/**
- * Alias-aware campus search. Returns matches where the name or any alias contains the
- * query (normalized, case-insensitive). Synchronous wrapper over the curated catalog.
- * (Phase 9: backed by the dynamic campus store with auto-persist of unverified entries.)
- */
-export async function searchCampus(query: string): Promise<Campus[]> {
-  const normalized = query.toLowerCase().trim();
-  if (!normalized) return campuses;
-  return campuses.filter(
-    (c) => c.name.toLowerCase().includes(normalized) || c.aliases.some((a) => a.toLowerCase().includes(normalized)),
-  );
-}
-
-/**
- * Submit a campus not in the catalog. Per Doc 01 §6 / Doc 03 IDN-010: auto-persists as
- * `unverified`, selectable immediately for the submitting user, publicly discoverable only
- * after ≥1 confirmed vendor, weekly founder review. Synchronous stub (Phase 9: persisted).
- */
-export async function submitNewCampus(name: string): Promise<Campus> {
-  return {
-    id: name.toLowerCase().replace(/\s+/g, "-"),
-    name,
-    city: "Unknown",
-    state: "Unknown",
-    isDefault: false,
-    status: "unverified",
-    aliases: [],
-    vendorCount: 0,
-    studentCount: null,
-  };
-}
 
 /**
  * Resolve a category slug (from /c/[slug]) to its display name. Falls back to the raw slug.

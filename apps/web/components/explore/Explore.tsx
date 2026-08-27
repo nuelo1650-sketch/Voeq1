@@ -34,7 +34,7 @@ import { RefreshCw, ChevronDown, LayoutGrid, List } from "lucide-react";
  *  3. Deep transient accent (UNPROVEN, optional): a brief deep-green flash on the contour line mid-
  *     entrance. Attempted; if it reads as a glitch it is cut. See transition note in code below.
  */
-const DEFAULT_CAMPUS = "NMU"; // public, logged-out default (Doc 04: works fully logged-out)
+const DEFAULT_CAMPUS = "nmu-okerenkoko"; // public, logged-out default (Doc 04: works fully logged-out)
 const ITEMS_PER_PAGE = 20; // Pagination size for infinite scroll
 
 // PassA-9: friendly results lead-in — sort value → human label
@@ -57,10 +57,12 @@ export function Explore({
   categoryPreset, 
   campus: initialCampus = DEFAULT_CAMPUS,
   initialQuery,
+  viewerIdentityId,
 }: { 
   categoryPreset?: string; 
   campus?: string;
   initialQuery?: string;
+  viewerIdentityId?: string;
 }) {
   const [filters, setFilters] = useState<ExploreFilters>({});
   const [query, setQuery] = useState(initialQuery || "");
@@ -257,7 +259,7 @@ export function Explore({
         </Link>
         
         {/* Campus selector - right side */}
-        <CampusSelector currentCampus={campus} onChange={setCampus} />
+        <CampusSelector currentCampus={campus} onChange={setCampus} viewerIdentityId={viewerIdentityId} />
       </header>
 
       <main style={{ padding: "var(--space-3) 0 var(--space-8)" }}>

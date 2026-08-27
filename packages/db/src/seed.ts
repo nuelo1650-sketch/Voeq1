@@ -11,16 +11,17 @@ import * as s from "./schema";
 import { realVendorRepo, realListingsRepo, realIdentityRepo, realSessionRepo } from "./repos";
 
 const CAMPUSSES = [
-  { id: "nmu", name: "NMU", slug: "nmu", region: "Eastern Cape" },
-  { id: "ru", name: "Rhodes University", slug: "rhodes", region: "Eastern Cape" },
-  { id: "wits", name: "Wits", slug: "wits", region: "Gauteng" },
-  { id: "uct", name: "UCT", slug: "uct", region: "Western Cape" },
-  { id: "up", name: "UP", slug: "up", region: "Gauteng" },
-  { id: "ukzn", name: "UKZN", slug: "ukzn", region: "KZN" },
-  { id: "tut", name: "TUT", slug: "tut", region: "Gauteng" },
-  { id: "cput", name: "CPUT", slug: "cput", region: "Western Cape" },
-  { id: "uwc", name: "UWC", slug: "uwc", region: "Western Cape" },
-  { id: "unisa", name: "UNISA", slug: "unisa", region: "National" },
+  { id: "nmu-okerenkoko", name: "Nigeria Maritime University (Okerenkoko)", slug: "nmu-okerenkoko", region: "Delta State", city: "Okerenkoko", state: "Delta State", lat: 5.62449, lng: 5.39038, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "nmu-kurutie", name: "Nigeria Maritime University (Kurutie)", slug: "nmu-kurutie", region: "Delta State", city: "Kurutie", state: "Delta State", lat: 5.62449, lng: 5.39038, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "unilag", name: "University of Lagos", slug: "unilag", region: "Lagos State", city: "Lagos", state: "Lagos State", lat: 6.51667, lng: 3.38611, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "ui", name: "University of Ibadan", slug: "ui", region: "Oyo State", city: "Ibadan", state: "Oyo State", lat: 7.3912, lng: 3.9167, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "oau", name: "Obafemi Awolowo University", slug: "oau", region: "Osun State", city: "Ile-Ife", state: "Osun State", lat: 7.51833, lng: 4.52278, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "unn", name: "University of Nigeria Nsukka", slug: "unn", region: "Enugu State", city: "Nsukka", state: "Enugu State", lat: 6.858, lng: 7.396, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "covenant", name: "Covenant University", slug: "covenant", region: "Ogun State", city: "Ota", state: "Ogun State", lat: 6.6699, lng: 3.1574, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "futo", name: "Federal University of Technology Owerri", slug: "futo", region: "Imo State", city: "Owerri", state: "Imo State", lat: 5.384, lng: 6.995, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "uniben", name: "University of Benin", slug: "uniben", region: "Edo State", city: "Benin City", state: "Edo State", lat: 6.33370, lng: 5.60015, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "abu", name: "Ahmadu Bello University", slug: "abu", region: "Kaduna State", city: "Zaria", state: "Kaduna State", lat: 11.067, lng: 7.700, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
+  { id: "unijos", name: "University of Jos", slug: "unijos", region: "Plateau State", city: "Jos", state: "Plateau State", lat: 9.95028, lng: 8.88917, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
 ];
 
 const CATEGORIES = [
@@ -53,12 +54,12 @@ export async function seed(): Promise<void> {
 
   // 6 demo vendors across campuses/categories.
   const vendors = [
-    { name: "Campus Eats", campus: "nmu", categoryIds: ["food"], slug: "campus-eats" },
-    { name: "Tech Swap", campus: "wits", categoryIds: ["tech"], slug: "tech-swap" },
-    { name: "Book Nook", campus: "uct", categoryIds: ["books"], slug: "book-nook" },
-    { name: "Quick Fix", campus: "up", categoryIds: ["services"], slug: "quick-fix" },
-    { name: "Thread Theory", campus: "ukzn", categoryIds: ["fashion"], slug: "thread-theory" },
-    { name: "NMU Prints", campus: "nmu", categoryIds: ["tech", "services"], slug: "nmu-prints" },
+    { name: "Campus Eats", campus: "nmu-okerenkoko", categoryIds: ["food"], slug: "campus-eats" },
+    { name: "Tech Swap", campus: "unilag", categoryIds: ["tech"], slug: "tech-swap" },
+    { name: "Book Nook", campus: "ui", categoryIds: ["books"], slug: "book-nook" },
+    { name: "Quick Fix", campus: "oau", categoryIds: ["services"], slug: "quick-fix" },
+    { name: "Thread Theory", campus: "unn", categoryIds: ["fashion"], slug: "thread-theory" },
+    { name: "NMU Prints", campus: "nmu-okerenkoko", categoryIds: ["tech", "services"], slug: "nmu-prints" },
   ];
   for (const v of vendors) {
     if (!(await realVendorRepo.listVendors({ campus: v.campus })).some((x) => x.slug === v.slug)) {

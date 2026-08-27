@@ -27,9 +27,8 @@ export async function PATCH(req: NextRequest) {
   const action = typeof body.action === "string" ? body.action : "";
   if (!slug) return NextResponse.json({ error: "missing_slug" }, { status: 400 });
   let updated = null;
-  if (action === "verify") updated = await mockCampusRepo.verify(slug, true);
-  else if (action === "unverify") updated = await mockCampusRepo.verify(slug, false);
-  else if (action === "promote") updated = await mockCampusRepo.promote(slug);
+  if (action === "verify") updated = await mockCampusRepo.setStatus(slug, "verified", actor.id);
+  else if (action === "unverify") updated = await mockCampusRepo.setStatus(slug, "unverified", actor.id);
   if (!updated) return NextResponse.json({ error: "not_found" }, { status: 404 });
   return NextResponse.json({ ok: true, campus: updated }, { status: 200 });
 }
