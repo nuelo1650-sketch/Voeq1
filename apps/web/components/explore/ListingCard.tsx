@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { ExploreListing } from "@voeq/data";
 import { CampusFingerprint } from "@voeq/contour";
 import { Heart } from "lucide-react";
@@ -30,6 +31,9 @@ export function ListingCard({
   onToggleBookmark?: (listingId: string) => void;
 }) {
   const img = listing.image;
+  const images = listing.images && listing.images.length > 0 ? listing.images : img ? [img] : [];
+  const [hovered, setHovered] = useState(false);
+  const displayImg = hovered && images[1] ? images[1] : images[0];
   
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -42,6 +46,16 @@ export function ListingCard({
   return (
     <article
       data-testid="listing-card"
+      onMouseEnter={(e) => {
+        setHovered(true);
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+      }}
+      onMouseLeave={(e) => {
+        setHovered(false);
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "none";
+      }}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -49,6 +63,7 @@ export function ListingCard({
         border: "1px solid var(--role-border)",
         borderRadius: "var(--radius-lg)",
         overflow: "hidden",
+        transition: "transform 200ms ease, box-shadow 200ms ease",
       }}
     >
       {/* Image frame (B.6): 4:3 matte; missing -> contour monogram; loading -> shimmer */}
@@ -68,7 +83,7 @@ export function ListingCard({
           <div data-testid="listing-shimmer" style={shimmerStyle} />
         ) : img ? (
           <img
-            src={img}
+            src={displayImg}
             alt={listing.title}
             data-testid="listing-image"
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
@@ -153,31 +168,51 @@ export function ListingCard({
             {formatPrice(listing.priceMinor)}
           </span>
           {listing.availability && (
-            <span
-              data-testid="listing-availability"
-              data-tone={AVAIL_TONE[listing.availability]}
-              style={{
-                fontSize: "11px",
-                padding: "2px 6px",
-                border: "1px solid var(--role-border)",
-                borderRadius: 999,
-                color: "var(--role-text-muted)",
-              }}
-            >
-              {AVAIL_LABEL[listing.availability]}
-            </span>
+            listing.availability === "open" ? (
+              <span data-testid="listing-card-open-badge">
+                <span
+                  data-testid="listing-availability"
+                  data-tone={AVAIL_TONE[listing.availability]}
+                  style={{
+                    fontSize: "11px",
+                    padding: "2px 6px",
+                    border: "1px solid var(--role-border)",
+                    borderRadius: 999,
+                    color: "var(--role-text-muted)",
+                  }}
+                >
+                  {AVAIL_LABEL[listing.availability]}
+                </span>
+              </span>
+            ) : (
+              <span
+                data-testid="listing-availability"
+                data-tone={AVAIL_TONE[listing.availability]}
+                style={{
+                  fontSize: "11px",
+                  padding: "2px 6px",
+                  border: "1px solid var(--role-border)",
+                  borderRadius: 999,
+                  color: "var(--role-text-muted)",
+                }}
+              >
+                {AVAIL_LABEL[listing.availability]}
+              </span>
+            )
           )}
         </div>
 
         {/* Trust row (C.3.2): verified badge / rating / featured mark */}
         <div data-testid="listing-trust" style={{ display: "flex", gap: 8, alignItems: "center", fontSize: "12px", color: "var(--role-text-muted)" }}>
           {listing.verified && (
-            <span data-testid="listing-verified" style={{ color: "var(--role-accent-strong)" }}>
-              ✓ Vouched
+            <span data-testid="listing-card-verified-pill">
+              <span data-testid="listing-verified" style={{ color: "var(--role-accent-strong)" }}>
+                ✓ Vouched
+              </span>
             </span>
           )}
           {typeof listing.rating === "number" && (
-            <span data-testid="listing-rating">★ {listing.rating.toFixed(1)}</span>
+            <span data-testid="listing-card-rating">★ {listing.rating.toFixed(1)}</span>
           )}
           {listing.featured && (
             <span data-testid="listing-featured" style={{ color: "var(--role-gold)" }}>
