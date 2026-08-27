@@ -1,26 +1,49 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Search, X, MapPin, TrendingUp } from "lucide-react";
+import { Search, X, MapPin, TrendingUp, Clock } from "lucide-react";
 import { campuses } from "@voeq/data";
+import type { ExploreListing } from "@voeq/data";
+import { CATEGORIES } from "./Filters";
+
+type Section = "recent" | "trending" | "listing" | "vendor" | "category" | "campus";
 
 interface SearchSuggestion {
-  type: "vendor" | "listing" | "campus" | "category" | "recent";
+  type: "vendor" | "listing" | "campus" | "category" | "recent" | "trending";
   label: string;
   subtitle?: string;
   value: string;
+  section: Section;
+  thumb?: string;
 }
 
-/** 
- * SearchBar — Industrial-standard search with autocomplete (K2.1 enhancement).
- * Features:
- * - Autocomplete dropdown with suggestions
- * - Multi-field search (vendors, listings, campus, category)
- * - Recent searches (localStorage)
- * - Keyboard navigation (↑↓ Enter Esc)
- * - Debounced API calls (250ms)
+const TRENDING = [
+  "Jollof rice",
+  "Past questions",
+  "Phone repair",
+  "Hair styling",
+  "Laundry",
+  "Tutoring",
+];
+
+const RECENT_KEY = "voeq:recent-searches";
+
+/**
+ * SearchBar — industrial-standard search with autocomplete (K2.1 + PassA-3).
+ * - Recent + Trending sections on focus/empty
+ * - Live matches (Listings / Vendors / Categories) computed from real loaded data
+ * - Keyboard navigation (↑↓ Enter Esc), click-outside to close
+ * - Debounced (250ms)
  */
-export function SearchBar({ initial = "", onSearch }: { initial?: string; onSearch: (q: string) => void }) {
+export function SearchBar({
+  initial = "",
+  onSearch,
+  listings,
+}: {
+  initial?: string;
+  onSearch: (q: string) => void;
+  listings?: ExploreListing[];
+}) {
   const [value, setValue] = useState(initial);
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -31,7 +54,7 @@ export function SearchBar({ initial = "", onSearch }: { initial?: string; onSear
 
   // Load recent searches from localStorage
   useEffect(() => {
-    const recent = localStorage.getItem("voeq:recentSearches");
+    const recent = localStorage.getItem(RECENT_KEY);
     if (recent) {
       try {
         setRecentSearches(JSON.parse(recent).slice(0, 5));
@@ -44,91 +67,116 @@ export function SearchBar({ initial = "", onSearch }: { initial?: string; onSear
   // Save to recent searches
   const saveRecentSearch = (query: string) => {
     if (!query.trim()) return;
-    const updated = [query, ...recentSearches.filter(q => q !== query)].slice(0, 5);
+    const updated = [query, ...recentSearches.filter((q) => q !== query)].slice(0, 5);
     setRecentSearches(updated);
-    localStorage.setItem("voeq:recentSearches", JSON.stringify(updated));
+    localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
   };
 
-  // Debounced search + autocomplete
+  // Debounced search + autocomplete (PassA-3: real live matches)
   useEffect(() => {
     const t = setTimeout(() => {
-      if (value.trim().length < 2) {
+      const query = value.toLowerCase().trim();
+
+      // Empty input (focused) → show Recent + Trending
+      if (query.length === 0) {
+        const recents: SearchSuggestion[] = recentSearches.map((q) => ({
+          type: "recent",
+          label: q,
+          value: q,
+          section: "recent",
+        }));
+        const trending: SearchSuggestion[] = TRENDING.map((q) => ({
+          type: "trending",
+          label: q,
+          value: q,
+          section: "trending",
+        }));
+        setSuggestions([...recents, ...trending]);
+        return;
+      }
+
+      if (query.length < 2) {
         setSuggestions([]);
         return;
       }
 
-      // Generate suggestions (in real app, this would be an API call)
-      const query = value.toLowerCase().trim();
       const results: SearchSuggestion[] = [];
 
-      // Campus suggestions
-      campuses.forEach(campus => {
+      // Campus suggestions (real data)
+      campuses.forEach((campus) => {
         if (campus.name.toLowerCase().includes(query)) {
           results.push({
             type: "campus",
             label: campus.name,
             subtitle: `${campus.city}, ${campus.state}`,
             value: campus.name,
+            section: "campus",
           });
         }
       });
 
-      // Category suggestions
-      const categories = ["Food", "Books", "Beauty", "Apparel", "Services"];
-      categories.forEach(cat => {
-        if (cat.toLowerCase().includes(query)) {
+      // Category suggestions (real data)
+      CATEGORIES.forEach((cat) => {
+        if (cat.label.toLowerCase().includes(query)) {
           results.push({
             type: "category",
-            label: cat,
-            subtitle: `Browse ${cat.toLowerCase()}`,
-            value: cat,
+            label: cat.label,
+            subtitle: `Browse ${cat.label.toLowerCase()}`,
+            value: cat.label,
+            section: "category",
           });
         }
       });
 
-      // Mock vendor suggestions (in real app, fetch from API)
-      if (query.includes("food") || query.includes("pizza")) {
-        results.push({
-          type: "vendor",
-          label: "Campus Pizza Hub",
-          subtitle: "Food • 4.5★",
-          value: "Campus Pizza Hub",
-        });
-      }
-      if (query.includes("book") || query.includes("text")) {
-        results.push({
-          type: "vendor",
-          label: "TextBook Exchange",
-          subtitle: "Books • 4.8★",
-          value: "TextBook Exchange",
-        });
-      }
+      // Live listing matches (real loaded data)
+      const listingHits: SearchSuggestion[] = (listings ?? [])
+        .filter((l) => l.title.toLowerCase().includes(query))
+        .slice(0, 4)
+        .map((l) => ({
+          type: "listing",
+          label: l.title,
+          subtitle: `₦ ${(l.priceMinor / 100).toLocaleString("en-NG")} · ${l.vendorName}`,
+          value: l.title,
+          section: "listing",
+          thumb: l.image,
+        }));
 
-      // Add "Search for..." option
-      if (results.length > 0 || query.length > 0) {
-        results.unshift({
+      // Live vendor matches (real loaded data, deduped by vendor name)
+      const vendorMap = new Map<string, ExploreListing>();
+      (listings ?? [])
+        .filter((l) => l.vendorName.toLowerCase().includes(query))
+        .forEach((l) => vendorMap.set(l.vendorName, l));
+      const vendorHits: SearchSuggestion[] = Array.from(vendorMap.values())
+        .slice(0, 3)
+        .map((v) => ({
+          type: "vendor",
+          label: v.vendorName,
+          subtitle: v.verified ? "Verified vendor" : "Vendor",
+          value: v.vendorName,
+          section: "vendor",
+        }));
+
+      // "Search for..." option first
+      const head: SearchSuggestion[] = [
+        {
           type: "listing",
           label: `Search for "${value}"`,
           subtitle: "Search all listings and vendors",
           value: value,
-        });
-      }
+          section: "listing",
+        },
+      ];
 
-      setSuggestions(results.slice(0, 8)); // Max 8 suggestions
+      setSuggestions([...head, ...results, ...listingHits, ...vendorHits].slice(0, 20));
     }, 250);
     return () => clearTimeout(t);
-  }, [value]);
+  }, [value, recentSearches, listings]);
 
-  // Show recent searches when focused with empty input
+  // Show recent/trending when focused with empty input (handled in the effect above
+  // via the empty-query branch). Ensure the dropdown opens on focus.
   useEffect(() => {
-    if (isOpen && !value.trim() && recentSearches.length > 0) {
-      setSuggestions(
-        recentSearches.map(q => ({
-          type: "recent",
-          label: q,
-          value: q,
-        }))
-      );
+    if (isOpen && !value.trim() && recentSearches.length === 0) {
+      // Trending still shows; nothing else needed.
     }
   }, [isOpen, value, recentSearches]);
 
@@ -145,11 +193,11 @@ export function SearchBar({ initial = "", onSearch }: { initial?: string; onSear
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
-        setSelectedIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
+        setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev));
         break;
       case "ArrowUp":
         e.preventDefault();
-        setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1));
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
         break;
       case "Enter":
         e.preventDefault();
@@ -207,13 +255,50 @@ export function SearchBar({ initial = "", onSearch }: { initial?: string; onSear
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const getSuggestionIcon = (type: SearchSuggestion["type"]) => {
-    switch (type) {
-      case "campus": return <MapPin size={16} />;
-      case "recent": return <TrendingUp size={16} />;
-      default: return <Search size={16} />;
+  const getSuggestionIcon = (s: SearchSuggestion) => {
+    switch (s.type) {
+      case "campus":
+        return <MapPin size={16} />;
+      case "recent":
+        return <Clock size={16} />;
+      case "trending":
+        return <TrendingUp size={16} />;
+      case "listing":
+      case "vendor":
+      case "category":
+        return <Search size={16} />;
+      default:
+        return <Search size={16} />;
     }
   };
+
+  // Group flat suggestions into ordered sections for rendering.
+  const SECTION_ORDER: Section[] = ["listing", "campus", "category", "vendor", "recent", "trending"];
+  const SECTION_TITLE: Record<Section, string> = {
+    listing: "Listings",
+    vendor: "Vendors",
+    category: "Categories",
+    campus: "Campuses",
+    recent: "Recent searches",
+    trending: "Trending on your campus",
+  };
+  const SECTION_TESTID: Record<Section, string> = {
+    listing: "search-suggestion-listing",
+    vendor: "search-suggestion-vendor",
+    category: "search-suggestion-category",
+    campus: "search-suggestion-campus",
+    recent: "search-suggestion-recent",
+    trending: "search-suggestion-trending",
+  };
+
+  const sections: { section: Section; items: SearchSuggestion[] }[] = [];
+  for (const sec of SECTION_ORDER) {
+    const items = suggestions.filter((s) => s.section === sec);
+    if (items.length > 0) sections.push({ section: sec, items });
+  }
+
+  // Flat index tracker for keyboard highlight across grouped render.
+  let flatIdx = -1;
 
   return (
     <div style={{ position: "relative", width: "100%" }}>
@@ -282,10 +367,11 @@ export function SearchBar({ initial = "", onSearch }: { initial?: string; onSear
         )}
       </div>
 
-      {/* Autocomplete dropdown */}
+      {/* Autocomplete dropdown (PassA-3: grouped, real matches) */}
       {isOpen && suggestions.length > 0 && (
         <div
           ref={dropdownRef}
+          data-testid="search-suggestions"
           style={{
             position: "absolute",
             top: "calc(100% + 4px)",
@@ -295,81 +381,121 @@ export function SearchBar({ initial = "", onSearch }: { initial?: string; onSear
             border: "1px solid var(--role-border)",
             borderRadius: "var(--radius-md)",
             boxShadow: "var(--shadow-lg)",
-            maxHeight: 400,
+            maxHeight: 420,
             overflowY: "auto",
             zIndex: 50,
           }}
         >
-          {suggestions.map((suggestion, idx) => (
-            <button
-              key={`${suggestion.type}-${suggestion.value}-${idx}`}
-              onClick={() => selectSuggestion(suggestion)}
-              onMouseEnter={() => setSelectedIndex(idx)}
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                border: "none",
-                background: idx === selectedIndex ? "var(--role-surface-hover)" : "transparent",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                textAlign: "left",
-                borderBottom: idx < suggestions.length - 1 ? "1px solid var(--role-border)" : "none",
-                transition: "background 80ms ease",
-              }}
-            >
-              <div style={{ color: "var(--role-text-muted)", display: "flex", flexShrink: 0 }}>
-                {getSuggestionIcon(suggestion.type)}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  color: "var(--role-text)",
+          {sections.map(({ section, items }) => (
+            <div key={section} data-testid={SECTION_TESTID[section]}>
+              <div
+                style={{
+                  padding: "8px 16px 4px",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  color: "var(--role-text-muted)",
                   fontFamily: "var(--role-font-ui)",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}>
-                  {suggestion.label}
-                </div>
-                {suggestion.subtitle && (
-                  <div style={{
-                    fontSize: "13px",
-                    color: "var(--role-text-muted)",
-                    fontFamily: "var(--role-font-ui)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}>
-                    {suggestion.subtitle}
-                  </div>
-                )}
+                }}
+              >
+                {SECTION_TITLE[section]}
               </div>
-              {suggestion.type === "recent" && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const updated = recentSearches.filter(q => q !== suggestion.value);
-                    setRecentSearches(updated);
-                    localStorage.setItem("voeq:recentSearches", JSON.stringify(updated));
-                    setSuggestions(prev => prev.filter(s => s.value !== suggestion.value));
-                  }}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 4,
-                    display: "flex",
-                    color: "var(--role-text-muted)",
-                  }}
-                  aria-label="Remove from recent searches"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </button>
+              {items.map((suggestion) => {
+                flatIdx += 1;
+                const idx = flatIdx;
+                return (
+                  <button
+                    key={`${suggestion.type}-${suggestion.value}-${idx}`}
+                    onClick={() => selectSuggestion(suggestion)}
+                    onMouseEnter={() => setSelectedIndex(idx)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 16px",
+                      border: "none",
+                      background: idx === selectedIndex ? "var(--role-surface-sunken)" : "transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      textAlign: "left",
+                      borderBottom: "1px solid var(--role-border)",
+                      transition: "background 80ms ease",
+                    }}
+                  >
+                    {suggestion.thumb ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={suggestion.thumb}
+                        alt=""
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 6,
+                          objectFit: "cover",
+                          flexShrink: 0,
+                        }}
+                      />
+                    ) : (
+                      <div style={{ color: "var(--role-text-muted)", display: "flex", flexShrink: 0 }}>
+                        {getSuggestionIcon(suggestion)}
+                      </div>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          color: "var(--role-text)",
+                          fontFamily: "var(--role-font-ui)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {suggestion.label}
+                      </div>
+                      {suggestion.subtitle && (
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "var(--role-text-muted)",
+                            fontFamily: "var(--role-font-ui)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {suggestion.subtitle}
+                        </div>
+                      )}
+                    </div>
+                    {suggestion.type === "recent" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const updated = recentSearches.filter((q) => q !== suggestion.value);
+                          setRecentSearches(updated);
+                          localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+                          setSuggestions((prev) => prev.filter((s) => s.value !== suggestion.value));
+                        }}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 4,
+                          display: "flex",
+                          color: "var(--role-text-muted)",
+                        }}
+                        aria-label="Remove from recent searches"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           ))}
         </div>
       )}

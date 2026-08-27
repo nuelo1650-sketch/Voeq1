@@ -252,7 +252,7 @@ export function Explore({
 
         <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", marginBottom: "var(--space-3)", paddingInline: "var(--nav-inline-pad)" }}>
           <div style={{ flex: 1 }}>
-            <SearchBar initial={query} onSearch={setQuery} />
+            <SearchBar initial={query} onSearch={setQuery} listings={data} />
           </div>
           <button
             data-testid="explore-filters-toggle"
