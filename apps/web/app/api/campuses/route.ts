@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mockCampusRepo } from "@voeq/data";
-import { getDb } from "@voeq/db";
 import { getCurrentIdentity } from "@/lib/session";
 
 /**
@@ -33,12 +32,11 @@ export async function POST(req: NextRequest) {
   if (!name) return NextResponse.json({ error: "Name is required." }, { status: 400 });
 
   // 1. Per-user daily cap -------------------------------------------------------
+  // Count the creator's own user-added campuses from the repo list (no raw SQL).
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const recent = await getDb()
-    .select({ id: s_campusId() })
-    .from(s_campuses())
-    .where(andCreatedBySince(identity.id, since));
-  if (recent.length >= DAILY_CAP) {
+  const existingAll = await mockCampusRepo.list(identity.id);
+  const recentCount = existingAll.filter((c) => c.source === "user-added" && c.createdAt >= since).length;
+  if (recentCount >= DAILY_CAP) {
     const resetAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     return NextResponse.json(
       { error: "submission_cap_exceeded", resetAt, message: `You can add up to ${DAILY_CAP} campuses per day.` },
@@ -71,18 +69,4 @@ export async function POST(req: NextRequest) {
     identity.id,
   );
   return NextResponse.json({ ok: true, campus: created }, { status: 201 });
-}
-
-// Helpers kept inline to avoid importing the full schema into a route file.
-// These reference the campus table the same way repos.ts does.
-import { eq, and, gte } from "drizzle-orm";
-import * as sch from "@voeq/db/schema";
-function s_campuses() {
-  return sch.campuses;
-}
-function s_campusId() {
-  return sch.campuses.id;
-}
-function andCreatedBySince(createdBy: string, sinceIso: string) {
-  return and(eq(sch.campuses.createdByUserId, createdBy), gte(sch.campuses.createdAt, sinceIso));
 }

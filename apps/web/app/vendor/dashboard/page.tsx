@@ -5,7 +5,7 @@ import {
   mockListingsRepo,
   canVendorBePublic,
   mockReviewRepo,
-  campuses,
+  mockCampusRepo,
 } from "@voeq/data";
 import { VendorDashboardClient } from "@/components/vendor/VendorDashboardClient";
 import { AppShell } from "@/components/shell/AppShell";
@@ -39,7 +39,8 @@ export default async function VendorDashboardPage() {
     ratingCount > 0 ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / ratingCount) * 10) / 10 : 0;
   const verifiedCount = listings.filter((l) => (l as { verified?: boolean }).verified).length;
 
-  const campus = campuses.find((c) => c.id === vendor.campus);
+  const campusList = await mockCampusRepo.list(identity.id);
+  const campus = campusList.find((c) => c.id === vendor.campus);
   const campusName = campus?.name || vendor.campus;
 
   // Time-aware greeting

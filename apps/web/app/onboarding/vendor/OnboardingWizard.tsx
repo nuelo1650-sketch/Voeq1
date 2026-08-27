@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Building2, MapPin, FileText, Check } from "lucide-react";
-import { categories, campuses, searchCampus, type Campus } from "@voeq/data";
+import { categories, mockCampusRepo, searchCampus, type Campus } from "@voeq/data";
 import { VENDOR_AGREEMENT_TEXT, CURRENT_VENDOR_AGREEMENT_VERSION } from "@voeq/data";
 
 /**
@@ -37,11 +37,19 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
   const [uploading, setUploading] = useState(false);
 
   // Step 2: Campus & presence
-  const [campusResults, setCampusResults] = useState<Campus[]>(campuses);
-  const [selectedCampus, setSelectedCampus] = useState<Campus | null>(
-    initial.campusId ? campuses.find((c) => c.id === initial.campusId) ?? null : null
-  );
+  const [allCampuses, setAllCampuses] = useState<Campus[]>([]);
+  const [campusResults, setCampusResults] = useState<Campus[]>([]);
+  const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
   const [subArea, setSubArea] = useState(initial.subArea);
+
+  // Load campus list via repo (D-1 visibility)
+  useEffect(() => {
+    mockCampusRepo.list().then((rows) => {
+      setAllCampuses(rows);
+      setCampusResults(rows);
+      if (initial.campusId) setSelectedCampus(rows.find((c) => c.id === initial.campusId) ?? null);
+    });
+  }, [initial.campusId]);
 
   // Step 3: Agreement
   const [agreed, setAgreed] = useState(false);
@@ -415,7 +423,7 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
                   type="text"
                   onChange={async (e) => {
                     const q = e.target.value;
-                    setCampusResults(q.trim() === "" ? campuses : await searchCampus(q));
+                    setCampusResults(q.trim() === "" ? allCampuses : await searchCampus(q));
                   }}
                   placeholder="Search your university"
                   style={inputStyle}

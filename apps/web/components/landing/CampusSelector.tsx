@@ -1,41 +1,48 @@
 /* eslint-disable react/no-unescaped-entities */
-'use client';
-import { useState, useEffect } from 'react';
-import { ChevronDown, MapPin, Search, X } from 'lucide-react';
-import { campuses, searchCampus, submitNewCampus, type Campus } from '@voeq/data';
+"use client";
+import { useState, useEffect } from "react";
+import { ChevronDown, MapPin, Search, X } from "lucide-react";
+import { mockCampusRepo, searchCampus, submitNewCampus, type Campus } from "@voeq/data";
 
 export function CampusSelector() {
   const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const [results, setResults] = useState<Campus[]>(campuses);
-  const [_selectedCampus, setSelectedCampus] = useState<Campus>(
-    campuses.find(c => c.isDefault) || campuses[0]
-  );
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState<Campus[]>([]);
+  const [all, setAll] = useState<Campus[]>([]);
+  const [_selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
+
+  useEffect(() => {
+    mockCampusRepo.list().then((rows) => {
+      setAll(rows);
+      setResults(rows);
+      setSelectedCampus(rows[0] ?? null);
+    });
+  }, []);
 
   useEffect(() => {
     const handleSearch = async () => {
-      if (search.trim() === '') {
-        setResults(campuses);
+      if (search.trim() === "") {
+        setResults(all);
       } else {
         const filtered = await searchCampus(search);
         setResults(filtered);
       }
     };
     handleSearch();
-  }, [search]);
+  }, [search, all]);
 
   const handleSelectCampus = (campus: Campus) => {
     setSelectedCampus(campus);
     setIsOpen(false);
-    setSearch('');
+    setSearch("");
   };
 
   const handleSubmitNewCampus = async () => {
-    if (search.trim() === '') return;
-    const newCampus = await submitNewCampus(search);
+    if (search.trim() === "") return;
+    const newCampus = await submitNewCampus(search, "anonymous");
     setSelectedCampus(newCampus);
     setIsOpen(false);
-    setSearch('');
+    setSearch("");
   };
 
   return (

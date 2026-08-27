@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getStaffIdentity } from "@/lib/session";
-import { mockVendorRepo, mockListingsRepo, mockIdentityRepo, ROLE_CAPABILITIES, type StaffRole, campuses } from "@voeq/data";
+import { mockVendorRepo, mockListingsRepo, mockIdentityRepo, ROLE_CAPABILITIES, type StaffRole, mockCampusRepo } from "@voeq/data";
 import Link from "next/link";
 import { AppShell } from "@/components/shell/AppShell";
 
@@ -30,7 +30,8 @@ export default async function AnalyticsPage() {
   const totalListings = allListings.length;
 
   // Campus distribution
-  const campusDistribution = campuses.map(campus => ({
+  const campusList = await mockCampusRepo.list();
+  const campusDistribution = campusList.map(campus => ({
     name: campus.name,
     vendors: allVendors.filter(v => v.campus === campus.id).length,
     listings: allListings.filter(l => {

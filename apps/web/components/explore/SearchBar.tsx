@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Search, X, MapPin, TrendingUp, Clock } from "lucide-react";
-import { campuses } from "@voeq/data";
+import { mockCampusRepo, type Campus } from "@voeq/data";
 import type { ExploreListing } from "@voeq/data";
 import { CATEGORIES } from "./Filters";
 
@@ -49,8 +49,14 @@ export function SearchBar({
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [campusList, setCampusList] = useState<Campus[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Load campus list via repo (D-1 visibility: verified + own unverified)
+  useEffect(() => {
+    mockCampusRepo.list().then(setCampusList);
+  }, []);
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -102,8 +108,8 @@ export function SearchBar({
 
       const results: SearchSuggestion[] = [];
 
-      // Campus suggestions (real data)
-      campuses.forEach((campus) => {
+      // Campus suggestions (real data via repo)
+      campusList.forEach((campus) => {
         if (campus.name.toLowerCase().includes(query)) {
           results.push({
             type: "campus",

@@ -1,35 +1,36 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
-import { campuses, searchCampus, submitNewCampus, type Campus } from "@voeq/data";
+import { mockCampusRepo, searchCampus, type Campus } from "@voeq/data";
 
 export default function SelectCampusClient() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<Campus[]>(campuses);
+  const [all, setAll] = useState<Campus[]>([]);
+  const [results, setResults] = useState<Campus[]>([]);
   const [selected, setSelected] = useState<Campus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    mockCampusRepo.list().then((rows) => {
+      setAll(rows);
+      setResults(rows);
+    });
+  }, []);
+
   async function runSearch(q: string) {
     setSearch(q);
     if (q.trim() === "") {
-      setResults(campuses);
+      setResults(all);
     } else {
       setResults(await searchCampus(q));
     }
   }
 
   async function choose(c: Campus) {
-    setSelected(c);
-    setError(null);
-  }
-
-  async function addNew() {
-    if (search.trim() === "") return;
-    const c = await submitNewCampus(search.trim());
     setSelected(c);
     setError(null);
   }
@@ -96,9 +97,9 @@ export default function SelectCampusClient() {
             {results.length === 0 && (
               <div className="campus-no-results">
                 <p>Can&rsquo;t find your campus?</p>
-                <button type="button" className="campus-submit-btn" onClick={addNew}>
-                  Add &ldquo;{search}&rdquo; →
-                </button>
+                <p className="campus-no-results-hint">
+                  Pick the nearest option for now. You can add your own university after you sign up.
+                </p>
               </div>
             )}
           </div>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentIdentity, SESSION_COOKIE } from "@/lib/session";
-import { mockVendorRepo, mockUserPrefRepo, mockSessionRepo, campuses } from "@voeq/data";
+import { mockVendorRepo, mockUserPrefRepo, mockSessionRepo, mockCampusRepo } from "@voeq/data";
 import { SettingsForms } from "@/components/shopper/SettingsForms";
 import { AppShell } from "@/components/shell/AppShell";
 
@@ -31,6 +31,7 @@ export default async function SettingsPage() {
     expiresAt: s.expiresAt,
     current: s.id === currentSessionId,
   }));
+  const campusList = await mockCampusRepo.list(identity.id);
 
   return (
     <AppShell role="shopper" userName={identity.name}>
@@ -62,7 +63,7 @@ export default async function SettingsPage() {
           campus: identity.campus,
         }}
         initialPrefs={notifPrefs}
-        campuses={campuses.map((c) => ({ id: c.id, name: c.name }))}
+        campuses={campusList.map((c) => ({ id: c.id, name: c.name }))}
         sessions={sessions}
       />
 

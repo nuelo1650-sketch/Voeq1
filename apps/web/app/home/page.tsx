@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { requireConsent } from "@/lib/session";
-import { mockUserPrefRepo, campuses } from "@voeq/data";
+import { mockUserPrefRepo, mockCampusRepo } from "@voeq/data";
 import { ShopperDashboard } from "@/components/shopper/ShopperDashboard";
 import { AppShell } from "@/components/shell/AppShell";
 
@@ -17,8 +17,9 @@ export default async function HomePage() {
   const prefs = await mockUserPrefRepo.get(identity.id);
   if (!prefs || !prefs.feedPrefsSetAt) redirect("/onboarding/shopper");
 
+  const campusList = await mockCampusRepo.list(identity.id);
   const campusLabel = identity.campus
-    ? (campuses.find((c) => c.id === identity.campus)?.name ?? "your campus")
+    ? (campusList.find((c) => c.id === identity.campus)?.name ?? "your campus")
     : "your campus";
 
   return (
