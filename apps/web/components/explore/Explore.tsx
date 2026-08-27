@@ -567,7 +567,7 @@ export function Explore({
                 )}
                 
                 <TrendingRail items={trending} />
-                {recentItems.length > 0 && <RecentlyViewedRail items={recentItems} />}
+                {status === "success" && <RecentlyViewedRail items={recentItems} ids={recentIds} />}
                 {view === "list" ? (
                   <div
                     data-testid="explore-list"

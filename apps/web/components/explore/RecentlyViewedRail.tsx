@@ -5,7 +5,7 @@ import type { ExploreListing } from "@voeq/data";
 import { ListingCard } from "./ListingCard";
 
 const STORAGE_KEY = "voeq:recently-viewed";
-const MAX = 8;
+const MAX = 12;
 
 /**
  * RecentlyViewedRail — client-side, deduped list (Doc 04 PG-PUB-002).
@@ -40,8 +40,38 @@ export function useRecentlyViewed() {
 }
 
 /** Renders the deduped recently-viewed rail from full listing data. */
-export function RecentlyViewedRail({ items }: { items: ExploreListing[] }) {
-  if (!items.length) return null;
+export function RecentlyViewedRail({ items, ids }: { items: ExploreListing[]; ids?: string[] }) {
+  // Friendly empty (PassA-8): nothing viewed yet, but the rail is intentionally shown.
+  if (items.length === 0) {
+    if (ids && ids.length === 0) {
+      return (
+        <section
+          data-testid="recently-viewed-empty"
+          aria-label="Recently viewed"
+          style={{ marginBlock: "var(--space-3)" }}
+        >
+          <h2 style={railTitle}>Recently viewed</h2>
+          <div
+            style={{
+              border: "1px dashed var(--role-border)",
+              borderRadius: "var(--radius-lg)",
+              padding: "var(--space-4)",
+              textAlign: "center",
+              color: "var(--role-text-muted)",
+              fontFamily: "var(--role-font-ui)",
+              fontSize: 14,
+            }}
+          >
+            Browse history — listings you view will appear here.{" "}
+            <a href="/explore" style={{ color: "var(--color-forest)", fontWeight: 600, textDecoration: "none" }}>
+              Start exploring →
+            </a>
+          </div>
+        </section>
+      );
+    }
+    return null; // ids exist but listings not resolved yet
+  }
   return (
     <section data-testid="recently-viewed-rail" aria-label="Recently viewed" style={{ marginBlock: "var(--space-3)" }}>
       <h2 style={railTitle}>Recently viewed</h2>
