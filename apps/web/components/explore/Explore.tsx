@@ -37,6 +37,16 @@ import { RefreshCw, ChevronDown, LayoutGrid, List } from "lucide-react";
 const DEFAULT_CAMPUS = "NMU"; // public, logged-out default (Doc 04: works fully logged-out)
 const ITEMS_PER_PAGE = 20; // Pagination size for infinite scroll
 
+// PassA-9: friendly results lead-in — sort value → human label
+const SORT_LABEL: Record<string, string> = {
+  relevance: "Most popular",
+  distance: "Distance (nearest)",
+  newest: "Newest first",
+  "price-asc": "Price: Low to High",
+  "price-desc": "Price: High to Low",
+  "rating-desc": "Top rated",
+};
+
 /**
  * Explore — the single discover surface. Filters/sort/search/campus all run through
  * loadExplore (data layer applies them). Campus is passed in (dynamic, VS4.9).
@@ -439,11 +449,12 @@ export function Explore({
                       }}
                     >
                       {data.length === 1 ? (
-                        "Showing 1 result"
+                        "1 result on your campus"
+                      ) : activeFilterCount === 0 ? (
+                        `${data.length} results on your campus · sorted by ${SORT_LABEL[filters.sort ?? "relevance"]}`
                       ) : (
-                        `Showing ${displayedCount} of ${data.length} results`
+                        `${data.length} results on your campus with ${activeFilterCount} ${activeFilterCount === 1 ? "filter" : "filters"} · sorted by ${SORT_LABEL[filters.sort ?? "relevance"]}`
                       )}
-                      {activeFilterCount > 0 && ` with ${activeFilterCount} ${activeFilterCount === 1 ? 'filter' : 'filters'} applied`}
                     </div>
 
                     <label
