@@ -361,25 +361,75 @@ export function Explore({
 
             {status === "success" && (
               <>
-                {/* Results count - industrial standard */}
-                <div 
-                  data-testid="explore-results-count"
-                  style={{
-                    fontSize: "14px",
-                    color: "var(--role-text-muted)",
-                    fontFamily: "var(--role-font-ui)",
-                    marginBottom: "var(--space-3)",
-                  }}
-                >
-                  {data.length === 0 ? (
-                    <EmptyState currentCategory={categoryPreset || filters.category} searchQuery={query} />
-                  ) : data.length === 1 ? (
-                    "Showing 1 result"
-                  ) : (
-                    `Showing ${displayedCount} of ${data.length} results`
-                  )}
-                  {data.length > 0 && activeFilterCount > 0 && ` with ${activeFilterCount} ${activeFilterCount === 1 ? 'filter' : 'filters'} applied`}
-                </div>
+                {/* Results header: count (left) + sort (right) */}
+                {data.length === 0 ? (
+                  <EmptyState currentCategory={categoryPreset || filters.category} searchQuery={query} />
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "var(--space-2)",
+                      marginBottom: "var(--space-3)",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <div
+                      data-testid="explore-results-count"
+                      style={{
+                        fontSize: "14px",
+                        color: "var(--role-text-muted)",
+                        fontFamily: "var(--role-font-ui)",
+                      }}
+                    >
+                      {data.length === 1 ? (
+                        "Showing 1 result"
+                      ) : (
+                        `Showing ${displayedCount} of ${data.length} results`
+                      )}
+                      {activeFilterCount > 0 && ` with ${activeFilterCount} ${activeFilterCount === 1 ? 'filter' : 'filters'} applied`}
+                    </div>
+
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        fontSize: "14px",
+                        color: "var(--role-text-muted)",
+                        fontFamily: "var(--role-font-ui)",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Sorted by
+                      <select
+                        data-testid="explore-sort"
+                        value={filters.sort ?? "relevance"}
+                        onChange={(e) =>
+                          setFilters((prev) => ({ ...prev, sort: e.target.value as ExploreFilters["sort"] }))
+                        }
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: 8,
+                          border: "1px solid var(--role-border)",
+                          background: "var(--role-surface)",
+                          color: "var(--role-text)",
+                          fontFamily: "var(--role-font-ui)",
+                          fontSize: "14px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <option value="relevance">Most popular</option>
+                        <option value="distance">Distance (nearest)</option>
+                        <option value="newest">Newest first</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="rating-desc">Top rated</option>
+                      </select>
+                    </label>
+                  </div>
+                )}
                 
                 {/* Featured listings carousel - larger cards, auto-rolling every 5s */}
                 {data.some(l => l.featured) && (
