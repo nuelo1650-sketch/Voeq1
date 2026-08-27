@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentIdentity } from "@/lib/session";
 import { mockConversationRepo, mockMessageRepo } from "@voeq/data";
+import type { AuthStatusResponse } from "@/lib/authStatus";
 
 /**
  * GET /api/auth/status
@@ -12,10 +13,8 @@ export async function GET() {
     const identity = await getCurrentIdentity();
 
     if (!identity) {
-      return NextResponse.json({
-        authenticated: false,
-        unreadCount: 0,
-      });
+      const body: AuthStatusResponse = { authenticated: false, unreadCount: 0 };
+      return NextResponse.json(body);
     }
 
     // Real unread count: messages in any of the user's conversations where the
@@ -30,15 +29,14 @@ export async function GET() {
       ).length;
     }
 
-    return NextResponse.json({
+    const body: AuthStatusResponse = {
       authenticated: true,
       unreadCount,
       role: identity.role,
-    });
+    };
+    return NextResponse.json(body);
   } catch (error) {
-    return NextResponse.json({
-      authenticated: false,
-      unreadCount: 0,
-    });
+    const body: AuthStatusResponse = { authenticated: false, unreadCount: 0 };
+    return NextResponse.json(body);
   }
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { VendorStorefrontView } from "@voeq/data";
+import type { AuthStatusResponse } from "@/lib/authStatus";
 import { OpenNowBadge } from "@/components/vendor/OpenNowBadge";
 import { MessageCircle } from "lucide-react";
 
@@ -40,8 +41,8 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
   useEffect(() => {
     fetch("/api/auth/status")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        setIsAuthenticated(d?.isAuthenticated ?? false);
+      .then((d: AuthStatusResponse | null) => {
+        setIsAuthenticated(d?.authenticated ?? false);
         setAuthLoading(false);
       })
       .catch(() => {

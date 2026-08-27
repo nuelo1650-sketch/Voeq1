@@ -11,6 +11,7 @@ import { CommentForm } from "@/components/shopper/CommentForm";
 import { CommentsList, type DisplayComment } from "@/components/shopper/CommentsList";
 import { ReportForm } from "@/components/shopper/ReportForm";
 import { Heart, Share2, Flag, X, ChevronLeft, ChevronRight, MessageCircle, Link2 } from "lucide-react";
+import type { AuthStatusResponse } from "@/lib/authStatus";
 
 /**
  * ListingDetail — K2.3 enhanced with gallery, vendor card, recommendation rows (Doc 04 PG-PUB-005).
@@ -85,8 +86,8 @@ export function ListingDetail({ id }: { id: string }) {
   useEffect(() => {
     fetch("/api/auth/status")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        setIsAuthenticated(d?.isAuthenticated ?? false);
+      .then((d: AuthStatusResponse | null) => {
+        setIsAuthenticated(d?.authenticated ?? false);
         setAuthLoading(false);
       })
       .catch(() => {

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
+import type { AuthStatusResponse } from "@/lib/authStatus";
 import { BrandLogo } from './BrandLogo';
 
 /**
@@ -26,10 +27,10 @@ export function LandingNav() {
   // Check auth status on mount
   useEffect(() => {
     fetch('/api/auth/status')
-      .then(r => r.json())
-      .then(data => {
-        setIsAuthed(data.authenticated || false);
-        setUnreadCount(data.unreadCount || 0);
+      .then((r) => (r.ok ? r.json() : Promise.resolve(null as AuthStatusResponse | null)))
+      .then((data) => {
+        setIsAuthed(data?.authenticated || false);
+        setUnreadCount(data?.unreadCount || 0);
       })
       .catch(() => setIsAuthed(false));
   }, []);
