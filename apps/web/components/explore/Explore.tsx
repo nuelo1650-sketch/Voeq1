@@ -12,13 +12,14 @@ import { ContourEdge } from "@voeq/contour";
 import { BrandLogo } from "../landing/BrandLogo";
 import { CampusSelector } from "./CampusSelector";
 import { ListingCard } from "./ListingCard";
+import { ListingRow } from "./ListingRow";
 import { Filters, CATEGORIES } from "./Filters";
 import { SearchBar } from "./SearchBar";
 import { TrendingRail } from "./TrendingRail";
 import { RecentlyViewedRail, useRecentlyViewed } from "./RecentlyViewedRail";
 import { ExploreSkeleton } from "./ExploreSkeleton";
 import { EmptyState } from "./EmptyState";
-import { RefreshCw, ChevronDown } from "lucide-react";
+import { RefreshCw, ChevronDown, LayoutGrid, List } from "lucide-react";
 
 /**
  * Explore — PG-PUB-002 (Doc 04). The core discovery surface.
@@ -57,6 +58,8 @@ export function Explore({
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [forceError, setForceError] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
+  const [view, setView] = useState<"grid" | "list">("grid");
+  const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
   const { ids: recentIds, record } = useRecentlyViewed();
   const { toggle: toggleBookmark, isBookmarked } = useBookmarks();
 
@@ -67,6 +70,23 @@ export function Explore({
       setCampus(stored);
     }
   }, []);
+
+  // Hydrate view/density from localStorage; default compact on mobile.
+  useEffect(() => {
+    const v = localStorage.getItem("voeq:explore-view");
+    const d = localStorage.getItem("voeq:explore-density");
+    if (v === "grid" || v === "list") setView(v);
+    if (d === "comfortable" || d === "compact") setDensity(d);
+    else if (typeof window !== "undefined" && window.innerWidth < 768) setDensity("compact");
+  }, []);
+
+  // Persist view/density across sessions.
+  useEffect(() => {
+    localStorage.setItem("voeq:explore-view", view);
+  }, [view]);
+  useEffect(() => {
+    localStorage.setItem("voeq:explore-density", density);
+  }, [density]);
 
   // Sync ?exploreError=1 (dev/test forced-failure path)
   useEffect(() => {
@@ -428,6 +448,81 @@ export function Explore({
                         <option value="rating-desc">Top rated</option>
                       </select>
                     </label>
+
+                    {/* View + density toggles (PassA-2) */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <div
+                        role="group"
+                        aria-label="View mode"
+                        style={{ display: "inline-flex", border: "1px solid var(--role-border)", borderRadius: 8, overflow: "hidden" }}
+                      >
+                        <button
+                          data-testid="explore-view-grid"
+                          aria-pressed={view === "grid"}
+                          aria-label="Grid view"
+                          onClick={() => setView("grid")}
+                          style={{
+                            display: "inline-flex", alignItems: "center", justifyContent: "center",
+                            padding: "8px 10px", border: "none", cursor: "pointer",
+                            background: view === "grid" ? "var(--color-forest)" : "var(--role-surface)",
+                            color: view === "grid" ? "var(--color-glass-white)" : "var(--role-text)",
+                          }}
+                        >
+                          <LayoutGrid size={16} />
+                        </button>
+                        <button
+                          data-testid="explore-view-list"
+                          aria-pressed={view === "list"}
+                          aria-label="List view"
+                          onClick={() => setView("list")}
+                          style={{
+                            display: "inline-flex", alignItems: "center", justifyContent: "center",
+                            padding: "8px 10px", border: "none", cursor: "pointer",
+                            background: view === "list" ? "var(--color-forest)" : "var(--role-surface)",
+                            color: view === "list" ? "var(--color-glass-white)" : "var(--role-text)",
+                            borderLeft: "1px solid var(--role-border)",
+                          }}
+                        >
+                          <List size={16} />
+                        </button>
+                      </div>
+
+                      <div
+                        role="group"
+                        aria-label="Density"
+                        style={{ display: "inline-flex", border: "1px solid var(--role-border)", borderRadius: 8, overflow: "hidden" }}
+                      >
+                        <button
+                          data-testid="explore-density-comfortable"
+                          aria-pressed={density === "comfortable"}
+                          aria-label="Comfortable density"
+                          onClick={() => setDensity("comfortable")}
+                          style={{
+                            padding: "8px 10px", border: "none", cursor: "pointer", fontSize: "13px",
+                            fontFamily: "var(--role-font-ui)",
+                            background: density === "comfortable" ? "var(--color-forest)" : "var(--role-surface)",
+                            color: density === "comfortable" ? "var(--color-glass-white)" : "var(--role-text)",
+                          }}
+                        >
+                          Comfortable
+                        </button>
+                        <button
+                          data-testid="explore-density-compact"
+                          aria-pressed={density === "compact"}
+                          aria-label="Compact density"
+                          onClick={() => setDensity("compact")}
+                          style={{
+                            padding: "8px 10px", border: "none", cursor: "pointer", fontSize: "13px",
+                            fontFamily: "var(--role-font-ui)",
+                            background: density === "compact" ? "var(--color-forest)" : "var(--role-surface)",
+                            color: density === "compact" ? "var(--color-glass-white)" : "var(--role-text)",
+                            borderLeft: "1px solid var(--role-border)",
+                          }}
+                        >
+                          Compact
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
@@ -438,7 +533,17 @@ export function Explore({
                 
                 <TrendingRail items={trending} />
                 {recentItems.length > 0 && <RecentlyViewedRail items={recentItems} />}
-                <div data-testid="explore-grid" style={gridStyle}>
+                {view === "list" ? (
+                  <div
+                    data-testid="explore-list"
+                    style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", marginTop: "var(--space-3)" }}
+                  >
+                    {displayedData.map((l) => (
+                      <ListingRow key={l.id} listing={l} onNavigate={onCardClick} />
+                    ))}
+                  </div>
+                ) : (
+                <div data-testid="explore-grid" style={{ ...gridStyle, gridTemplateColumns: density === "compact" ? "repeat(auto-fill, minmax(min(180px, 100%), 1fr))" : gridStyle.gridTemplateColumns }}>
                   {displayedData.map((l) => (
                     <Link
                       key={l.id}
@@ -455,6 +560,7 @@ export function Explore({
                     </Link>
                   ))}
                 </div>
+                )}
                 
                 {/* Infinite scroll: Load more button (K2.9 #2) */}
                 {hasMore && (
