@@ -345,7 +345,18 @@ export function Explore({
 
         {/* Desktop: persistent filter sidebar + grid. Mobile: bottom-sheet filters. */}
         <div className="explore-layout" style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "var(--space-3)", marginTop: "var(--space-3)", paddingInline: "var(--nav-inline-pad)" }}>
-          <aside data-testid="explore-sidebar" className="explore-desktop-only" style={{ display: "block" }}>
+          <aside
+            data-testid="explore-sidebar"
+            className="explore-desktop-only"
+            style={{
+              display: "block",
+              position: "sticky",
+              top: "calc(var(--nav-height) + var(--space-3))",
+              alignSelf: "start",
+              maxHeight: "calc(100vh - var(--nav-height) - var(--space-4))",
+              overflowY: "auto",
+            }}
+          >
             <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} />
           </aside>
 
