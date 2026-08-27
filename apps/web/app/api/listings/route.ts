@@ -15,6 +15,21 @@ export async function POST(req: NextRequest) {
   if (!identity) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!identity.vendorId) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
+  // D-2 vendor gate: legacy SA `nmu` vendors must pick a Nigerian campus before posting.
+  if (identity.campus === "nmu") {
+    return NextResponse.json(
+      {
+        error: "nmu_migration_required",
+        message: "Nigeria Maritime University has been split into two campuses. Please select yours before posting.",
+        options: [
+          { id: "nmu-okerenkoko", name: "Nigeria Maritime University (Okerenkoko)" },
+          { id: "nmu-kurutie", name: "Nigeria Maritime University (Kurutie)" },
+        ],
+      },
+      { status: 409 },
+    );
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();
