@@ -211,8 +211,10 @@ export function ListingCard({
               </span>
             </span>
           )}
-          {typeof listing.rating === "number" && (
-            <span data-testid="listing-card-rating">★ {listing.rating.toFixed(1)}</span>
+          {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
+            <span data-testid="listing-card-rating">★ {listing.vendorRatingAvg.toFixed(1)} <span style={{ color: "var(--role-text-muted)", fontSize: 12 }}>({listing.vendorRatingCount})</span></span>
+          ) : (
+            <span data-testid="listing-card-rating-empty" style={{ color: "var(--role-text-muted)", fontSize: 12 }}>New</span>
           )}
           {listing.featured && (
             <span data-testid="listing-featured" style={{ color: "var(--role-gold)" }}>

@@ -178,8 +178,10 @@ function StorefrontListingCard({ listing }: { listing: ExploreListing }) {
               ✓ Vouched
             </span>
           )}
-          {typeof listing.rating === "number" && (
-            <span>★ {listing.rating.toFixed(1)}</span>
+          {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
+            <span>★ {listing.vendorRatingAvg.toFixed(1)} ({listing.vendorRatingCount})</span>
+          ) : (
+            <span style={{ fontSize: 12, color: "var(--role-text-muted)" }}>New</span>
           )}
           {listing.featured && (
             <span style={{ color: "#f59e0b", fontWeight: 500 }}>Featured</span>

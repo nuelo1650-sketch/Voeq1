@@ -143,10 +143,12 @@ export function ListingRow({
           <span style={{ fontWeight: 600, color: "var(--role-text)" }}>
             {formatPrice(listing.priceMinor)}
           </span>
-          {typeof listing.rating === "number" && (
+          {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
             <span style={{ color: "var(--role-text-muted)" }}>
-              ★ {listing.rating.toFixed(1)}
+              ★ {listing.vendorRatingAvg.toFixed(1)} ({listing.vendorRatingCount})
             </span>
+          ) : (
+            <span style={{ color: "var(--role-text-muted)", fontSize: 12 }}>New</span>
           )}
         </div>
       </div>

@@ -28,8 +28,8 @@ export interface VendorSummary {
   categorySlug: string;
   categoryColor: string;
   photoUrl: string | null;
-  rating: number;
-  reviewCount: number;
+  rating?: number;
+  reviewCount?: number;
   status: "open" | "closing_soon" | "closed";
   campusId: string;
   priceRange?: {
@@ -202,73 +202,73 @@ const CATEGORY_SLUG_TO_NAME: Record<string, string> = Object.fromEntries(
 export const vendors: VendorSummary[] = [
   {
     id: "1", slug: "kemi-cuts", name: "Kemi Cuts", category: "Fashion", categorySlug: "fashion", categoryColor: "#E8919D",
-    photoUrl: null, rating: 4.8, reviewCount: 24, status: "open", campusId: "nmu",
+    photoUrl: null, status: "open", campusId: "nmu",
     priceRange: { min: 2000, max: 8000, currency: "NGN" },
     tags: ["popular", "topRated"],
   },
   {
     id: "2", slug: "tech-fix-nmu", name: "TechFix NMU", category: "Tech & Repairs", categorySlug: "tech", categoryColor: "#5BA8A0",
-    photoUrl: null, rating: 4.9, reviewCount: 42, status: "open", campusId: "nmu",
+    photoUrl: null, status: "open", campusId: "nmu",
     priceRange: { min: 1500, max: 25000, currency: "NGN" },
     tags: ["popular", "topRated", "trending"],
   },
   {
     id: "3", slug: "mama-jollof", name: "Mama Jollof Kitchen", category: "Food & Drinks", categorySlug: "food", categoryColor: "#E8A33D",
-    photoUrl: null, rating: 4.7, reviewCount: 89, status: "closing_soon", campusId: "nmu",
+    photoUrl: null, status: "closing_soon", campusId: "nmu",
     priceRange: { min: 500, max: 3000, currency: "NGN" },
     tags: ["popular", "topRated"],
   },
   {
     id: "4", slug: "print-hub", name: "Print Hub Express", category: "Printing", categorySlug: "printing", categoryColor: "#5B7FB8",
-    photoUrl: null, rating: 4.6, reviewCount: 38, status: "open", campusId: "nmu",
+    photoUrl: null, status: "open", campusId: "nmu",
     priceRange: { min: 100, max: 5000, currency: "NGN" },
     tags: ["trending"],
   },
   {
     id: "5", slug: "beauty-by-ada", name: "Beauty by Ada", category: "Beauty & Care", categorySlug: "beauty", categoryColor: "#C97B9E",
-    photoUrl: null, rating: 4.9, reviewCount: 56, status: "open", campusId: "nmu",
+    photoUrl: null, status: "open", campusId: "nmu",
     priceRange: { min: 3000, max: 15000, currency: "NGN" },
     tags: ["popular"],
   },
   {
     id: "6", slug: "campus-cafe", name: "Campus Café", category: "Food & Drinks", categorySlug: "food", categoryColor: "#E8A33D",
-    photoUrl: null, rating: 4.5, reviewCount: 127, status: "open", campusId: "nmu",
+    photoUrl: null, status: "open", campusId: "nmu",
     priceRange: { min: 800, max: 4000, currency: "NGN" },
     tags: ["new"],
   },
   {
     id: "7", slug: "swift-logistics", name: "Swift Campus Logistics", category: "Logistics", categorySlug: "logistics", categoryColor: "#3B5A7B",
-    photoUrl: null, rating: 4.4, reviewCount: 31, status: "open", campusId: "nmu",
+    photoUrl: null, status: "open", campusId: "nmu",
     priceRange: { min: 500, max: 3500, currency: "NGN" },
     tags: ["new"],
   },
   {
     id: "8", slug: "ace-tutors", name: "Ace Academic Tutors", category: "Academic Services", categorySlug: "academic", categoryColor: "#2D5A3D",
-    photoUrl: null, rating: 4.8, reviewCount: 64, status: "open", campusId: "nmu",
+    photoUrl: null, status: "open", campusId: "nmu",
     priceRange: { min: 2000, max: 10000, currency: "NGN" },
     tags: [],
   },
   {
     id: "9", slug: "snap-memories", name: "Snap Memories Studio", category: "Photography", categorySlug: "photography", categoryColor: "#8B6FB8",
-    photoUrl: null, rating: 4.7, reviewCount: 45, status: "open", campusId: "nmu",
+    photoUrl: null, status: "open", campusId: "nmu",
     priceRange: { min: 5000, max: 50000, currency: "NGN" },
     tags: ["new"],
   },
   {
     id: "10", slug: "stitch-perfect", name: "Stitch Perfect Tailoring", category: "Tailoring", categorySlug: "tailoring", categoryColor: "#C9A24B",
-    photoUrl: null, rating: 4.6, reviewCount: 29, status: "closing_soon", campusId: "nmu",
+    photoUrl: null, status: "closing_soon", campusId: "nmu",
     priceRange: { min: 1500, max: 12000, currency: "NGN" },
     tags: [],
   },
   {
     id: "11", slug: "gadget-repair", name: "Gadget Repair Pro", category: "Tech & Repairs", categorySlug: "tech", categoryColor: "#5BA8A0",
-    photoUrl: null, rating: 4.5, reviewCount: 52, status: "open", campusId: "nmu",
+    photoUrl: null, status: "open", campusId: "nmu",
     priceRange: { min: 2000, max: 30000, currency: "NGN" },
     tags: [],
   },
   {
     id: "12", slug: "fresh-bites", name: "Fresh Bites Eatery", category: "Food & Drinks", categorySlug: "food", categoryColor: "#E8A33D",
-    photoUrl: null, rating: 4.3, reviewCount: 98, status: "closed", campusId: "nmu",
+    photoUrl: null, status: "closed", campusId: "nmu",
     priceRange: { min: 600, max: 3500, currency: "NGN" },
     tags: [],
   },

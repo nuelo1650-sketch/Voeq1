@@ -156,13 +156,21 @@ function RecommendationCard({ listing }: { listing: ExploreListing }) {
         }}>
           {formatPrice(listing.priceMinor)}
         </div>
-        {typeof listing.rating === "number" && (
+        {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
           <div style={{
             fontSize: "12px",
             color: "var(--role-text-muted)",
             fontFamily: "var(--role-font-ui)",
           }}>
-            ★ {listing.rating.toFixed(1)}
+            ★ {listing.vendorRatingAvg.toFixed(1)} ({listing.vendorRatingCount})
+          </div>
+        ) : (
+          <div style={{
+            fontSize: "12px",
+            color: "var(--role-text-muted)",
+            fontFamily: "var(--role-font-ui)",
+          }}>
+            New
           </div>
         )}
         {listing.verified && (

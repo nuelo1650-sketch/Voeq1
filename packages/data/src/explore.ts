@@ -1,5 +1,6 @@
 import type { Listing, Vendor } from "./interfaces";
 import { mockListingsRepo, mockVendorRepo, mockListingsRepoThatFails, vendorName } from "./mock";
+import { mockReviewRepo } from "./shopper";
 
 /**
  * Explore data boundary (Doc 04 PG-PUB-002/003, Doc 07 §7.7).
@@ -16,7 +17,6 @@ export type Availability = "open" | "closed" | "soon";
 
 export interface ExploreListing extends Listing {
   vendorName: string;
-  rating?: number;
   verified?: boolean;
   featured?: boolean;
   soldOut?: boolean;
@@ -24,6 +24,10 @@ export interface ExploreListing extends Listing {
   categorySlug?: string;
   image?: string;
   trending?: boolean;
+  /** Vendor's average rating, computed from the reviews table. undefined if no reviews. */
+  vendorRatingAvg?: number;
+  /** Number of reviews for this vendor. */
+  vendorRatingCount?: number;
 }
 
 export interface ExploreFilters {
@@ -57,18 +61,18 @@ export interface ExploreResult {
   cached?: ExploreListing[];
 }
 
-function toExploreListing(l: Listing, vendors: Vendor[]): ExploreListing {
+function toExploreListing(l: Listing, vendors: Vendor[], vendorRatings?: Map<string, { avg: number; count: number }>): ExploreListing {
   const v = vendors.find((x) => x.id === l.vendorId);
   // Mock-only extras are attached by the mock repo objects; cast to read them.
   const extra = l as Listing & {
-    rating?: number; verified?: boolean; featured?: boolean;
+    verified?: boolean; featured?: boolean;
     soldOut?: boolean; availability?: Availability; categorySlug?: string;
     image?: string; trending?: boolean;
   };
+  const vr = vendorRatings?.get(l.vendorId);
   return {
     ...l,
     vendorName: v?.name ?? vendorName(l.vendorId),
-    rating: extra.rating,
     verified: extra.verified,
     featured: extra.featured,
     soldOut: extra.soldOut,
@@ -77,7 +81,26 @@ function toExploreListing(l: Listing, vendors: Vendor[]): ExploreListing {
     image: extra.image ?? (Array.isArray(l.images) ? l.images[0] : undefined),
     // Trending derives from a real signal (featured), not invented analytics.
     trending: l.isFeatured || extra.trending,
+    vendorRatingAvg: vr?.avg,
+    vendorRatingCount: vr?.count,
   };
+}
+
+/** Compute average rating + count per vendor from the reviews table. */
+async function computeVendorRatings(vendorIds: string[]): Promise<Map<string, { avg: number; count: number }>> {
+  const result = new Map<string, { avg: number; count: number }>();
+  const unique = Array.from(new Set(vendorIds));
+  await Promise.all(
+    unique.map(async (vid) => {
+      const reviews = await mockReviewRepo.listByVendor(vid);
+      const rated = reviews.filter((r) => typeof r.rating === "number" && r.status !== "hidden");
+      if (rated.length > 0) {
+        const avg = Math.round((rated.reduce((s, r) => s + r.rating, 0) / rated.length) * 10) / 10;
+        result.set(vid, { avg, count: rated.length });
+      }
+    }),
+  );
+  return result;
 }
 
 /** PURE: apply filters. Unit-tested independently of the repo. */
@@ -86,7 +109,7 @@ export function applyFilters(items: ExploreListing[], f: ExploreFilters): Explor
   if (f.category) out = out.filter((i) => i.categorySlug === f.category);
   if (typeof f.minPrice === "number") out = out.filter((i) => i.priceMinor >= f.minPrice!);
   if (typeof f.maxPrice === "number") out = out.filter((i) => i.priceMinor <= f.maxPrice!);
-  if (typeof f.minRating === "number") out = out.filter((i) => (i.rating ?? 0) >= f.minRating!);
+  if (typeof f.minRating === "number") out = out.filter((i) => (i.vendorRatingAvg ?? 0) >= f.minRating!);
   if (f.verifiedOnly) out = out.filter((i) => i.verified);
   if (f.featuredOnly) out = out.filter((i) => i.featured);
   
@@ -131,7 +154,7 @@ export function applySort(items: ExploreListing[], sort: ExploreFilters["sort"])
   switch (sort) {
     case "price-asc": return arr.sort((a, b) => a.priceMinor - b.priceMinor);
     case "price-desc": return arr.sort((a, b) => b.priceMinor - a.priceMinor);
-    case "rating-desc": return arr.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    case "rating-desc": return arr.sort((a, b) => (b.vendorRatingAvg ?? 0) - (a.vendorRatingAvg ?? 0));
     case "newest": return arr.sort((a, b) => (b.id > a.id ? 1 : -1)); // Mock: sort by ID as proxy for creation time
     case "near-me": return arr; // Would need geolocation; mock returns original order
     default: return arr; // relevance = mock order
@@ -152,8 +175,9 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
       listingsRepo.list({ campus: params.campus, category }),
       mockVendorRepo.listVendors({ campus: params.campus }),
     ]);
+    const vendorRatings = await computeVendorRatings(vendors.map((v) => v.id));
 
-    let mapped: ExploreListing[] = listings.map((l) => toExploreListing(l, vendors));
+    let mapped: ExploreListing[] = listings.map((l) => toExploreListing(l, vendors, vendorRatings));
 
     if (params.query) {
       const q = params.query.trim().toLowerCase();
@@ -193,5 +217,6 @@ export async function loadListing(id: string): Promise<ExploreListing | null> {
     mockVendorRepo.listVendors({}),
   ]);
   if (!listing) return null;
-  return toExploreListing(listing, vendors);
+  const vendorRatings = await computeVendorRatings(vendors.map((v) => v.id));
+  return toExploreListing(listing, vendors, vendorRatings);
 }

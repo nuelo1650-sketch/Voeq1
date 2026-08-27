@@ -982,7 +982,7 @@ function FeaturedCarousel({ items }: { items: ExploreListing[] }) {
               </div>
               
               <div>
-                {currentItem.rating && (
+                {typeof currentItem.vendorRatingAvg === "number" && (currentItem.vendorRatingCount ?? 0) > 0 ? (
                   <div style={{ 
                     display: "flex", 
                     alignItems: "center", 
@@ -992,7 +992,16 @@ function FeaturedCarousel({ items }: { items: ExploreListing[] }) {
                     color: "var(--role-text)",
                   }}>
                     <span>⭐</span>
-                    <span style={{ fontWeight: 600 }}>{currentItem.rating.toFixed(1)}</span>
+                    <span style={{ fontWeight: 600 }}>{currentItem.vendorRatingAvg.toFixed(1)}</span>
+                    <span style={{ color: "var(--role-text-muted)", fontSize: 12 }}>({currentItem.vendorRatingCount})</span>
+                  </div>
+                ) : (
+                  <div style={{
+                    fontSize: "12px",
+                    color: "var(--role-text-muted)",
+                    marginBottom: "var(--space-2)",
+                  }}>
+                    New
                   </div>
                 )}
                 <p style={{ 

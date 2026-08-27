@@ -6,9 +6,9 @@ function mk(partial: Partial<ExploreListing> & Pick<ExploreListing, "id" | "vend
 }
 
 const sample: ExploreListing[] = [
-  mk({ id: "a", vendorId: "v1", title: "Alpha", priceMinor: 5000, isPublished: true, images: [], categorySlug: "food", rating: 4.5, verified: true, featured: false, availability: "open" }),
-  mk({ id: "b", vendorId: "v2", title: "Beta", priceMinor: 9000, isPublished: true, images: [], categorySlug: "books", rating: 3.2, verified: false, featured: true, availability: "open" }),
-  mk({ id: "c", vendorId: "v3", title: "Gamma", priceMinor: 12000, isPublished: true, images: [], categorySlug: "food", rating: 5.0, verified: true, featured: true, availability: "closed", soldOut: true }),
+  mk({ id: "a", vendorId: "v1", title: "Alpha", priceMinor: 5000, isPublished: true, images: [], categorySlug: "food", vendorRatingAvg: 4.5, vendorRatingCount: 12, verified: true, featured: false, availability: "open" }),
+  mk({ id: "b", vendorId: "v2", title: "Beta", priceMinor: 9000, isPublished: true, images: [], categorySlug: "books", vendorRatingAvg: 3.2, vendorRatingCount: 5, verified: false, featured: true, availability: "open" }),
+  mk({ id: "c", vendorId: "v3", title: "Gamma", priceMinor: 12000, isPublished: true, images: [], categorySlug: "food", vendorRatingAvg: 5.0, vendorRatingCount: 20, verified: true, featured: true, availability: "closed", soldOut: true }),
 ];
 
 describe("applyFilters", () => {

@@ -110,7 +110,7 @@ export function ListingDetail({ id }: { id: string }) {
           setStatus("success");
           
           // Load "More from this vendor" (same vendorId, exclude current)
-          loadExplore({ query: "", campus: "nmu" })
+          loadExplore({ query: "" })
             .then((exploreRes) => {
               if (cancelled) return;
               const fromVendor = exploreRes.data
@@ -121,7 +121,7 @@ export function ListingDetail({ id }: { id: string }) {
           
           // Load "You might also like" (same category, different vendors)
           if (res.categorySlug) {
-            loadExplore({ category: res.categorySlug, campus: "nmu" })
+            loadExplore({ category: res.categorySlug })
               .then((exploreRes) => {
                 if (cancelled) return;
                 const related = exploreRes.data
@@ -603,8 +603,10 @@ export function ListingDetail({ id }: { id: string }) {
                   ✓ Student Vouched
                 </span>
               )}
-              {typeof listing.rating === "number" && (
-                <span data-testid="listing-detail-rating">★ {listing.rating.toFixed(1)}</span>
+              {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
+                <span data-testid="listing-detail-rating">★ {listing.vendorRatingAvg.toFixed(1)} <span style={{ color: "var(--role-text-muted)", fontSize: 14 }}>({listing.vendorRatingCount})</span></span>
+              ) : (
+                <span data-testid="listing-detail-rating-empty" style={{ color: "var(--role-text-muted)", fontSize: 14 }}>New</span>
               )}
               {listing.featured && (
                 <span data-testid="listing-detail-featured" style={{ color: "var(--role-gold)" }}>
@@ -934,14 +936,23 @@ function ListingCard({ listing }: { listing: ExploreListing }) {
         }}>
           {formatPrice(listing.priceMinor)}
         </div>
-        {typeof listing.rating === "number" && (
+        {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
           <div style={{
             fontSize: "12px",
             color: "var(--role-text-muted)",
             fontFamily: "var(--role-font-ui)",
             marginTop: 4,
           }}>
-            ★ {listing.rating.toFixed(1)}
+            ★ {listing.vendorRatingAvg.toFixed(1)} ({listing.vendorRatingCount})
+          </div>
+        ) : (
+          <div style={{
+            fontSize: "12px",
+            color: "var(--role-text-muted)",
+            fontFamily: "var(--role-font-ui)",
+            marginTop: 4,
+          }}>
+            New
           </div>
         )}
       </div>

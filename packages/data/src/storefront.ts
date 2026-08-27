@@ -22,13 +22,12 @@ function toExploreListingLocal(l: Listing & MockListingExtra, vendorDisplayName:
   return {
     ...l,
     vendorName: vendorDisplayName,
-    rating: l.rating,
     verified: l.verified,
     soldOut: l.soldOut,
     availability: l.availability,
     categorySlug: l.categorySlug,
     image: l.image ?? (Array.isArray(l.images) ? l.images[0] : undefined),
-    trending: l.trending,
+    trending: l.isFeatured || l.trending,
   };
 }
 
@@ -51,20 +50,28 @@ export interface VendorStorefrontView extends Vendor {
  * graceful storefront (hero + honest empty listings/reviews) rather than 404.
  * Returns null only for an id/slug that matches nothing (route calls notFound()).
  */
+/** Compute average rating + count for a vendor from the reviews table. */
+async function vendorRatingFromReviews(vendorId: string): Promise<{ ratingAvg: number | undefined; ratingCount: number }> {
+  const reviews = await mockReviewRepo.listByVendor(vendorId);
+  const rated = reviews.filter((r) => typeof r.rating === "number" && r.status !== "hidden");
+  if (rated.length === 0) return { ratingAvg: undefined, ratingCount: 0 };
+  const ratingAvg = Math.round((rated.reduce((s, r) => s + r.rating, 0) / rated.length) * 10) / 10;
+  return { ratingAvg, ratingCount: rated.length };
+}
+
 export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStorefrontView | null> {
   // 1) Curated storefront fixture (has real listings).
   const fixture = MOCK_VENDORS.find((v) => v.id === idOrSlug || v.handle === idOrSlug);
   if (fixture) {
     const displayName = fixture.name ?? vendorName(fixture.id);
     const listings = listListingsByVendor(fixture.id).map((l) => toExploreListingLocal(l, displayName));
-    const rated = listings.filter((m) => typeof m.rating === "number");
-    const ratingAvg = rated.length > 0 ? rated.reduce((s, m) => s + (m.rating as number), 0) / rated.length : undefined;
     const reviews = await mockReviewRepo.listByVendor(fixture.id);
+    const { ratingAvg, ratingCount } = await vendorRatingFromReviews(fixture.id);
     return {
       ...fixture,
       listings,
       ratingAvg,
-      ratingCount: rated.length,
+      ratingCount,
       verifiedCount: listings.filter((m) => m.verified).length,
       listingCount: listings.length,
       reviews,
@@ -76,6 +83,7 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
   const showcase = showcaseVendors.find((v) => v.id === idOrSlug || v.slug === idOrSlug);
   if (showcase) {
     const reviews = await mockReviewRepo.listByVendor(showcase.id);
+    const { ratingAvg, ratingCount } = await vendorRatingFromReviews(showcase.id);
     return {
       id: showcase.id,
       name: showcase.name,
@@ -92,8 +100,8 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
       identityId: null,
       slug: showcase.slug,
       listings: [],
-      ratingAvg: showcase.rating,
-      ratingCount: showcase.reviewCount,
+      ratingAvg,
+      ratingCount,
       verifiedCount: 0,
       listingCount: 0,
       reviews,
@@ -113,14 +121,13 @@ export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStor
     const listings = campusListings
       .filter((l) => l.vendorId === real.id)
       .map((l) => toExploreListingLocal(l as Listing & MockListingExtra, real.name ?? vendorName(real.id)));
-    const rated = listings.filter((m) => typeof m.rating === "number");
-    const ratingAvg = rated.length > 0 ? rated.reduce((s, m) => s + (m.rating as number), 0) / rated.length : undefined;
     const reviews = await mockReviewRepo.listByVendor(real.id);
+    const { ratingAvg, ratingCount } = await vendorRatingFromReviews(real.id);
     return {
       ...real,
       listings,
       ratingAvg,
-      ratingCount: rated.length,
+      ratingCount,
       verifiedCount: listings.filter((m) => m.verified).length,
       listingCount: listings.length,
       reviews,
