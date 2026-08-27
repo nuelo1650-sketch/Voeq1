@@ -159,7 +159,7 @@ export function Filters({
       {/* Divider */}
       <div style={{ height: 1, background: "var(--color-ink-subtle)", margin: 0 }} />
 
-      {/* Quick filters */}
+      {/* Quick filters — pill toggles (PassA-6) */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <p style={{ 
           fontSize: 12, 
@@ -172,41 +172,31 @@ export function Filters({
           Quick filters
         </p>
 
-        {/* Open now */}
-        <label style={modernCheckStyle}>
-          <input
-            data-testid="filter-open-now"
-            type="checkbox"
-            checked={!!value.openNow}
-            onChange={(e) => set({ openNow: e.target.checked || undefined })}
-            style={checkboxStyle}
-          />
-          <span>Open now</span>
-        </label>
-
-        {/* Verified only */}
-        <label style={modernCheckStyle}>
-          <input
-            data-testid="filter-verified"
-            type="checkbox"
-            checked={!!value.verifiedOnly}
-            onChange={(e) => set({ verifiedOnly: e.target.checked || undefined })}
-            style={checkboxStyle}
-          />
-          <span>Verified only</span>
-        </label>
-
-        {/* Has photos */}
-        <label style={modernCheckStyle}>
-          <input
-            data-testid="filter-has-photos"
-            type="checkbox"
-            checked={!!value.hasPhotos}
-            onChange={(e) => set({ hasPhotos: e.target.checked || undefined })}
-            style={checkboxStyle}
-          />
-          <span>Has photos</span>
-        </label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {(
+            [
+              { key: "openNow", testid: "filter-open-now-pill", label: "Open now" },
+              { key: "verifiedOnly", testid: "filter-verified-pill", label: "Verified" },
+              { key: "hasPhotos", testid: "filter-has-photos-pill", label: "Has photos" },
+            ] as const
+          ).map(({ key, testid, label }) => {
+            const active = !!value[key];
+            return (
+              <button
+                key={key}
+                data-testid={testid}
+                aria-pressed={active}
+                onClick={() => set({ [key]: active ? undefined : true } as Partial<ExploreFilters>)}
+                style={{
+                  ...quickPillStyle,
+                  ...(active ? quickPillActiveStyle : {}),
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Clear all button */}
@@ -286,4 +276,25 @@ const checkboxStyle: React.CSSProperties = {
   width: 18,
   height: 18,
   cursor: "pointer",
+};
+
+// PassA-6: quick-filter pill toggles (match category pill visual language)
+const quickPillStyle: React.CSSProperties = {
+  fontFamily: "var(--font-body)",
+  fontSize: "13px",
+  fontWeight: 500,
+  padding: "6px 14px",
+  borderRadius: 999,
+  border: "1px solid var(--color-ink-subtle)",
+  background: "var(--color-glass-white)",
+  color: "var(--color-ink)",
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  transition: "all 120ms ease",
+};
+
+const quickPillActiveStyle: React.CSSProperties = {
+  background: "var(--color-forest)",
+  color: "var(--color-glass-white)",
+  borderColor: "var(--color-forest)",
 };
