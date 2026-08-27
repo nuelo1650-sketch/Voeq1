@@ -2,11 +2,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Search, UtensilsCrossed, Shirt, Laptop, Sparkles, BookOpen } from 'lucide-react';
 import { LiquidGlassPanel } from './LiquidGlassPanel';
 import { HeroVisual } from './HeroVisual';
 import { BrandLogo } from './BrandLogo';
 import { categories } from '@voeq/data';
+
+const CAT_ICONS: Record<string, React.ReactNode> = {
+  'food-drinks': <UtensilsCrossed size={16} />,
+  'fashion': <Shirt size={16} />,
+  'tech-repairs': <Laptop size={16} />,
+  'beauty-care': <Sparkles size={16} />,
+  'academic-services': <BookOpen size={16} />,
+};
 
 export function LandingHero() {
   const router = useRouter();
@@ -97,11 +105,11 @@ export function LandingHero() {
             Popular:
           </span>
           {[
-            { emoji: "🍔", name: "Food", slug: "food-drinks" },
-            { emoji: "👗", name: "Fashion", slug: "fashion" },
-            { emoji: "💻", name: "Tech Repair", slug: "tech-repairs" },
-            { emoji: "💇", name: "Beauty", slug: "beauty-care" },
-            { emoji: "📚", name: "Academic", slug: "academic-services" },
+            { iconKey: 'food-drinks', name: 'Food', slug: 'food-drinks' },
+            { iconKey: 'fashion', name: 'Fashion', slug: 'fashion' },
+            { iconKey: 'tech-repairs', name: 'Tech Repair', slug: 'tech-repairs' },
+            { iconKey: 'beauty-care', name: 'Beauty', slug: 'beauty-care' },
+            { iconKey: 'academic-services', name: 'Academic', slug: 'academic-services' },
           ].map((cat) => (
             <Link
               key={cat.slug}
@@ -133,7 +141,7 @@ export function LandingHero() {
                 e.currentTarget.style.transform = "translateY(0)";
               }}
             >
-              <span>{cat.emoji}</span>
+              <span style={{ color: "var(--color-forest)", display: "inline-flex", alignItems: "center" }}>{CAT_ICONS[cat.iconKey]}</span>
               <span>{cat.name}</span>
             </Link>
           ))}

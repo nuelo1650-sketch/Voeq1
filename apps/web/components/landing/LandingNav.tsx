@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
@@ -22,7 +23,10 @@ export function LandingNav() {
   const [open, setOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState<boolean>(false); // Default to false for immediate render
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isMounted, setIsMounted] = useState(false); // guard for portal (document exists only client-side)
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => { setIsMounted(true); }, []);
 
   // Check auth status on mount
   useEffect(() => {
@@ -195,8 +199,9 @@ export function LandingNav() {
         </svg>
       </button>
 
-      {/* Mobile full-screen overlay nav */}
-      {open && (
+      {/* Mobile full-screen overlay nav — portaled to document root so it renders
+          above ALL stacking contexts (hero content, search bar, etc.) at z-index 9999 */}
+      {open && isMounted && createPortal(
         <div
           data-testid="landing-nav-overlay"
           className="landing-nav-overlay"
@@ -229,7 +234,8 @@ export function LandingNav() {
               </button>
             </>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </nav>
   );

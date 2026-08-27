@@ -7,7 +7,7 @@ import { ListingCard } from "./ListingCard";
 export function TrendingRail({ items }: { items: ExploreListing[] }) {
   if (!items.length) return null;
   return (
-    <section data-testid="trending-rail" aria-label="Trending on my campus" style={{ marginBlock: "var(--space-3)" }}>
+    <section data-testid="trending-rail" aria-label="Trending on my campus" style={{ marginBlock: "var(--space-3)", overflowX: "hidden" }}>
       <h2 style={railTitle}>Trending on my campus</h2>
       <div style={{ display: "flex", gap: "var(--space-2)", overflowX: "auto", paddingBottom: 8 }}>
         {items.map((l) => (
