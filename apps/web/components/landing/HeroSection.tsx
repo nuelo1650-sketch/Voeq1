@@ -3,34 +3,28 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
-import { Search, UtensilsCrossed, Shirt, Laptop, Sparkles, BookOpen } from "lucide-react";
+import { Search, UtensilsCrossed, Shirt, Laptop, Sparkles, BookOpen, ChevronRight, ArrowRight } from "lucide-react";
 import { mockCampusRepo, type Campus } from "@voeq/data";
 import { categories } from "@voeq/data";
 
 const CAT_ICONS: Record<string, React.ReactNode> = {
-  "food-drinks": <UtensilsCrossed size={16} />,
-  fashion: <Shirt size={16} />,
-  "tech-repairs": <Laptop size={16} />,
-  "beauty-care": <Sparkles size={16} />,
-  "academic-services": <BookOpen size={16} />,
+  "food-drinks": <UtensilsCrossed size={14} />,
+  fashion: <Shirt size={14} />,
+  "tech-repairs": <Laptop size={14} />,
+  "beauty-care": <Sparkles size={14} />,
+  "academic-services": <BookOpen size={14} />,
 };
 
-interface HeroSectionProps {
-  onSearch?: (query: string, category?: string) => void;
-}
-
-export function HeroSection({ onSearch }: HeroSectionProps) {
+export function HeroSection() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [campuses, setCampuses] = useState<Campus[]>([]);
-  const [mounted, setMounted] = useState(false);
-  const shouldReduceMotion = useReducedMotion();
-  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const [animated, setAnimated] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
+    setAnimated(true);
     mockCampusRepo.list().then((rows) => {
       setCampuses(rows.filter((c) => c.status === "verified"));
     });
@@ -41,181 +35,85 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.append("q", searchQuery);
     if (selectedCategory !== "all") params.append("category", selectedCategory);
-    const queryString = params.toString();
-    if (onSearch) {
-      onSearch(searchQuery, selectedCategory === "all" ? undefined : selectedCategory);
-    }
-    router.push(queryString ? `/explore?${queryString}` : "/explore");
+    router.push(params.toString() ? `/explore?${params.toString()}` : "/explore");
   };
 
-  // Kinetic headline: each word reveals sequentially
-  const easeOut = [0.22, 1, 0.36, 1] as [number, number, number, number];
-  const easeInOut = [0.4, 0, 0.2, 1] as [number, number, number, number];
-
-  const wordVariants = {
-    hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: {
-        delay: shouldReduceMotion ? 0 : i * 0.4,
-        duration: shouldReduceMotion ? 0 : 0.5,
-        ease: easeOut,
-      },
-    }),
+  const scrollCategories = (direction: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const amount = direction === "left" ? -120 : 120;
+    scrollRef.current.scrollBy({ left: amount, behavior: "smooth" });
   };
-
-  const growVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        delay: shouldReduceMotion ? 0 : 1.2,
-        duration: shouldReduceMotion ? 0 : 0.6,
-        ease: easeOut,
-      },
-    },
-  };
-
-  const underlineVariants = {
-    hidden: { scaleX: 0 },
-    visible: {
-      scaleX: 1,
-      transition: {
-        delay: shouldReduceMotion ? 0 : 1.6,
-        duration: shouldReduceMotion ? 0 : 0.4,
-        ease: easeOut,
-      },
-    },
-  };
-
-  const tracerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: [0, 1, 1, 0],
-      x: [0, 40, 80, 120],
-      y: [0, -10, 5, 0],
-      transition: {
-        delay: shouldReduceMotion ? 0 : 0.5,
-        duration: shouldReduceMotion ? 0 : 2,
-        ease: easeInOut,
-      },
-    },
-  };
-
-  const ctaVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: shouldReduceMotion ? 0 : 1.8,
-        duration: shouldReduceMotion ? 0 : 0.4,
-        ease: easeOut,
-      },
-    },
-  };
-
-  const words = ["Find.", "Connect."];
 
   return (
     <section className="hero-section">
+      {/* Background texture + gradient */}
+      <div className="hero-bg" />
+
       <div className="hero-content">
-        {/* Kinetic headline */}
-        <div ref={headlineRef} style={{ position: "relative" }}>
-          <h1 className="hero-headline" aria-label="Find. Connect. Grow.">
-            {words.map((word, i) => (
-              <motion.span
-                key={word}
-                custom={i}
-                initial="hidden"
-                animate={mounted ? "visible" : "hidden"}
-                variants={wordVariants}
-                style={{ display: "inline-block", marginRight: "0.3em" }}
-              >
-                {word}
-              </motion.span>
-            ))}
-            <motion.span
-              custom={words.length}
-              initial="hidden"
-              animate={mounted ? "visible" : "hidden"}
-              variants={growVariants}
-              style={{
-                display: "inline-block",
-                fontStyle: "italic",
-                color: "var(--color-gold, #D4A054)",
-                transformOrigin: "left center",
-              }}
-            >
-              Grow.
-            </motion.span>
-          </h1>
-          {/* Underline draw-in */}
-          <motion.div
-            initial="hidden"
-            animate={mounted ? "visible" : "hidden"}
-            variants={underlineVariants}
-            style={{
-              height: 3,
-              background: "var(--color-gold, #D4A054)",
-              borderRadius: 2,
-              marginTop: 8,
-              transformOrigin: "left center",
-              maxWidth: 200,
-            }}
-            aria-hidden="true"
-          />
-          {/* Tracer dot */}
-          {!shouldReduceMotion && (
-            <motion.div
-              initial="hidden"
-              animate={mounted ? "visible" : "hidden"}
-              variants={tracerVariants}
-              style={{
-                position: "absolute",
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: "var(--color-gold, #D4A054)",
-                top: 0,
-                left: 0,
-                pointerEvents: "none",
-              }}
-              aria-hidden="true"
-            />
-          )}
+        {/* Eyebrow with gold dot */}
+        <div className={`hero-eyebrow ${animated ? "hero-eyebrow--in" : ""}`}>
+          <span className="hero-eyebrow-dot" />
+          <span>your campus, in motion</span>
         </div>
 
-        <motion.p
-          initial="hidden"
-          animate={mounted ? "visible" : "hidden"}
-          variants={ctaVariants}
-          className="hero-subheadline"
-        >
-          The campus marketplace for Nigerian students
-        </motion.p>
-
-        {/* Search bar */}
-        <motion.form
-          onSubmit={handleSearch}
-          initial="hidden"
-          animate={mounted ? "visible" : "hidden"}
-          variants={ctaVariants}
-          className="hero-search-bar"
-        >
-          <div className="hero-search-input-wrapper">
-            <Search size={20} className="hero-search-icon" />
-            <input
-              type="text"
-              placeholder="What are you looking for?"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="hero-search-input"
+        {/* Kinetic headline */}
+        <div className="hero-headline-wrap">
+          <h1 className="hero-headline" aria-label="Find. Connect. Grow.">
+            <span
+              className={`hero-word ${animated ? "hero-word--in" : ""}`}
+              style={{ animationDelay: "0.4s" }}
+            >
+              Find.
+            </span>{" "}
+            <span
+              className={`hero-word ${animated ? "hero-word--in" : ""}`}
+              style={{ animationDelay: "0.95s" }}
+            >
+              Connect.
+            </span>
+            <br />
+            <span
+              className={`hero-word hero-word--grow ${animated ? "hero-word--in" : ""}`}
+              style={{ animationDelay: "1.5s" }}
+            >
+              Grow.
+            </span>
+            <span
+              className={`hero-underline ${animated ? "hero-underline--in" : ""}`}
+              style={{ animationDelay: "2.05s" }}
+              aria-hidden="true"
             />
-          </div>
+          </h1>
+          {/* Tracer dot */}
+          <span
+            className={`hero-tracer ${animated ? "hero-tracer--in" : ""}`}
+            style={{ animationDelay: "0.3s" }}
+            aria-hidden="true"
+          />
+        </div>
+
+        {/* Subheadline */}
+        <p
+          className={`hero-subheadline ${animated ? "hero-subheadline--in" : ""}`}
+          style={{ animationDelay: "2.25s" }}
+        >
+          The campus marketplace for Nigerian students — discover vendors, services, and hand-me-downs from people on your own campus.
+        </p>
+
+        {/* Search bar — single pill */}
+        <form
+          onSubmit={handleSearch}
+          className={`hero-search-bar ${animated ? "hero-search-bar--in" : ""}`}
+          style={{ animationDelay: "2.5s" }}
+        >
+          <Search size={18} className="hero-search-icon" />
+          <input
+            type="text"
+            placeholder="What are you looking for?"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="hero-search-input"
+          />
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -223,102 +121,100 @@ export function HeroSection({ onSearch }: HeroSectionProps) {
           >
             <option value="all">All categories</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.slug}>
-                {c.name}
-              </option>
+              <option key={c.id} value={c.slug}>{c.name}</option>
             ))}
           </select>
           <button type="submit" className="hero-search-btn">
-            Search
+            <span className="hero-search-btn-text">Search</span>
+            <ChevronRight size={18} className="hero-search-btn-icon" />
           </button>
-        </motion.form>
+        </form>
 
-        {/* Category pills */}
-        <motion.div
-          initial="hidden"
-          animate={mounted ? "visible" : "hidden"}
-          variants={ctaVariants}
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 8,
-            justifyContent: "center",
-          }}
+        {/* Category pills — scrollable */}
+        <div
+          className={`hero-pills-wrapper ${animated ? "hero-pills-wrapper--in" : ""}`}
+          style={{ animationDelay: "2.65s" }}
         >
-          {[
-            { iconKey: "food-drinks", name: "Food", slug: "food-drinks" },
-            { iconKey: "fashion", name: "Fashion", slug: "fashion" },
-            { iconKey: "tech-repairs", name: "Tech Repair", slug: "tech-repairs" },
-            { iconKey: "beauty-care", name: "Beauty", slug: "beauty-care" },
-            { iconKey: "academic-services", name: "Academic", slug: "academic-services" },
-          ].map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/explore?category=${cat.slug}`}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "6px 14px",
-                background: "var(--glass-bg)",
-                backdropFilter: "var(--glass-blur)",
-                WebkitBackdropFilter: "var(--glass-blur)",
-                border: "1px solid var(--glass-border)",
-                borderRadius: 999,
-                fontSize: 14,
-                fontWeight: 500,
-                color: "var(--color-ink-deep)",
-                textDecoration: "none",
-                transition: "all 0.2s ease",
-              }}
+          <button
+            onClick={() => scrollCategories("left")}
+            className="hero-pill-scroll hero-pill-scroll--left"
+            aria-label="Scroll categories left"
+          >
+            <ArrowRight size={14} style={{ transform: "rotate(180deg)" }} />
+          </button>
+          <div className="hero-pills" ref={scrollRef}>
+            <button
+              className={`hero-pill ${selectedCategory === "all" ? "hero-pill--active" : ""}`}
+              onClick={() => setSelectedCategory("all")}
             >
-              <span style={{ color: "var(--color-forest)", display: "inline-flex", alignItems: "center" }}>
-                {CAT_ICONS[cat.iconKey]}
-              </span>
-              <span>{cat.name}</span>
-            </Link>
-          ))}
-        </motion.div>
+              Everything
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                className={`hero-pill ${selectedCategory === cat.slug ? "hero-pill--active" : ""}`}
+                onClick={() => setSelectedCategory(cat.slug)}
+              >
+                {CAT_ICONS[cat.slug]}
+                <span>{cat.name}</span>
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => scrollCategories("right")}
+            className="hero-pill-scroll hero-pill-scroll--right"
+            aria-label="Scroll categories right"
+          >
+            <ArrowRight size={14} />
+          </button>
+        </div>
 
         {/* CTA buttons */}
-        <motion.div
-          initial="hidden"
-          animate={mounted ? "visible" : "hidden"}
-          variants={ctaVariants}
-          className="hero-ctas"
+        <div
+          className={`hero-ctas ${animated ? "hero-ctas--in" : ""}`}
+          style={{ animationDelay: "2.8s" }}
         >
-          <Link href="/explore" className="btn-primary btn-lg">
-            Explore
+          <Link href="/explore" className="btn-primary btn-lg hero-cta-primary">
+            <span>Explore marketplace</span>
+            <ArrowRight size={18} />
           </Link>
           <Link href="/for-vendors" className="btn-ghost btn-lg">
             Become a vendor
           </Link>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Campus roll-call (desktop right column) */}
+      {/* Right column — campus roll-call (desktop only) */}
       {campuses.length > 0 && (
-        <motion.div
-          initial="hidden"
-          animate={mounted ? "visible" : "hidden"}
-          variants={ctaVariants}
-          className="hero-campus-roll"
-          style={{
-            display: "none",
-          }}
+        <div
+          className={`hero-right-col ${animated ? "hero-right-col--in" : ""}`}
+          style={{ animationDelay: "2.9s" }}
         >
-          <p style={{ fontSize: 13, color: "var(--color-ink-muted)", marginBottom: 8 }}>
-            Now live at:
-          </p>
-          <div className="hero-campus-list">
-            {campuses.map((c) => (
-              <span key={c.id} className="hero-campus-chip">
-                {c.name}
-              </span>
-            ))}
+          <div className="hero-campus-roll">
+            <p className="hero-campus-roll-label">Now live at:</p>
+            <div className="hero-campus-list">
+              {campuses.map((c, i) => (
+                <span
+                  key={c.id}
+                  className="hero-campus-chip"
+                  style={{ animationDelay: `${2.9 + i * 0.06}s` }}
+                >
+                  <span className="hero-campus-dot" />
+                  <span>{c.name}</span>
+                </span>
+              ))}
+            </div>
           </div>
-        </motion.div>
+          <p className="hero-brand-copy">
+            Built by students, for students. Your campus economy, in one place.
+          </p>
+        </div>
       )}
+
+      {/* Mobile scroll indicator */}
+      <div className="hero-scroll-indicator">
+        <div className="hero-scroll-line" />
+      </div>
     </section>
   );
 }
