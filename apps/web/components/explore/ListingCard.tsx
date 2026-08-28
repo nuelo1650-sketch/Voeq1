@@ -202,15 +202,8 @@ export function ListingCard({
           )}
         </div>
 
-        {/* Trust row (C.3.2): verified badge / rating / featured mark */}
+        {/* Trust row (C.3.2): rating / featured mark */}
         <div data-testid="listing-trust" style={{ display: "flex", gap: 8, alignItems: "center", fontSize: "12px", color: "var(--role-text-muted)" }}>
-          {listing.verified && (
-            <span data-testid="listing-card-verified-pill">
-              <span data-testid="listing-verified" style={{ color: "var(--role-accent-strong)" }}>
-                ✓ Vouched
-              </span>
-            </span>
-          )}
           {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
             <span data-testid="listing-card-rating">★ {listing.vendorRatingAvg.toFixed(1)} <span style={{ color: "var(--role-text-muted)", fontSize: 12 }}>({listing.vendorRatingCount})</span></span>
           ) : (

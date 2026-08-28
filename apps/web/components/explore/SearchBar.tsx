@@ -157,7 +157,7 @@ export function SearchBar({
         .map((v) => ({
           type: "vendor",
           label: v.vendorName,
-          subtitle: v.verified ? "Verified vendor" : "Vendor",
+          subtitle: "Vendor",
           value: v.vendorName,
           section: "vendor",
         }));

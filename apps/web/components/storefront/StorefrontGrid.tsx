@@ -173,11 +173,6 @@ function StorefrontListingCard({ listing }: { listing: ExploreListing }) {
           color: "var(--role-text-muted)",
           fontFamily: "var(--role-font-ui)",
         }}>
-          {listing.verified && (
-            <span style={{ color: "var(--role-accent-strong)", fontWeight: 500 }}>
-              ✓ Vouched
-            </span>
-          )}
           {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
             <span>★ {listing.vendorRatingAvg.toFixed(1)} ({listing.vendorRatingCount})</span>
           ) : (

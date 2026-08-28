@@ -184,7 +184,6 @@ export function Explore({
     if (filters.maxPrice) count++;
     if (filters.minRating) count++;
     if (filters.openNow) count++;
-    if (filters.verifiedOnly) count++;
     if (filters.hasPhotos) count++;
     if (filters.recentlyActive) count++;
     if (filters.featuredOnly) count++;
@@ -201,7 +200,7 @@ export function Explore({
     const next: ExploreFilters = { ...filters };
     const order: (keyof ExploreFilters)[] = [
       "category", "minPrice", "maxPrice", "minRating",
-      "openNow", "verifiedOnly", "hasPhotos", "recentlyActive", "featuredOnly",
+      "openNow", "hasPhotos", "recentlyActive", "featuredOnly",
     ];
     for (const key of order) {
       if (key !== "sort" && next[key] !== undefined) {
@@ -362,9 +361,6 @@ export function Explore({
             )}
             {filters.openNow && (
               <FilterChip label="Open now" onRemove={() => removeFilter('openNow')} />
-            )}
-            {filters.verifiedOnly && (
-              <FilterChip label="Verified" onRemove={() => removeFilter('verifiedOnly')} />
             )}
             {filters.hasPhotos && (
               <FilterChip label="Has photos" onRemove={() => removeFilter('hasPhotos')} />

@@ -173,7 +173,6 @@ export function Filters({
           {(
             [
               { key: "openNow", testid: "filter-open-now-pill", label: "Open now" },
-              { key: "verifiedOnly", testid: "filter-verified-pill", label: "Verified" },
               { key: "hasPhotos", testid: "filter-has-photos-pill", label: "Has photos" },
             ] as const
           ).map(({ key, testid, label }) => {
@@ -197,7 +196,7 @@ export function Filters({
       </div>
 
       {/* Clear all button */}
-      {(value.category || value.minPrice || value.maxPrice || value.minRating || value.openNow || value.verifiedOnly || value.hasPhotos) && (
+      {(value.category || value.minPrice || value.maxPrice || value.minRating || value.openNow || value.hasPhotos) && (
         <button
           onClick={() => onChange({})}
           style={{

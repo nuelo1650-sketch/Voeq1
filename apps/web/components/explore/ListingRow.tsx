@@ -114,22 +114,6 @@ export function ListingRow({
           >
             {listing.vendorName}
           </span>
-          {listing.verified && (
-            <span
-              title="Verified"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 2,
-                color: "var(--color-forest)",
-                fontSize: 12,
-                fontWeight: 600,
-                flexShrink: 0,
-              }}
-            >
-              <BadgeCheck size={14} /> Verified
-            </span>
-          )}
         </div>
 
         <div

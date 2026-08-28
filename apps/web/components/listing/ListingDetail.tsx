@@ -598,11 +598,6 @@ export function ListingDetail({ id }: { id: string }) {
               data-testid="listing-detail-trust"
               style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", fontSize: "13px", color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}
             >
-              {listing.verified && (
-                <span data-testid="listing-detail-verified" style={{ color: "var(--role-accent-strong)" }}>
-                  ✓ Student Vouched
-                </span>
-              )}
               {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
                 <span data-testid="listing-detail-rating">★ {listing.vendorRatingAvg.toFixed(1)} <span style={{ color: "var(--role-text-muted)", fontSize: 14 }}>({listing.vendorRatingCount})</span></span>
               ) : (
@@ -657,23 +652,9 @@ export function ListingDetail({ id }: { id: string }) {
                 {listing.vendorName.charAt(0).toUpperCase()}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ 
-                  fontSize: "16px", 
-                  fontWeight: 600,
-                  color: "var(--role-text)",
-                  fontFamily: "var(--role-font-ui)",
-                }}>
+                <div style={{ fontSize: "16px", fontWeight: 600, color: "var(--role-text)", fontFamily: "var(--role-font-ui)" }}>
                   {listing.vendorName}
                 </div>
-                {listing.verified && (
-                  <div style={{ 
-                    fontSize: "13px", 
-                    color: "var(--role-accent-strong)",
-                    fontFamily: "var(--role-font-ui)",
-                  }}>
-                    ✓ Verified Vendor
-                  </div>
-                )}
               </div>
             </div>
             <Link
