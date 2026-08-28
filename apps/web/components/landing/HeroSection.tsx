@@ -19,14 +19,37 @@ export function HeroSection() {
 
   return (
     <section className="hero">
-      {/* Warm gradient background */}
+      {/* Warm gradient background with texture */}
       <div className="hero-bg" />
 
-      {/* Floating orbs for depth */}
-      <div className="hero-orbs" aria-hidden="true">
-        <div className="hero-orb hero-orb--1" />
-        <div className="hero-orb hero-orb--2" />
-        <div className="hero-orb hero-orb--3" />
+      {/* Campus illustration */}
+      <div className="hero-illustration" aria-hidden="true">
+        <svg viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Stylized campus buildings */}
+          <rect x="100" y="300" width="120" height="200" rx="8" fill="#1e3b2f" opacity="0.1"/>
+          <rect x="240" y="250" width="100" height="250" rx="8" fill="#1e3b2f" opacity="0.08"/>
+          <rect x="360" y="320" width="140" height="180" rx="8" fill="#1e3b2f" opacity="0.12"/>
+          <rect x="520" y="280" width="110" height="220" rx="8" fill="#1e3b2f" opacity="0.09"/>
+          
+          {/* Trees */}
+          <circle cx="180" cy="420" r="30" fill="#2d5a3d" opacity="0.15"/>
+          <circle cx="420" cy="400" r="35" fill="#2d5a3d" opacity="0.12"/>
+          <circle cx="600" cy="430" r="28" fill="#2d5a3d" opacity="0.14"/>
+          
+          {/* Students (stylized) */}
+          <circle cx="200" cy="380" r="8" fill="#D4A054" opacity="0.3"/>
+          <rect x="196" y="390" width="8" height="20" rx="4" fill="#1e3b2f" opacity="0.2"/>
+          
+          <circle cx="450" cy="370" r="8" fill="#D4A054" opacity="0.25"/>
+          <rect x="446" y="380" width="8" height="20" rx="4" fill="#1e3b2f" opacity="0.2"/>
+          
+          <circle cx="650" cy="390" r="8" fill="#D4A054" opacity="0.3"/>
+          <rect x="646" y="400" width="8" height="20" rx="4" fill="#1e3b2f" opacity="0.2"/>
+          
+          {/* Marketplace stall */}
+          <rect x="300" y="450" width="80" height="50" rx="4" fill="#D4A054" opacity="0.2"/>
+          <rect x="310" y="440" width="60" height="10" rx="2" fill="#D4A054" opacity="0.3"/>
+        </svg>
       </div>
 
       <div className="hero-content">
@@ -48,9 +71,9 @@ export function HeroSection() {
           transition={{ delay: 0.3, duration: 0.6 }}
           className="hero-headline"
         >
-          Find your people.
+          Your campus.
           <br />
-          <span className="hero-headline-accent">Find your stuff.</span>
+          <span className="hero-headline-accent">Your marketplace.</span>
         </motion.h1>
 
         {/* Subheadline */}
@@ -60,7 +83,9 @@ export function HeroSection() {
           transition={{ delay: 0.6, duration: 0.5 }}
           className="hero-subheadline"
         >
-          The campus marketplace where Nigerian students discover, buy, and sell — all in one place.
+          Discover, buy, and sell with students on your own campus.
+          <br />
+          From textbooks to tutoring, food to fashion — find what you need from people you know.
         </motion.p>
 
         {/* Single CTA */}
@@ -74,7 +99,7 @@ export function HeroSection() {
             onClick={() => router.push("/explore")}
             className="hero-cta-btn"
           >
-            Get started
+            Explore your campus
           </button>
         </motion.div>
 
