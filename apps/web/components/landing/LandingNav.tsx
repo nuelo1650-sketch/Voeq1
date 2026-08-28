@@ -106,8 +106,28 @@ export function LandingNav() {
         <BrandLogo width={94} />
       </Link>
 
-      {/* Desktop: auth buttons (hidden <=768px) */}
+      {/* Desktop: nav links + auth buttons (hidden <=768px) */}
       <div className="landing-nav-links">
+        <Link
+          href="/explore"
+          style={{ fontFamily: "var(--role-font-ui)", fontSize: "14.5px", fontWeight: 500, color: "var(--color-forest)", textDecoration: "none" }}
+        >
+          Explore
+        </Link>
+        <Link
+          href="/how-it-works"
+          style={{ fontFamily: "var(--role-font-ui)", fontSize: "14.5px", fontWeight: 500, color: "var(--color-forest)", textDecoration: "none" }}
+        >
+          How it works
+        </Link>
+        <Link
+          href="/for-vendors"
+          style={{ fontFamily: "var(--role-font-ui)", fontSize: "14.5px", fontWeight: 500, color: "var(--color-forest)", textDecoration: "none" }}
+        >
+          Sell on voeq
+        </Link>
+      </div>
+      <div className="landing-nav-auth">
         {isAuthed ? (
           <>
             {/* Messages bell with badge */}
@@ -165,9 +185,9 @@ export function LandingNav() {
               data-testid="nav-signin"
               style={{
                 fontFamily: "var(--role-font-ui)",
-                fontSize: "14px",
-                fontWeight: 600,
-                color: "var(--color-ink-muted)",
+                fontSize: "14.5px",
+                fontWeight: 500,
+                color: "var(--color-forest)",
                 textDecoration: "none",
               }}
             >

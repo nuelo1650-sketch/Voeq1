@@ -46,9 +46,6 @@ export function HeroSection() {
 
   return (
     <section className="hero-section">
-      {/* Background texture + gradient */}
-      <div className="hero-bg" />
-
       <div className="hero-content">
         {/* Eyebrow with gold dot */}
         <div className={`hero-eyebrow ${animated ? "hero-eyebrow--in" : ""}`}>
@@ -59,70 +56,27 @@ export function HeroSection() {
         {/* Kinetic headline */}
         <div className="hero-headline-wrap">
           <h1 className="hero-headline" aria-label="Find. Connect. Grow.">
-            <span
-              className={`hero-word ${animated ? "hero-word--in" : ""}`}
-              style={{ animationDelay: "0.4s" }}
-            >
-              Find.
-            </span>{" "}
-            <span
-              className={`hero-word ${animated ? "hero-word--in" : ""}`}
-              style={{ animationDelay: "0.95s" }}
-            >
-              Connect.
-            </span>
+            <span className={`hero-word ${animated ? "hero-word--in" : ""}`} style={{ animationDelay: "0.4s" }}>Find.</span>{" "}
+            <span className={`hero-word ${animated ? "hero-word--in" : ""}`} style={{ animationDelay: "0.95s" }}>Connect.</span>
             <br />
-            <span
-              className={`hero-word hero-word--grow ${animated ? "hero-word--in" : ""}`}
-              style={{ animationDelay: "1.5s" }}
-            >
-              Grow.
-            </span>
-            <span
-              className={`hero-underline ${animated ? "hero-underline--in" : ""}`}
-              style={{ animationDelay: "2.05s" }}
-              aria-hidden="true"
-            />
+            <span className={`hero-word hero-word--grow ${animated ? "hero-word--in" : ""}`} style={{ animationDelay: "1.5s" }}>Grow.</span>
+            <span className={`hero-underline ${animated ? "hero-underline--in" : ""}`} style={{ animationDelay: "2.05s" }} aria-hidden="true" />
           </h1>
-          {/* Tracer dot */}
-          <span
-            className={`hero-tracer ${animated ? "hero-tracer--in" : ""}`}
-            style={{ animationDelay: "0.3s" }}
-            aria-hidden="true"
-          />
+          <span className={`hero-tracer ${animated ? "hero-tracer--in" : ""}`} style={{ animationDelay: "0.3s" }} aria-hidden="true" />
         </div>
 
         {/* Subheadline */}
-        <p
-          className={`hero-subheadline ${animated ? "hero-subheadline--in" : ""}`}
-          style={{ animationDelay: "2.25s" }}
-        >
+        <p className={`hero-subheadline ${animated ? "hero-subheadline--in" : ""}`} style={{ animationDelay: "2.25s" }}>
           The campus marketplace for Nigerian students — discover vendors, services, and hand-me-downs from people on your own campus.
         </p>
 
         {/* Search bar — single pill */}
-        <form
-          onSubmit={handleSearch}
-          className={`hero-search-bar ${animated ? "hero-search-bar--in" : ""}`}
-          style={{ animationDelay: "2.5s" }}
-        >
+        <form onSubmit={handleSearch} className={`hero-search-bar ${animated ? "hero-search-bar--in" : ""}`} style={{ animationDelay: "2.5s" }}>
           <Search size={18} className="hero-search-icon" />
-          <input
-            type="text"
-            placeholder="What are you looking for?"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="hero-search-input"
-          />
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="hero-search-select"
-          >
+          <input type="text" placeholder="What are you looking for?" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
             <option value="all">All categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.slug}>{c.name}</option>
-            ))}
+            {categories.map((c) => (<option key={c.id} value={c.slug}>{c.name}</option>))}
           </select>
           <button type="submit" className="hero-search-btn">
             <span className="hero-search-btn-text">Search</span>
@@ -131,83 +85,49 @@ export function HeroSection() {
         </form>
 
         {/* Category pills — scrollable */}
-        <div
-          className={`hero-pills-wrapper ${animated ? "hero-pills-wrapper--in" : ""}`}
-          style={{ animationDelay: "2.65s" }}
-        >
-          <button
-            onClick={() => scrollCategories("left")}
-            className="hero-pill-scroll hero-pill-scroll--left"
-            aria-label="Scroll categories left"
-          >
+        <div className={`hero-pills-wrapper ${animated ? "hero-pills-wrapper--in" : ""}`} style={{ animationDelay: "2.65s" }}>
+          <button onClick={() => scrollCategories("left")} className="hero-pill-scroll hero-pill-scroll--left" aria-label="Scroll categories left">
             <ArrowRight size={14} style={{ transform: "rotate(180deg)" }} />
           </button>
           <div className="hero-pills" ref={scrollRef}>
-            <button
-              className={`hero-pill ${selectedCategory === "all" ? "hero-pill--active" : ""}`}
-              onClick={() => setSelectedCategory("all")}
-            >
-              Everything
-            </button>
+            <button className={`hero-pill ${selectedCategory === "all" ? "hero-pill--active" : ""}`} onClick={() => setSelectedCategory("all")}>Everything</button>
             {categories.map((cat) => (
-              <button
-                key={cat.id}
-                className={`hero-pill ${selectedCategory === cat.slug ? "hero-pill--active" : ""}`}
-                onClick={() => setSelectedCategory(cat.slug)}
-              >
+              <button key={cat.id} className={`hero-pill ${selectedCategory === cat.slug ? "hero-pill--active" : ""}`} onClick={() => setSelectedCategory(cat.slug)}>
                 {CAT_ICONS[cat.slug]}
                 <span>{cat.name}</span>
               </button>
             ))}
           </div>
-          <button
-            onClick={() => scrollCategories("right")}
-            className="hero-pill-scroll hero-pill-scroll--right"
-            aria-label="Scroll categories right"
-          >
+          <button onClick={() => scrollCategories("right")} className="hero-pill-scroll hero-pill-scroll--right" aria-label="Scroll categories right">
             <ArrowRight size={14} />
           </button>
         </div>
 
         {/* CTA buttons */}
-        <div
-          className={`hero-ctas ${animated ? "hero-ctas--in" : ""}`}
-          style={{ animationDelay: "2.8s" }}
-        >
+        <div className={`hero-ctas ${animated ? "hero-ctas--in" : ""}`} style={{ animationDelay: "2.8s" }}>
           <Link href="/explore" className="btn-primary btn-lg hero-cta-primary">
             <span>Explore marketplace</span>
             <ArrowRight size={18} />
           </Link>
-          <Link href="/for-vendors" className="btn-ghost btn-lg">
-            Become a vendor
-          </Link>
+          <Link href="/for-vendors" className="btn-ghost btn-lg">Become a vendor</Link>
         </div>
       </div>
 
       {/* Right column — campus roll-call (desktop only) */}
       {campuses.length > 0 && (
-        <div
-          className={`hero-right-col ${animated ? "hero-right-col--in" : ""}`}
-          style={{ animationDelay: "2.9s" }}
-        >
+        <div className={`hero-right-col ${animated ? "hero-right-col--in" : ""}`} style={{ animationDelay: "2.9s" }}>
           <div className="hero-campus-roll">
             <p className="hero-campus-roll-label">Now live at:</p>
             <div className="hero-campus-list">
               {campuses.map((c, i) => (
-                <span
-                  key={c.id}
-                  className="hero-campus-chip"
-                  style={{ animationDelay: `${2.9 + i * 0.06}s` }}
-                >
+                <span key={c.id} className="hero-campus-chip" style={{ animationDelay: `${2.9 + i * 0.06}s` }}>
                   <span className="hero-campus-dot" />
                   <span>{c.name}</span>
                 </span>
               ))}
             </div>
           </div>
-          <p className="hero-brand-copy">
-            Built by students, for students. Your campus economy, in one place.
-          </p>
+          <p className="hero-brand-copy">Built by students, for students. Your campus economy, in one place.</p>
         </div>
       )}
 

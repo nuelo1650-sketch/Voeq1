@@ -33,15 +33,8 @@ export function LandingShell() {
           data-testid="landing"
           style={{ minHeight: "100vh", paddingBlock: "var(--space-8)", paddingInline: "var(--space-2)" }}
         >
-          <div className="landing-split">
-            <div className="landing-split-left">
-              <HeroSection />
-              <LandingProofRow />
-            </div>
-            <div className="landing-split-right">
-              <ContourSignature />
-            </div>
-          </div>
+          <HeroSection />
+          <LandingProofRow />
         </main>
         <TrustStrip />
         {/* Reversal of locked PG-PUB-001 (founder authorized, 2026-08-20): rich
