@@ -87,14 +87,12 @@ export function LandingHero() {
           </form>
         </LiquidGlassPanel>
 
-        {/* Popular category chips */}
+        {/* Popular category chips — spacing handled by parent flex gap */}
         <div style={{ 
           display: "flex", 
           flexWrap: "wrap", 
           gap: 8, 
           justifyContent: "center",
-          marginTop: "var(--space-3)",
-          marginBottom: "var(--space-4)",
         }}>
           <span style={{ 
             fontSize: 13, 

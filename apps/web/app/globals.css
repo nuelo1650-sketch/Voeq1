@@ -2271,22 +2271,22 @@
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 768px) {
   .hero-content {
-    padding: var(--space-lg) var(--space-md);
+    padding: calc(var(--nav-height) + var(--space-lg)) var(--space-md) var(--space-lg);
     gap: var(--space-md);
   }
   
   .hero-wordmark {
-    margin-bottom: var(--space-2);
+    /* spacing handled by parent flex gap */
   }
   
   .hero-headline {
     font-size: 2.75rem;
-    margin-bottom: var(--space-1);
+    /* spacing handled by parent flex gap */
   }
   
   .hero-subheadline {
     font-size: 1rem;
-    margin-bottom: var(--space-3);
+    /* spacing handled by parent flex gap */
   }
   
   .hero-search-panel {
@@ -2309,7 +2309,6 @@
     flex-direction: column;
     width: 100%;
     gap: var(--space-2);
-    margin-top: var(--space-3);
   }
 
   .btn-primary,
