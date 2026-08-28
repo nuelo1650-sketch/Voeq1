@@ -1,6 +1,8 @@
 "use client";
 
-import type { ExploreFilters } from "@voeq/data";
+import { useMemo } from "react";
+import type { ExploreFilters, ExploreListing } from "@voeq/data";
+import { PriceRangeSlider } from "./PriceRangeSlider";
 
 export const CATEGORIES = [
   { slug: "food", label: "Food & Drinks" },
@@ -29,12 +31,23 @@ export function Filters({
   value,
   onChange,
   presetCategory,
+  listings,
 }: {
   value: ExploreFilters;
   onChange: (next: ExploreFilters) => void;
   presetCategory?: string;
+  listings?: ExploreListing[];
 }) {
   const set = (patch: Partial<ExploreFilters>) => onChange({ ...value, ...patch });
+
+  // Compute price histogram from unfiltered data
+  const priceStats = useMemo(() => {
+    if (!listings?.length) return null;
+    const prices = listings.map((l) => l.priceMinor);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return { min, max, prices };
+  }, [listings]);
 
   return (
     <div data-testid="explore-filters" style={{ 
@@ -98,36 +111,20 @@ export function Filters({
         }}>
           Price range (₦)
         </legend>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          <div>
-            <label style={{ fontSize: 12, color: "var(--color-ink-muted)", marginBottom: 4, display: "block" }}>
-              Minimum
-            </label>
-            <input
-              data-testid="filter-min-price"
-              type="number"
-              min={0}
-              placeholder="0"
-              value={value.minPrice ? value.minPrice / 100 : ""}
-              onChange={(e) => set({ minPrice: e.target.value ? Number(e.target.value) * 100 : undefined })}
-              style={modernInputStyle}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: 12, color: "var(--color-ink-muted)", marginBottom: 4, display: "block" }}>
-              Maximum
-            </label>
-            <input
-              data-testid="filter-max-price"
-              type="number"
-              min={0}
-              placeholder="Any"
-              value={value.maxPrice ? value.maxPrice / 100 : ""}
-              onChange={(e) => set({ maxPrice: e.target.value ? Number(e.target.value) * 100 : undefined })}
-              style={modernInputStyle}
-            />
-          </div>
-        </div>
+        {priceStats && (
+          <PriceRangeSlider
+            min={priceStats.min}
+            max={priceStats.max}
+            valueMin={value.minPrice}
+            valueMax={value.maxPrice}
+            onChange={(min, max) => set({ minPrice: min, maxPrice: max })}
+            histogram={Array(12).fill(0).map((_, i) => {
+              const bucketMin = priceStats.min + (i / 12) * (priceStats.max - priceStats.min);
+              const bucketMax = priceStats.min + ((i + 1) / 12) * (priceStats.max - priceStats.min);
+              return priceStats.prices.filter((p) => p >= bucketMin && p < bucketMax).length;
+            })}
+          />
+        )}
         {(value.minPrice || value.maxPrice) && (
           <p style={{ fontSize: 12, color: "var(--color-forest-mid)", margin: 0, marginTop: 6 }}>
             {value.minPrice && value.maxPrice 

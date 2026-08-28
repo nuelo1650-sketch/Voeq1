@@ -402,7 +402,7 @@ export function Explore({
               overflowY: "auto",
             }}
           >
-            <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} />
+            <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} />
           </aside>
 
           <div>
@@ -700,7 +700,7 @@ export function Explore({
               Done
             </button>
           </div>
-          <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} />
+          <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} />
         </div>
       )}
     </div>
