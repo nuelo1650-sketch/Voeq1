@@ -16,6 +16,7 @@ import { ListingRow } from "./ListingRow";
 import { Filters, CATEGORIES } from "./Filters";
 import { SearchBar } from "./SearchBar";
 import { TrendingRail } from "./TrendingRail";
+import { OnboardingBanner } from "./OnboardingBanner";
 import { RecentlyViewedRail, useRecentlyViewed } from "./RecentlyViewedRail";
 import { ExploreSkeleton } from "./ExploreSkeleton";
 import { EmptyState } from "./EmptyState";
@@ -437,6 +438,10 @@ export function Explore({
 
             {status === "success" && (
               <>
+                {/* Onboarding nudge — new users with no recently-viewed listings */}
+                {recentIds.length === 0 && (
+                  <OnboardingBanner currentCampus={campus} onCampusChange={setCampus} />
+                )}
                 {/* Results header: count (left) + sort (right) */}
                 {data.length === 0 ? (
                   <EmptyState
