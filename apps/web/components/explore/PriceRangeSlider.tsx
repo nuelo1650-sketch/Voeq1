@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 
 interface PriceRangeSliderProps {
   min: number;
@@ -45,22 +45,42 @@ export function PriceRangeSlider({
   const currentMin = valueMin ?? min;
   const currentMax = valueMax ?? max;
 
+  // Debounced commits — thumbs track drag immediately, filter state updates after 150ms
+  const [pendingMin, setPendingMin] = useState(currentMin);
+  const [pendingMax, setPendingMax] = useState(currentMax);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Sync external value changes (e.g. clear filters) into pending state
+  useEffect(() => {
+    setPendingMin(currentMin);
+    setPendingMax(currentMax);
+  }, [currentMin, currentMax]);
+
+  // Debounced commit to parent filter state
+  useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      onChange(pendingMin, pendingMax);
+    }, 150);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [pendingMin, pendingMax, onChange]);
+
   const pct = useCallback((v: number) => ((v - min) / range) * 100, [min, range]);
 
   const handleMinChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const v = Number(e.target.value);
-      onChange(Math.min(v, currentMax), currentMax);
+      setPendingMin(Math.min(v, pendingMax));
     },
-    [currentMax, onChange]
+    [pendingMax]
   );
 
   const handleMaxChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const v = Number(e.target.value);
-      onChange(currentMin, Math.max(v, currentMin));
+      setPendingMax(Math.max(v, pendingMin));
     },
-    [currentMin, onChange]
+    [pendingMin]
   );
 
   const minPct = pct(currentMin);
