@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import type { ReviewResponse } from "@/lib/apiTypes";
 
 /**
  * ReviewForm — create/update a vendor review (VS4.4).
@@ -41,6 +42,7 @@ export function ReviewForm({ vendorId }: { vendorId: string }) {
         return;
       }
       if (res.ok) {
+        await res.json() as ReviewResponse;
         setBody("");
         setRating(0);
         setMsg("Thanks — your review was saved.");

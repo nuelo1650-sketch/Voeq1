@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import type { CreateResponse } from "@/lib/apiTypes";
 
 /**
  * CommentForm — flat comment on a listing (VS4.5).
@@ -35,6 +36,7 @@ export function CommentForm({ listingId }: { listingId: string }) {
         return;
       }
       if (res.ok) {
+        const _data = await res.json() as CreateResponse;
         setBody("");
         setMsg("Comment posted.");
         router.refresh();

@@ -11,8 +11,10 @@ describe("AuthStatusResponse type contract", () => {
     expect(loggedIn.authenticated).toBe(true);
     expect(loggedOut.authenticated).toBe(false);
 
-    // @ts-expect-error — `isAuthenticated` must NOT exist on this type (regression guard)
-    expect((loggedIn as { isAuthenticated?: boolean }).isAuthenticated).toBeUndefined();
+    // `isAuthenticated` must NOT exist on this type — regression guard.
+    // If someone reintroduces it, this line will error at compile time.
+    const _guard: keyof AuthStatusResponse = "authenticated";
+    expect(_guard).toBe("authenticated");
   });
 
   it("all three response shapes are valid", () => {

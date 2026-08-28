@@ -8,10 +8,10 @@ import { ContourEdge, CampusFingerprint } from "@voeq/contour";
 import { SaveButton } from "@/components/shopper/SaveButton";
 import { LikeButton } from "@/components/shopper/LikeButton";
 import { CommentForm } from "@/components/shopper/CommentForm";
+import type { AuthStatusResponse, CommentsResponse, CreateResponse } from "@/lib/apiTypes";
 import { CommentsList, type DisplayComment } from "@/components/shopper/CommentsList";
 import { ReportForm } from "@/components/shopper/ReportForm";
 import { Heart, Share2, Flag, X, ChevronLeft, ChevronRight, MessageCircle, Link2 } from "lucide-react";
-import type { AuthStatusResponse } from "@/lib/authStatus";
 
 /**
  * ListingDetail — K2.3 enhanced with gallery, vendor card, recommendation rows (Doc 04 PG-PUB-005).
@@ -85,8 +85,8 @@ export function ListingDetail({ id }: { id: string }) {
   // Check auth status
   useEffect(() => {
     fetch("/api/auth/status")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d: AuthStatusResponse | null) => {
+      .then(async (r) => (r.ok ? await r.json() as AuthStatusResponse : null))
+      .then((d) => {
         setIsAuthenticated(d?.authenticated ?? false);
         setAuthLoading(false);
       })
@@ -138,7 +138,7 @@ export function ListingDetail({ id }: { id: string }) {
     
     // Fetch public comments
     fetch(`/api/listings/${id}/comments`)
-      .then((r) => (r.ok ? r.json() : null))
+      .then(async (r) => (r.ok ? await r.json() as CommentsResponse : null))
       .then((d) => { if (!cancelled && d) setComments(d.comments); })
       .catch(() => {});
     
@@ -245,8 +245,8 @@ export function ListingDetail({ id }: { id: string }) {
       });
       
       if (res.ok) {
-        const data = await res.json();
-        router.push(`/messages/${data.conversationId}`);
+        const data = await res.json() as CreateResponse;
+        if (data.conversation?.id) router.push(`/messages/${data.conversation.id}`);
       }
     } catch {
       // Error handled silently (K2.6 will add proper error UI)

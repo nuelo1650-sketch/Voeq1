@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bookmark, Users, MessageCircle, Search, Heart, Clock } from "lucide-react";
+import type { HomeResponse } from "@/lib/apiTypes";
 
-interface HomeData {
+interface HomeData extends HomeResponse {
   savedListings: (string | null)[];
   savedVendors: (string | null)[];
   following: string[];
@@ -44,8 +45,8 @@ export function ShopperDashboard({ name, campus }: { name: string; campus?: stri
   useEffect(() => {
     let cancelled = false;
     fetch("/api/home")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("load failed"))))
-      .then((d) => !cancelled && setData(d))
+      .then((r): Promise<HomeData | null> => (r.ok ? r.json() : Promise.reject(new Error("load failed"))))
+      .then((d) => { if (d && !cancelled) setData(d); })
       .catch(() => !cancelled && setErr("Could not load your dashboard."));
     return () => { cancelled = true; };
   }, []);
