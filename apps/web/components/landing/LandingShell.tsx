@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { LandingNav } from "./LandingNav";
-import { LandingHero } from "./LandingHero";
+import { HeroSection } from "./HeroSection";
 import { ContourSignature } from "./ContourSignature";
 import { TrustStrip } from "./TrustStrip";
 import { LandingFooter } from "./LandingFooter";
@@ -35,7 +35,7 @@ export function LandingShell() {
         >
           <div className="landing-split">
             <div className="landing-split-left">
-              <LandingHero />
+              <HeroSection />
               <LandingProofRow />
             </div>
             <div className="landing-split-right">

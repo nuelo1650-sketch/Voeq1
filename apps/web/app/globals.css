@@ -1081,6 +1081,37 @@
   margin: 0;
 }
 
+/* Campus roll-call */
+.hero-campus-roll {
+  display: none;
+}
+
+.hero-campus-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.hero-campus-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--color-ink-muted);
+  background: var(--color-cream);
+  border: 1px solid var(--color-ink-subtle);
+  borderRadius: 999px;
+  whiteSpace: nowrap;
+}
+
+@media (min-width: 768px) {
+  .hero-campus-roll {
+    display: block;
+    text-align: left;
+  }
+}
+
 .hero-search-panel {
   width: 100%;
   max-width: 700px;
