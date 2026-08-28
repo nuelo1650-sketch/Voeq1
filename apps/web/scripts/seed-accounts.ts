@@ -3,7 +3,8 @@
  * Run:  tsx apps/web/scripts/seed-accounts.ts   (env loaded from repo root .env.local)
  *
  * Creates:
- *   - 1 vendor  (identity + vendor record + 1 listing)  on campus "nmu"
+ *   - 1 vendor  (identity + vendor record + 1 listing)  on campus "nmu-okerenkoko"
+ *   - 1 shopper (identity, active, consent accepted)
  *   - 1 shopper (identity, active, consent accepted)
  * Confirms the super_admin (VOEQ_SUPER_ADMIN_EMAIL) is bootstrapped.
  * Idempotent: re-running reuses existing rows by email.
@@ -36,7 +37,7 @@ async function upsertVendor() {
     (await mockIdentityRepo.patch(id.id, {
       accountStatus: "active",
       emailVerified: true,
-      campus: "nmu",
+      campus: "nmu-okerenkoko",
       role: "vendor",
       intent: "vendor",
     })) ?? id;
@@ -50,7 +51,7 @@ async function upsertVendor() {
     vendor = await mockVendorRepo.create({
       identityId: id.id,
       name: "Campus Eats",
-      campus: "nmu",
+      campus: "nmu-okerenkoko",
       categoryIds: ["food"],
       description: "Affordable meals and snacks for students.",
       profilePhotoUrl: null,
@@ -66,7 +67,7 @@ async function upsertVendor() {
       priceMinMinor: 2500, // R25.00
       categoryId: "food",
       description: "Freshly cooked jollof with grilled chicken.",
-      campus: "nmu",
+      campus: "nmu-okerenkoko",
     } as never);
   }
   return { identityId: id.id, vendorId: vendor.id };
@@ -87,7 +88,7 @@ async function upsertShopper() {
     (await mockIdentityRepo.patch(id.id, {
       accountStatus: "active",
       emailVerified: true,
-      campus: "nmu",
+      campus: "nmu-okerenkoko",
       role: "shopper",
       intent: "shopper",
     })) ?? id;

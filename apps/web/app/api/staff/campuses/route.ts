@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const slug = typeof body.slug === "string" ? body.slug.trim() : "";
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!slug || !name) return NextResponse.json({ error: "missing_fields" }, { status: 400 });
-  const created = await mockCampusRepo.create({ slug, name });
+  const created = await mockCampusRepo.create({ slug, name }, actor.id);
   return NextResponse.json({ ok: true, campus: created }, { status: 200 });
 }
 

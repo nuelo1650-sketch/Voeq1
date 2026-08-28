@@ -32,10 +32,13 @@ export async function POST(req: NextRequest) {
   // Create or reuse the vendor linked to this identity.
   let vendor = identity.vendorId ? await mockVendorRepo.getById(identity.vendorId) : null;
   if (!vendor) {
+    if (!identity.campus) {
+      return NextResponse.json({ error: "Campus required", message: "Please select a campus before setting up your vendor account." }, { status: 400 });
+    }
     vendor = await mockVendorRepo.create({
       identityId: identity.id,
       name,
-      campus: identity.campus ?? "nmu",
+      campus: identity.campus,
       categoryIds: [categoryId],
       description,
       profilePhotoUrl: profilePhotoUrl || null,
