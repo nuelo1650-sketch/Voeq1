@@ -13,6 +13,20 @@ const filterTabs = [
   { id: 'trending' as FilterTab, label: 'Trending Now', description: 'Recent activity spike' },
 ];
 
+/**
+ * Rank a VendorSummary by real, available signals (Phase-2 relevance alignment).
+ * Uses only fields the feed genuinely carries: rating, reviewCount, status.
+ * Confidence-smooths rating by review count (a single 5-star ≠ a rock-solid 4.6),
+ * and small open/boost so a live vendor edges a closed one. No invented data.
+ */
+function rankVendor(v: VendorSummary): number {
+  const rating = v.rating ?? 0;
+  const reviews = v.reviewCount ?? 0;
+  const ratingSignal = (rating / 5) * Math.min(1, reviews / 5); // 0..1
+  const openSignal = v.status === 'open' ? 0.15 : 0;
+  return ratingSignal + openSignal;
+}
+
 export function TrendingRail() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<FilterTab>('popular');
@@ -62,7 +76,10 @@ export function TrendingRail() {
   // Filter vendors based on active tab (real vendors rarely carry curated tags;
   // fall back to showing all when a tab has no matches so the rail is never empty).
   const filteredVendors = vendors.filter(vendor => vendor.tags.includes(activeTab));
-  const displayVendors = filteredVendors.length > 0 ? filteredVendors : vendors;
+  const pool = filteredVendors.length > 0 ? filteredVendors : vendors;
+  // Phase-2-relevance: rank the visible pool by a real-data score so "Popular on Voeq"
+  // and "Trending Now" reflect genuine rating/engagement — not arbitrary vendor order.
+  const displayVendors = [...pool].sort((a, b) => rankVendor(b) - rankVendor(a));
 
   return (
     <section 

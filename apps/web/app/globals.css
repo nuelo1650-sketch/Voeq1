@@ -471,7 +471,7 @@
 
 /* Brand col */
 .footer-col--brand { gap: 0; }
-.footer-brand-logo { font-family: var(--role-font-ui); font-weight: 700; font-size: 26px; letter-spacing: -.02em; color: #fff; margin-bottom: 14px; }
+.footer-brand-logo { display: inline-block; margin-bottom: 16px; }
 .footer-brand-tagline { font-size: 14px; line-height: 1.6; color: #93a39b; max-width: 250px; margin-bottom: 20px; }
 .footer-socials { display: flex; gap: 10px; }
 .footer-social {

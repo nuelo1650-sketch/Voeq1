@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { BrandLogo } from "./BrandLogo";
 
 /** Real Voeq channel links (founder-provided 2026-08-29). Do NOT re-derive or drop.
  *  Used in the canonical www.whatsapp.com form so both desktop and mobile apps
@@ -65,7 +66,7 @@ export function LandingFooter() {
           {/* Column 1: brand + socials */}
           <div className="footer-col footer-col--brand">
             <div className="footer-brand">
-              <span className="footer-brand-logo">voeq</span>
+              <BrandLogo width={94} color="#f6f1e6" className="footer-brand-logo" />
               <p className="footer-brand-tagline">
                 The campus marketplace for Nigerian students — find, connect,
                 and grow with people on your own campus.
