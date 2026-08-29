@@ -242,24 +242,18 @@ export function Explore({
       {/* Shared spatial anchor — mirrors Landing nav geometry exactly (D.4.1 component 2) */}
       <header
         data-testid="explore-topbar"
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          height: "var(--nav-height)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingInline: "var(--nav-inline-pad)",
-          background: "var(--nav-bg)",
-          borderBottom: "1px solid var(--nav-border)",
-        }}
+        style={topbarStyle}
       >
-        <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}>
+        <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
           <BrandLogo width={64} />
         </Link>
-        
-        {/* Campus selector - right side */}
+
+        {/* Search bar — the alive, centered anchor of the header */}
+        <div style={{ flex: 1, maxWidth: 520, margin: "0 auto", paddingInline: "var(--space-2)" }}>
+          <SearchBar initial={query} onSearch={setQuery} listings={data} />
+        </div>
+
+        {/* Campus selector - right side, rich pill */}
         <CampusSelector currentCampus={campus} onChange={setCampus} viewerIdentityId={viewerIdentityId} />
       </header>
 
@@ -271,19 +265,16 @@ export function Explore({
           <ContourEdge intensity="whisper" />
         </div>
 
-        <div style={{ marginBottom: "var(--space-4)", paddingInline: "var(--nav-inline-pad)" }}>
-          <h1 data-testid="explore-heading" style={{...headingStyle, marginBottom: 8}}>
-            {categoryPreset ? `Explore · ${categoryPreset}` : "Explore"}
-          </h1>
-          <p style={{ fontSize: 16, color: "var(--role-muted)", margin: 0 }}>
-            Discover vendors, services, and products on campus
-          </p>
-        </div>
-
-        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", marginBottom: "var(--space-3)", paddingInline: "var(--nav-inline-pad)" }}>
-          <div style={{ flex: 1 }}>
-            <SearchBar initial={query} onSearch={setQuery} listings={data} />
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "var(--space-2)", flexWrap: "wrap", marginBottom: "var(--space-4)", paddingInline: "var(--nav-inline-pad)" }}>
+          <div>
+            <h1 data-testid="explore-heading" style={{...headingStyle, marginBottom: 8}}>
+              {categoryPreset ? `Explore · ${categoryPreset}` : "Explore"}
+            </h1>
+            <p style={{ fontSize: 15, color: "var(--role-muted)", margin: 0 }}>
+              Discover vendors, services, and products on campus
+            </p>
           </div>
+          {/* Mobile filters button — right-aligned with heading on mobile */}
           <button
             data-testid="explore-filters-toggle"
             className="explore-mobile-only"
@@ -730,6 +721,20 @@ const gridStyle: React.CSSProperties = {
   gridTemplateColumns: "repeat(auto-fill, minmax(min(240px, 100%), 1fr))",
   gap: "var(--space-3)",
   marginTop: "var(--space-3)",
+};
+const topbarStyle: React.CSSProperties = {
+  position: "sticky",
+  top: 0,
+  zIndex: 10,
+  minHeight: "var(--nav-height)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "var(--space-2)",
+  paddingInline: "var(--nav-inline-pad)",
+  background: "var(--nav-bg)",
+  borderBottom: "1px solid var(--nav-border)",
+  transition: "box-shadow .2s ease",
 };
 const sheetStyle: React.CSSProperties = {
   position: "fixed",
