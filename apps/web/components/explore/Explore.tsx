@@ -20,15 +20,7 @@ import { OnboardingBanner } from "./OnboardingBanner";
 import { RecentlyViewedRail, useRecentlyViewed } from "./RecentlyViewedRail";
 import { ExploreSkeleton } from "./ExploreSkeleton";
 import { EmptyState } from "./EmptyState";
-import { RefreshCw, ChevronDown, LayoutGrid, List, Map as MapIcon } from "lucide-react";
-import dynamic from "next/dynamic";
-import { getCampusCentroid } from "@/lib/map/campusCentroids";
-import { hashToOffset } from "@/lib/map/hashToOffset";
-
-const MapView = dynamic(() => import("./MapView"), {
-  ssr: false,
-  loading: () => <div data-testid="map-loading" style={{ padding: 24, textAlign: "center" }}>Loading map…</div>,
-});
+import { RefreshCw, ChevronDown, LayoutGrid, List } from "lucide-react";
 
 /**
  * Explore — PG-PUB-002 (Doc 04). The core discovery surface.
@@ -79,7 +71,7 @@ export function Explore({
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [forceError, setForceError] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
-  const [view, setView] = useState<"grid" | "list" | "map">("grid");
+  const [view, setView] = useState<"grid" | "list">("grid");
   const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
 
   const { ids: recentIds, record } = useRecentlyViewed();
@@ -143,13 +135,6 @@ export function Explore({
   );
 
   const hasMore = displayedCount < data.length;
-
-  // Pin offsets for map view — deterministic per listing.id, memoized
-  const pinOffsets = useMemo(() => {
-    const m = new Map<string, [number, number]>();
-    for (const l of displayedData) m.set(l.id, hashToOffset(l.id));
-    return m;
-  }, [displayedData]);
 
   // Pull-to-refresh handler (K2.9 #1)
   const handleRefresh = useCallback(async () => {
@@ -550,21 +535,6 @@ export function Explore({
                         >
                           <List size={16} />
                         </button>
-                        <button
-                          data-testid="explore-view-map"
-                          aria-pressed={view === "map"}
-                          aria-label="Map view"
-                          onClick={() => setView("map")}
-                          style={{
-                            display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            padding: "8px 10px", border: "none", cursor: "pointer",
-                            background: view === "map" ? "var(--color-forest)" : "var(--role-surface)",
-                            color: view === "map" ? "var(--color-glass-white)" : "var(--role-text)",
-                            borderLeft: "1px solid var(--role-border)",
-                          }}
-                        >
-                          <MapIcon size={16} />
-                        </button>
                       </div>
 
                       <div
@@ -613,17 +583,7 @@ export function Explore({
                 
                 <TrendingRail items={trending} />
                 {status === "success" && <RecentlyViewedRail items={recentItems} ids={recentIds} />}
-                {view === "map" ? (
-                  <div style={{ marginTop: "var(--space-3)", height: "60vh", minHeight: 400, borderRadius: 12, overflow: "hidden" }}>
-                    <MapView
-                      listings={displayedData}
-                      campus={campus}
-                      campusName={campus}
-                      centroid={getCampusCentroid(campus)}
-                      pinOffsets={pinOffsets}
-                    />
-                  </div>
-                ) : view === "list" ? (
+                {view === "list" ? (
                   <div
                     data-testid="explore-list"
                     style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", marginTop: "var(--space-3)" }}

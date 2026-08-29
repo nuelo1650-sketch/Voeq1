@@ -4310,8 +4310,7 @@
 }
 .explore-page button:hover { transition: all .15s; }
 .explore-page [data-testid="explore-view-grid"]:hover,
-.explore-page [data-testid="explore-view-list"]:hover,
-.explore-page [data-testid="explore-view-map"]:hover { background: var(--color-forest-light) !important; color:#fff !important; }
+.explore-page [data-testid="explore-view-list"]:hover { background: var(--color-forest-light) !important; color:#fff !important; }
 .explore-page [data-testid="explore-sort"] {
   background: #fffdf8;
   border: 1px solid rgba(30,59,47,.12);
