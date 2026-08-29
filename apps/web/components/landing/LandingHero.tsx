@@ -113,6 +113,16 @@ export function LandingHero() {
             ))}
           </div>
 
+          {/* Primary CTA — unmissable path to Explore */}
+          <button
+            type="button"
+            className="hero-cta-btn"
+            onClick={() => router.push("/explore")}
+          >
+            Explore marketplace
+            <ArrowRight size={17} aria-hidden="true" />
+          </button>
+
           {/* Honest value props — no fake numbers */}
           <div className="hero-props">
             <span className="hero-prop">

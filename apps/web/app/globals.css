@@ -522,6 +522,11 @@
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   .footer-bottom { flex-direction: column; gap: 14px; align-items: flex-start; }
 }
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+  .footer-socials { flex-wrap: wrap; }
+  .footer-bottom-right { flex-wrap: wrap; gap: 14px; }
+}
 
 /* Info pages (Phase B) — structured public pages sharing Landing's nav/footer.
    Cream inherited from layout.tsx (data-env="cream"). Tokens only. */
@@ -1062,6 +1067,20 @@
 }
 .hero-search-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(30,59,47,.28); }
 
+/* Primary CTA — bold path to Explore */
+.hero-cta-btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--color-forest), var(--color-forest-mid));
+  color: #fff; border-radius: 999px;
+  padding: 15px 34px;
+  font-family: var(--role-font-ui); font-size: 15px; font-weight: 600;
+  box-shadow: 0 10px 24px rgba(30,59,47,.22);
+  transition: transform .18s, box-shadow .18s;
+  margin-bottom: 26px;
+}
+.hero-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(30,59,47,.30); }
+
 /* Category chips */
 .hero-chips { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 30px; }
 .hero-chip {
@@ -1107,6 +1126,8 @@
   .hero-search { flex-wrap: wrap; gap: 8px; border-radius: 20px; padding: 10px; }
   .hero-search-cat { flex: 1 1 auto; }
   .hero-search-btn { flex: 1 1 100%; justify-content: center; }
+  .hero-cta-btn { width: 100%; justify-content: center; }
+  .hero-props { justify-content: center; gap: 14px; }
 }
 
 
