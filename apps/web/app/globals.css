@@ -4243,3 +4243,275 @@
   transition: transform .18s, box-shadow .18s;
 }
 .for-vendors-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(30,59,47,.28); }
+
+/* ============================================================
+   EXPLORE DESIGN REFRESH (Phase 1, 2026-08-29) — token scope.
+   Every Explore element reads var(--role-*)/var(--color-*).
+   Re-theming those tokens INSIDE .explore-page warms the whole
+   surface (cards, topbar, pills, buttons) to match the landing
+   hero/footer WITHOUT touching any JSX or logic. Words intact.
+   ============================================================ */
+.explore-page {
+  /* Warm surfaces (was pure white / glass-white) — matches hero+footer */
+  --role-surface: #fffdf8;
+  --role-surface-sunken: #f6f1e6;
+  --color-glass-white: #f6f1e6;
+  --role-bg: #f6f1e6;
+
+  /* Warm depth — softer, warmer shadows than the cool (15,42,29) ones */
+  --shadow-sm: 0 1px 2px rgba(30,59,47,.05);
+  --shadow-md: 0 4px 14px rgba(30,59,47,.08);
+  --shadow-lg: 0 12px 32px rgba(30,59,47,.12);
+  --shadow-2: 0 4px 14px rgba(30,59,47,.10);
+
+  /* Warm glass-border (was cool white glass-border) */
+  --role-border: rgba(30,59,47,.10);
+
+  /* Serif display for headings — matches hero */
+  color: var(--role-text);
+}
+
+/* --- Explore topbar: hairline + warm anchor --- */
+.explore-page header {
+  background: rgba(250,246,236,.9) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(30,59,47,.08) !important;
+}
+
+/* --- Results heading: serif, forest, tighter --- */
+.explore-page h1[data-testid="explore-heading"] {
+  font-family: var(--role-font-display);
+  color: var(--color-forest);
+  letter-spacing: -0.015em;
+}
+
+/* --- Search bar container: warm pill --- */
+.explore-page input[type="text"],
+.explore-page input[type="search"],
+.explore-page .search-input,
+.explore-page [data-testid*="search"] input {
+  background: #fffdf8;
+  border: 1px solid rgba(30,59,47,.11);
+  border-radius: 12px;
+}
+.explore-page input:focus { border-color: var(--color-amber); box-shadow: 0 0 0 3px rgba(232,163,61,.15); }
+
+/* --- Filter sidebar: warm panel --- */
+.explore-page aside {
+  background: #fffdf8;
+  border: 1px solid rgba(30,59,47,.09);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+/* --- Buttons: warm hover, forest primary, amber accent --- */
+.explore-page button {
+  font-family: var(--role-font-ui);
+}
+.explore-page button:hover { transition: all .15s; }
+.explore-page [data-testid="explore-view-grid"]:hover,
+.explore-page [data-testid="explore-view-list"]:hover,
+.explore-page [data-testid="explore-view-map"]:hover { background: var(--color-forest-light) !important; color:#fff !important; }
+.explore-page [data-testid="explore-sort"] {
+  background: #fffdf8;
+  border: 1px solid rgba(30,59,47,.12);
+  border-radius: 10px;
+}
+
+/* --- Category pills: warm pills, forest active --- */
+.explore-page button[aria-pressed], 
+.explore-page .category-pill {
+  border-radius: 999px;
+}
+
+/* --- Listing cards: warm glass + lift --- */
+.explore-page a[data-testid="explore-card-link"] > * {
+  background: #fffdf8;
+  border: 1px solid rgba(30,59,47,.08);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(30,59,47,.06);
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.explore-page a[data-testid="explore-card-link"]:hover > * {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(30,59,47,.13);
+  border-color: rgba(232,163,61,.4);
+}
+
+/* --- Grid: consistent warm background so cards read on it --- */
+.explore-page main,
+.explore-page div[data-testid="explore-grid"],
+.explore-page div[data-testid="explore-list"] {
+  background: transparent;
+}
+
+/* --- Empty/error state boxes --- */
+.explore-page [data-testid="explore-empty"],
+.explore-page [data-testid="explore-error"] {
+  background: #fffdf8;
+  border: 1px solid rgba(30,59,47,.10);
+  border-radius: 18px;
+}
+
+/* --- Mobile bottom-sheet filters --- */
+.explore-page div[data-testid="explore-filters-sheet"] {
+  background: #faf6ec;
+  border-top: 1px solid rgba(30,59,47,.10);
+}
+
+/* ============================================================
+   EXPLORE PREMIUM DEPTH (Phase 1b, 2026-08-29) — deep polish.
+   Pure CSS overrides keyed on stable data-testids. NO JSX or
+   logic changes — every filter/sort/search/map/feature untouched.
+   Gives Explore the same artisan depth as the landing hero/footer:
+   glass cards, gold price, category chip, tonal availability,
+   premium topbar, warm search, pill toggles, hover lift.
+   ============================================================ */
+
+/* ---- LISTING CARDS: glass, gold price, chip, lift ---- */
+.explore-page [data-testid="listing-card"] {
+  background: #fffdf8 !important;
+  border: 1px solid rgba(30,59,47,.08) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 6px 20px rgba(30,59,47,.07) !important;
+}
+/* image frame: soft inner top rounding */
+.explore-page [data-testid="listing-image-frame"] {
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+}
+/* price: gold, tabular, never recedes */
+.explore-page [data-testid="listing-price"] {
+  color: var(--color-amber-dark) !important;
+  font-family: var(--role-font-display) !important;
+  font-weight: 650 !important;
+  font-size: 16px !important;
+  letter-spacing: -.01em;
+}
+/* title: serif, forest, tighter */
+.explore-page [data-testid="listing-title"] {
+  font-family: var(--role-font-display) !important;
+  font-weight: 580 !important;
+  color: var(--color-forest) !important;
+  font-size: 15.5px !important;
+  line-height: 1.3;
+}
+/* availability: tonal pill */
+.explore-page [data-testid="listing-availability"] {
+  border: none !important;
+  border-radius: 999px !important;
+  font-weight: 600 !important;
+  font-size: 10.5px !important;
+  padding: 3px 9px !important;
+  letter-spacing: .3px;
+}
+.explore-page [data-testid="listing-availability"][data-tone="success"] {
+  background: rgba(45,90,61,.12) !important; color: var(--color-status-open) !important;
+}
+.explore-page [data-testid="listing-availability"][data-tone="warning"] {
+  background: rgba(212,146,42,.14) !important; color: var(--color-status-closing) !important;
+}
+.explore-page [data-testid="listing-availability"][data-tone="error"] {
+  background: rgba(184,92,62,.12) !important; color: var(--color-status-closed) !important;
+}
+/* rating row */
+.explore-page [data-testid="listing-card-rating"] {
+  color: var(--color-amber-dark) !important; font-weight: 600;
+}
+/* featured tag: solid gold pill */
+.explore-page [data-testid="listing-featured"] {
+  background: rgba(232,163,61,.16); color: var(--color-amber-dark);
+  border-radius: 999px; padding: 2px 8px; font-weight: 600;
+}
+/* vendor meta: muted, readable */
+.explore-page [data-testid="listing-vendor-name"] { color: var(--color-forest-mid) !important; font-weight: 500; }
+
+/* hover lift (inline handlers already transform; add box-shadow + deeper lift) */
+.explore-page [data-testid="listing-card"]:hover {
+  box-shadow: 0 18px 42px rgba(30,59,47,.16) !important;
+  border-color: rgba(232,163,61,.45) !important;
+}
+
+/* ---- TOPBAR: glass, warm hairline, gold underline aff -*/
+.explore-page header {
+  background: rgba(250,246,236,.92) !important;
+  backdrop-filter: blur(12px) saturate(160%);
+  border-bottom: 1px solid rgba(30,59,47,.07) !important;
+  box-shadow: 0 1px 0 rgba(224,163,61,.18);
+}
+/* explore heading: eyebrow + serif title */
+.explore-page h1[data-testid="explore-heading"] {
+  font-family: var(--role-font-display) !important;
+  color: var(--color-forest) !important;
+  letter-spacing: -.02em !important;
+  font-weight: 560 !important;
+}
+
+/* ---- SEARCH BAR: warm pill + focus glow ---- */
+.explore-page [data-testid*="search"] input,
+.explore-page .search-input {
+  background: #fffdf8 !important;
+  border: 1px solid rgba(30,59,47,.12) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 14px rgba(30,59,47,.06);
+}
+.explore-page [data-testid*="search"] input:focus { border-color: var(--color-amber) !important; box-shadow: 0 0 0 3px rgba(232,163,61,.16); }
+
+/* ---- FILTER SIDEBAR: warm glass panel ---- */
+.explore-page aside {
+  background: #fffdf8 !important;
+  border: 1px solid rgba(30,59,47,.09) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 6px 20px rgba(30,59,47,.06);
+}
+
+/* ---- VIEW / DENSITY toggles: pill group, forest active ---- */
+.explore-page [aria-label="View mode"],
+.explore-page [aria-label="Density"] {
+  border: none !important; border-radius: 12px !important; overflow: hidden;
+  background: #efe7d4; box-shadow: inset 0 1px 2px rgba(30,59,47,.08);
+}
+.explore-page [aria-label="View mode"] button,
+.explore-page [aria-label="Density"] button {
+  border: none !important; background: transparent !important; color: var(--color-forest-mid);
+}
+.explore-page [aria-label="View mode"] button[aria-pressed="true"],
+.explore-page [aria-label="Density"] button[aria-pressed="true"] {
+  background: var(--color-forest) !important; color: #fff !important;
+}
+
+/* ---- SORT select: warm ---- */
+.explore-page [data-testid="explore-sort"] {
+  background: #fffdf8 !important; border: 1px solid rgba(30,59,47,.12) !important;
+  border-radius: 10px !important; color: var(--color-forest-dark);
+}
+
+/* ---- CATEGORY pills: warm, forest active ---- */
+.explore-page button { border-radius: 999px; }
+
+/* ---- FEATURED carousel + trending/recently cards ---- */
+.explore-page [data-testid="explore-grid"] > a > *,
+.explore-page [data-testid="explore-list"] > * {
+  background: #fffdf8 !important;
+  border: 1px solid rgba(30,59,47,.08) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 6px 20px rgba(30,59,47,.07);
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.explore-page [data-testid="explore-grid"] > a:hover > * {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 42px rgba(30,59,47,.16);
+  border-color: rgba(232,163,61,.45);
+}
+
+/* ---- Empty / error state: warm glass card ---- */
+.explore-page [data-testid="explore-empty"],
+.explore-page [data-testid="explore-error"] {
+  background: #fffdf8 !important; border: 1px solid rgba(30,59,47,.10) !important;
+  border-radius: 20px !important; box-shadow: 0 6px 20px rgba(30,59,47,.06);
+}
+
+/* ---- Load more: forest pill ---- */
+.explore-page [data-testid="explore-load-more"] {
+  border-radius: 999px !important;
+}
