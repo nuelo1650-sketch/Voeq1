@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, Bell, LogOut, X } from "lucide-react";
 import { AppRole, PRIMARY_NAV, CENTER_NAV, STAFF_SIDE_NAV, SIDE_NAV, NavItem } from "./navItems";
+import { BrandLogo } from "@/components/landing/BrandLogo";
 
 const SHELL_CSS = {
   root: {
@@ -200,8 +201,8 @@ export function AppShell({
           >
             <Menu size={20} />
           </button>
-          <Link href="/" style={SHELL_CSS.logo}>
-            voeq
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }}>
+            <BrandLogo width={94} />
           </Link>
         </div>
 
