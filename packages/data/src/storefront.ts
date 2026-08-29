@@ -11,9 +11,8 @@
  */
 
 import type { Listing, Vendor, Review } from "./interfaces";
-import { MOCK_VENDORS, mockVendorRepo, mockListingsRepo, vendorName, listListingsByVendor, type MockListingExtra } from "./mock";
+import { mockVendorRepo, mockListingsRepo, vendorName, type MockListingExtra } from "./mock";
 import type { ExploreListing } from "./explore";
-import { vendors as showcaseVendors } from "./explore-view";
 import { mockReviewRepo } from "./shopper";
 
 // Local mapper mirroring `toExploreListing` in explore.ts so this module stays
@@ -60,58 +59,11 @@ async function vendorRatingFromReviews(vendorId: string): Promise<{ ratingAvg: n
 }
 
 export async function loadVendorStorefront(idOrSlug: string): Promise<VendorStorefrontView | null> {
-  // 1) Curated storefront fixture (has real listings).
-  const fixture = MOCK_VENDORS.find((v) => v.id === idOrSlug || v.handle === idOrSlug);
-  if (fixture) {
-    const displayName = fixture.name ?? vendorName(fixture.id);
-    const listings = listListingsByVendor(fixture.id).map((l) => toExploreListingLocal(l, displayName));
-    const reviews = await mockReviewRepo.listByVendor(fixture.id);
-    const { ratingAvg, ratingCount } = await vendorRatingFromReviews(fixture.id);
-    return {
-      ...fixture,
-      listings,
-      ratingAvg,
-      ratingCount,
-      verifiedCount: listings.filter((m) => m.verified).length,
-      listingCount: listings.length,
-      reviews,
-    };
-  }
-
-  // 2) Hand-curated Explore showcase vendor (no listings yet) — graceful storefront,
-  //    never a 404. Reuses StorefrontHero/Grid/Trust's honest empty states.
-  const showcase = showcaseVendors.find((v) => v.id === idOrSlug || v.slug === idOrSlug);
-  if (showcase) {
-    const reviews = await mockReviewRepo.listByVendor(showcase.id);
-    const { ratingAvg, ratingCount } = await vendorRatingFromReviews(showcase.id);
-    return {
-      id: showcase.id,
-      name: showcase.name,
-      handle: showcase.slug,
-      campus: showcase.campusId,
-      categoryIds: [showcase.categorySlug],
-      status: "live",
-      verified: false,
-      description: "",
-      subArea: null,
-      profilePhotoUrl: null,
-      agreementVersion: null,
-      agreementAcceptedAt: null,
-      identityId: null,
-      slug: showcase.slug,
-      listings: [],
-      ratingAvg,
-      ratingCount,
-      verifiedCount: 0,
-      listingCount: 0,
-      reviews,
-    };
-  }
-
-  // 3) Real vendor from Neon (Phase 9 path) — resolves real vendors, not just
-  //    mock fixtures. Resolves by id OR slug (VendorCard/Explore link by slug).
-  //    The page's canVendorBePublic() gate still decides 404 vs render, so the
-  //    visibility precondition (status === "live") is preserved.
+  // P4 (2026-08-29): mock purge — the curated fixture branch (v1-v6 with mock
+  // listings) and the hand-curated showcase branch are REMOVED. Storefronts
+  // resolve from REAL vendors only. A slug that matches no real vendor 404s.
+  // The page's canVendorBePublic() gate still decides 404 vs render, so the
+  // visibility precondition (status === "live") is preserved.
   let real = await mockVendorRepo.getById(idOrSlug);
   if (!real) {
     real = (await mockVendorRepo.listVendors()).find((v) => v.slug === idOrSlug) ?? null;

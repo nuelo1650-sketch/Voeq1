@@ -1,25 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mockVendorRepo, mockListingsRepo, mockReviewRepo, categories } from "@voeq/data/server";
-import { vendors as showcaseVendors, type VendorSummary } from "@voeq/data";
+import type { VendorSummary } from "@voeq/data";
 
 /**
  * VS-PROC — Vendor directory feed for the landing TrendingRail (F-A9).
  *
- * Prod (USE_REAL / DATABASE_URL set): returns REAL vendors from Neon, mapped to
- * VendorSummary (derived rating from the vendor's listing ratings, price range
- * from its listings). No fake data ships to users.
- *
- * Dev (no DATABASE_URL): returns the curated showcase so the landing still looks
- * populated locally. This is the ONLY place the showcase is used in prod — it is
- * never sent to real users.
+ * P4 (2026-08-29): mock purge. Returns REAL vendors from Neon only — mapped to
+ * VendorSummary (derived rating from the vendor's reviews, price range from its
+ * listings). When Neon has no vendors, this returns an honest EMPTY list. No
+ * showcase fallback — no fake data ships to users, ever.
  */
 export async function GET(req: NextRequest) {
   const campus = req.nextUrl.searchParams.get("campus") ?? undefined;
 
   const realVendors = await mockVendorRepo.listVendors(campus ? { campus } : undefined);
   if (realVendors.length === 0) {
-    // Dev fallback: curated showcase (not used in prod where Neon has data).
-    return NextResponse.json({ vendors: showcaseVendors, source: "showcase" });
+    // Honest empty: real Neon has no vendors yet. No showcase fallback (P4).
+    return NextResponse.json({ vendors: [], source: "neon" });
   }
 
   const summary: VendorSummary[] = await Promise.all(
