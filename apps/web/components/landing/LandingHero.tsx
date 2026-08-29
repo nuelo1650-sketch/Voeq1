@@ -1,158 +1,167 @@
-'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Search, UtensilsCrossed, Shirt, Laptop, Sparkles, BookOpen } from 'lucide-react';
-import { LiquidGlassPanel } from './LiquidGlassPanel';
-import { HeroVisual } from './HeroVisual';
-import { BrandLogo } from './BrandLogo';
-import { categories } from '@voeq/data';
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Search,
+  UtensilsCrossed,
+  Shirt,
+  Laptop,
+  Sparkles,
+  BookOpen,
+  ArrowRight,
+} from "lucide-react";
+import { categories } from "@voeq/data";
 
 const CAT_ICONS: Record<string, React.ReactNode> = {
-  'food-drinks': <UtensilsCrossed size={16} />,
-  'fashion': <Shirt size={16} />,
-  'tech-repairs': <Laptop size={16} />,
-  'beauty-care': <Sparkles size={16} />,
-  'academic-services': <BookOpen size={16} />,
+  "food-drinks": <UtensilsCrossed size={16} />,
+  "fashion": <Shirt size={16} />,
+  "tech-repairs": <Laptop size={16} />,
+  "beauty-care": <Sparkles size={16} />,
+  "academic-services": <BookOpen size={16} />,
 };
 
+/**
+ * LandingHero — the emotional anchor (v5, founder-approved direction 2026-08-29).
+ * Tagline "Find. Connect. Grow." is the hero. Search command-bar + category chips are
+ * the TOOLS below it — fully wired to /explore. Living campus cards give the Voeq
+ * personality. No fabricated numbers anywhere.
+ */
 export function LandingHero() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [query, setQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const handleSearch = (e?: React.FormEvent) => {
-    e?.preventDefault();
+  const goExplore = (q: string, cat: string) => {
     const params = new URLSearchParams();
-    if (searchQuery.trim()) params.append('q', searchQuery);
-    if (selectedCategory !== 'all') params.append('category', selectedCategory);
-    
-    const queryString = params.toString();
-    router.push(queryString ? `/explore?${queryString}` : '/explore');
+    if (q.trim()) params.append("q", q.trim());
+    if (cat !== "all") params.append("category", cat);
+    const qs = params.toString();
+    router.push(qs ? `/explore?${qs}` : "/explore");
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    goExplore(query, selectedCategory);
   };
 
   return (
-    <section className="hero-section">
-      {/* Full-screen glass white background with animated moving dots */}
-      <HeroVisual />
+    <section className="hero">
+      {/* Warm gradient + texture */}
+      <div className="hero-bg" aria-hidden="true" />
 
-      {/* Content layer */}
-      <div className="hero-content">
-        {/* Voeq wordmark above headline — sized to match Find. Connect. Grow. */}
-        <div
-          className="hero-wordmark"
-          style={{
-            marginBottom: "var(--space-3)",
-            lineHeight: 1,
-          }}
-        >
-          <BrandLogo width={180} />
-        </div>
-        
-        {/* Main headline */}
-        <h1 className="hero-headline">Find. Connect. Grow.</h1>
-        <p className="hero-subheadline">The campus marketplace for Nigerian students</p>
+      <div className="hero-inner">
+        {/* LEFT — emotional anchor + tools */}
+        <div className="hero-copy">
+          <div className="hero-eyebrow">
+            <span className="hero-eyebrow-pulse" />
+            <span className="hero-eyebrow-text">The campus marketplace</span>
+          </div>
 
-        {/* Search bar in liquid glass panel (breathe duration: 14s, delay: 1s) */}
-        <LiquidGlassPanel breathDuration={14} delay={1} className="hero-search-panel">
-          <form onSubmit={handleSearch} className="hero-search-bar">
-            <div className="hero-search-input-wrapper">
-              <Search size={20} className="hero-search-icon" />
-              <input 
-                type="text"
-                placeholder="What are you looking for?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="hero-search-input"
-              />
-            </div>
-            
-            <select 
+          <h1 className="hero-headline">
+            Find. Connect.
+            <span className="hero-headline-row2">
+              <span className="hero-headline-accent">Grow.</span>
+            </span>
+          </h1>
+
+          <p className="hero-subhead">
+            Meet the marketplace that lives on your own campus — where you find
+            things, people, and opportunities, all from students you know.
+          </p>
+
+          {/* Search command-bar — wired to /explore */}
+          <form className="hero-search" onSubmit={handleSearch}>
+            <Search size={18} className="hero-search-icon" aria-hidden="true" />
+            <input
+              className="hero-search-input"
+              type="text"
+              placeholder="What are you looking for?"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search Voeq"
+            />
+            <select
+              className="hero-search-cat"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="hero-search-select"
+              aria-label="Filter by category"
             >
               <option value="all">All categories</option>
-              {categories.map(c => (
+              {categories.map((c) => (
                 <option key={c.id} value={c.slug}>{c.name}</option>
               ))}
             </select>
-            
-            <button 
-              type="submit"
-              className="hero-search-btn"
-            >
+            <button className="hero-search-btn" type="submit">
               Search
+              <ArrowRight size={15} aria-hidden="true" />
             </button>
           </form>
-        </LiquidGlassPanel>
 
-        {/* Popular category chips — spacing handled by parent flex gap */}
-        <div style={{ 
-          display: "flex", 
-          flexWrap: "wrap", 
-          gap: 8, 
-          justifyContent: "center",
-        }}>
-          <span style={{ 
-            fontSize: 13, 
-            color: "var(--color-ink-muted)", 
-            marginRight: 4,
-            alignSelf: "center",
-          }}>
-            Popular:
-          </span>
-          {[
-            { iconKey: 'food-drinks', name: 'Food', slug: 'food-drinks' },
-            { iconKey: 'fashion', name: 'Fashion', slug: 'fashion' },
-            { iconKey: 'tech-repairs', name: 'Tech Repair', slug: 'tech-repairs' },
-            { iconKey: 'beauty-care', name: 'Beauty', slug: 'beauty-care' },
-            { iconKey: 'academic-services', name: 'Academic', slug: 'academic-services' },
-          ].map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/explore?category=${cat.slug}`}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "6px 14px",
-                background: "var(--glass-bg)",
-                backdropFilter: "var(--glass-blur)",
-                WebkitBackdropFilter: "var(--glass-blur)",
-                border: "1px solid var(--glass-border)",
-                borderRadius: 999,
-                fontSize: 14,
-                fontWeight: 500,
-                color: "var(--color-ink-deep)",
-                textDecoration: "none",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "var(--color-cream)";
-                e.currentTarget.style.borderColor = "var(--color-forest)";
-                e.currentTarget.style.transform = "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "var(--glass-bg)";
-                e.currentTarget.style.borderColor = "var(--glass-border)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              <span style={{ color: "var(--color-forest)", display: "inline-flex", alignItems: "center" }}>{CAT_ICONS[cat.iconKey]}</span>
-              <span>{cat.name}</span>
-            </Link>
-          ))}
+          {/* Category chips — wired to /explore?category=slug */}
+          <div className="hero-chips">
+            {categories.slice(0, 5).map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                className="hero-chip"
+                onClick={() => router.push(`/explore?category=${c.slug}`)}
+              >
+                <span className="hero-chip-icon">{CAT_ICONS[c.slug] ?? null}</span>
+                <span>{c.name.replace(/ &.*$/, "")}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Honest value props — no fake numbers */}
+          <div className="hero-props">
+            <span className="hero-prop">
+              <span className="hero-prop-check">✓</span>
+              <span><strong>Free</strong> to browse</span>
+            </span>
+            <span className="hero-prop">
+              <span className="hero-prop-check">✓</span>
+              <span><strong>Reviewed</strong> sellers</span>
+            </span>
+            <span className="hero-prop">
+              <span className="hero-prop-check">✓</span>
+              <span><strong>Local</strong> pickup on campus</span>
+            </span>
+          </div>
         </div>
 
-        {/* CTA buttons */}
-        <div className="hero-ctas">
-          <Link href="/explore" className="btn-primary btn-lg">
-            Explore
-          </Link>
-          <Link href="/for-vendors" className="btn-ghost btn-lg">
-            Become a vendor
-          </Link>
+        {/* RIGHT — living campus cards */}
+        <div className="hero-visual" aria-hidden="true">
+          <div className="hero-card hero-card--1">
+            <div className="hero-card-ic hero-card-ic--gold">
+              <UtensilsCrossed size={20} />
+            </div>
+            <div className="hero-card-body">
+              <h4>Suya spot</h4>
+              <p>Nova Market · 2 min away</p>
+            </div>
+            <span className="hero-card-tag">Open</span>
+          </div>
+          <div className="hero-card hero-card--2">
+            <div className="hero-card-ic hero-card-ic--forest">
+              <BookOpen size={20} />
+            </div>
+            <div className="hero-card-body">
+              <h4>Calculus tutor</h4>
+              <p>Freelance · Book my slot</p>
+            </div>
+            <span className="hero-card-tag hero-card-tag--forest">Verified</span>
+          </div>
+          <div className="hero-card hero-card--3">
+            <div className="hero-card-ic hero-card-ic--gold">
+              <Shirt size={20} />
+            </div>
+            <div className="hero-card-body">
+              <h4>Classic denim</h4>
+              <p>Men's · Hostel B</p>
+            </div>
+            <span className="hero-card-tag">New</span>
+          </div>
         </div>
       </div>
     </section>
