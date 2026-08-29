@@ -10,6 +10,8 @@ import { ArrowRight } from "lucide-react";
 const WHATSAPP_URL = "https://www.whatsapp.com/channel/0029Vb8u4Md6mYPON8gMpi3i";
 const TIKTOK_HANDLE = "voeq.ng";
 const TIKTOK_URL = `https://tiktok.com/@${TIKTOK_HANDLE.replace(/^@/, "")}`;
+const INSTAGRAM_HANDLE = "voeq.ng";
+const INSTAGRAM_URL = `https://instagram.com/${INSTAGRAM_HANDLE.replace(/^@/, "")}`;
 const NEWSLETTER_EMAIL = "support@voeq.ng";
 
 function WhatsAppIcon({ size = 16 }: { size?: number }) {
@@ -24,6 +26,16 @@ function TikTokIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.3 0 .6.05.88.13V9.4a6.33 6.33 0 0 0-5.39 10.69 6.33 6.33 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+    </svg>
+  );
+}
+
+function InstagramIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/>
+      <circle cx="12" cy="12" r="4.3"/>
+      <circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/>
     </svg>
   );
 }
@@ -79,6 +91,16 @@ export function LandingFooter() {
                 data-testid="footer-social-tiktok"
               >
                 <TikTokIcon />
+              </a>
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-social"
+                aria-label="Voeq on Instagram"
+                data-testid="footer-social-instagram"
+              >
+                <InstagramIcon />
               </a>
             </div>
           </div>
@@ -140,7 +162,7 @@ export function LandingFooter() {
         {/* Bottom bar */}
         <div className="footer-bottom">
           <div className="footer-bottom-left">
-            <span className="footer-copyright">© 2026 Voeq. All rights reserved.</span>
+            <span className="footer-copyright">© 2026 Voeq. All rights reserved. · Powered by Legacy LM</span>
           </div>
           <div className="footer-bottom-right">
             <Link href="/terms" className="footer-legal-link">Terms of Service</Link>

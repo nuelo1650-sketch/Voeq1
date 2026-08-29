@@ -5,7 +5,6 @@ import { CategoryGrid } from '@/components/landing/CategoryGrid';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import { TrustPillars } from '@/components/landing/TrustPillars';
 import { ForVendorsCTA } from '@/components/landing/ForVendorsCTA';
-import { LandingFooter } from '@/components/landing/LandingFooter';
 
 /**
  * Landing — GLASS-WHITE CANVAS REBUILD (2026-08-21)
@@ -35,7 +34,6 @@ export default function Landing() {
         <HowItWorks />
         <TrustPillars />
         <ForVendorsCTA />
-        <LandingFooter />
       </main>
     </>
   );

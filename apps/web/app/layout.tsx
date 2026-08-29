@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { playfair, inter, jetbrainsMono } from "./fonts";
 import "@voeq/design-tokens/tokens.css";
 import "./globals.css";
-import { NotificationBell } from "@/components/shopper/NotificationBell";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://voeq.ng"),
@@ -74,60 +74,7 @@ export default function RootLayout({
         }}
       >
         {children}
-        <footer
-          data-testid="site-footer"
-          style={{
-            borderTop: "1px solid var(--role-border)",
-            padding: "var(--space-4) var(--nav-inline-pad)",
-            color: "var(--role-text-muted)",
-            fontSize: "14px",
-            background: "var(--role-surface)",
-          }}
-        >
-          <nav aria-label="Footer" style={{ 
-            display: "flex", 
-            gap: "var(--space-4)", 
-            flexWrap: "wrap", 
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: "var(--space-2)",
-          }}>
-            <a 
-              href="/become-vendor" 
-              data-testid="footer-become-vendor" 
-              className="site-footer-link"
-            >
-              Become a vendor
-            </a>
-            <a 
-              href="/for-vendors" 
-              className="site-footer-link"
-            >
-              For Vendors
-            </a>
-            <a 
-              href="/terms" 
-              className="site-footer-link"
-            >
-              Terms
-            </a>
-            <NotificationBell />
-          </nav>
-          <div style={{
-            textAlign: "center",
-            color: "var(--role-text-muted)",
-            fontSize: "13px",
-            paddingTop: "var(--space-2)",
-            borderTop: "1px solid var(--role-border)",
-          }}>
-            © 2026 Voeq · Powered by Legacy LM
-          </div>
-        </footer>
-        <style>{`
-          .site-footer-link:hover {
-            color: var(--role-text) !important;
-          }
-        `}</style>
+        <LandingFooter />
       </body>
     </html>
   );

@@ -3,7 +3,6 @@ import { use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Home } from 'lucide-react';
 import { Explore } from '@/components/explore/Explore';
-import { LandingFooter } from '@/components/landing/LandingFooter';
 import { CATEGORIES } from '@/components/explore/Filters';
 
 /**
@@ -221,8 +220,6 @@ export default function CategoryPage({ params }: { params: Promise<{ categorySlu
           </div>
         </div>
       )}
-      
-      <LandingFooter />
     </div>
   );
 }
