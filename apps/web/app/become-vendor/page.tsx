@@ -47,7 +47,13 @@ export default async function BecomeVendorPage() {
 
         <section className="info-section">
           <div className="vendor-cta-group" data-testid="become-vendor-cta">
-            <Link href="/signup?next=/onboarding/vendor" className="vendor-cta-primary">
+            {/*
+              P2 fix (2026-08-29): this page REQUIRES login (see redirect above), so every
+              visitor here already has an account. Sending a signed-in shopper to /signup
+              forced account recreation. Now the CTA starts vendor onboarding directly —
+              step-1 creates the vendor and links identity.vendorId (account "swap").
+            */}
+            <Link href="/onboarding/vendor" className="vendor-cta-primary">
               Start vendor setup
             </Link>
             <Link href="/for-vendors" className="vendor-cta-secondary">
