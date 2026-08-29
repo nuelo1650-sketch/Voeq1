@@ -1,6 +1,6 @@
 import type { Listing, Vendor } from "./interfaces";
 import { mockListingsRepo, mockVendorRepo, mockListingsRepoThatFails, vendorName } from "./mock";
-import { mockReviewRepo } from "./shopper";
+import { mockReviewRepo, countSavesByVendor, mockFollowRepo } from "./shopper";
 
 /**
  * Explore data boundary (Doc 04 PG-PUB-002/003, Doc 07 §7.7).
@@ -28,6 +28,10 @@ export interface ExploreListing extends Listing {
   vendorRatingAvg?: number;
   /** Number of reviews for this vendor. */
   vendorRatingCount?: number;
+  /** Real saved-count for this vendor (direct saves + saves of their listings). */
+  saveCount?: number;
+  /** Real follower-count for this vendor. */
+  followerCount?: number;
 }
 
 export interface ExploreFilters {
@@ -148,6 +152,53 @@ export function applyFilters(items: ExploreListing[], f: ExploreFilters): Explor
   return out;
 }
 
+/**
+ * PURE: weighted relevance score for "Most popular" (Phase 2).
+ * Honest weighted blend of REAL engagement signals the system already records
+ * (rating with count-confidence, verified, featured, trending, saves, follows).
+ * High = more popular. No invented data; missing signals contribute 0.
+ *
+ * Weights (sum 100):
+ *   50 rating   — confidence-smoothed avg rating (a single 5-star ≠ 20 five-stars)
+ *   20 engagement — log(1 + saves + follows), scaled to 0..1
+ *   15 verified — real VS7.8 staff flag
+ *   10 featured — real VS7.9 staff feature flag
+ *   5  trending — momentum proxy (featured/traffic flag already on the listing)
+ */
+export function rankRelevance(l: ExploreListing): number {
+  // 1) Rating signal (0..1): avg rating scaled 0..5, then confidence-smoothed by review count.
+  //    A vendor with 1 review at 5.0 scores far lower than one with 20 reviews at 4.6.
+  const ratingAvg = l.vendorRatingAvg ?? 0;
+  const ratingCount = l.vendorRatingCount ?? 0;
+  const ratingConfidence = Math.min(1, ratingCount / 10); // 10+ reviews => full confidence
+  const ratingSignal = (ratingAvg / 5) * ratingConfidence; // 0..1
+
+  // 2) Engagement signal (0..1): log-scaled so a few saves/follows give a big early lift,
+  //    but diminishing returns at scale (1 save => ~0.3, 10 => ~0.58, 100 => ~0.83).
+  const engagementRaw = (l.saveCount ?? 0) + (l.followerCount ?? 0);
+  const engagementSignal = engagementRaw > 0
+    ? Math.log(1 + engagementRaw) / Math.log(1 + 100)
+    : 0;
+
+  // 3-5) Boolean signals.
+  const verifiedSignal = l.verified ? 1 : 0;
+  const featuredSignal = l.featured ? 1 : 0;
+  const trendingSignal = l.trending ? 1 : 0;
+
+  return (
+    50 * ratingSignal +
+    20 * engagementSignal +
+    15 * verifiedSignal +
+    10 * featuredSignal +
+    5 * trendingSignal
+  );
+}
+
+/** PURE: sort by weighted relevance score, descending. */
+export function rankByRelevance(items: ExploreListing[]): ExploreListing[] {
+  return [...items].sort((a, b) => rankRelevance(b) - rankRelevance(a));
+}
+
 /** PURE: apply sort. */
 export function applySort(items: ExploreListing[], sort: ExploreFilters["sort"]): ExploreListing[] {
   const arr = [...items];
@@ -157,7 +208,7 @@ export function applySort(items: ExploreListing[], sort: ExploreFilters["sort"])
     case "rating-desc": return arr.sort((a, b) => (b.vendorRatingAvg ?? 0) - (a.vendorRatingAvg ?? 0));
     case "newest": return arr.sort((a, b) => (b.id > a.id ? 1 : -1)); // Mock: sort by ID as proxy for creation time
     case "near-me": return arr; // Would need geolocation; mock returns original order
-    default: return arr; // relevance = mock order
+    default: return rankByRelevance(arr); // relevance = weighted score (Phase 2)
   }
 }
 
@@ -177,7 +228,23 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
     ]);
     const vendorRatings = await computeVendorRatings(vendors.map((v) => v.id));
 
-    let mapped: ExploreListing[] = listings.map((l) => toExploreListing(l, vendors, vendorRatings));
+    // Phase 2: real engagement signal per vendor (saves + follows) for the relevance score.
+    const vendorEngagement: Map<string, { saves: number; follows: number }> = new Map();
+    await Promise.all(
+      vendors.map(async (v) => {
+        const [saves, follows] = await Promise.all([
+          countSavesByVendor(v.id),
+          mockFollowRepo.listByVendor(v.id).then((f) => f.length),
+        ]);
+        vendorEngagement.set(v.id, { saves, follows });
+      }),
+    );
+
+    let mapped: ExploreListing[] = listings.map((l) => {
+      const base = toExploreListing(l, vendors, vendorRatings);
+      const eng = vendorEngagement.get(l.vendorId);
+      return { ...base, saveCount: eng?.saves ?? 0, followerCount: eng?.follows ?? 0 };
+    });
 
     if (params.query) {
       const q = params.query.trim().toLowerCase();
