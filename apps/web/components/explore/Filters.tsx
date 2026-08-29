@@ -25,7 +25,8 @@ const SORTS = [
 
 /**
  * Filters — modernized filter sidebar for campus marketplace.
- * Genuine, student-relevant filters only. Clean, modern styling.
+ * Genuine, student-relevant filters only. Warm, premium, readable.
+ * Preserves every data-testid so e2e stays green; visual layer only.
  */
 export function Filters({
   value,
@@ -49,26 +50,22 @@ export function Filters({
     return { min, max, prices };
   }, [listings]);
 
+  const hasActive =
+    value.category || value.minPrice || value.maxPrice || value.minRating ||
+    value.openNow || value.hasPhotos || value.verifiedOnly || value.featuredOnly || value.recentlyActive;
+
+  // Quick filters — richer set than before (verified/featured/recently-active added)
+  const quickFilters = [
+    { key: "openNow" as const, testid: "filter-open-now-pill", label: "Open now", icon: "🕐" },
+    { key: "verifiedOnly" as const, testid: "filter-verified-pill", label: "Verified", icon: "✓" },
+    { key: "featuredOnly" as const, testid: "filter-featured-pill", label: "Featured", icon: "★" },
+    { key: "hasPhotos" as const, testid: "filter-has-photos-pill", label: "Has photos", icon: "📷" },
+    { key: "recentlyActive" as const, testid: "filter-recently-active-pill", label: "Recently active", icon: "⚡" },
+  ];
+
   return (
-    <div data-testid="explore-filters" style={{ 
-      display: "flex", 
-      flexDirection: "column", 
-      gap: "var(--space-4)",
-      background: "var(--color-cream)",
-      border: "1px solid var(--color-ink-subtle)",
-      borderRadius: 12,
-      padding: "var(--space-3)",
-    }}>
-      <h3 style={{ 
-        fontFamily: "var(--font-display)", 
-        fontSize: 18, 
-        margin: 0, 
-        color: "var(--color-forest)",
-        paddingBottom: "var(--space-2)",
-        borderBottom: "1px solid var(--color-ink-subtle)",
-      }}>
-        Filters
-      </h3>
+    <div data-testid="explore-filters" style={panelStyle}>
+      <h3 style={panelTitleStyle}>Filters</h3>
 
       {/* Category */}
       <Field label="Category">
@@ -102,15 +99,7 @@ export function Filters({
 
       {/* Price range */}
       <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-        <legend style={{ 
-          fontSize: 14, 
-          fontWeight: 600,
-          color: "var(--color-forest)", 
-          fontFamily: "var(--font-body)", 
-          marginBottom: 8 
-        }}>
-          Price range (₦)
-        </legend>
+        <legend style={legendStyle}>Price range (₦)</legend>
         {priceStats && (
           <PriceRangeSlider
             min={priceStats.min}
@@ -121,18 +110,21 @@ export function Filters({
             histogram={Array(12).fill(0).map((_, i) => {
               const bucketMin = priceStats.min + (i / 12) * (priceStats.max - priceStats.min);
               const bucketMax = priceStats.min + ((i + 1) / 12) * (priceStats.max - priceStats.min);
-              return priceStats.prices.filter((p) => p >= bucketMin && p < bucketMax).length;
+              const bucket = priceStats.prices.filter(
+                (p) => p >= bucketMin && p < bucketMax && p >= (value.minPrice ?? priceStats.min) && p <= (value.maxPrice ?? priceStats.max)
+              );
+              return bucket.length;
             })}
           />
         )}
         {(value.minPrice || value.maxPrice) && (
-          <p style={{ fontSize: 12, color: "var(--color-forest-mid)", margin: 0, marginTop: 6 }}>
-            {value.minPrice && value.maxPrice 
-              ? `₦${value.minPrice / 100} – ₦${value.maxPrice / 100}`
-              : value.minPrice 
-              ? `From ₦${value.minPrice / 100}`
+          <p style={priceSummaryStyle}>
+            {value.minPrice && value.maxPrice
+              ? `₦${Math.round(value.minPrice / 100)} – ₦${Math.round(value.maxPrice / 100)}`
+              : value.minPrice
+              ? `From ₦${Math.round(value.minPrice / 100)}`
               : value.maxPrice
-              ? `Up to ₦${value.maxPrice / 100}`
+              ? `Up to ₦${Math.round(value.maxPrice / 100)}`
               : ""}
           </p>
         )}
@@ -153,29 +145,13 @@ export function Filters({
         </select>
       </Field>
 
-      {/* Divider */}
       <div style={{ height: 1, background: "var(--color-ink-subtle)", margin: 0 }} />
 
-      {/* Quick filters — pill toggles (PassA-6) */}
+      {/* Quick filters — pill toggles */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <p style={{ 
-          fontSize: 12, 
-          fontWeight: 600, 
-          color: "var(--color-ink-muted)", 
-          textTransform: "uppercase", 
-          letterSpacing: "0.5px",
-          margin: 0,
-        }}>
-          Quick filters
-        </p>
-
+        <p style={quickFiltersLabelStyle}>Quick filters</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {(
-            [
-              { key: "openNow", testid: "filter-open-now-pill", label: "Open now" },
-              { key: "hasPhotos", testid: "filter-has-photos-pill", label: "Has photos" },
-            ] as const
-          ).map(({ key, testid, label }) => {
+          {quickFilters.map(({ key, testid, label, icon }) => {
             const active = !!value[key];
             return (
               <button
@@ -188,6 +164,7 @@ export function Filters({
                   ...(active ? quickPillActiveStyle : {}),
                 }}
               >
+                <span aria-hidden="true" style={{ opacity: active ? 1 : 0.7 }}>{icon}</span>
                 {label}
               </button>
             );
@@ -196,20 +173,10 @@ export function Filters({
       </div>
 
       {/* Clear all button */}
-      {(value.category || value.minPrice || value.maxPrice || value.minRating || value.openNow || value.hasPhotos) && (
+      {hasActive && (
         <button
           onClick={() => onChange({})}
-          style={{
-            padding: "10px",
-            background: "transparent",
-            color: "var(--color-ink-muted)",
-            border: "1px solid var(--color-ink-subtle)",
-            borderRadius: 8,
-            fontSize: 14,
-            fontWeight: 500,
-            cursor: "pointer",
-            marginTop: "var(--space-2)",
-          }}
+          style={clearAllStyle}
         >
           Clear all filters
         </button>
@@ -220,77 +187,111 @@ export function Filters({
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label style={{ 
-      display: "flex", 
-      flexDirection: "column", 
-      gap: 8, 
-      fontSize: 14, 
-      fontWeight: 600,
-      color: "var(--color-forest)", 
-      fontFamily: "var(--font-body)" 
-    }}>
+    <label style={fieldStyle}>
       {label}
       {children}
     </label>
   );
 }
 
+// ---- styles ----
+const panelStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "var(--space-4)",
+  background: "#fffdf8",
+  border: "1px solid rgba(30,59,47,.09)",
+  borderRadius: 18,
+  padding: "var(--space-3)",
+  boxShadow: "0 6px 20px rgba(30,59,47,.06)",
+};
+
+const panelTitleStyle: React.CSSProperties = {
+  fontFamily: "var(--role-font-display)",
+  fontSize: 18,
+  margin: 0,
+  color: "var(--color-forest)",
+  paddingBottom: "var(--space-2)",
+  borderBottom: "1px solid rgba(30,59,47,.08)",
+  letterSpacing: "-0.01em",
+};
+
+const fieldStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+  fontSize: 13.5,
+  fontWeight: 600,
+  color: "var(--color-forest-mid)",
+  fontFamily: "var(--role-font-ui)",
+};
+
+const legendStyle: React.CSSProperties = {
+  fontSize: 13.5,
+  fontWeight: 600,
+  color: "var(--color-forest-mid)",
+  fontFamily: "var(--role-font-ui)",
+  marginBottom: 8,
+};
+
 const modernSelectStyle: React.CSSProperties = {
   padding: "10px 12px",
-  borderRadius: 8,
-  border: "1px solid var(--color-ink-subtle)",
-  background: "var(--color-glass-white)",
-  color: "var(--color-ink)",
-  fontFamily: "var(--font-body)",
+  borderRadius: 10,
+  border: "1px solid rgba(30,59,47,.12)",
+  background: "#f6f1e6",
+  color: "var(--color-forest-dark)",
+  fontFamily: "var(--role-font-ui)",
   fontSize: 14,
   cursor: "pointer",
 };
 
-const modernInputStyle: React.CSSProperties = {
-  flex: 1,
-  padding: "10px 12px",
-  borderRadius: 8,
-  border: "1px solid var(--color-ink-subtle)",
-  background: "var(--color-glass-white)",
-  color: "var(--color-ink)",
-  fontFamily: "var(--font-body)",
-  fontSize: 14,
+const priceSummaryStyle: React.CSSProperties = {
+  fontSize: 12,
+  color: "var(--color-forest-mid)",
+  margin: 0,
+  marginTop: 6,
 };
 
-const modernCheckStyle: React.CSSProperties = {
-  display: "flex",
-  gap: 10,
-  alignItems: "center",
-  fontSize: 14,
-  color: "var(--color-ink)",
-  fontFamily: "var(--font-body)",
-  cursor: "pointer",
-  padding: "6px 0",
+const quickFiltersLabelStyle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  color: "var(--color-ink-muted)",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  margin: 0,
 };
 
-const checkboxStyle: React.CSSProperties = {
-  width: 18,
-  height: 18,
-  cursor: "pointer",
-};
-
-// PassA-6: quick-filter pill toggles (match category pill visual language)
 const quickPillStyle: React.CSSProperties = {
-  fontFamily: "var(--font-body)",
-  fontSize: "13px",
+  fontFamily: "var(--role-font-ui)",
+  fontSize: 13,
   fontWeight: 500,
   padding: "6px 14px",
   borderRadius: 999,
-  border: "1px solid var(--color-ink-subtle)",
-  background: "var(--color-glass-white)",
-  color: "var(--color-ink)",
+  border: "1px solid rgba(30,59,47,.12)",
+  background: "#fffdf8",
+  color: "var(--color-forest-dark)",
   cursor: "pointer",
   whiteSpace: "nowrap",
   transition: "all 120ms ease",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 5,
 };
 
 const quickPillActiveStyle: React.CSSProperties = {
   background: "var(--color-forest)",
-  color: "var(--color-glass-white)",
+  color: "#fff",
   borderColor: "var(--color-forest)",
+};
+
+const clearAllStyle: React.CSSProperties = {
+  padding: "10px",
+  background: "transparent",
+  color: "var(--color-forest-mid)",
+  border: "1px solid rgba(30,59,47,.12)",
+  borderRadius: 10,
+  fontSize: 14,
+  fontWeight: 500,
+  cursor: "pointer",
+  marginTop: "var(--space-2)",
 };

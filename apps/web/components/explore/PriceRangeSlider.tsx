@@ -26,7 +26,8 @@ function buildHistogram(values: number[], min: number, max: number): number[] {
 }
 
 function formatPrice(value: number): string {
-  return new Intl.NumberFormat("en-NG").format(value);
+  // value is in kobo (minor units) — display as whole naira
+  return new Intl.NumberFormat("en-NG").format(Math.round(value / 100));
 }
 
 export function PriceRangeSlider({
