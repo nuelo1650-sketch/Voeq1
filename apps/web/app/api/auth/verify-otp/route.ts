@@ -8,7 +8,8 @@ import {
   consumePendingToken,
   checkRateLimit,
   logAudit,
-} from "@voeq/data";
+  sendEmail,
+} from "@voeq/data/server";
 import { z } from "zod";
 
 const OTP_LIMIT = 5;
@@ -65,6 +66,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Account not found." }, { status: 404 });
   }
 
+  // P3 (2026-08-29): Welcome email goes to accounts verifying for the FIRST time
+  // (status was pending_verification). Covers both email registration AND Google
+  // first-login (purpose google_verify). An email_change on an active account
+  // must NOT re-welcome. Capture before the patch activates it.
+  const isFirstVerification = identity.accountStatus === "pending_verification";
+
   // Activate + mark verified. Consent still required (VS2.7) before app access.
   await mockIdentityRepo.patch(identity.id, {
     accountStatus: "active",
@@ -90,6 +97,19 @@ export async function POST(req: NextRequest) {
     title: "Welcome to Voeq",
     body: "Your account is verified. Explore campus vendors near you.",
   });
+
+  // P3 (2026-08-29): send the WELCOME email on first-ever verification.
+  // Covers email registration + Google first-login; skips email_change re-verifies.
+  // Fire-and-forget: email failure must never fail verification.
+  if (isFirstVerification) {
+    void sendEmail({
+      to: identity.email,
+      template: "WELCOME",
+      vars: { name: identity.name || "there" },
+    }).catch(() => {
+      /* welcome email is best-effort; sendEmail logs its own failures */
+    });
+  }
 
   return NextResponse.json({ ok: true, redirect: "/consent" });
 }
