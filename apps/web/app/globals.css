@@ -4739,3 +4739,57 @@
   box-shadow: inset 0 0 0 1px var(--color-amber) !important;
 }
 .auth-form-error { border-radius: 12px !important; }
+
+/* ============================================================
+   ONBOARDING + DASHBOARD WARM (2026-08-29) — CSS only.
+   Gentle scoped warm-up that carries the landing palette into
+   the inline-styled onboarding cards + AppShell surfaces.
+   No logic changes; keys off stable testids/classes.
+   ============================================================ */
+
+/* Shopper onboarding — warm glass card (was flat cream + hard border) */
+[data-testid="shopper-onboarding"] {
+  background:
+    radial-gradient(700px 400px at 85% -10%, rgba(224,163,61,.10), transparent 55%),
+    linear-gradient(158deg,#faf6ec 0%,#f6f1e6 50%,#efe7d4 100%) !important;
+}
+
+/* Onboarding content card */
+[data-testid="shopper-onboarding"] > div {
+  background: rgba(255,253,248,.9) !important;
+  border: 1px solid rgba(30,59,47,.09) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 18px 50px rgba(30,59,47,.10) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Onboarding buttons (primary action) */
+[data-testid="shopper-onboarding"] button {
+  border-radius: 999px !important;
+  font-weight: 600 !important;
+}
+
+/* Interest grid tiles */
+.interest-grid > button {
+  border: 1px solid rgba(30,59,47,.12) !important;
+  background: #fffdf8 !important;
+  border-radius: 14px !important;
+  transition: all .15s !important;
+}
+.interest-grid > button:hover {
+  border-color: var(--color-amber) !important;
+  transform: translateY(-2px);
+}
+.interest-grid > button.is-selected,
+.interest-grid > button[data-active="true"] {
+  background: var(--color-forest) !important;
+  color: #fff !important;
+  border-color: var(--color-forest) !important;
+}
+
+/* AppShell topbar: warm glass + hairline */
+header.AppShell,
+.app-shell-root header {
+  background: rgba(250,246,236,.92) !important;
+  backdrop-filter: blur(10px);
+}
