@@ -8,7 +8,7 @@
  */
 import { getDb } from "./client";
 import * as s from "./schema";
-import { realVendorRepo, realListingsRepo, realIdentityRepo, realSessionRepo } from "./repos";
+import { realVendorRepo, realIdentityRepo, realSessionRepo } from "./repos";
 
 const CAMPUSSES = [
   { id: "nmu-okerenkoko", name: "Nigeria Maritime University (Okerenkoko)", slug: "nmu-okerenkoko", region: "Delta State", city: "Okerenkoko", state: "Delta State", lat: 5.62449, lng: 5.39038, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
@@ -52,50 +52,11 @@ export async function seed(): Promise<void> {
     }
   }
 
-  // 6 demo vendors across campuses/categories.
-  const vendors = [
-    { name: "Campus Eats", campus: "nmu-okerenkoko", categoryIds: ["food"], slug: "campus-eats" },
-    { name: "Tech Swap", campus: "unilag", categoryIds: ["tech"], slug: "tech-swap" },
-    { name: "Book Nook", campus: "ui", categoryIds: ["books"], slug: "book-nook" },
-    { name: "Quick Fix", campus: "oau", categoryIds: ["services"], slug: "quick-fix" },
-    { name: "Thread Theory", campus: "unn", categoryIds: ["fashion"], slug: "thread-theory" },
-    { name: "NMU Prints", campus: "nmu-okerenkoko", categoryIds: ["tech", "services"], slug: "nmu-prints" },
-  ];
-  for (const v of vendors) {
-    if (!(await realVendorRepo.listVendors({ campus: v.campus })).some((x) => x.slug === v.slug)) {
-      await realVendorRepo.create({
-        identityId: "seed",
-        name: v.name,
-        campus: v.campus,
-        categoryIds: v.categoryIds,
-        slug: v.slug,
-        status: "live",
-        verified: true,
-        description: `${v.name} — demo vendor on Voeq.`,
-        agreementVersion: "2026-08-01",
-        agreementAcceptedAt: new Date().toISOString(),
-      });
-    }
-  }
-
-  // 25 listings spread across the 6 vendors.
+  // P4 reset (2026-08-29): demo vendors + demo listings REMOVED from seed.
+  // Founder directive: fresh platform, real vendors only, honest-empty Explore
+  // until real signups. Seeded content is now: campuses, categories, super-admin.
   const allVendors = await realVendorRepo.listVendors();
-  let created = 0;
-  for (let i = 0; i < 25 && created < 25; i++) {
-    const v = allVendors[i % allVendors.length];
-    if (!v) continue;
-    await realListingsRepo.create({
-      vendorId: v.id,
-      title: `Demo listing ${i + 1}`,
-      priceMinMinor: 1000 * (i + 1),
-      categoryId: v.categoryIds[0] ?? "food",
-      description: "Seeded demo listing.",
-      images: [],
-      status: "active",
-      isFeatured: i % 5 === 0, // a few featured -> surfaced as trending
-    });
-    created++;
-  }
+  const created = 0;
 
   // eslint-disable-next-line no-console
   console.log(`[seed] done: ${CAMPUSSES.length} campuses, ${CATEGORIES.length} categories, ${allVendors.length} vendors, ${created} listings.`);
