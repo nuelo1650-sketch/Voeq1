@@ -4800,3 +4800,111 @@ header.AppShell,
   background: rgba(250,246,236,.92) !important;
   backdrop-filter: blur(10px);
 }
+
+/* ============================================================
+   EXPLORE MOBILE FREEDOM (P5, 2026-08-29) — CSS only.
+   Fixes the mobile squeeze at 360-414px: search row no longer
+   half-sized, toggles/featured get full width and comfortable
+   proportions, filters collapse to a sheet-friendly stack.
+   Zero logic changes.
+   ============================================================ */
+
+/* ---- Tablet and below: relax density ---- */
+@media (max-width: 860px) {
+  .explore-page [data-testid="explore"] {
+    padding: 0 14px 24px !important;
+  }
+
+  /* Topbar: allow wrapping so search + campus never overlap */
+  .explore-page header[data-testid="explore-topbar"] {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+  .explore-page header[data-testid="explore-topbar"] > * {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  /* Search takes the full row under the logo row */
+  .explore-page header[data-testid="explore-topbar"] [data-testid*="search"] {
+    flex: 1 1 100% !important;
+  }
+  .explore-page header[data-testid="explore-topbar"] input[type="text"],
+  .explore-page header[data-testid="explore-topbar"] input[type="search"] {
+    font-size: 16px !important; /* prevents iOS zoom-on-focus */
+    padding: 12px 14px !important;
+  }
+
+  /* View toggles: comfortable, not half-sized */
+  .explore-page [data-testid="explore-view-grid"],
+  .explore-page [data-testid="explore-view-list"] {
+    padding: 10px 16px !important;
+    min-width: 52px !important;
+    min-height: 44px !important; /* touch target */
+  }
+
+  /* Density toggles same treatment */
+  .explore-page [role="group"] button {
+    min-height: 44px !important;
+  }
+
+  /* Featured carousel: full-width, honest height */
+  .explore-page .featured-carousel-grid {
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+  }
+  .explore-page .featured-carousel-image {
+    min-height: 170px !important;
+  }
+
+  /* Listing grid: cards fill the screen comfortably */
+  .explore-page [data-testid="explore-grid"] {
+    grid-template-columns: repeat(auto-fill, minmax(min(170px, 100%), 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* Heading scale */
+  .explore-page h1[data-testid="explore-heading"] {
+    font-size: 1.45rem !important;
+    line-height: 1.25 !important;
+  }
+}
+
+/* ---- Phones: single column, big touch targets ---- */
+@media (max-width: 480px) {
+  .explore-page [data-testid="explore"] {
+    padding: 0 12px 20px !important;
+  }
+  .explore-page [data-testid="explore-grid"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .explore-page [data-testid="explore-grid"] [data-testid="listing-card-link"] {
+    border-radius: 14px !important;
+  }
+  /* Filter panel inside its mobile sheet: stack cleanly */
+  .explore-page [data-testid="explore-filters"] {
+    padding: 16px !important;
+    gap: 14px !important;
+  }
+  .explore-page [data-testid="explore-filters"] select {
+    font-size: 16px !important; /* iOS no-zoom */
+    padding: 11px 12px !important;
+  }
+  /* Quick pills wrap nicely */
+  .explore-page [data-testid="explore-filters"] button {
+    padding: 9px 14px !important;
+    min-height: 40px !important;
+  }
+}
+
+/* ---- Very small phones (360px) ---- */
+@media (max-width: 390px) {
+  .explore-page [data-testid="explore-grid"] {
+    grid-template-columns: 1fr !important;
+  }
+}
