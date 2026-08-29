@@ -3909,34 +3909,29 @@
   max-width: 36ch;
 }
 
-/* D3: 6-box OTP */
-.auth-otp-row {
-  display: flex;
-  gap: var(--space-2);
-  justify-content: center;
-}
-.auth-otp-cell {
-  width: 48px;
-  height: 56px;
-  text-align: center;
+/* D3: single-field OTP (replaces 6-box row that overflowed on mobile) */
+.auth-otp-single {
+  width: 100%;
+  box-sizing: border-box;
+  height: 64px;
   font-family: var(--role-font-ui);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
-  color: var(--role-text);
-  border: 1px solid var(--role-border);
-  border-radius: var(--radius-md);
-  background: var(--role-bg);
-  padding: 0;
+  color: var(--color-forest, #0F2A1D);
+  border: 1.5px solid rgba(30,59,47,.14);
+  border-radius: 14px;
+  background: #f6f1e6;
+  padding: 0 12px;
   transition: border-color 120ms ease, box-shadow 120ms ease;
+  caret-color: var(--color-amber, #E8A33D);
 }
-.auth-otp-cell:focus {
+.auth-otp-single:focus {
   outline: none;
-  border-color: var(--role-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--role-accent) 18%, transparent);
+  border-color: var(--color-amber, #E8A33D);
+  box-shadow: 0 0 0 3px rgba(232,163,61,.16);
 }
-.auth-otp-cell.is-error {
-  border-color: var(--role-danger);
-}
+.auth-otp-single.is-error { border-color: var(--role-danger); }
+.auth-otp-single::placeholder { color: #c9c2ae; letter-spacing: .35em; }
 
 /* D3: visually-hidden label helper */
 .sr-only {
@@ -4503,7 +4498,7 @@
 /* ---- SORT select: warm ---- */
 .explore-page [data-testid="explore-sort"] {
   background: #fffdf8 !important; border: 1px solid rgba(30,59,47,.12) !important;
-  border-radius: 10px !important; color: var(--color-forest-dark);
+  border-radius: 10px !important; color: var(--color-forest);
 }
 
 /* ---- CATEGORY pills: warm, forest active ---- */
@@ -4591,7 +4586,7 @@
   background: #f6f1e6 !important;
   border: 1px solid rgba(30,59,47,.12) !important;
   border-radius: 10px !important;
-  color: var(--color-forest-dark) !important;
+  color: var(--color-forest) !important;
 }
 /* quick-filter pills */
 .explore-page [data-testid="explore-filters"] button {
@@ -4681,7 +4676,7 @@
   background: #f6f1e6 !important;
   border: 1px solid rgba(30,59,47,.13) !important;
   border-radius: 12px !important;
-  color: var(--color-forest-dark) !important;
+  color: var(--color-forest) !important;
   transition: border-color .15s, box-shadow .15s;
 }
 .auth-field input::placeholder { color: #a49d8c; }
@@ -4718,19 +4713,31 @@
 .auth-alt a:hover, .auth-link-btn:hover { color: var(--color-forest) !important; }
 .auth-consent a { color: var(--color-amber-dark) !important; }
 
-/* --- OTP cells: warm, focus glow --- */
-.auth-otp-cell {
-  border: 1px solid rgba(30,59,47,.14) !important;
-  border-radius: 12px !important;
-  background: #f6f1e6 !important;
-  color: var(--color-forest-dark) !important;
-}
-.auth-otp-cell:focus {
-  outline: none !important;
+/* --- OTP cell: warm, focus glow --- */
+.auth-otp-single { background: #f6f1e6 !important; }
+.auth-otp-single:focus {
   border-color: var(--color-amber) !important;
   box-shadow: 0 0 0 3px rgba(232,163,61,.16) !important;
 }
-.auth-otp-cell.is-error { border-color: var(--color-status-closed) !important; }
+.auth-otp-single.is-error { border-color: var(--role-danger) !important; }
+
+/* --- Turnstile widget: contained inside the card on ALL screens --- */
+.auth-turnstile {
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+.auth-turnstile > div,
+.auth-turnstile iframe,
+.auth-turnstile [data-testid="login-turnstile"] {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+/* Turnstile's fixed 300px minimum: scale down slightly on very small cards rather than overflow */
+@media (max-width: 380px) {
+  .auth-turnstile iframe { transform: scale(.92); transform-origin: center; }
+}
 
 /* --- Consent switch / intents: warm --- */
 .auth-intent-opt { border-radius: 12px !important; background: #fffdf8 !important; }
