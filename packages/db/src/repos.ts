@@ -219,6 +219,16 @@ export const realOtpRepo = {
     });
     return code;
   },
+  /** DEV-ONLY (2026-08-29): latest unexpired code for email+purpose. Powers
+   *  /api/dev/otp in real-DB mode; no production caller. */
+  async peek(email: string, purpose: OtpPurpose): Promise<string | null> {
+    const rows = await getDb().select().from(s.otps).where(and(eq(s.otps.email, email.toLowerCase()), eq(s.otps.purpose, purpose)));
+    const now = Date.now();
+    const active = rows
+      .filter((r) => now <= new Date(r.expiresAt).getTime())
+      .sort((a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime());
+    return active[0]?.code ?? null;
+  },
   async verify(email: string, code: string, purpose: OtpPurpose): Promise<boolean> {
     const rows = await getDb().select().from(s.otps).where(and(eq(s.otps.email, email.toLowerCase()), eq(s.otps.purpose, purpose)));
     const match = rows.find((r) => r.code === code && Date.now() <= new Date(r.expiresAt).getTime());
