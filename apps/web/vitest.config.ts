@@ -34,7 +34,7 @@ export default defineConfig({
     // (connection-pool contention). Default 5s is too tight; 30s gives headroom
     // without masking a genuine hang (a real hang would still exceed this).
     testTimeout: 30000,
-    env: loadEnvLocal(),
+    env: isolateTestEnv(loadEnvLocal()),
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
@@ -42,3 +42,20 @@ export default defineConfig({
     },
   },
 });
+
+/**
+ * P6 (2026-08-30): run the test suite against an ISOLATED database so tests
+ * never mutate the launch/prod data. If the file contains a prod DATABASE_URL
+ * pointing at /neondb, we rewrite it to /neondb_test for the test run (unless a
+ * VOEQ_TEST_DATABASE_URL is already provided). This keeps the launch DB pristine
+ * while still exercising the real Neon query path.
+ */
+function isolateTestEnv(env: Record<string, string>): Record<string, string> {
+  const out = { ...env };
+  if (!out.DATABASE_URL) return out;
+  // Honest: never rewrite a URL that isn't the prod /neondb target.
+  if (/\/neondb(\?|$)/.test(out.DATABASE_URL)) {
+    out.DATABASE_URL = out.DATABASE_URL.replace(/\/neondb(\?|$)/, "/neondb_test$1");
+  }
+  return out;
+}
