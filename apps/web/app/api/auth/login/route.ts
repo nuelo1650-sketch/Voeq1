@@ -18,6 +18,7 @@ const schema = z.object({
   password: z.string().min(1),
   remember: z.boolean().optional(),
   next: z.string().optional(),
+  intent: z.string().optional(),
   turnstileToken: z.string().min(1, "Bot protection required"),
 });
 
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Enter your email and password." }, { status: 400 });
   }
-  const { email, password, remember, next, turnstileToken } = parsed.data;
+  const { email, password, remember, next, intent, turnstileToken } = parsed.data;
 
   // FIX #4: Verify Turnstile first (bot protection before rate-limit check)
   const cfOk = await verifyTurnstile({
@@ -94,7 +95,8 @@ export async function POST(req: NextRequest) {
   const session = await mockSessionRepo.create(identity.id);
   // Remember-me extends to 30d (default already 30d; non-remember could be shorter,
   // but mock phase keeps 30d for both — Phase 9 can shorten non-remember).
-  const res = NextResponse.json({ ok: true, redirect: sanitizeNext(next) });
+  // Phase 1: preserve the user's pending intent so post-auth the action resumes.
+  const res = NextResponse.json({ ok: true, redirect: resolveNext(next, intent) });
   res.cookies.set("sessionId", session.id, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -116,6 +118,18 @@ function sanitizeNext(next?: string): string {
   // Block path traversal.
   if (next.includes("..")) return roleHome();
   return next;
+}
+
+/**
+ * Phase 1: sanitize `next`, then re-attach the user's pending `intent` so the
+ * post-auth action resumes. If `intent` is present and valid, it's appended to
+ * the target; the client reads it via usePendingIntent() and re-triggers.
+ */
+function resolveNext(next?: string, intent?: string): string {
+  const base = sanitizeNext(next);
+  if (!intent) return base;
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}intent=${encodeURIComponent(intent)}`;
 }
 
 function roleHome(): string {

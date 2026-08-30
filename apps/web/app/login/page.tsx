@@ -14,6 +14,7 @@ function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") ?? "";
+  const intent = params.get("intent") ?? "";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -80,7 +81,7 @@ function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, remember, next, turnstileToken }),
+        body: JSON.stringify({ email, password, remember, next, intent, turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) {

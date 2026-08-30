@@ -40,10 +40,27 @@ export async function requireAuth(next?: string): Promise<Identity> {
 export async function requireConsent(next?: string): Promise<Identity> {
   const id = await requireAuth(next);
   if (!id.consent || id.consent.length === 0) {
-    const url = next ? `/consent?next=${encodeURIComponent(next)}` : "/consent";
+    // Preserve a pending intent if the original URL carried one, so the consent
+    // flow can resume the action (Phase 1). `next` may be "/onboarding/vendor";
+    // intent arrives separately if the caller forwarded it.
+    const intent = extractIntentFromNext(next);
+    const qs = next ? `?next=${encodeURIComponent(next)}` : "";
+    const url = intent ? `/consent${qs}&intent=${encodeURIComponent(intent)}` : `/consent${qs}`;
     redirect(url);
   }
   return id;
+}
+
+/** Pull an `intent=...` value out of a `next` string that already contains it. */
+function extractIntentFromNext(next?: string): string | null {
+  if (!next) return null;
+  const q = next.indexOf("?");
+  if (q < 0) return null;
+  for (const pair of next.slice(q + 1).split("&")) {
+    const [k, v] = pair.split("=");
+    if (k === "intent") return decodeURIComponent(v ?? "");
+  }
+  return null;
 }
 
 /**

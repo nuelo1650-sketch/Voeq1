@@ -128,7 +128,9 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
                   : `Sign in to follow ${vendor.name} and get updates on new listings.`}
               </span>
               <Link
-                href={`/login?next=${encodeURIComponent(pathname)}`}
+                href={`/login?next=${encodeURIComponent(pathname)}&intent=${encodeURIComponent(
+                  gated === "message" ? `message:${vendor.id}` : `follow:${vendor.id}`,
+                )}`}
                 data-testid="storefront-auth-gate-cta"
                 style={{
                   alignSelf: "flex-start",

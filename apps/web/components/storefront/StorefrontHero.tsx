@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import type { VendorStorefrontView } from "@voeq/data";
 import type { AuthStatusResponse } from "@/lib/authStatus";
 import { OpenNowBadge } from "@/components/vendor/OpenNowBadge";
+import { usePendingIntent } from "@/lib/usePendingIntent";
 import { MessageCircle } from "lucide-react";
 
 /**
@@ -37,6 +38,7 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
   // Auth check for messaging
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+  const { pending: pendingIntent, consume: consumeIntent } = usePendingIntent();
 
   useEffect(() => {
     fetch("/api/auth/status")
@@ -52,7 +54,9 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
 
   const handleContactVendor = async () => {
     if (!isAuthenticated) {
-      router.push(`/login?next=${encodeURIComponent(pathname)}`);
+      router.push(
+        `/login?next=${encodeURIComponent(pathname)}&intent=${encodeURIComponent(`message:${vendor.id}`)}`,
+      );
       return;
     }
     
@@ -74,6 +78,38 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
       // Error handled silently (K2.6 will add proper error UI)
     }
   };
+
+  // Phase 1: resume a pending "message this vendor" intent after the auth gate.
+  useEffect(() => {
+    if (pendingIntent?.kind !== "message") return;
+    if (!isAuthenticated || authLoading) return;
+    if (pendingIntent.vendorId && pendingIntent.vendorId !== vendor.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/conversations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ vendorId: vendor.id }),
+        });
+        if (cancelled) return;
+        if (res.ok) {
+          const data = await res.json();
+          router.push(`/messages/${data.conversationId}`);
+        }
+      } catch {
+        // silent
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingIntent, isAuthenticated, authLoading, vendor.id]);
+
+  useEffect(() => {
+    if (pendingIntent) consumeIntent();
+  }, [pendingIntent, consumeIntent]);
 
   // Category display
   const categories = Array.isArray(vendor.categoryIds) ? vendor.categoryIds : [];

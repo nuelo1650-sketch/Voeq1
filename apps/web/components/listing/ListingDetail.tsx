@@ -11,6 +11,7 @@ import { CommentForm } from "@/components/shopper/CommentForm";
 import type { AuthStatusResponse, CommentsResponse, CreateResponse } from "@/lib/apiTypes";
 import { CommentsList, type DisplayComment } from "@/components/shopper/CommentsList";
 import { ReportForm } from "@/components/shopper/ReportForm";
+import { usePendingIntent } from "@/lib/usePendingIntent";
 import { Heart, Share2, Flag, X, ChevronLeft, ChevronRight, MessageCircle, Link2 } from "lucide-react";
 
 /**
@@ -82,6 +83,10 @@ export function ListingDetail({ id }: { id: string }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
 
+  // Phase 1: pending intent (e.g. "I wanted to message this vendor") surfaced
+  // after the auth gate. We wait for the vendor to resolve, then resume.
+  const { pending: pendingIntent, consume: consumeIntent } = usePendingIntent();
+
   // Check auth status
   useEffect(() => {
     fetch("/api/auth/status")
@@ -146,6 +151,43 @@ export function ListingDetail({ id }: { id: string }) {
       cancelled = true;
     };
   }, [id]);
+
+  // Phase 1: resume a pending "message vendor" intent after the auth gate.
+  // We settle here (not in the handler) so it runs once the listing resolved and
+  // the user is authenticated+post-login. consume() strips the intent so it
+  // cannot re-fire on a refresh (the old loop).
+  useEffect(() => {
+    if (pendingIntent?.kind !== "message") return;
+    if (!isAuthenticated || authLoading) return;
+    if (!listing?.vendorId) return;
+    const vendorId = listing.vendorId;
+    if (pendingIntent.vendorId && pendingIntent.vendorId !== vendorId) return;
+    let cancelledNow = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/conversations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ vendorId, listingId: id }),
+        });
+        if (cancelledNow) return;
+        if (res.ok) {
+          const data = (await res.json()) as CreateResponse;
+          if (data.conversation?.id) router.push(`/messages/${data.conversation.id}`);
+        }
+      } catch {
+        // silent — user can tap Message manually
+      }
+    })();
+    return () => {
+      cancelledNow = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingIntent, isAuthenticated, authLoading, listing, id]);
+
+  useEffect(() => {
+    if (pendingIntent) consumeIntent();
+  }, [pendingIntent, consumeIntent]);
 
   const handleShare = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -226,8 +268,14 @@ export function ListingDetail({ id }: { id: string }) {
   );
 
   const handleMessageVendor = async () => {
+    if (!listing?.vendorId) return;
     if (!isAuthenticated) {
-      router.push(`/login?next=${encodeURIComponent(pathname)}`);
+      // Phase 1: carry the message intent through the auth gate so after login
+      // the user drops straight into a conversation with THIS vendor (not just
+      // back on the page, re-losing their intent — the old loop).
+      router.push(
+        `/login?next=${encodeURIComponent(pathname)}&intent=${encodeURIComponent(`message:${listing.vendorId}`)}`,
+      );
       return;
     }
     

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
 
 /**
@@ -12,12 +13,27 @@ import { InfoPageShell } from "@/components/info/InfoPageShell";
  *
  * Consent is recorded server-side via the consent repo; this page only collects
  * the checkbox and POSTs acceptance. It does NOT bypass the gate.
+ *
+ * Phase 1: passes ?next and ?intent to the API so consent resumes the user's
+ * original action (message vendor / become vendor) instead of dumping them at
+ * /select-campus.
  */
 export default function ConsentPage() {
+  return (
+    <Suspense fallback={<div className="auth-card">Loading…</div>}>
+      <ConsentForm />
+    </Suspense>
+  );
+}
+
+function ConsentForm() {
   const router = useRouter();
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const params = useSearchParams();
+  const next = params.get("next") ?? "";
+  const intent = params.get("intent") ?? "";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -28,7 +44,11 @@ export default function ConsentPage() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/auth/consent", { method: "POST" });
+      const qs = new URLSearchParams();
+      if (next) qs.set("next", next);
+      if (intent) qs.set("intent", intent);
+      const suffix = qs.toString() ? `?${qs.toString()}` : "";
+      const res = await fetch(`/api/auth/consent${suffix}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Could not record consent.");
