@@ -248,10 +248,20 @@ export function LandingNav() {
             </>
           ) : (
             <>
-              <Link href="/login" onClick={() => setOpen(false)}>Sign in</Link>
-              <button onClick={() => { handleGetStarted(); setOpen(false); }} className="landing-cta landing-cta--sm">
+              <BrandLogo width={72} className="landing-nav-overlay-logo" />
+              <p className="landing-nav-overlay-tag">The campus marketplace.</p>
+              <Link href="/login" onClick={() => setOpen(false)} className="landing-nav-overlay-signin">
+                Sign in
+              </Link>
+              <button
+                onClick={() => { handleGetStarted(); setOpen(false); }}
+                className="landing-nav-overlay-getstarted"
+              >
                 Get started
               </button>
+              <Link href="/explore" onClick={() => setOpen(false)} className="landing-nav-overlay-explore">
+                Browse the marketplace
+              </Link>
             </>
           )}
         </div>,

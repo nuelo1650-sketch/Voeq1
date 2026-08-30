@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { BrandLogo } from '../landing/BrandLogo';
-import { LandingFooter } from '../landing/LandingFooter';
 
 interface InfoPageShellProps {
   children: React.ReactNode;
@@ -31,9 +30,6 @@ export function InfoPageShell({ children, title }: InfoPageShellProps) {
           {children}
         </div>
       </main>
-
-      {/* Footer */}
-      <LandingFooter />
     </div>
   );
 }

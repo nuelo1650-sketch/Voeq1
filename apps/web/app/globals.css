@@ -73,15 +73,74 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(var(--color-cream-rgb, 245, 241, 232), 0.98);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background:
+    radial-gradient(900px 500px at 20% -10%, rgba(232,163,61,.16), transparent 60%),
+    radial-gradient(700px 520px at 100% 110%, rgba(15,42,29,.14), transparent 60%),
+    rgba(var(--color-cream-rgb, 245, 241, 232), 0.985);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
-  padding: var(--space-4);
+  padding: var(--space-6) var(--space-4);
+}
+.landing-nav-overlay-logo { margin-bottom: 4px; }
+.landing-nav-overlay-tag {
+  font-family: var(--role-font-ui);
+  font-size: 14px;
+  letter-spacing: .02em;
+  color: var(--color-ink-muted, #6f6a5e);
+  margin: 0 0 var(--space-3);
+}
+/* Sign in — warm ghost pill, clearly clickable (was a bare text link). */
+.landing-nav-overlay a.landing-nav-overlay-signin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 320px);
+  font-family: var(--role-font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-forest);
+  text-decoration: none;
+  padding: 15px 24px;
+  border: 1.5px solid rgba(15,42,29,.22);
+  border-radius: 999px;
+  background: rgba(255,255,255,.5);
+  transition: background .15s ease, transform .15s ease, border-color .15s ease;
+}
+.landing-nav-overlay a.landing-nav-overlay-signin:hover { background: rgba(255,255,255,.85); border-color: rgba(15,42,29,.4); transform: translateY(-1px); }
+/* Get started — primary forest pill. */
+.landing-nav-overlay button.landing-nav-overlay-getstarted {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 320px);
+  font-family: var(--role-font-ui);
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-forest);
+  box-shadow: 0 10px 26px rgba(15,42,29,.28);
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.landing-nav-overlay button.landing-nav-overlay-getstarted:hover { transform: translateY(-1px); box-shadow: 0 14px 32px rgba(15,42,29,.34); }
+/* Browse — subtle tertiary under the primary CTAs. */
+.landing-nav-overlay a.landing-nav-overlay-explore {
+  font-family: var(--role-font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-ink-muted, #6f6a5e);
+  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  margin-top: var(--space-2);
 }
 .landing-nav-overlay a,
 .landing-nav-overlay button { font-family: var(--role-font-display); font-size: 28px; color: var(--role-text); text-decoration: none; background: transparent; border: none; cursor: pointer; padding: 0; }
@@ -99,6 +158,10 @@
 @media (max-width: 768px) {
   .landing-nav-links { display: none; }
   .landing-nav-hamburger { display: inline-flex; }
+  /* Mobile: the auth CTAs (Sign in / Get started) already live in the hamburger
+     drawer — showing them in the top bar too doubles them and crowds the row
+     against the logo + hamburger (mobile-first polish, 2026-08-30). */
+  .landing-nav-auth { display: none; }
 }
 
 /* Contour field desktop floor (Doc 05 C.9: min-width 320px) */
@@ -1124,7 +1187,10 @@
   .hero-headline { font-size: clamp(40px, 10vw, 56px); }
   .hero-visual { min-height: 290px; margin-top: 8px; }
   .hero-search { flex-wrap: wrap; gap: 8px; border-radius: 20px; padding: 10px; }
-  .hero-search-cat { flex: 1 1 auto; }
+  /* Mobile: drop "All categories" so the search input is full-width, not
+     squeezed against a select. Category filtering stays via the chips below. */
+  .hero-search-cat { display: none; }
+  .hero-search-input { flex: 1 1 100%; }
   .hero-search-btn { flex: 1 1 100%; justify-content: center; }
   .hero-cta-btn { width: 100%; justify-content: center; }
   .hero-props { justify-content: center; gap: 14px; }
