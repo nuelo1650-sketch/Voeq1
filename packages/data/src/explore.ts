@@ -1,6 +1,7 @@
 import type { Listing, Vendor } from "./interfaces";
 import { mockListingsRepo, mockVendorRepo, mockListingsRepoThatFails, vendorName } from "./mock";
 import { mockReviewRepo, countSavesByVendor, mockFollowRepo } from "./shopper";
+import { CATEGORY_ID_TO_SLUG } from "./explore-view";
 
 /**
  * Explore data boundary (Doc 04 PG-PUB-002/003, Doc 07 §7.7).
@@ -74,6 +75,10 @@ function toExploreListing(l: Listing, vendors: Vendor[], vendorRatings?: Map<str
     image?: string; trending?: boolean;
   };
   const vr = vendorRatings?.get(l.vendorId);
+  // P3 (2026-08-29): real Neon listings carry a categoryId but no categorySlug
+  // column, so a mock-only read left categorySlug undefined and EVERY category
+  // filter silently returned nothing. Derive it from the canonical id->slug map.
+  const categorySlug = extra.categorySlug ?? CATEGORY_ID_TO_SLUG[l.categoryId];
   return {
     ...l,
     vendorName: v?.name ?? vendorName(l.vendorId),
@@ -81,7 +86,7 @@ function toExploreListing(l: Listing, vendors: Vendor[], vendorRatings?: Map<str
     featured: extra.featured,
     soldOut: extra.soldOut,
     availability: extra.availability,
-    categorySlug: extra.categorySlug,
+    categorySlug,
     image: extra.image ?? (Array.isArray(l.images) ? l.images[0] : undefined),
     // Trending derives from a real signal (featured), not invented analytics.
     trending: l.isFeatured || extra.trending,

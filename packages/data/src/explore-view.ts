@@ -176,6 +176,13 @@ export async function submitNewCampus(name: string, creatorIdentityId: string): 
 // ---------------------------------------------------------------------------
 // CATEGORY TAXONOMY (curated, static per Doc 06 §"Categories (taxonomy)")
 // ---------------------------------------------------------------------------
+// IMPORTANT (P3, 2026-08-29): this array is the SINGLE source of truth for every
+// category id/slug/name in the app — the vendor wizard, landing hero chips,
+// /api/vendors resolution, and the Explore category key all read from here.
+// `id` is what vendors/listings store (Database); `slug` is the URL + filter key
+// (e.g. /c/food-drinks). Keep them 1:1 with seed.ts so the staff CRUD table and
+// the UI never diverge. A listing's categorySlug is DERIVED from its categoryId
+// via this map (real Neon listings have no categorySlug column).
 
 export const categories: Category[] = [
   { id: "food", slug: "food-drinks", name: "Food & Drinks", color: "#E8A33D", icon: "utensils", vendorCount: 0 },
@@ -183,12 +190,26 @@ export const categories: Category[] = [
   { id: "tech", slug: "tech-repairs", name: "Tech & Repairs", color: "#5BA8A0", icon: "wrench", vendorCount: 0 },
   { id: "beauty", slug: "beauty-care", name: "Beauty & Care", color: "#C97B9E", icon: "sparkles", vendorCount: 0 },
   { id: "academic", slug: "academic-services", name: "Academic Services", color: "#2D5A3D", icon: "book", vendorCount: 0 },
+  { id: "books", slug: "books", name: "Books & Study Materials", color: "#5B7FB8", icon: "book", vendorCount: 0 },
   { id: "printing", slug: "printing", name: "Printing", color: "#5B7FB8", icon: "printer", vendorCount: 0 },
   { id: "photography", slug: "photography", name: "Photography", color: "#8B6FB8", icon: "camera", vendorCount: 0 },
   { id: "tailoring", slug: "tailoring", name: "Tailoring", color: "#C9A24B", icon: "scissors", vendorCount: 0 },
   { id: "logistics", slug: "logistics", name: "Logistics", color: "#3B5A7B", icon: "truck", vendorCount: 0 },
+  { id: "home", slug: "home-essentials", name: "Home Essentials", color: "#7A9E7E", icon: "home", vendorCount: 0 },
+  { id: "health", slug: "health-wellness", name: "Health & Wellness", color: "#5BA8A0", icon: "heart", vendorCount: 0 },
+  { id: "groceries", slug: "groceries", name: "Groceries", color: "#7AB55A", icon: "shopping basket", vendorCount: 0 },
+  { id: "tutorials", slug: "tutorials", name: "Tutorials & Classes", color: "#2D5A3D", icon: "graduation", vendorCount: 0 },
+  { id: "rentals", slug: "rentals", name: "Rentals", color: "#3B5A7B", icon: "key", vendorCount: 0 },
+  { id: "events", slug: "events", name: "Events & Parties", color: "#C97B9E", icon: "party", vendorCount: 0 },
+  { id: "travel", slug: "travel-transport", name: "Travel & Transport", color: "#5B7FB8", icon: "car", vendorCount: 0 },
+  { id: "student-support", slug: "student-support", name: "Student Support", color: "#C9A24B", icon: "users", vendorCount: 0 },
   { id: "other", slug: "other", name: "Other", color: "#7A7A7A", icon: "grid", vendorCount: 0 },
 ];
+
+/** Map a category id -> its slug (used to derive categorySlug for real listings). */
+export const CATEGORY_ID_TO_SLUG: Record<string, string> = Object.fromEntries(
+  categories.map((c) => [c.id, c.slug]),
+);
 
 /** Map a category slug used in URLs (/c/[slug]) to the vendor `category` field. */
 const CATEGORY_SLUG_TO_NAME: Record<string, string> = Object.fromEntries(

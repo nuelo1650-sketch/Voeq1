@@ -24,12 +24,30 @@ const CAMPUSSES = [
   { id: "unijos", name: "University of Jos", slug: "unijos", region: "Plateau State", city: "Jos", state: "Plateau State", lat: 9.95028, lng: 8.88917, source: "seeded" as const, status: "verified" as const, createdAt: new Date(0).toISOString() },
 ];
 
+// P3 (2026-08-29): keep the DB categories table 1:1 with the canonical taxonomy
+// (explore-view.ts categories) so the staff CRUD table, the vendor wizard, and
+// the Explore filters all reference the same ids/slugs. id = what vendors/listings
+// store; slug = URL + filter key.
 const CATEGORIES = [
-  { id: "food", name: "Food", slug: "food" },
-  { id: "tech", name: "Tech", slug: "tech" },
-  { id: "books", name: "Books", slug: "books" },
-  { id: "services", name: "Services", slug: "services" },
+  { id: "food", name: "Food & Drinks", slug: "food-drinks" },
   { id: "fashion", name: "Fashion", slug: "fashion" },
+  { id: "tech", name: "Tech & Repairs", slug: "tech-repairs" },
+  { id: "beauty", name: "Beauty & Care", slug: "beauty-care" },
+  { id: "academic", name: "Academic Services", slug: "academic-services" },
+  { id: "books", name: "Books & Study Materials", slug: "books" },
+  { id: "printing", name: "Printing", slug: "printing" },
+  { id: "photography", name: "Photography", slug: "photography" },
+  { id: "tailoring", name: "Tailoring", slug: "tailoring" },
+  { id: "logistics", name: "Logistics", slug: "logistics" },
+  { id: "home", name: "Home Essentials", slug: "home-essentials" },
+  { id: "health", name: "Health & Wellness", slug: "health-wellness" },
+  { id: "groceries", name: "Groceries", slug: "groceries" },
+  { id: "tutorials", name: "Tutorials & Classes", slug: "tutorials" },
+  { id: "rentals", name: "Rentals", slug: "rentals" },
+  { id: "events", name: "Events & Parties", slug: "events" },
+  { id: "travel", name: "Travel & Transport", slug: "travel-transport" },
+  { id: "student-support", name: "Student Support", slug: "student-support" },
+  { id: "other", name: "Other", slug: "other" },
 ];
 
 export async function seed(): Promise<void> {

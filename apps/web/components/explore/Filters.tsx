@@ -4,15 +4,14 @@ import { useMemo } from "react";
 import type { ExploreFilters, ExploreListing } from "@voeq/data";
 import { PriceRangeSlider } from "./PriceRangeSlider";
 
-export const CATEGORIES = [
-  { slug: "food", label: "Food & Drinks" },
-  { slug: "books", label: "Academic" },
-  { slug: "beauty", label: "Beauty & Wellness" },
-  { slug: "apparel", label: "Fashion" },
-  { slug: "services", label: "Services" },
-  { slug: "tech", label: "Tech & Electronics" },
-  { slug: "printing", label: "Printing & Copy" },
-];
+import { categories } from "@voeq/data";
+
+/** P3 (2026-08-29): Explore category keys derive from the canonical categories
+ * taxonomy (@voeq/data) so the filter slug matches a real listing's categorySlug.
+ * Previously this was a hardcoded list with slugs ("food","tech") that DON'T match
+ * the canonical slugs ("food-drinks","tech-repairs") — so the category filter
+ * silently returned nothing on real data. */
+export const CATEGORIES = categories.map((c) => ({ slug: c.slug, label: c.name }));
 
 const SORTS = [
   { value: "relevance", label: "Most popular" },
