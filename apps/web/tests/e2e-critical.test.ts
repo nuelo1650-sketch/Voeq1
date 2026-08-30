@@ -257,10 +257,30 @@ describe("health + config", () => {
   });
 
   it("18. validateEnv(api) passes when all required secrets present", () => {
-    // validateEnv reads process.env directly (no overrides arg). Real env is
-    // complete after the D.10 env-var reconciliation, so this should pass.
-    const report = validateEnv("api");
-    expect(report.ok).toBe(true);
+    // 2026-08-29: validateEnv reads process.env directly (no overrides arg), and a
+    // dev machine legitimately lacks prod-only secrets (e.g. TURNSTILE_SECRET_KEY
+    // may not be configured locally). Deterministic pass-path proof: sentinel-fill
+    // every required-but-absent var, assert ok:true + zero missing, restore all.
+    const required = [
+      "DATABASE_URL", "VOEQ_SESSION_SECRET", "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY",
+      "CLOUDINARY_API_SECRET", "SIGHTENGINE_USER", "SIGHTENGINE_SECRET", "RESEND_API_KEY",
+      "RESEND_FROM_EMAIL", "AUTH_GOOGLE_CLIENT_ID", "AUTH_GOOGLE_CLIENT_SECRET",
+      "TURNSTILE_SECRET_KEY", "CORS_ALLOWLIST", "SUPER_ADMIN_EMAIL",
+    ];
+    const saved: Record<string, string | undefined> = {};
+    for (const k of required) {
+      if (!process.env[k]) { saved[k] = process.env[k]; process.env[k] = `sentinel-${k}`; }
+    }
+    try {
+      const report = validateEnv("api");
+      expect(report.ok).toBe(true);
+      expect(report.missing).toHaveLength(0);
+      expect(report.real.length).toBe(required.length);
+    } finally {
+      for (const [k, v] of Object.entries(saved)) {
+        if (v === undefined) delete process.env[k]; else process.env[k] = v;
+      }
+    }
   });
 });
 

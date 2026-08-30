@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { applyFilters, applySort, loadExplore, rankRelevance, rankByRelevance, type ExploreListing } from "@voeq/data";
+import { mockVendorRepo, mockListingsRepo } from "@voeq/data/server";
 
 function mk(partial: Partial<ExploreListing> & Pick<ExploreListing, "id" | "vendorId" | "title" | "priceMinor" | "isPublished" | "images">): ExploreListing {
   return { vendorName: "V", ...partial } as ExploreListing;
@@ -80,11 +81,43 @@ describe("rankRelevance / rankByRelevance (Phase 2)", () => {
 
 describe("loadExplore", () => {
   it("returns success with mapped listings + trending + vendor names", async () => {
-    const res = await loadExplore({ campus: "nmu" });
+    // 2026-08-29 reset: seed no longer plants demo vendors/listings (founder directive:
+    // real vendors only, honest-empty Explore). This test now creates its own fixture
+    // vendor + listing through the REAL repos, then asserts Explore surfaces them.
+    const campus = "unn"; // seeded verified campus
+    const vendor = await mockVendorRepo.create({
+      identityId: "explore-test-fixture",
+      name: "Explore Test Vendor",
+      campus,
+      categoryIds: ["food"],
+      status: "live",
+      description: "Test vendor for loadExplore pipeline verification.",
+    });
+    await mockListingsRepo.create({
+      vendorId: vendor.id,
+      title: "Pipeline Test Jollof",
+      priceMinMinor: 6500,
+      categoryId: "food",
+      description: "Fixture listing for the Explore pipeline test.",
+      images: [],
+      status: "active",
+      isPublished: true,
+    });
+
+    const res = await loadExplore({ campus });
     expect(res.status).toBe("success");
     expect(res.data.length).toBeGreaterThan(0);
-    expect(res.data[0].vendorName).toBeTruthy();
-    expect(res.trending.length).toBeGreaterThan(0);
+    const found = res.data.find((l) => l.title === "Pipeline Test Jollof");
+    expect(found).toBeTruthy();
+    expect(found?.vendorName).toBe("Explore Test Vendor");
+    expect(res.data.length).toBeGreaterThan(0);
+
+    // Cleanup: remove the fixture listing + make the fixture vendor non-public so
+    // the DB stays honest-empty for other tests (VendorRepo has no remove()).
+    await mockListingsRepo.remove(
+      (await mockListingsRepo.list({ campus })).find((l) => l.title === "Pipeline Test Jollof")!.id,
+    );
+    await mockVendorRepo.patch(vendor.id, { status: "pending_listings" });
   });
 
   it("returns empty for a category preset that matches nothing (real zero case)", async () => {

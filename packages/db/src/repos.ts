@@ -861,8 +861,13 @@ export const realCampusRepo: CampusRepo = {
   ): Promise<Campus> {
     const slug = (input.slug ?? input.name.trim().toLowerCase().replace(/\s+/g, "-")).replace(/[^a-z0-9-]/g, "");
     if (!slug) throw new Error("invalid_campus_slug");
-    const existing = await getDb().select({ id: s.campuses.id }).from(s.campuses).where(eq(s.campuses.slug, slug)).limit(1);
-    if (existing.length > 0) throw new Error("duplicate_slug");
+    // A.6 contract (2026-08-29 fix): on slug collision, RETURN the existing campus
+    // instead of throwing. The in-memory repo already behaved this way; a user
+    // typing an existing campus name must be handed the existing campus, not an error.
+    const existingRows = await getDb().select().from(s.campuses).where(eq(s.campuses.slug, slug)).limit(1);
+    if (existingRows.length > 0) {
+      return existingRows[0];
+    }
     const rec = {
       id: `campus-${Date.now()}`,
       slug,
