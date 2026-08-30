@@ -20,8 +20,8 @@ export async function POST() {
   const result = await goLive(identity.id);
   if (!result) return NextResponse.json({ error: "Vendor not found." }, { status: 404 });
   if (!result.ok) {
-    return NextResponse.json({ error: "Preconditions not met.", reasons: result.reasons }, { status: 409 });
+    return NextResponse.json({ error: "Preconditions not met.", reasons: result.reasons, notes: result.notes }, { status: 409 });
   }
 
-  return NextResponse.json({ ok: true, status: "live", reasons: result.reasons });
+  return NextResponse.json({ ok: true, status: "live", reasons: result.reasons, notes: result.notes });
 }

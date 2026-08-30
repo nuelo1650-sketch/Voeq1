@@ -17,6 +17,8 @@ export interface CanGoLiveResult {
   ok: boolean;
   status: "live" | "pending_listings";
   reasons: string[];
+  /** Non-blocking recommendations (e.g. "add a profile photo") surfaced to the vendor. */
+  notes?: string[];
 }
 
 /** Pure precondition check — does this vendor satisfy Phase A + Phase B? */
@@ -28,6 +30,7 @@ export async function canGoLive(vendor: {
   status: "pending_listings" | "live" | "suspended";
 }): Promise<CanGoLiveResult> {
   const reasons: string[] = [];
+  const notes: string[] = [];
   if (!vendor.agreementAcceptedAt) reasons.push("phase_a_incomplete");
   // Real listings live in Neon (mockListingsRepo switches to realListingsRepo on
   // USE_REAL). listListingsByVendor only checks the in-memory dev dataset, so it
@@ -35,12 +38,17 @@ export async function canGoLive(vendor: {
   // listings by vendorId instead.
   const hasListing =
     (await mockListingsRepo.list({ campus: vendor.campus })).filter((l) => l.vendorId === vendor.id).length > 0;
-  if (!vendor.profilePhotoUrl) reasons.push("profile_photo_missing");
+  // P2 (2026-08-29): graduated go-live. The profile photo is RECOMMENDED, never a
+  // hard block — the wizard already labels it "optional, add later in settings",
+  // and a vendor with a listing + agreement should be able to make money. The
+  // photo surfaces as a recommendation to complete, not a wall.
+  if (!vendor.profilePhotoUrl) notes.push("profile_photo_recommended");
   if (!hasListing) reasons.push("no_listing");
   return {
     ok: reasons.length === 0,
     status: reasons.length === 0 ? "live" : "pending_listings",
     reasons,
+    notes,
   };
 }
 

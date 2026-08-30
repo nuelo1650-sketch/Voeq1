@@ -173,15 +173,16 @@ describe("LAUNCH SWEEP v2: full real-user journey on fresh Neon", () => {
     expect(listing.res.status).toBe(200);
     expect(listing.data?.listing?.id ?? listing.data?.id).toBeTruthy();
 
-    // Go-live gate: with a listing present, check what remains. 409 with
-    // profile_photo_missing is CORRECT product behavior (photo gate).
+    // Go-live (P2 graduated): with agreement + a listing, the vendor can now go
+    // LIVE without a profile photo (photo is recommended, not a wall). This
+    // proves the smoother vendor path: listing alone → live.
     const gl = await api(jar, "/api/vendor/go-live", { method: "POST", body: JSON.stringify({}) });
     evidence("go-live-after-listing", { status: gl.res.status, body: gl.data });
-    expect([200, 409]).toContain(gl.res.status);
-    if (gl.res.status === 409) {
-      expect(Array.isArray(gl.data?.reasons)).toBe(true);
-    } else {
-      expect(gl.data?.ok ?? true).toBe(true);
+    expect(gl.res.status).toBe(200);
+    expect(gl.data?.status).toBe("live");
+    // No photo? Should be a recommendation, never a blocking reason.
+    if (Array.isArray(gl.data?.notes)) {
+      expect(gl.data.notes).toContain("profile_photo_recommended");
     }
   }, 90000);
 

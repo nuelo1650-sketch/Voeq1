@@ -109,7 +109,7 @@ export default async function VendorDashboardPage() {
             <p style={{ color: "var(--color-forest-mid)", margin: 0 }}>All caught up! Your storefront is live. 🎉</p>
           ) : (
             <p style={{ color: "var(--color-ink-muted)", margin: 0 }}>
-              Complete the photo and first listing to go public.
+              Create your first listing to go public. Need a photo first? You can go live without one — add a profile photo anytime in Settings.
             </p>
           )}
         </div>
