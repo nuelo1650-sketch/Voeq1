@@ -8,7 +8,12 @@
  */
 import { describe, it, expect, beforeAll } from "vitest";
 
-const BASE = "http://localhost:3030";
+const BASE = process.env.VOEQ_HTTP_BASE ?? "http://localhost:3030";
+// HTTP integration test: only runs when explicitly pointed at a server. By
+// default vitest skips it, so a routine `vitest run` NEVER touches the launch DB
+// (the :3030 dev server points at prod). Set VOEQ_HTTP_BASE=http://localhost:3031
+// (a test-DB server) to run a full round-trip.
+const runHttp = Boolean(process.env.VOEQ_HTTP_BASE);
 const TS = Date.now();
 const CAMPUS = "nmu-okerenkoko"; // seeded, stable, verified
 const SHOPPER = { email: `sweep-shopper-${TS}@voeq.ng`, password: "SweepPass123!", name: "Sweep Shopper" };
@@ -49,7 +54,7 @@ function evidence(label: string, detail: unknown) {
   console.log(`[SWEEP] ${label}:`, JSON.stringify(detail)?.slice(0, 220));
 }
 
-describe("LAUNCH SWEEP v2: full real-user journey on fresh Neon", () => {
+describe.skipIf(!runHttp)("LAUNCH SWEEP v2: full real-user journey on fresh Neon", () => {
   beforeAll(async () => {
     const r = await fetch(`${BASE}/api/health`);
     if (!r.ok) throw new Error("dev server not up");

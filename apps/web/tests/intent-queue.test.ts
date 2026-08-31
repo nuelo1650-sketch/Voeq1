@@ -9,7 +9,10 @@
  */
 import { describe, it, expect } from "vitest";
 
-const BASE = "http://localhost:3030";
+const BASE = process.env.VOEQ_HTTP_BASE ?? "http://localhost:3030";
+// HTTP integration test: skipped by default so a routine `vitest run` never
+// touches the launch DB. Set VOEQ_HTTP_BASE to run it against a test server.
+const runHttp = Boolean(process.env.VOEQ_HTTP_BASE);
 const TS = Date.now();
 const SHOPPER = { email: `intent-${TS}@voeq.ng`, password: "IntentPass123!", name: "Intent Shopper" };
 
@@ -38,7 +41,7 @@ async function devOtp(email: string) {
   return data.code;
 }
 
-describe("Phase 1: post-auth intent queue", () => {
+describe.skipIf(!runHttp)("Phase 1: post-auth intent queue", () => {
   it("login preserves intent; consent honors next+intent", async () => {
     // 1) create + fully verify + consent the account
     const jar: Jar = {};
