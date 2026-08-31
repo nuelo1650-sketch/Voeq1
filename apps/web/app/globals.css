@@ -5194,3 +5194,77 @@ header.AppShell,
   font-size: 16px; font-weight: 650; color: var(--color-forest);
   font-family: var(--role-font-ui); margin: 0 0 10px; letter-spacing: -.01em;
 }
+
+/* ============================================================================
+   VOEQ STOREFRONT DESIGN SYSTEM (Phase A, 2026-08-30) — warm, editorial, mobile-first.
+   Same Voeq theme as Explore. ZERO logic change — all data-testids preserved.
+   ============================================================================ */
+
+/* Hero band */
+.vs-hero {
+  display: flex; flex-direction: column; gap: 18px;
+  padding: 20px 0 8px; max-width: 1100px; margin: 0 auto;
+}
+.vs-hero-top {
+  display: flex; align-items: flex-start; gap: 18px;
+}
+.vs-avatar {
+  width: 84px; height: 84px; border-radius: 24px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--color-forest) 0%, var(--color-forest-mid) 100%);
+  color: var(--color-cream, #f6f1e6); display: flex; align-items: center; justify-content: center;
+  font-size: 30px; font-weight: 700; font-family: var(--role-font-display);
+  box-shadow: 0 8px 20px rgba(15,42,29,.18);
+}
+.vs-name {
+  margin: 0; font-family: var(--role-font-display); font-size: clamp(1.8rem, 5vw, 2.75rem);
+  line-height: 1.05; color: var(--color-forest); letter-spacing: -.02em;
+}
+.vs-trustrow {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: 13.5px; color: var(--color-ink-muted, #6f6a5e); font-family: var(--role-font-ui);
+}
+.vs-trust { color: var(--color-forest); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.vs-cat-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.vs-cat-badge {
+  font-size: 12px; font-weight: 550; padding: 4px 12px; text-transform: capitalize;
+  color: var(--color-forest); background: rgba(30,59,47,.06);
+  border: 1px solid rgba(30,59,47,.12); border-radius: 999px; font-family: var(--role-font-ui);
+}
+.vs-desc { margin: 0; font-size: 15px; line-height: 1.65; color: var(--color-ink, #23201a); max-width: 620px; font-family: var(--role-font-ui); }
+.vs-cta {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--role-font-ui); font-weight: 650; font-size: 15px;
+  background: var(--color-forest); color: var(--color-cream, #f6f1e6);
+  border: none; border-radius: 14px; padding: 14px 26px; cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease; box-shadow: 0 8px 20px rgba(15,42,29,.22);
+}
+.vs-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(15,42,29,.28); }
+.vs-cta:disabled { opacity: .6; cursor: wait; }
+.vs-socials { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; font-family: var(--role-font-ui); }
+.vs-social { color: var(--color-ink-muted, #6f6a5e); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.vs-social:hover { color: var(--color-forest); }
+
+/* Stats row */
+.vs-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  padding: 18px; background: var(--color-glass-white, #fffef9);
+  border: 1px solid rgba(30,59,47,.09); border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(30,59,47,.05);
+}
+.vs-stat { display: flex; flex-direction: column; gap: 3px; }
+.vs-stat-value { font-size: 24px; font-weight: 750; color: var(--color-forest); font-family: var(--role-font-mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; }
+.vs-stat-label { font-size: 12.5px; color: var(--color-ink-muted, #6f6a5e); font-family: var(--role-font-ui); }
+
+/* About / info card */
+.vs-card {
+  padding: 20px; background: var(--color-glass-white, #fffef9);
+  border: 1px solid rgba(30,59,47,.09); border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(30,59,47,.05);
+}
+.vs-card-title { margin: 0 0 10px; font-size: 18px; font-weight: 700; color: var(--color-forest); font-family: var(--role-font-display); }
+.vs-card-body { font-size: 14px; line-height: 1.65; color: var(--color-ink, #23201a); font-family: var(--role-font-ui); }
+
+@media (min-width: 768px) {
+  .vs-hero { flex-direction: column; }
+  .vs-stats { gap: 20px; padding: 22px; }
+}

@@ -115,132 +115,57 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
   const categories = Array.isArray(vendor.categoryIds) ? vendor.categoryIds : [];
   
   return (
-    <div style={{ marginBottom: "var(--space-6)" }}>
+    <div className="vs-hero">
       {/* Hero header */}
-      <header
-        data-testid="storefront-hero"
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "var(--space-4)",
-          padding: "var(--space-4) 0",
-          marginBottom: "var(--space-3)",
-        }}
-      >
-        {/* Avatar: 80px circle (K2.4 #2) */}
-        <div
-          data-testid="storefront-avatar"
-          aria-hidden
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: "50%",
-            background: "var(--color-forest)",
-            color: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "28px",
-            fontWeight: 700,
-            fontFamily: "var(--role-font-display)",
-            flexShrink: 0,
-          }}
-        >
+      <header data-testid="storefront-hero" className="vs-hero-top">
+        {/* Avatar */}
+        <div data-testid="storefront-avatar" aria-hidden className="vs-avatar">
           {initials(vendor.name)}
         </div>
 
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px", minWidth: 0 }}>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", marginBottom: 8 }}>
-              <h1
-                data-testid="storefront-name"
-                style={{
-                  margin: 0,
-                  fontFamily: "var(--role-font-display)",
-                  fontSize: "clamp(2rem, 4vw, 3rem)",
-                  lineHeight: 1.05,
-                  color: "var(--role-text)",
-                }}
-              >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: 8 }}>
+              <h1 data-testid="storefront-name" className="vs-name">
                 {vendor.name}
               </h1>
               <OpenNowBadge vendor={vendor} />
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", fontSize: "14px", color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)", marginBottom: 8 }}>
-              {/* Locked trust language — "Student Vouched" (K2.4 #2) */}
-              <span data-testid="storefront-vouched" style={{ color: "var(--role-accent-strong)", fontWeight: 500 }}>
+            <div className="vs-trustrow">
+              <span data-testid="storefront-vouched" className="vs-trust">
                 ✓ Student Vouched
               </span>
               {hasRating && (
-                <span data-testid="storefront-rating" style={{ fontWeight: 500 }}>★ {vendor.ratingAvg!.toFixed(1)} ({vendor.ratingCount} {vendor.ratingCount === 1 ? 'review' : 'reviews'})</span>
+                <span data-testid="storefront-rating">★ {vendor.ratingAvg!.toFixed(1)} ({vendor.ratingCount} {vendor.ratingCount === 1 ? 'review' : 'reviews'})</span>
               )}
               <span>{vendor.campus}</span>
-              <Link href="/explore" data-testid="storefront-back" style={{ color: "var(--role-text-muted)", textDecoration: "none" }}>
+              <Link href="/explore" data-testid="storefront-back" style={{ color: "var(--color-ink-muted, #6f6a5e)", textDecoration: "none" }}>
                 ← Explore
               </Link>
             </div>
 
-            {/* Category badges (K2.4 #2) */}
+            {/* Category badges */}
             {categories.length > 0 && (
-              <div style={{ display: "flex", gap: "var(--space-1)", flexWrap: "wrap", marginBottom: 12 }}>
+              <div className="vs-cat-badges" style={{ marginBottom: 12 }}>
                 {categories.slice(0, 3).map((cat) => (
-                  <span
-                    key={cat}
-                    style={{
-                      fontSize: "12px",
-                      padding: "4px 12px",
-                      background: "var(--role-surface-sunken)",
-                      border: "1px solid var(--role-border)",
-                      borderRadius: 999,
-                      color: "var(--role-text)",
-                      fontFamily: "var(--role-font-ui)",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {cat}
-                  </span>
+                  <span key={cat} className="vs-cat-badge">{cat}</span>
                 ))}
               </div>
             )}
 
-            {/* Description (K2.4 #2) */}
+            {/* Description */}
             {vendor.description && (
-              <p style={{
-                margin: 0,
-                fontSize: "15px",
-                lineHeight: 1.6,
-                color: "var(--role-text)",
-                fontFamily: "var(--role-font-ui)",
-                maxWidth: 600,
-              }}>
-                {vendor.description}
-              </p>
+              <p className="vs-desc">{vendor.description}</p>
             )}
           </div>
 
-          {/* Primary CTA (K2.4 #4) */}
-          <button 
-            data-testid="storefront-contact-cta" 
+          {/* Primary CTA */}
+          <button
+            data-testid="storefront-contact-cta"
             onClick={handleContactVendor}
             disabled={authLoading}
-            style={{
-              alignSelf: "flex-start",
-              padding: "14px 28px",
-              fontSize: "16px",
-              fontWeight: 600,
-              fontFamily: "var(--role-font-ui)",
-              background: "var(--color-forest)",
-              color: "white",
-              border: "none",
-              borderRadius: "var(--radius)",
-              cursor: authLoading ? "wait" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              opacity: authLoading ? 0.6 : 1,
-            }}
+            className="vs-cta"
           >
             <MessageCircle size={18} />
             Contact {vendor.name}
@@ -248,128 +173,56 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
 
           {/* Socials (existing) */}
           {(vendor.socials?.phone || vendor.socials?.instagram || vendor.socials?.twitter || vendor.socials?.tiktok) && (
-            <div data-testid="storefront-socials" style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap", fontSize: 13, fontFamily: "var(--role-font-ui)" }}>
+            <div data-testid="storefront-socials" className="vs-socials">
               {vendor.socials.phone && (
-                <a href={`tel:${vendor.socials.phone}`} data-testid="storefront-social-phone" style={{ color: "var(--role-text)" }}>📞 {vendor.socials.phone}</a>
+                <a href={`tel:${vendor.socials.phone}`} data-testid="storefront-social-phone" className="vs-social">📞 {vendor.socials.phone}</a>
               )}
               {vendor.socials.instagram && (
-                <a href={`https://instagram.com/${vendor.socials.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-instagram" style={{ color: "var(--role-text)" }}>Instagram: {vendor.socials.instagram}</a>
+                <a href={`https://instagram.com/${vendor.socials.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-instagram" className="vs-social">Instagram: {vendor.socials.instagram}</a>
               )}
               {vendor.socials.twitter && (
-                <a href={`https://x.com/${vendor.socials.twitter.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-twitter" style={{ color: "var(--role-text)" }}>Twitter: {vendor.socials.twitter}</a>
+                <a href={`https://x.com/${vendor.socials.twitter.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-twitter" className="vs-social">Twitter: {vendor.socials.twitter}</a>
               )}
               {vendor.socials.tiktok && (
-                <a href={`https://tiktok.com/@${vendor.socials.tiktok.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-tiktok" style={{ color: "var(--role-text)" }}>TikTok: {vendor.socials.tiktok}</a>
+                <a href={`https://tiktok.com/@${vendor.socials.tiktok.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-tiktok" className="vs-social">TikTok: {vendor.socials.tiktok}</a>
               )}
             </div>
           )}
         </div>
       </header>
 
-      {/* Stats row (K2.4 #5) */}
-      <div 
-        data-testid="storefront-stats"
-        style={{
-          display: "flex",
-          gap: "var(--space-4)",
-          padding: "var(--space-3)",
-          background: "var(--role-surface-sunken)",
-          borderRadius: "var(--radius-lg)",
-          border: "1px solid var(--role-border)",
-          marginBottom: "var(--space-4)",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{
-            fontSize: "24px",
-            fontWeight: 700,
-            color: "var(--role-text)",
-            fontFamily: "var(--role-font-mono)",
-          }}>
-            {vendor.listingCount}
-          </div>
-          <div style={{
-            fontSize: "13px",
-            color: "var(--role-text-muted)",
-            fontFamily: "var(--role-font-ui)",
-          }}>
-            {vendor.listingCount === 1 ? 'Listing' : 'Listings'}
-          </div>
+      {/* Stats row */}
+      <div data-testid="storefront-stats" className="vs-stats">
+        <div className="vs-stat">
+          <div className="vs-stat-value">{vendor.listingCount}</div>
+          <div className="vs-stat-label">{vendor.listingCount === 1 ? 'Listing' : 'Listings'}</div>
         </div>
 
         {hasRating && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <div style={{
-              fontSize: "24px",
-              fontWeight: 700,
-              color: "var(--role-text)",
-              fontFamily: "var(--role-font-mono)",
-            }}>
-              {vendor.ratingAvg!.toFixed(1)} ★
-            </div>
-            <div style={{
-              fontSize: "13px",
-              color: "var(--role-text-muted)",
-              fontFamily: "var(--role-font-ui)",
-            }}>
-              Average rating
-            </div>
+          <div className="vs-stat">
+            <div className="vs-stat-value">{vendor.ratingAvg!.toFixed(1)} ★</div>
+            <div className="vs-stat-label">Average rating</div>
           </div>
         )}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{
-            fontSize: "24px",
-            fontWeight: 700,
-            color: "var(--role-text)",
-            fontFamily: "var(--role-font-mono)",
-          }}>
-            {vendor.verifiedCount}
-          </div>
-          <div style={{
-            fontSize: "13px",
-            color: "var(--role-text-muted)",
-            fontFamily: "var(--role-font-ui)",
-          }}>
-            Verified {vendor.verifiedCount === 1 ? 'listing' : 'listings'}
-          </div>
+        <div className="vs-stat">
+          <div className="vs-stat-value">{vendor.verifiedCount}</div>
+          <div className="vs-stat-label">Verified {vendor.verifiedCount === 1 ? 'listing' : 'listings'}</div>
         </div>
       </div>
 
-      {/* About section (K2.4 #6) */}
-      <div 
-        data-testid="storefront-about"
-        style={{
-          padding: "var(--space-3)",
-          background: "var(--role-surface)",
-          borderRadius: "var(--radius-lg)",
-          border: "1px solid var(--role-border)",
-        }}
-      >
-        <h2 style={{
-          margin: 0,
-          marginBottom: "var(--space-2)",
-          fontSize: "18px",
-          fontWeight: 600,
-          color: "var(--role-text)",
-          fontFamily: "var(--role-font-display)",
-        }}>
-          About
-        </h2>
-        <div style={{
-          fontSize: "14px",
-          lineHeight: 1.6,
-          color: "var(--role-text)",
-          fontFamily: "var(--role-font-ui)",
-        }}>
+      {/* About section */}
+      <div data-testid="storefront-about" className="vs-card">
+        <h2 className="vs-card-title">About</h2>
+        <div className="vs-card-body">
           {vendor.description ? (
             <p style={{ margin: 0, marginBottom: 12 }}>{vendor.description}</p>
           ) : (
-            <p style={{ margin: 0, marginBottom: 12, color: "var(--role-text-muted)" }}>
+            <p style={{ margin: 0, marginBottom: 12, color: "var(--color-ink-muted, #6f6a5e)" }}>
               No description available yet.
             </p>
           )}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--role-text-muted)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-ink-muted, #6f6a5e)" }}>
             <span>📍</span>
             <span>{vendor.campus}</span>
             {vendor.subArea && <span>• {vendor.subArea}</span>}
