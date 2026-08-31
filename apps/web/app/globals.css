@@ -5189,3 +5189,8 @@ header.AppShell,
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+.voeq-rail-title {
+  font-size: 16px; font-weight: 650; color: var(--color-forest);
+  font-family: var(--role-font-ui); margin: 0 0 10px; letter-spacing: -.01em;
+}

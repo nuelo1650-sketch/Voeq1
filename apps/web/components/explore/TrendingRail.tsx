@@ -7,11 +7,11 @@ import { ListingCard } from "./ListingCard";
 export function TrendingRail({ items }: { items: ExploreListing[] }) {
   if (!items.length) return null;
   return (
-    <section data-testid="trending-rail" aria-label="Trending on my campus" style={{ marginBlock: "var(--space-3)", overflowX: "hidden" }}>
-      <h2 style={railTitle}>Trending on my campus</h2>
-      <div style={{ display: "flex", gap: "var(--space-2)", overflowX: "auto", paddingBottom: 8 }}>
+    <section data-testid="trending-rail" aria-label="Trending on my campus" style={{ marginBlock: "var(--space-3)" }}>
+      <h2 className="voeq-rail-title">Trending on my campus</h2>
+      <div className="voeq-rail">
         {items.map((l) => (
-          <div key={l.id} style={{ minWidth: 220, flex: "0 0 auto" }}>
+          <div key={l.id}>
             <ListingCard listing={l} />
           </div>
         ))}
@@ -19,11 +19,3 @@ export function TrendingRail({ items }: { items: ExploreListing[] }) {
     </section>
   );
 }
-
-const railTitle: React.CSSProperties = {
-  fontSize: "16px",
-  fontWeight: 600,
-  color: "var(--role-text)",
-  fontFamily: "var(--role-font-ui)",
-  margin: "0 0 8px",
-};
