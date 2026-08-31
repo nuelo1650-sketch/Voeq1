@@ -30,18 +30,18 @@ export function ReviewsList({
           No reviews yet.
         </p>
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
           {reviews.map((r) => (
-            <li key={r.id} data-testid="review-item" style={{ borderBottom: "1px solid var(--role-border)", paddingBottom: "var(--space-2)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ color: "var(--color-amber)" }} aria-label={`${r.rating} stars`}>
+            <li key={r.id} data-testid="review-item" className="voeq-review">
+              <div className="voeq-review-head">
+                <span className="voeq-review-stars" aria-label={`${r.rating} stars`}>
                   {"★".repeat(r.rating)}
                 </span>
-                <span style={{ fontSize: 12, color: "var(--role-text-muted)" }}>
+                <span style={{ fontSize: 12, color: "var(--color-ink-muted, #6f6a5e)" }}>
                   {new Date(r.createdAt ?? Date.now()).toLocaleDateString()}
                 </span>
               </div>
-              <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--role-text)" }}>{r.body}</p>
+              <p className="voeq-review-text">{r.body}</p>
             </li>
           ))}
         </ul>

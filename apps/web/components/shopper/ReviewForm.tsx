@@ -58,7 +58,7 @@ export function ReviewForm({ vendorId }: { vendorId: string }) {
   }
 
   return (
-    <form onSubmit={submit} data-testid="review-form" style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", marginTop: "var(--space-3)" }}>
+    <form onSubmit={submit} data-testid="review-form" className="voeq-comment-form">
       <div style={{ display: "flex", gap: 4 }} aria-label="Star rating">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
@@ -69,7 +69,7 @@ export function ReviewForm({ vendorId }: { vendorId: string }) {
             onMouseEnter={() => setHover(n)}
             onMouseLeave={() => setHover(0)}
             onClick={() => setRating(n)}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: (hover || rating) >= n ? "var(--color-amber)" : "var(--role-border)" }}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: (hover || rating) >= n ? "var(--color-amber)" : "var(--color-ink-subtle, #d8d2c4)", transition: "color .12s ease" }}
           >
             ★
           </button>
@@ -81,13 +81,13 @@ export function ReviewForm({ vendorId }: { vendorId: string }) {
         onChange={(e) => setBody(e.target.value)}
         placeholder="Share what you bought and how it went (min 10 characters)"
         rows={3}
-        style={{ width: "100%", fontFamily: "var(--role-font-ui)", fontSize: 14, padding: 10, borderRadius: "var(--radius)", border: "1px solid var(--role-border)", background: "var(--role-surface)", color: "var(--role-text)", resize: "vertical" }}
+        className="voeq-textarea"
       />
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-        <button type="submit" disabled={busy} data-testid="review-submit" style={{ fontFamily: "var(--role-font-ui)", fontWeight: 600, fontSize: 14, padding: "10px 18px", borderRadius: "var(--radius)", border: "none", background: "var(--role-accent-strong)", color: "var(--role-on-accent)", cursor: busy ? "default" : "pointer" }}>
+      <div className="voeq-comment-actions">
+        <button type="submit" disabled={busy} data-testid="review-submit" className="voeq-btn voeq-btn--primary" style={{ padding: "10px 18px", fontSize: 14 }}>
           {busy ? "Saving…" : "Post review"}
         </button>
-        {msg && <span data-testid="review-msg" style={{ fontSize: 13, color: "var(--role-text-muted)" }}>{msg}</span>}
+        {msg && <span data-testid="review-msg" className="voeq-comment-msg">{msg}</span>}
       </div>
     </form>
   );

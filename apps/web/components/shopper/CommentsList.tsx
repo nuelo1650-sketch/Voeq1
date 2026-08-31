@@ -14,18 +14,23 @@ export function CommentsList({ comments }: { comments: DisplayComment[] }) {
         Comments {comments.length > 0 && <span style={{ color: "var(--role-text-muted)", fontSize: 14 }}>({comments.length})</span>}
       </h3>
       {comments.length === 0 ? (
-        <p data-testid="comments-empty" style={{ color: "var(--role-text-muted)", fontSize: 14 }}>
+        <p data-testid="comments-empty" className="voeq-comment-msg">
           No comments yet.
         </p>
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column" }}>
           {comments.map((c) => (
-            <li key={c.id} data-testid="comment-item" style={{ borderBottom: "1px solid var(--role-border)", paddingBottom: "var(--space-2)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--role-text-muted)" }}>
-                <span style={{ fontWeight: 600, color: "var(--role-text)" }}>{c.authorName ?? "Shopper"}</span>
-                <span>{new Date(c.createdAt).toLocaleDateString()}</span>
+            <li key={c.id} data-testid="comment-item" className="voeq-comment">
+              <div className="voeq-comment-avatar" aria-hidden>
+                {(c.authorName ?? "S").slice(0, 1).toUpperCase()}
               </div>
-              <p style={{ margin: "4px 0 0", fontSize: 14, color: "var(--role-text)" }}>{c.body}</p>
+              <div className="voeq-comment-body">
+                <div className="voeq-comment-head">
+                  <span className="voeq-comment-author">{c.authorName ?? "Shopper"}</span>
+                  <span className="voeq-comment-time">{new Date(c.createdAt).toLocaleDateString()}</span>
+                </div>
+                <p className="voeq-comment-text">{c.body}</p>
+              </div>
             </li>
           ))}
         </ul>
