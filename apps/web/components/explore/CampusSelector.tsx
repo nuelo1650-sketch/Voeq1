@@ -66,6 +66,7 @@ export function CampusSelector({ currentCampus, onChange, viewerIdentityId }: Ca
       <button
         onClick={() => setIsOpen(!isOpen)}
         data-testid="campus-selector-trigger"
+        className="campus-trigger"
         style={{
           display: "flex",
           alignItems: "center",
@@ -90,7 +91,7 @@ export function CampusSelector({ currentCampus, onChange, viewerIdentityId }: Ca
         }}
       >
         <MapPin size={16} style={{ color: "var(--color-forest)" }} />
-        <span>{displayName}</span>
+        <span className="campus-trigger-name">{displayName}</span>
         <ChevronDown
           size={16}
           style={{
@@ -116,6 +117,7 @@ export function CampusSelector({ currentCampus, onChange, viewerIdentityId }: Ca
 
           <div
             data-testid="campus-selector-menu"
+            className="campus-menu"
             style={{
               position: "absolute",
               top: "calc(100% + 4px)",

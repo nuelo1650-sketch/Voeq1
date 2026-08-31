@@ -323,10 +323,10 @@ export function Explore({
               <FilterChip label={`Category: ${CATEGORIES.find(c => c.slug === filters.category)?.label}`} onRemove={() => removeFilter('category')} />
             )}
             {filters.minPrice && (
-              <FilterChip label={`Min: ₦${filters.minPrice / 100}`} onRemove={() => removeFilter('minPrice')} />
+              <FilterChip label={`Min: ${formatNaira(filters.minPrice)}`} onRemove={() => removeFilter('minPrice')} />
             )}
             {filters.maxPrice && (
-              <FilterChip label={`Max: ₦${filters.maxPrice / 100}`} onRemove={() => removeFilter('maxPrice')} />
+              <FilterChip label={`Max: ${formatNaira(filters.maxPrice)}`} onRemove={() => removeFilter('maxPrice')} />
             )}
             {filters.minRating && (
               <FilterChip label={`${filters.minRating}+ stars`} onRemove={() => removeFilter('minRating')} />
@@ -641,6 +641,11 @@ const primaryBtn: React.CSSProperties = {
   color: "var(--role-on-accent)",
   borderColor: "var(--role-accent-strong)",
 };
+/** kobo (minor units) -> "₦6,500" with thousands separators (en-NG). */
+function formatNaira(minor: number): string {
+  return `₦${new Intl.NumberFormat("en-NG").format(Math.round(minor / 100))}`;
+}
+
 const sheetStyle: React.CSSProperties = {
   position: "fixed",
   left: 0,
