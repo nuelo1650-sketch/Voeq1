@@ -87,11 +87,17 @@ export function Explore({
 
   // Hydrate view/density from localStorage; default compact on mobile.
   useEffect(() => {
+    // P-A fix (2026-08-31): phones ALWAYS use the compact 2-col grid.
+    // The persisted "list" view (or a previous render without this fix) made
+    // Explore look like a full-width "just listing" feed. Only desktop
+    // (>=768px) may honor a previously saved list view.
+    const isPhone = typeof window !== "undefined" && window.innerWidth < 768;
     const v = localStorage.getItem("voeq:explore-view");
     const d = localStorage.getItem("voeq:explore-density");
-    if (v === "grid" || v === "list") setView(v);
+    if (v === "list" && !isPhone) setView("list");
+    else setView("grid");
     if (d === "comfortable" || d === "compact") setDensity(d);
-    else if (typeof window !== "undefined" && window.innerWidth < 768) setDensity("compact");
+    else if (isPhone) setDensity("compact");
   }, []);
 
   // Persist view/density across sessions.
