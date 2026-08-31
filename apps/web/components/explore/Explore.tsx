@@ -296,10 +296,7 @@ export function Explore({
             <div style={{ display: "inline-flex", gap: "var(--space-2)" }}>
               <button
                 onClick={() => removeFilter('category')}
-                style={{
-                  ...categoryPillStyle,
-                  ...(filters.category ? {} : categoryPillActiveStyle),
-                }}
+                className={`voeq-pill${filters.category ? "" : " is-active"}`}
               >
                 All
               </button>
@@ -307,10 +304,7 @@ export function Explore({
                 <button
                   key={cat.slug}
                   onClick={() => setFilters((prev) => ({ ...prev, category: cat.slug }))}
-                  style={{
-                    ...categoryPillStyle,
-                    ...(filters.category === cat.slug ? categoryPillActiveStyle : {}),
-                  }}
+                  className={`voeq-pill${filters.category === cat.slug ? " is-active" : ""}`}
                 >
                   {cat.label}
                 </button>
@@ -384,28 +378,28 @@ export function Explore({
             {status === "loading" && <ExploreSkeleton />}
 
             {status === "error" && (
-              <div data-testid="explore-error" role="alert" style={stateBox}>
+              <div data-testid="explore-error" role="alert" className="voeq-state">
                 <p>Couldn’t load listings{error ? ` (${error})` : ""}.</p>
                 {cached && cached.length > 0 && (
                   <p data-testid="explore-partial" style={{ color: "var(--role-text-muted)" }}>
                     Showing last loaded results — some content couldn’t load.
                   </p>
                 )}
-                <button data-testid="explore-retry" onClick={retry} style={primaryBtn}>
+                <button data-testid="explore-retry" onClick={retry} className="voeq-btn voeq-btn--primary">
                   Retry
                 </button>
               </div>
             )}
 
             {status === "empty" && (
-              <div data-testid="explore-empty" style={stateBox}>
+              <div data-testid="explore-empty" className="voeq-state">
                 <h2 style={{ margin: 0 }}>No vendors yet on {campus}</h2>
                 <p style={{ color: "var(--role-text-muted)" }}>
                   Be the first to share what you’re selling near {campus}.
                 </p>
-                <div style={{ display: "flex", gap: "var(--space-2)" }}>
-                  <Link href="/" data-testid="explore-empty-browse" style={primaryBtn}>Browse other campuses</Link>
-                  <Link href="/for-vendors" data-testid="explore-empty-vendor" style={ghostBtn}>Become a vendor</Link>
+                <div className="voeq-state-actions">
+                  <Link href="/" data-testid="explore-empty-browse" className="voeq-btn voeq-btn--primary">Browse other campuses</Link>
+                  <Link href="/for-vendors" data-testid="explore-empty-vendor" className="voeq-btn voeq-btn--ghost">Become a vendor</Link>
                 </div>
               </div>
             )}
@@ -647,16 +641,6 @@ const primaryBtn: React.CSSProperties = {
   color: "var(--role-on-accent)",
   borderColor: "var(--role-accent-strong)",
 };
-const stateBox: React.CSSProperties = {
-  border: "1px solid var(--role-border)",
-  borderRadius: "var(--radius-lg)",
-  padding: "var(--space-4)",
-  background: "var(--role-surface)",
-  display: "flex",
-  flexDirection: "column",
-  gap: "var(--space-2)",
-  alignItems: "flex-start",
-};
 const sheetStyle: React.CSSProperties = {
   position: "fixed",
   left: 0,
@@ -669,25 +653,6 @@ const sheetStyle: React.CSSProperties = {
   borderTopRightRadius: "var(--radius-lg)",
   padding: "var(--space-3)",
   boxShadow: "var(--shadow-2)",
-};
-
-const categoryPillStyle: React.CSSProperties = {
-  fontFamily: "var(--role-font-ui)",
-  fontSize: "14px",
-  padding: "6px 14px",
-  borderRadius: 999,
-  border: "1px solid var(--role-border)",
-  background: "var(--role-surface)",
-  color: "var(--role-text)",
-  cursor: "pointer",
-  whiteSpace: "nowrap",
-  transition: "all 120ms ease",
-};
-
-const categoryPillActiveStyle: React.CSSProperties = {
-  background: "var(--color-forest)",
-  color: "var(--color-glass-white)",
-  borderColor: "var(--color-forest)",
 };
 
 const filterBadgeStyle: React.CSSProperties = {
