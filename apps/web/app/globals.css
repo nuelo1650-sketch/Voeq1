@@ -5008,6 +5008,17 @@ header.AppShell,
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
+/* Round 6: mobile compact card — small square image, tight type so the WHOLE
+   card (image+title+price+meta) fits on screen in 2-per-row. */
+@media (max-width: 767px) {
+  .voeq-card { border-radius: 14px; }
+  .voeq-card-image { aspect-ratio: 1 / 1; }
+  .voeq-card-body { padding: 8px 10px 10px; gap: 4px; }
+  .voeq-card-title { font-size: 13px; line-height: 1.25; }
+  .voeq-card-price { font-size: 14px; }
+  .voeq-card-vendor { font-size: 11.5px; }
+  .voeq-card-cat { font-size: 10.5px; }
+}
 .voeq-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .voeq-card-body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 5px; }
 .voeq-card-title {
@@ -5155,11 +5166,12 @@ header.AppShell,
 /* ---- 8. Mobile-first grid ----------------------------------------------- */
 .voeq-grid {
   display: grid;
-  /* Mobile-first (P-A feedback, round 2): 2 columns at phone width so a WHOLE
-     card (image + title + price) is visible per row — 1-col made cards so tall
-     they appeared "half-cut" on screen. 3-col tablet, 4-col desktop. */
+  /* Mobile (feedback, round 6): TWO small compact cards per row so a whole
+     card is visible on screen (image + title + price) — previously 1-col
+     full-width cards were too big and only part showed. Desktop keeps
+     larger 3-4 col cards. Different setups per platform, as requested. */
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 @media (min-width: 768px) {
   .voeq-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
