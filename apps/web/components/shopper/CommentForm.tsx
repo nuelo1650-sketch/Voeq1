@@ -50,20 +50,20 @@ export function CommentForm({ listingId }: { listingId: string }) {
   }
 
   return (
-    <form onSubmit={submit} data-testid="comment-form" style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", marginTop: "var(--space-3)" }}>
+    <form onSubmit={submit} data-testid="comment-form" className="voeq-comment-form">
       <textarea
         data-testid="comment-body"
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="Add a comment…"
         rows={3}
-        style={{ width: "100%", fontFamily: "var(--role-font-ui)", fontSize: 14, padding: 10, borderRadius: "var(--radius)", border: "1px solid var(--role-border)", background: "var(--role-surface)", color: "var(--role-text)", resize: "vertical" }}
+        className="voeq-textarea"
       />
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-        <button type="submit" disabled={busy} data-testid="comment-submit" style={{ fontFamily: "var(--role-font-ui)", fontWeight: 600, fontSize: 14, padding: "10px 18px", borderRadius: "var(--radius)", border: "none", background: "var(--role-accent-strong)", color: "var(--role-on-accent)", cursor: busy ? "default" : "pointer" }}>
+      <div className="voeq-comment-actions">
+        <button type="submit" disabled={busy} data-testid="comment-submit" className="voeq-btn voeq-btn--primary" style={{ padding: "10px 18px", fontSize: 14 }}>
           {busy ? "Posting…" : "Post comment"}
         </button>
-        {msg && <span data-testid="comment-msg" style={{ fontSize: 13, color: "var(--role-text-muted)" }}>{msg}</span>}
+        {msg && <span data-testid="comment-msg" className="voeq-comment-msg">{msg}</span>}
       </div>
     </form>
   );

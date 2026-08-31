@@ -55,22 +55,9 @@ export function LikeButton({
       aria-pressed={liked}
       aria-label={liked ? "Unlike" : "Like"}
       onClick={onClick}
-      className={className}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        background: "transparent",
-        border: "none",
-        cursor: "pointer",
-        color: liked ? "var(--role-accent-strong)" : "var(--role-text-muted)",
-        padding: 6,
-        fontSize: 14,
-        fontWeight: 500,
-      }}
+      className={`voeq-like${liked ? " is-liked" : ""}${className ? ` ${className}` : ""}`}
     >
-      <ThumbsUp size={18} fill={liked ? "currentColor" : "none"} />
+      <ThumbsUp size={17} fill={liked ? "currentColor" : "none"} />
       {liked ? "Liked" : "Like"}
     </button>
   );

@@ -5268,3 +5268,61 @@ header.AppShell,
   .vs-hero { flex-direction: column; }
   .vs-stats { gap: 20px; padding: 22px; }
 }
+
+/* ============================================================================
+   VOEQ ENGAGEMENT DESIGN SYSTEM (Phase A, 2026-08-30) — comments / likes / reviews.
+   Same warm Voeq theme, mobile-first. ZERO logic change (testids preserved).
+   ============================================================================ */
+
+/* Comment form */
+.voeq-comment-form {
+  display: flex; flex-direction: column; gap: 10px; margin-top: 14px;
+}
+.voeq-textarea {
+  width: 100%; font-family: var(--role-font-ui); font-size: 14px; line-height: 1.5;
+  padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(30,59,47,.14);
+  background: var(--color-glass-white, #fffef9); color: var(--color-ink, #23201a);
+  resize: vertical; outline: none; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.voeq-textarea:focus { border-color: var(--color-amber); box-shadow: 0 0 0 3px rgba(232,163,61,.16); }
+.voeq-comment-actions { display: flex; align-items: center; gap: 10px; }
+.voeq-comment-msg { font-size: 13px; color: var(--color-ink-muted, #6f6a5e); }
+
+/* Comment / review list */
+.voeq-comment {
+  display: flex; gap: 10px; padding: 12px 0;
+  border-bottom: 1px solid rgba(30,59,47,.07);
+}
+.voeq-comment-avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: var(--color-forest); color: var(--color-cream, #f6f1e6);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-family: var(--role-font-ui); font-size: 14px;
+}
+.voeq-comment-body { flex: 1; min-width: 0; }
+.voeq-comment-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.voeq-comment-author { font-size: 14px; font-weight: 650; color: var(--color-forest); font-family: var(--role-font-ui); }
+.voeq-comment-time { font-size: 12px; color: var(--color-ink-muted, #6f6a5e); }
+.voeq-comment-text { font-size: 14px; line-height: 1.55; color: var(--color-ink, #23201a); font-family: var(--role-font-ui); margin: 2px 0 0; }
+
+/* Like button */
+.voeq-like {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: transparent; border: 1px solid rgba(30,59,47,.16); border-radius: 999px;
+  cursor: pointer; color: var(--color-ink-muted, #6f6a5e); padding: 7px 13px;
+  font-size: 13.5px; font-weight: 600; font-family: var(--role-font-ui);
+  transition: all .15s ease;
+}
+.voeq-like:hover { border-color: rgba(30,59,47,.32); color: var(--color-forest); }
+.voeq-like.is-liked { background: rgba(232,163,61,.14); border-color: rgba(232,163,61,.4); color: #a4791d; }
+
+/* Review card */
+.voeq-review {
+  display: flex; flex-direction: column; gap: 6px; padding: 14px;
+  background: var(--color-glass-white, #fffef9); border: 1px solid rgba(30,59,47,.08);
+  border-radius: 16px;
+}
+.voeq-review-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.voeq-review-stars { color: var(--color-amber); font-size: 15px; letter-spacing: 1px; }
+.voeq-review-text { font-size: 14px; line-height: 1.55; color: var(--color-ink, #23201a); font-family: var(--role-font-ui); }
+.voeq-review-verdict { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: #2e7d4f; background: rgba(46,125,79,.10); border-radius: 999px; padding: 3px 9px; }
