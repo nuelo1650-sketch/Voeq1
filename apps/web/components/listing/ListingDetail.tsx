@@ -33,9 +33,9 @@ function formatPrice(minor: number): string {
 
 type DetailStatus = "loading" | "success" | "error" | "notfound";
 
-export function ListingDetail({ id }: { id: string }) {
-  const [status, setStatus] = useState<DetailStatus>("loading");
-  const [listing, setListing] = useState<ExploreListing | null>(null);
+export function ListingDetail({ id, initialListing }: { id: string; initialListing?: ExploreListing | null }) {
+  const [status, setStatus] = useState<DetailStatus>(initialListing ? "success" : "loading");
+  const [listing, setListing] = useState<ExploreListing | null>(initialListing ?? null);
   const [moreFromVendor, setMoreFromVendor] = useState<ExploreListing[]>([]);
   const [youMightLike, setYouMightLike] = useState<ExploreListing[]>([]);
   const pathname = usePathname();
@@ -102,25 +102,40 @@ export function ListingDetail({ id }: { id: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    setStatus("loading");
+    // P-A fix (2026-08-31): when the server already passed the listing
+    // (initialListing), don't flash "loading" — the page renders immediately.
+    if (!initialListing) setStatus("loading");
 
     // Load main listing — P-A fix (2026-08-31): fetch the SERVER API route.
     // Previously client-side loadListing(id) bundled USE_REAL=false into the
     // browser -> mock repo -> null -> "Listing not found" for real Neon rows.
     (async () => {
       try {
-        const res = await fetch(`/api/listings/${id}`);
-        if (res.status === 404) {
-          if (!cancelled) setStatus("notfound");
-          return;
+        // P-A fix (2026-08-31): the SERVER component already loaded the listing
+        // (initialListing) — used directly, no client refetch of /api/listings/[id]
+        // (which on production hits a Vercel->Render proxy loop -> 508).
+        // Fallback: if the server pass was null/missing (e.g. direct client nav),
+        // refetch through the API; a 404 or error maps to notfound/error.
+        let mainListing: ExploreListing | null = initialListing ?? null;
+        if (!mainListing) {
+          const res = await fetch(`/api/listings/${id}`);
+          if (res.status === 404) {
+            if (!cancelled) setStatus("notfound");
+            return;
+          }
+          if (!res.ok) {
+            if (!cancelled) setStatus("error");
+            return;
+          }
+          const d = (await res.json()) as { listing?: ExploreListing };
+          mainListing = d.listing ?? null;
         }
-        if (!res.ok) {
-          if (!cancelled) setStatus("error");
-          return;
-        }
-        const d = (await res.json()) as { listing: ExploreListing };
         if (cancelled) return;
-        setListing(d.listing);
+        if (!mainListing) {
+          setStatus("notfound");
+          return;
+        }
+        setListing(mainListing);
         setStatus("success");
 
         // Load "More from this vendor" (same vendorId, exclude current)
@@ -128,18 +143,18 @@ export function ListingDetail({ id }: { id: string }) {
           const ex = (await (await fetch(`/api/explore`)).json()) as { data: ExploreListing[] };
           if (cancelled) return;
           const fromVendor = ex.data
-            .filter((l) => l.vendorId === d.listing.vendorId && l.id !== id)
+            .filter((l) => l.vendorId === mainListing.vendorId && l.id !== id)
             .slice(0, 4);
           setMoreFromVendor(fromVendor);
 
           // Load "You might also like" (same category, different vendors)
-          if (d.listing.categorySlug) {
+          if (mainListing.categorySlug) {
             const ex2 = (await (
-              await fetch(`/api/explore?${new URLSearchParams({ category: d.listing.categorySlug })}`)
+              await fetch(`/api/explore?${new URLSearchParams({ category: mainListing.categorySlug })}`)
             ).json()) as { data: ExploreListing[] };
             if (!cancelled) {
               const related = ex2.data
-                .filter((l) => l.vendorId !== d.listing.vendorId && l.id !== id)
+                .filter((l) => l.vendorId !== mainListing.vendorId && l.id !== id)
                 .slice(0, 4);
               setYouMightLike(related);
             }

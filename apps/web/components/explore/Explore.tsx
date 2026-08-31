@@ -244,7 +244,7 @@ export function Explore({
         data-testid="explore-topbar"
         className="voeq-topbar"
       >
-        <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
+        <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" className="voeq-topbar-wordmark" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
           <BrandLogo width={64} />
         </Link>
 
@@ -652,6 +652,10 @@ const sheetStyle: React.CSSProperties = {
   borderTopLeftRadius: "var(--radius-lg)",
   borderTopRightRadius: "var(--radius-lg)",
   padding: "var(--space-3)",
+  /* P-A: respect iPhone home indicator + keep content off the very bottom */
+  paddingBottom: "calc(var(--space-3) + env(safe-area-inset-bottom, 0px))",
+  maxHeight: "calc(100dvh - env(safe-area-inset-top, 0px) - 12px)",
+  overflowY: "auto",
   boxShadow: "var(--shadow-2)",
 };
 

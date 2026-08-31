@@ -50,5 +50,11 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
 
 export default async function ListingPage({ params }: ListingPageProps) {
   const { id } = await params;
-  return <ListingDetail id={id} />;
+  // P-A fix (2026-08-31): server-load the listing and pass it down. The client
+  // previously refetched GET /api/listings/[id], which on production hit a
+  // Vercel->Render proxy loop (508) -> "Couldn't load this listing". Server-side
+  // loadListing is proven working (this is the renderer that produces the
+  // correct <title>); the client gets the data ready-made instead of refetching.
+  const listing = await loadListing(id);
+  return <ListingDetail id={id} initialListing={listing} />;
 }

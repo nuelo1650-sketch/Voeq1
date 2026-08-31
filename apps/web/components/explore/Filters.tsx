@@ -119,11 +119,11 @@ export function Filters({
         {(value.minPrice || value.maxPrice) && (
           <p style={priceSummaryStyle}>
             {value.minPrice && value.maxPrice
-              ? `₦${Math.round(value.minPrice / 100)} – ₦${Math.round(value.maxPrice / 100)}`
+              ? `${formatNaira(value.minPrice)} – ${formatNaira(value.maxPrice)}`
               : value.minPrice
-              ? `From ₦${Math.round(value.minPrice / 100)}`
+              ? `From ${formatNaira(value.minPrice)}`
               : value.maxPrice
-              ? `Up to ₦${Math.round(value.maxPrice / 100)}`
+              ? `Up to ${formatNaira(value.maxPrice)}`
               : ""}
           </p>
         )}
@@ -256,6 +256,11 @@ const quickFiltersLabelStyle: React.CSSProperties = {
   letterSpacing: "0.5px",
   margin: 0,
 };
+
+/** kobo (minor units) -> "₦6,500" with thousands separators (en-NG). */
+function formatNaira(minor: number): string {
+  return `₦${new Intl.NumberFormat("en-NG").format(Math.round(minor / 100))}`;
+}
 
 const clearAllStyle: React.CSSProperties = {
   padding: "10px",

@@ -5123,15 +5123,22 @@ header.AppShell,
 
 /* ---- 6. Topbar (logo / search / campus) — mobile-first ------------------- */
 .voeq-topbar {
-  display: flex; align-items: center; gap: 12px; padding: 10px var(--nav-inline-pad, 16px);
+  display: flex; align-items: center; gap: 10px; padding: 10px var(--nav-inline-pad, 16px);
   background: var(--color-glass-white, #fffef9); border-bottom: 1px solid rgba(30,59,47,.08);
   min-height: var(--nav-height, 60px);
   position: sticky; top: 0; z-index: 10;
+  /* Mobile-first (P-A feedback): row 1 = logo + campus, row 2 = full-width search.
+     No more squeezed "Search ve..." — search is never truncated on phones. */
+  flex-wrap: wrap;
 }
-.voeq-topbar-search { flex: 1; min-width: 0; }
-.voeq-topbar-campus { flex-shrink: 0; }
+.voeq-topbar-search { flex: 1 1 100%; order: 3; min-width: 0; margin-top: 2px; }
+.voeq-topbar-search input { font-size: 16px !important; } /* prevents iOS zoom-on-focus */
+.voeq-topbar-campus { flex-shrink: 0; order: 2; margin-left: auto; }
+.voeq-topbar-wordmark { order: 1; }
 @media (min-width: 768px) {
-  .voeq-topbar-search { max-width: 520px; margin: 0 auto; }
+  .voeq-topbar { flex-wrap: nowrap; }
+  .voeq-topbar-search { flex: 1 1 auto; order: 2; max-width: 520px; margin: 0 auto; }
+  .voeq-topbar-campus { order: 3; margin-left: 0; }
 }
 
 /* ---- 7. Results toolbar (count / sort / view / density) ------------------ */
@@ -5139,14 +5146,25 @@ header.AppShell,
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   flex-wrap: wrap; margin-bottom: 14px;
 }
-.voeq-toolbar-count { font-size: 13.5px; color: var(--color-ink-muted, #6f6a5e); order: 1; flex: 1 1 100%; }
+.voeq-toolbar-count { font-size: 13.5px; color: var(--color-ink-muted, #6f6a5e); order: 1; flex: 1 1 100%; white-space: normal; overflow-wrap: anywhere; }
 .voeq-toolbar-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; order: 2; }
 
 /* ---- 8. Mobile-first grid ----------------------------------------------- */
 .voeq-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Mobile-first (P-A feedback): single FULL-WIDTH column on small phones so
+     cards read as "full" not "half" — design was strict 2-up at every width. */
+  grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 14px;
+}
+@media (min-width: 480px) {
+  .voeq-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 768px) {
+  .voeq-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1200px) {
+  .voeq-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 /* ---- 9. Rails (trending / recently viewed) — compact mobile strips ------- */
