@@ -5126,9 +5126,13 @@ header.AppShell,
   display: flex; align-items: center; gap: 12px; padding: 10px var(--nav-inline-pad, 16px);
   background: var(--color-glass-white, #fffef9); border-bottom: 1px solid rgba(30,59,47,.08);
   min-height: var(--nav-height, 60px);
+  position: sticky; top: 0; z-index: 10;
 }
 .voeq-topbar-search { flex: 1; min-width: 0; }
 .voeq-topbar-campus { flex-shrink: 0; }
+@media (min-width: 768px) {
+  .voeq-topbar-search { max-width: 520px; margin: 0 auto; }
+}
 
 /* ---- 7. Results toolbar (count / sort / view / density) ------------------ */
 .voeq-toolbar {

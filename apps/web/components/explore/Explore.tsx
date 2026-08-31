@@ -242,19 +242,21 @@ export function Explore({
       {/* Shared spatial anchor — mirrors Landing nav geometry exactly (D.4.1 component 2) */}
       <header
         data-testid="explore-topbar"
-        style={topbarStyle}
+        className="voeq-topbar"
       >
         <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
           <BrandLogo width={64} />
         </Link>
 
         {/* Search bar — the alive, centered anchor of the header */}
-        <div style={{ flex: 1, maxWidth: 520, margin: "0 auto", paddingInline: "var(--space-2)" }}>
+        <div className="voeq-topbar-search">
           <SearchBar initial={query} onSearch={setQuery} listings={data} />
         </div>
 
         {/* Campus selector - right side, rich pill */}
-        <CampusSelector currentCampus={campus} onChange={setCampus} viewerIdentityId={viewerIdentityId} />
+        <div className="voeq-topbar-campus">
+          <CampusSelector currentCampus={campus} onChange={setCampus} viewerIdentityId={viewerIdentityId} />
+        </div>
       </header>
 
       <main style={{ padding: "var(--space-3) 0 var(--space-8)" }}>
@@ -425,23 +427,10 @@ export function Explore({
                     closestMatches={trending}
                   />
                 ) : (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "var(--space-2)",
-                      marginBottom: "var(--space-3)",
-                      flexWrap: "wrap",
-                    }}
-                  >
+                  <div className="voeq-toolbar" data-testid="explore-results-toolbar">
                     <div
                       data-testid="explore-results-count"
-                      style={{
-                        fontSize: "14px",
-                        color: "var(--role-text-muted)",
-                        fontFamily: "var(--role-font-ui)",
-                      }}
+                      className="voeq-toolbar-count"
                     >
                       {data.length === 1 ? (
                         "1 result on your campus"
@@ -452,62 +441,35 @@ export function Explore({
                       )}
                     </div>
 
-                    <label
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        fontSize: "14px",
-                        color: "var(--role-text-muted)",
-                        fontFamily: "var(--role-font-ui)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      Sorted by
-                      <select
-                        data-testid="explore-sort"
-                        value={filters.sort ?? "relevance"}
-                        onChange={(e) =>
-                          setFilters((prev) => ({ ...prev, sort: e.target.value as ExploreFilters["sort"] }))
-                        }
-                        style={{
-                          padding: "8px 12px",
-                          borderRadius: 8,
-                          border: "1px solid var(--role-border)",
-                          background: "var(--role-surface)",
-                          color: "var(--role-text)",
-                          fontFamily: "var(--role-font-ui)",
-                          fontSize: "14px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <option value="relevance">Most popular</option>
-                        <option value="distance">Distance (nearest)</option>
-                        <option value="newest">Newest first</option>
-                        <option value="price-asc">Price: Low to High</option>
-                        <option value="price-desc">Price: High to Low</option>
-                        <option value="rating-desc">Top rated</option>
-                      </select>
-                    </label>
+                    <div className="voeq-toolbar-controls">
+                      <div className="voeq-select-wrap">
+                        <span className="voeq-select-label">Sort</span>
+                        <select
+                          data-testid="explore-sort"
+                          value={filters.sort ?? "relevance"}
+                          onChange={(e) =>
+                            setFilters((prev) => ({ ...prev, sort: e.target.value as ExploreFilters["sort"] }))
+                          }
+                          className="voeq-select"
+                        >
+                          <option value="relevance">Most popular</option>
+                          <option value="distance">Distance (nearest)</option>
+                          <option value="newest">Newest first</option>
+                          <option value="price-asc">Price: Low to High</option>
+                          <option value="price-desc">Price: High to Low</option>
+                          <option value="rating-desc">Top rated</option>
+                        </select>
+                        <span className="voeq-select-caret"><ChevronDown size={16} /></span>
+                      </div>
 
-                    {/* View + density toggles (PassA-2) */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div
-                        role="group"
-                        aria-label="View mode"
-                        style={{ display: "inline-flex", border: "1px solid var(--role-border)", borderRadius: 8, overflow: "hidden" }}
-                      >
+                      {/* View + density toggles */}
+                      <div className="voeq-segmented" role="group" aria-label="View mode">
                         <button
                           data-testid="explore-view-grid"
                           aria-pressed={view === "grid"}
                           aria-label="Grid view"
+                          className={view === "grid" ? "is-active" : ""}
                           onClick={() => setView("grid")}
-                          style={{
-                            display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            padding: "8px 10px", border: "none", cursor: "pointer",
-                            background: view === "grid" ? "var(--color-forest)" : "var(--role-surface)",
-                            color: view === "grid" ? "var(--color-glass-white)" : "var(--role-text)",
-                          }}
                         >
                           <LayoutGrid size={16} />
                         </button>
@@ -515,35 +477,20 @@ export function Explore({
                           data-testid="explore-view-list"
                           aria-pressed={view === "list"}
                           aria-label="List view"
+                          className={view === "list" ? "is-active" : ""}
                           onClick={() => setView("list")}
-                          style={{
-                            display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            padding: "8px 10px", border: "none", cursor: "pointer",
-                            background: view === "list" ? "var(--color-forest)" : "var(--role-surface)",
-                            color: view === "list" ? "var(--color-glass-white)" : "var(--role-text)",
-                            borderLeft: "1px solid var(--role-border)",
-                          }}
                         >
                           <List size={16} />
                         </button>
                       </div>
 
-                      <div
-                        role="group"
-                        aria-label="Density"
-                        style={{ display: "inline-flex", border: "1px solid var(--role-border)", borderRadius: 8, overflow: "hidden" }}
-                      >
+                      <div className="voeq-segmented" role="group" aria-label="Density">
                         <button
                           data-testid="explore-density-comfortable"
                           aria-pressed={density === "comfortable"}
                           aria-label="Comfortable density"
+                          className={density === "comfortable" ? "is-active" : ""}
                           onClick={() => setDensity("comfortable")}
-                          style={{
-                            padding: "8px 10px", border: "none", cursor: "pointer", fontSize: "13px",
-                            fontFamily: "var(--role-font-ui)",
-                            background: density === "comfortable" ? "var(--color-forest)" : "var(--role-surface)",
-                            color: density === "comfortable" ? "var(--color-glass-white)" : "var(--role-text)",
-                          }}
                         >
                           Comfortable
                         </button>
@@ -551,14 +498,8 @@ export function Explore({
                           data-testid="explore-density-compact"
                           aria-pressed={density === "compact"}
                           aria-label="Compact density"
+                          className={density === "compact" ? "is-active" : ""}
                           onClick={() => setDensity("compact")}
-                          style={{
-                            padding: "8px 10px", border: "none", cursor: "pointer", fontSize: "13px",
-                            fontFamily: "var(--role-font-ui)",
-                            background: density === "compact" ? "var(--color-forest)" : "var(--role-surface)",
-                            color: density === "compact" ? "var(--color-glass-white)" : "var(--role-text)",
-                            borderLeft: "1px solid var(--role-border)",
-                          }}
                         >
                           Compact
                         </button>
@@ -715,20 +656,6 @@ const stateBox: React.CSSProperties = {
   flexDirection: "column",
   gap: "var(--space-2)",
   alignItems: "flex-start",
-};
-const topbarStyle: React.CSSProperties = {
-  position: "sticky",
-  top: 0,
-  zIndex: 10,
-  minHeight: "var(--nav-height)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: "var(--space-2)",
-  paddingInline: "var(--nav-inline-pad)",
-  background: "var(--nav-bg)",
-  borderBottom: "1px solid var(--nav-border)",
-  transition: "box-shadow .2s ease",
 };
 const sheetStyle: React.CSSProperties = {
   position: "fixed",
