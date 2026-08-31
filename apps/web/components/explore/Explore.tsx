@@ -357,8 +357,9 @@ export function Explore({
           </div>
         )}
 
-        {/* Desktop: persistent filter sidebar + grid. Mobile: bottom-sheet filters. */}
-        <div className="explore-layout" style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "var(--space-3)", marginTop: "var(--space-3)", paddingInline: "var(--nav-inline-pad)" }}>
+        {/* P-A: layout is a single column on mobile (cards full width);
+            desktop (>=1024px) gets the 220px filter sidebar via CSS — no inline grid. */}
+        <div className="explore-layout">
           <aside
             data-testid="explore-sidebar"
             className="explore-desktop-only"
@@ -833,7 +834,7 @@ function FeaturedCarousel({ items }: { items: ExploreListing[] }) {
             FEATURED
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, minHeight: 280 }} className="featured-carousel-grid">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, minHeight: 280 }} className="featured-carousel-grid-voeq">
             {/* Image side */}
             <div 
               className="featured-carousel-image"

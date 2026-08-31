@@ -5124,6 +5124,7 @@ header.AppShell,
 
 /* ---- 6. Topbar (logo / search / campus) — mobile-first ------------------- */
 .voeq-topbar {
+  position: sticky; top: 0; z-index: 30;
   display: flex; align-items: center; gap: 10px; padding: 10px var(--nav-inline-pad, 16px);
   background: var(--color-glass-white, #fffef9); border-bottom: 1px solid rgba(30,59,47,.08);
   min-height: var(--nav-height, 60px);
@@ -5365,3 +5366,11 @@ header.AppShell,
     box-shadow: 0 -12px 40px rgba(15,42,29,.18) !important;
   }
 }
+
+/* ---- P-A round 2: explore-layout — mobile-first single column, desktop sidebar ---- */
+.explore-layout { display: grid; grid-template-columns: 1fr; gap: var(--space-3); margin-top: var(--space-3); padding-inline: var(--nav-inline-pad, 16px); }
+@media (min-width: 1024px) { .explore-layout { grid-template-columns: 220px 1fr; gap: var(--space-4); } }
+
+/* Featured carousel: 1-up on phones, 2-up >>=640px */
+.featured-carousel-grid-voeq { grid-template-columns: 1fr !important; }
+@media (min-width: 640px) { .featured-carousel-grid-voeq { grid-template-columns: 1fr 1fr !important; } }
