@@ -29,6 +29,8 @@ export interface ExploreListing extends Listing {
   vendorRatingAvg?: number;
   /** Number of reviews for this vendor. */
   vendorRatingCount?: number;
+  /** Real vendor operating hours (VS5.3), used for the Open-now quick filter. */
+  vendorHours?: { open: string; close: string; days: string[] } | null;
   /** Real saved-count for this vendor (direct saves + saves of their listings). */
   saveCount?: number;
   /** Real follower-count for this vendor. */
@@ -79,13 +81,20 @@ function toExploreListing(l: Listing, vendors: Vendor[], vendorRatings?: Map<str
   // column, so a mock-only read left categorySlug undefined and EVERY category
   // filter silently returned nothing. Derive it from the canonical id->slug map.
   const categorySlug = extra.categorySlug ?? CATEGORY_ID_TO_SLUG[l.categoryId];
+  // P-A round 2 (2026-08-31): honest quick-filter fields. `verified`, `featured`,
+  // `hours` and status come from the REAL vendor/listing rows (mock `extra`
+  // fields would be undefined for Neon data and make verifiedOnly/openNow
+  // filters silently return empty). Fall back to the mock extras only when the
+  // vendor object is absent (dev fixtures).
+  const verifiedFlag = v ? Boolean(v.verified && v.status === "live") : Boolean(extra.verified);
   return {
     ...l,
     vendorName: v?.name ?? vendorName(l.vendorId),
-    verified: extra.verified,
-    featured: extra.featured,
+    verified: verifiedFlag,
+    featured: l.isFeatured || Boolean(extra.featured),
     soldOut: extra.soldOut,
     availability: extra.availability,
+    vendorHours: v?.hours ?? null,
     categorySlug,
     image: extra.image ?? (Array.isArray(l.images) ? l.images[0] : undefined),
     // Trending derives from a real signal (featured), not invented analytics.
@@ -127,14 +136,13 @@ export function applyFilters(items: ExploreListing[], f: ExploreFilters): Explor
     const now = new Date();
     const currentDay = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][now.getDay()] as 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
     const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    
+
     out = out.filter((i) => {
-      // Access vendor hours through the listing's vendor data (needs to be passed through)
-      // For now, we'll check if hours exist in the mock data structure
-      const vendor = (i as any).vendor;
-      if (!vendor?.hours) return false;
-      if (!vendor.hours.days.includes(currentDay)) return false;
-      return currentTime >= vendor.hours.open && currentTime <= vendor.hours.close;
+      // Real vendor hours were mapped into vendorHours by toExploreListing.
+      const hours = i.vendorHours;
+      if (!hours || !Array.isArray(hours.days)) return false;
+      if (!hours.days.includes(currentDay)) return false;
+      return currentTime >= hours.open && currentTime <= hours.close;
     });
   }
   
