@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Building2, MapPin, FileText, Check } from "lucide-react";
-import { categories, mockCampusRepo, searchCampus, type Campus } from "@voeq/data";
+import { categories, type Campus } from "@voeq/data";
 import { VENDOR_AGREEMENT_TEXT, CURRENT_VENDOR_AGREEMENT_VERSION } from "@voeq/data";
 
 /**
@@ -42,13 +42,17 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
   const [subArea, setSubArea] = useState(initial.subArea);
 
-  // Load campus list via repo (D-1 visibility)
+  // Load campus list via server route (real Neon; D-1 verified visibility)
   useEffect(() => {
-    mockCampusRepo.list().then((rows) => {
-      setAllCampuses(rows);
-      setCampusResults(rows);
-      if (initial.campusId) setSelectedCampus(rows.find((c) => c.id === initial.campusId) ?? null);
-    });
+    fetch("/api/campuses/list")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { campuses?: Campus[] } | null) => {
+        const rows = d?.campuses ?? [];
+        setAllCampuses(rows);
+        setCampusResults(rows);
+        if (initial.campusId) setSelectedCampus(rows.find((c) => c.id === initial.campusId) ?? null);
+      })
+      .catch(() => {});
   }, [initial.campusId]);
 
   // Step 3: Agreement
@@ -421,9 +425,10 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
               <Field label="Campus" required>
                 <input
                   type="text"
-                  onChange={async (e) => {
+                  onChange={(e) => {
                     const q = e.target.value;
-                    setCampusResults(q.trim() === "" ? allCampuses : await searchCampus(q));
+                    const needle = q.trim().toLowerCase();
+                    setCampusResults(q.trim() === "" ? allCampuses : allCampuses.filter((c) => c.name.toLowerCase().includes(needle)));
                   }}
                   placeholder="Search your university"
                   style={inputStyle}

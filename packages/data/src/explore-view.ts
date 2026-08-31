@@ -211,6 +211,12 @@ export const CATEGORY_ID_TO_SLUG: Record<string, string> = Object.fromEntries(
   categories.map((c) => [c.id, c.slug]),
 );
 
+/** Map a category slug -> id (used at the Explore filter boundary: the UI sends
+ * a slug like "food-drinks" but the DB column `category_id` stores the id "food"). */
+export const CATEGORY_SLUG_TO_ID: Record<string, string> = Object.fromEntries(
+  categories.map((c) => [c.slug, c.id]),
+);
+
 /** Map a category slug used in URLs (/c/[slug]) to the vendor `category` field. */
 const CATEGORY_SLUG_TO_NAME: Record<string, string> = Object.fromEntries(
   categories.map((c) => [c.slug, c.name]),

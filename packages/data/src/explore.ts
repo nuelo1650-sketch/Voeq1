@@ -1,7 +1,7 @@
 import type { Listing, Vendor } from "./interfaces";
 import { mockListingsRepo, mockVendorRepo, mockListingsRepoThatFails, vendorName } from "./mock";
 import { mockReviewRepo, countSavesByVendor, mockFollowRepo } from "./shopper";
-import { CATEGORY_ID_TO_SLUG } from "./explore-view";
+import { CATEGORY_ID_TO_SLUG, CATEGORY_SLUG_TO_ID } from "./explore-view";
 
 /**
  * Explore data boundary (Doc 04 PG-PUB-002/003, Doc 07 §7.7).
@@ -224,11 +224,18 @@ export function applySort(items: ExploreListing[], sort: ExploreFilters["sort"])
  * - Returns status "empty" when zero results (a REAL zero case, not pre-load).
  */
 export async function loadExplore(params: ExploreParams): Promise<ExploreResult> {
-  const category = params.categoryPreset ?? params.category;
+  // P-A fix (2026-08-31): the Explore UI/Filters send category SLUG (food-drinks)
+  // but the repo's list({category}) filters the DB category_id column by ID
+  // ("food"). Resolve slug -> id for the repo layer; applyFilters (lower down)
+  // still uses the slug against categorySlug. Without this, EVERY category
+  // filter silently returned empty on real data.
+  const categorySlug = params.categoryPreset ?? params.category;
+  const categoryId = categorySlug ? CATEGORY_SLUG_TO_ID[categorySlug] ?? categorySlug : undefined;
+  const categoryForRepo = categoryId;
   const listingsRepo = params.forceError ? mockListingsRepoThatFails : mockListingsRepo;
   try {
     const [listings, vendors] = await Promise.all([
-      listingsRepo.list({ campus: params.campus, category }),
+      listingsRepo.list({ campus: params.campus, category: categoryForRepo }),
       mockVendorRepo.listVendors({ campus: params.campus }),
     ]);
     const vendorRatings = await computeVendorRatings(vendors.map((v) => v.id));
@@ -259,7 +266,7 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
       mapped = mapped.filter((m) => m.title.toLowerCase().includes(q));
     }
 
-    const filtered = applySort(applyFilters(mapped, { ...params, category }), params.sort);
+    const filtered = applySort(applyFilters(mapped, { ...params, category: categorySlug }), params.sort);
     const trending = mapped.filter((m) => m.trending);
 
     return {

@@ -3,7 +3,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
-import { mockCampusRepo, searchCampus, type Campus } from "@voeq/data";
+import { type Campus } from "@voeq/data";
 
 export default function SelectCampusClient() {
   const router = useRouter();
@@ -15,10 +15,14 @@ export default function SelectCampusClient() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    mockCampusRepo.list().then((rows) => {
-      setAll(rows);
-      setResults(rows);
-    });
+    fetch("/api/campuses/list")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { campuses?: Campus[] } | null) => {
+        const rows = d?.campuses ?? [];
+        setAll(rows);
+        setResults(rows);
+      })
+      .catch(() => {});
   }, []);
 
   async function runSearch(q: string) {
@@ -26,7 +30,8 @@ export default function SelectCampusClient() {
     if (q.trim() === "") {
       setResults(all);
     } else {
-      setResults(await searchCampus(q));
+      const needle = q.trim().toLowerCase();
+      setResults(all.filter((c) => c.name.toLowerCase().includes(needle)));
     }
   }
 

@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { ChevronDown, MapPin, Search, X } from "lucide-react";
-import { searchCampus, submitNewCampus, type Campus } from "@voeq/data";
+import type { Campus } from "@voeq/data";
 
 export function CampusSelector() {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,12 +26,12 @@ export function CampusSelector() {
   }, []);
 
   useEffect(() => {
-    const handleSearch = async () => {
+    const handleSearch = () => {
       if (search.trim() === "") {
         setResults(all);
       } else {
-        const filtered = await searchCampus(search);
-        setResults(filtered);
+        const needle = search.trim().toLowerCase();
+        setResults(all.filter((c) => c.name.toLowerCase().includes(needle)));
       }
     };
     handleSearch();
@@ -45,10 +45,18 @@ export function CampusSelector() {
 
   const handleSubmitNewCampus = async () => {
     if (search.trim() === "") return;
-    const newCampus = await submitNewCampus(search, "anonymous");
-    setSelectedCampus(newCampus);
-    setIsOpen(false);
-    setSearch("");
+    const res = await fetch("/api/campuses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: search.trim() }),
+    });
+    if (!res.ok) return; // auth-gated; silently ignore anonymous submissions
+    const created = (await res.json()) as { campus?: Campus };
+    if (created.campus) {
+      setSelectedCampus(created.campus);
+      setIsOpen(false);
+      setSearch("");
+    }
   };
 
   return (

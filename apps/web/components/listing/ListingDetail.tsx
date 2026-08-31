@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { loadListing, loadExplore, type ExploreListing } from "@voeq/data";
+import type { ExploreListing } from "@voeq/data";
 import { ContourEdge, CampusFingerprint } from "@voeq/contour";
 import { SaveButton } from "@/components/shopper/SaveButton";
 import { LikeButton } from "@/components/shopper/LikeButton";
@@ -103,50 +103,61 @@ export function ListingDetail({ id }: { id: string }) {
   useEffect(() => {
     let cancelled = false;
     setStatus("loading");
-    
-    // Load main listing
-    loadListing(id)
-      .then((res) => {
-        if (cancelled) return;
-        if (!res) {
-          setStatus("notfound");
-        } else {
-          setListing(res);
-          setStatus("success");
-          
-          // Load "More from this vendor" (same vendorId, exclude current)
-          loadExplore({ query: "" })
-            .then((exploreRes) => {
-              if (cancelled) return;
-              const fromVendor = exploreRes.data
-                .filter((l) => l.vendorId === res.vendorId && l.id !== id)
-                .slice(0, 4);
-              setMoreFromVendor(fromVendor);
-            });
-          
-          // Load "You might also like" (same category, different vendors)
-          if (res.categorySlug) {
-            loadExplore({ category: res.categorySlug })
-              .then((exploreRes) => {
-                if (cancelled) return;
-                const related = exploreRes.data
-                  .filter((l) => l.vendorId !== res.vendorId && l.id !== id)
-                  .slice(0, 4);
-                setYouMightLike(related);
-              });
-          }
+
+    // Load main listing — P-A fix (2026-08-31): fetch the SERVER API route.
+    // Previously client-side loadListing(id) bundled USE_REAL=false into the
+    // browser -> mock repo -> null -> "Listing not found" for real Neon rows.
+    (async () => {
+      try {
+        const res = await fetch(`/api/listings/${id}`);
+        if (res.status === 404) {
+          if (!cancelled) setStatus("notfound");
+          return;
         }
-      })
-      .catch(() => {
+        if (!res.ok) {
+          if (!cancelled) setStatus("error");
+          return;
+        }
+        const d = (await res.json()) as { listing: ExploreListing };
+        if (cancelled) return;
+        setListing(d.listing);
+        setStatus("success");
+
+        // Load "More from this vendor" (same vendorId, exclude current)
+        try {
+          const ex = (await (await fetch(`/api/explore`)).json()) as { data: ExploreListing[] };
+          if (cancelled) return;
+          const fromVendor = ex.data
+            .filter((l) => l.vendorId === d.listing.vendorId && l.id !== id)
+            .slice(0, 4);
+          setMoreFromVendor(fromVendor);
+
+          // Load "You might also like" (same category, different vendors)
+          if (d.listing.categorySlug) {
+            const ex2 = (await (
+              await fetch(`/api/explore?${new URLSearchParams({ category: d.listing.categorySlug })}`)
+            ).json()) as { data: ExploreListing[] };
+            if (!cancelled) {
+              const related = ex2.data
+                .filter((l) => l.vendorId !== d.listing.vendorId && l.id !== id)
+                .slice(0, 4);
+              setYouMightLike(related);
+            }
+          }
+        } catch {
+          // secondary rails fail silently; the listing itself is shown
+        }
+      } catch {
         if (!cancelled) setStatus("error");
-      });
-    
+      }
+    })();
+
     // Fetch public comments
     fetch(`/api/listings/${id}/comments`)
       .then(async (r) => (r.ok ? await r.json() as CommentsResponse : null))
       .then((d) => { if (!cancelled && d) setComments(d.comments); })
       .catch(() => {});
-    
+
     return () => {
       cancelled = true;
     };

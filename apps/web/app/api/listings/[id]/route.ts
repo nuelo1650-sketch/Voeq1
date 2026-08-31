@@ -13,9 +13,24 @@ import { SESSION_COOKIE } from "@/lib/session";
 /**
  * VS5.7 / VS5.8 — Edit or remove a single listing. Owner-only:
  * the listing's vendorId must match the session's vendorId (IDOR guard).
+ *   GET    — public listing detail (real Neon, server-side).
  *   PATCH  — partial update (title/description/price/category/images).
  *   DELETE — remove + re-run visibility guard (last listing removed => revert to pending_listings).
  */
+
+/**
+ * GET /api/listings/[id] — public listing detail (P-A fix, 2026-08-31).
+ * The listing detail page previously imported loadListing into the CLIENT
+ * bundle where USE_REAL=false -> mock repo -> null -> "Listing not found"
+ * even though the row exists in Neon. This route runs server-side (real DB).
+ */
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const listing = await mockListingsRepo.getById(id);
+  if (!listing) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  return NextResponse.json({ listing });
+}
+
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const store = await cookies();

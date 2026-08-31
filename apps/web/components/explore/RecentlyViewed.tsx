@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
 import type { VendorSummary } from '@voeq/data';
-import { vendors } from '@voeq/data';
 import { SaveButton } from '@/components/shopper/SaveButton';
 
 const RECENT_KEY = 'voeq:recentlyViewed';
@@ -34,10 +33,13 @@ export function RecentlyViewed({ vendors: propVendors }: RecentlyViewedProps) {
   // Load real recently-viewed history after mount (client-only).
   useEffect(() => {
     const ids = loadRecentIds();
-    const byId = new Map(vendors.map((v) => [v.id, v]));
+    // P-A fix: resolve ids against server-provided vendors only (real data).
+    // Previously the mock `vendors` array was imported into this client bundle.
+    const byId = new Map((propVendors ?? []).map((v) => [v.id, v]));
     const recent = ids.map((id) => byId.get(id)).filter((v): v is VendorSummary => Boolean(v));
     setRecentVendors(recent);
     setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const source = propVendors && propVendors.length > 0 ? propVendors : recentVendors;
