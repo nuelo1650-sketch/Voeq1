@@ -158,10 +158,7 @@ export function Filters({
                 data-testid={testid}
                 aria-pressed={active}
                 onClick={() => set({ [key]: active ? undefined : true } as Partial<ExploreFilters>)}
-                style={{
-                  ...quickPillStyle,
-                  ...(active ? quickPillActiveStyle : {}),
-                }}
+                className={`voeq-pill${active ? " is-active" : ""}`}
               >
                 <span aria-hidden="true" style={{ opacity: active ? 1 : 0.7 }}>{icon}</span>
                 {label}
@@ -238,7 +235,7 @@ const modernSelectStyle: React.CSSProperties = {
   borderRadius: 10,
   border: "1px solid rgba(30,59,47,.12)",
   background: "#f6f1e6",
-  color: "var(--color-forest-dark)",
+  color: "var(--color-forest)",
   fontFamily: "var(--role-font-ui)",
   fontSize: 14,
   cursor: "pointer",
@@ -258,29 +255,6 @@ const quickFiltersLabelStyle: React.CSSProperties = {
   textTransform: "uppercase",
   letterSpacing: "0.5px",
   margin: 0,
-};
-
-const quickPillStyle: React.CSSProperties = {
-  fontFamily: "var(--role-font-ui)",
-  fontSize: 13,
-  fontWeight: 500,
-  padding: "6px 14px",
-  borderRadius: 999,
-  border: "1px solid rgba(30,59,47,.12)",
-  background: "#fffdf8",
-  color: "var(--color-forest-dark)",
-  cursor: "pointer",
-  whiteSpace: "nowrap",
-  transition: "all 120ms ease",
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 5,
-};
-
-const quickPillActiveStyle: React.CSSProperties = {
-  background: "var(--color-forest)",
-  color: "#fff",
-  borderColor: "var(--color-forest)",
 };
 
 const clearAllStyle: React.CSSProperties = {
