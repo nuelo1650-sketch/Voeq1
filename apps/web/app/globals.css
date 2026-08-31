@@ -4974,3 +4974,214 @@ header.AppShell,
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ============================================================================
+   VOEQ EXPLORE DESIGN SYSTEM (Phase A, 2026-08-30) — mobile-first, Voeq theme.
+   A single coherent, class-driven surface for Explore (and reused visually by
+   storefront). Replaces the patch-on-patch inline-style soup. Real tokens only:
+   --color-forest #0F2A1D, --color-amber #E8A33D, cream glass, warm neutrals.
+   Mobile-first: base styles target <=480px; desktop is the enhancement.
+   ZERO logic changes — every data-testid / behavioural contract is preserved.
+   ============================================================================ */
+
+/* ---- 1. Card (listing) — the hero of the marketplace feel --------------- */
+.voeq-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-glass-white, #fffef9);
+  border: 1px solid rgba(30,59,47,.10);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  box-shadow: 0 1px 2px rgba(30,59,47,.04);
+  position: relative;
+}
+.voeq-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(30,59,47,.12);
+  border-color: rgba(30,59,47,.18);
+}
+.voeq-card-image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--role-surface-sunken, #f1ece2);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.voeq-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.voeq-card-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+.voeq-card-title {
+  margin: 0; font-size: 15px; font-weight: 650; color: var(--color-forest);
+  font-family: var(--role-font-ui); letter-spacing: -.01em; line-height: 1.3;
+  text-decoration: none;
+}
+.voeq-card-price {
+  font-family: var(--role-font-mono, ui-monospace, SFMono-Regular, monospace);
+  font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 700;
+  color: var(--color-forest);
+}
+.voeq-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.voeq-card-vendor {
+  font-size: 12px; color: var(--color-ink-muted, #6f6a5e);
+  display: flex; align-items: center; gap: 5px; min-width: 0;
+}
+.voeq-card-vendor span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.voeq-card-cat {
+  font-size: 11px; color: var(--color-ink-muted, #6f6a5e);
+  background: rgba(30,59,47,.06); border-radius: 999px; padding: 3px 9px; flex-shrink: 0;
+}
+.voeq-chip-avail {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px;
+  border: 1px solid transparent; flex-shrink: 0;
+}
+.voeq-chip-avail--open { color: #2e7d4f; background: rgba(46,125,79,.10); border-color: rgba(46,125,79,.20); }
+.voeq-chip-avail--closed { color: #b23b3b; background: rgba(178,59,59,.10); border-color: rgba(178,59,59,.20); }
+.voeq-chip-avail--soon { color: #a4791d; background: rgba(232,163,61,.16); border-color: rgba(232,163,61,.30); }
+.voeq-card-rating { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-ink-muted, #6f6a5e); }
+.voeq-card-rating .star { color: var(--color-amber); }
+.voeq-badge {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 650;
+  border-radius: 999px; padding: 3px 9px;
+}
+.voeq-badge--featured { color: #7a5c11; background: rgba(232,163,61,.16); border: 1px solid rgba(232,163,61,.35); }
+.voeq-badge--verified { color: #2e7d4f; background: rgba(46,125,79,.10); border: 1px solid rgba(46,125,79,.20); }
+.voeq-card-bookmark {
+  position: absolute; top: 8px; right: 8px; width: 34px; height: 34px;
+  border: none; border-radius: 50%; cursor: pointer;
+  background: rgba(255,255,255,.85); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.10); color: var(--color-ink-muted, #6f6a5e);
+  transition: transform .15s ease, color .15s ease;
+}
+.voeq-card-bookmark:hover { transform: scale(1.08); }
+.voeq-card-bookmark.is-active { color: var(--color-forest); }
+
+/* ---- 2. Pills / chips (category quick-selection) ------------------------- */
+.voeq-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 550;
+  font-family: var(--role-font-ui); border: 1px solid rgba(30,59,47,.14);
+  background: transparent; color: var(--color-forest); cursor: pointer; white-space: nowrap;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.voeq-pill:hover { background: rgba(30,59,47,.05); border-color: rgba(30,59,47,.28); }
+.voeq-pill.is-active { background: var(--color-forest); color: var(--color-cream, #f6f1e6); border-color: var(--color-forest); }
+.voeq-pill .pill-icon { display: inline-flex; }
+.voeq-filter-chip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 550;
+  padding: 5px 12px; border-radius: 999px; background: rgba(30,59,47,.07);
+  color: var(--color-forest); border: 1px solid rgba(30,59,47,.12);
+}
+.voeq-filter-chip button {
+  border: none; background: transparent; cursor: pointer; color: var(--color-forest);
+  display: inline-flex; padding: 0; font-size: 13px;
+}
+
+/* ---- 3. Select (sort) ---------------------------------------------------- */
+.voeq-select-wrap { display: inline-flex; align-items: center; gap: 8px; position: relative; }
+.voeq-select-label { font-size: 13.5px; color: var(--color-ink-muted, #6f6a5e); }
+.voeq-select {
+  appearance: none; -webkit-appearance: none;
+  padding: 9px 34px 9px 14px; border-radius: 12px; font-size: 14px; font-weight: 550;
+  font-family: var(--role-font-ui); border: 1px solid rgba(30,59,47,.14);
+  background: var(--color-glass-white, #fffef9); color: var(--color-forest);
+  cursor: pointer; outline: none; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.voeq-select:focus { border-color: var(--color-amber); box-shadow: 0 0 0 3px rgba(232,163,61,.18); }
+.voeq-select-caret {
+  position: absolute; right: 12px; pointer-events: none; color: var(--color-forest); display: flex;
+}
+
+/* ---- 4. Segmented control (view + density) ------------------------------- */
+.voeq-segmented {
+  display: inline-flex; border: 1px solid rgba(30,59,47,.14); border-radius: 12px; overflow: hidden;
+  background: var(--color-glass-white, #fffef9);
+}
+.voeq-segmented button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 12px; border: none; cursor: pointer; background: transparent;
+  color: var(--color-ink-muted, #6f6a5e); font-size: 13px; font-weight: 550;
+  font-family: var(--role-font-ui); transition: background .15s ease, color .15s ease;
+}
+.voeq-segmented button + button { border-left: 1px solid rgba(30,59,47,.10); }
+.voeq-segmented button.is-active { background: var(--color-forest); color: var(--color-cream, #f6f1e6); }
+
+/* ---- 5. Buttons ----------------------------------------------------------- */
+.voeq-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  font-family: var(--role-font-ui); font-weight: 650; font-size: 14px;
+  border-radius: 12px; padding: 12px 20px; cursor: pointer; transition: all .15s ease;
+  border: 1px solid transparent; text-decoration: none; line-height: 1;
+}
+.voeq-btn--primary { background: var(--color-forest); color: var(--color-cream, #f6f1e6); box-shadow: 0 6px 16px rgba(15,42,29,.22); }
+.voeq-btn--primary:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(15,42,29,.28); }
+.voeq-btn--ghost { background: transparent; color: var(--color-forest); border-color: rgba(30,59,47,.24); }
+.voeq-btn--ghost:hover { background: rgba(30,59,47,.05); }
+.voeq-btn--amber { background: var(--color-amber); color: #3a2c07; box-shadow: 0 6px 16px rgba(232,163,61,.28); }
+.voeq-btn--amber:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(232,163,61,.34); }
+
+/* ---- 6. Topbar (logo / search / campus) — mobile-first ------------------- */
+.voeq-topbar {
+  display: flex; align-items: center; gap: 12px; padding: 10px var(--nav-inline-pad, 16px);
+  background: var(--color-glass-white, #fffef9); border-bottom: 1px solid rgba(30,59,47,.08);
+  min-height: var(--nav-height, 60px);
+}
+.voeq-topbar-search { flex: 1; min-width: 0; }
+.voeq-topbar-campus { flex-shrink: 0; }
+
+/* ---- 7. Results toolbar (count / sort / view / density) ------------------ */
+.voeq-toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  flex-wrap: wrap; margin-bottom: 14px;
+}
+.voeq-toolbar-count { font-size: 13.5px; color: var(--color-ink-muted, #6f6a5e); order: 1; flex: 1 1 100%; }
+.voeq-toolbar-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; order: 2; }
+
+/* ---- 8. Mobile-first grid ----------------------------------------------- */
+.voeq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+/* ---- 9. Rails (trending / recently viewed) — compact mobile strips ------- */
+.voeq-rail { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.voeq-rail::-webkit-scrollbar { display: none; }
+.voeq-rail > * { flex: 0 0 auto; width: min(180px, 62vw); }
+
+/* ---- 10. Empty / loading / error state boxes ----------------------------- */
+.voeq-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 8px; padding: 48px 24px; border-radius: 20px;
+  background: var(--color-glass-white, #fffef9); border: 1px solid rgba(30,59,47,.08);
+}
+.voeq-state-icon { color: var(--color-amber); display: flex; }
+.voeq-state h2 { margin: 0; font-family: var(--role-font-display); color: var(--color-forest); font-size: 22px; }
+.voeq-state p { margin: 0; color: var(--color-ink-muted, #6f6a5e); font-size: 14px; max-width: 340px; }
+.voeq-state-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+/* ---- Desktop enhancement (min-width tiers) — the EDGE CASE --------------- */
+@media (min-width: 768px) {
+  .voeq-grid { grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 18px; }
+  .voeq-card-image { aspect-ratio: 4 / 3; }
+  .voeq-toolbar-count { flex: none; order: 0; }
+  .voeq-toolbar-controls { order: 1; }
+  .voeq-rail > * { width: 208px; }
+}
+@media (min-width: 1024px) {
+  .voeq-grid { grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 20px; }
+}
+
+/* ---- Restore ghost responsive classes (were only in a stale .next build) - */
+.explore-mobile-only { display: block; }
+.explore-desktop-only { display: none; }
+@media (min-width: 768px) {
+  .explore-mobile-only { display: none !important; }
+  .explore-desktop-only { display: block !important; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

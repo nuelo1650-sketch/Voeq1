@@ -584,7 +584,7 @@ export function Explore({
                     ))}
                   </div>
                 ) : (
-                <div data-testid="explore-grid" style={{ ...gridStyle, gridTemplateColumns: density === "compact" ? "repeat(auto-fill, minmax(min(180px, 100%), 1fr))" : gridStyle.gridTemplateColumns }}>
+                <div data-testid="explore-grid" className="voeq-grid">
                   {displayedData.map((l) => (
                     <Link
                       key={l.id}
@@ -715,12 +715,6 @@ const stateBox: React.CSSProperties = {
   flexDirection: "column",
   gap: "var(--space-2)",
   alignItems: "flex-start",
-};
-const gridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(min(240px, 100%), 1fr))",
-  gap: "var(--space-3)",
-  marginTop: "var(--space-3)",
 };
 const topbarStyle: React.CSSProperties = {
   position: "sticky",
