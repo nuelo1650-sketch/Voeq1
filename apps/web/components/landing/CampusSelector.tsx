@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { ChevronDown, MapPin, Search, X } from "lucide-react";
-import { mockCampusRepo, searchCampus, submitNewCampus, type Campus } from "@voeq/data";
+import { searchCampus, submitNewCampus, type Campus } from "@voeq/data";
 
 export function CampusSelector() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,11 +12,17 @@ export function CampusSelector() {
   const [_selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
 
   useEffect(() => {
-    mockCampusRepo.list().then((rows) => {
-      setAll(rows);
-      setResults(rows);
-      setSelectedCampus(rows[0] ?? null);
-    });
+    fetch("/api/campuses/list")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { campuses?: Campus[] } | null) => {
+        const rows = d?.campuses ?? [];
+        setAll(rows);
+        setResults(rows);
+        setSelectedCampus(rows[0] ?? null);
+      })
+      .catch(() => {
+        // silent
+      });
   }, []);
 
   useEffect(() => {

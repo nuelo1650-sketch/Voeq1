@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Search, X, MapPin, TrendingUp, Clock } from "lucide-react";
-import { mockCampusRepo, type Campus } from "@voeq/data";
+import type { Campus } from "@voeq/data";
 import type { ExploreListing } from "@voeq/data";
 import { CATEGORIES } from "./Filters";
 
@@ -53,9 +53,16 @@ export function SearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Load campus list via repo (D-1 visibility: verified + own unverified)
+  // Load campus list from the server route (real Neon; no mock data in the bundle)
   useEffect(() => {
-    mockCampusRepo.list().then(setCampusList);
+    fetch("/api/campuses/list")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { campuses?: Campus[] } | null) => {
+        if (d?.campuses) setCampusList(d.campuses);
+      })
+      .catch(() => {
+        // silent
+      });
   }, []);
 
   // Load recent searches from localStorage

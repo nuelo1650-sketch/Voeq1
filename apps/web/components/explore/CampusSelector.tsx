@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { MapPin, ChevronDown } from "lucide-react";
-import { mockCampusRepo, type Campus } from "@voeq/data";
+import type { Campus } from "@voeq/data";
 
 /**
  * CampusSelector — dropdown to switch campus on explore page.
@@ -33,9 +33,14 @@ export function CampusSelector({ currentCampus, onChange, viewerIdentityId }: Ca
 
   useEffect(() => {
     let active = true;
-    mockCampusRepo.list(viewerIdentityId).then((rows) => {
-      if (active) setList(rows);
-    });
+    fetch("/api/campuses/list")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { campuses?: Campus[] } | null) => {
+        if (active && d?.campuses) setList(d.campuses);
+      })
+      .catch(() => {
+        // silent; dropdown stays empty until reload
+      });
     return () => {
       active = false;
     };
