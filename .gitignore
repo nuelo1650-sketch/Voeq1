@@ -27,3 +27,7 @@ _vend_hdr.txt
 
 .vercel
 .env*
+SCRATCH
+apps/web/verify-shots/
+apps/web/verify-report/
+apps/web/test-results/
