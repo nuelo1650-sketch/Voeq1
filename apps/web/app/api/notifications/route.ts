@@ -10,10 +10,16 @@ import { SESSION_COOKIE } from "@/lib/session";
 export async function GET() {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE)?.value;
-  if (!sessionId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!sessionId) {
+    // Anonymous: empty state with 200 (page redirects to login anyway — this
+    // kills the 401 console noise the matrix caught on /notifications).
+    return NextResponse.json({ notifications: [], unread: 0 });
+  }
 
   const identity = await mockAuthRepo.currentIdentity(sessionId);
-  if (!identity) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!identity) {
+    return NextResponse.json({ notifications: [], unread: 0 });
+  }
 
   const notifications = await mockNotificationRepo.list(identity.id);
   const unread = notifications.filter((n) => !n.read).length;
