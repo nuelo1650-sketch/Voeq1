@@ -48,10 +48,20 @@ export function CampusSelector({ currentCampus, onChange, viewerIdentityId }: Ca
 
   const currentCampusData = list.find((c) => c.id === currentCampus) || list[0];
 
+  // P-A round 20: if the list hasn't loaded yet, show a friendly version of the
+  // stored campus id (e.g. 'nmu-okerenkoko' -> 'NMU Okerenkoko') instead of the
+  // raw id — previously the raw id rendered and clipped as "NMU(" on mobile.
+  const friendlyFallback = (currentCampus ?? "")
+    .split(/[\s-]+/)
+    .map((w) => (w.length > 3 ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+    .join(" ");
+
   const displayName =
-    currentCampusData && isMobile && currentCampusData.name.length > 20
-      ? currentCampusData.name.split(" ").map((w) => w[0]).join("")
-      : currentCampusData?.name ?? currentCampus;
+    currentCampusData
+      ? (isMobile && currentCampusData.name.length > 20
+          ? currentCampusData.name.split(" ").map((w) => w[0]).join("")
+          : currentCampusData.name)
+      : friendlyFallback;
 
   const handleSelect = (campusId: string) => {
     if (mounted) {
