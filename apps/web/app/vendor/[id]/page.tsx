@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { loadVendorStorefront, canVendorBePublic, loadExplore } from "@voeq/data";
+import { loadVendorStorefront, canVendorBePublic, loadExplore, CATEGORY_ID_TO_SLUG } from "@voeq/data";
 import { StorefrontHero } from "@/components/storefront/StorefrontHero";
 import { StorefrontGrid } from "@/components/storefront/StorefrontGrid";
 import { StorefrontTrust } from "@/components/storefront/StorefrontTrust";
@@ -70,8 +70,14 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
     .filter((l) => l.vendorId !== vendor.id)
     .slice(0, 8);
   
-  const relatedVendors = vendor.categoryIds.length > 0
-    ? await loadExplore({ category: vendor.categoryIds[0], campus: vendor.campus }).then((res) =>
+  // P-A round 33 (FIND-05 fix): vendor.categoryIds holds category IDS ("food"),
+  // but loadExplore filters by categorySlug ("food-drinks") — passing the id
+  // made "Similar vendors" ALWAYS empty. Map id -> slug before filtering.
+  const similarCategorySlug = vendor.categoryIds.length > 0
+    ? (CATEGORY_ID_TO_SLUG[vendor.categoryIds[0]] ?? vendor.categoryIds[0])
+    : undefined;
+  const relatedVendors = similarCategorySlug
+    ? await loadExplore({ category: similarCategorySlug, campus: vendor.campus }).then((res) =>
         res.data.filter((l) => l.vendorId !== vendor.id).slice(0, 8)
       )
     : [];
