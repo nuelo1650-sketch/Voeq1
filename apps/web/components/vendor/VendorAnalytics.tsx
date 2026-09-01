@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { TrendingUp, Eye, MessageCircle, Users, Heart, Star, Calendar } from "lucide-react";
+import { TrendingUp, MessageCircle, Users, Heart, Star, Calendar } from "lucide-react";
 import type { Vendor, Listing } from "@voeq/data";
 
 /**
@@ -13,6 +13,7 @@ import type { Vendor, Listing } from "@voeq/data";
  */
 
 type DateRange = "7d" | "30d" | "all";
+// P-A round 30: DateRange no longer used (removed fake date-range selector).
 
 export function VendorAnalytics({
   vendor,
@@ -21,7 +22,6 @@ export function VendorAnalytics({
   vendor: Vendor;
   listings: Listing[];
 }) {
-  const [dateRange, setDateRange] = useState<DateRange>("30d");
   const [analytics, setAnalytics] = useState<{
     listingCount: number;
     reviewCount: number;
@@ -56,7 +56,6 @@ export function VendorAnalytics({
   }, []);
 
   // Fall back to counts derived from props if the API hasn't resolved yet.
-  const views = analytics ? analytics.saveCount + analytics.followerCount : 0;
   const display = analytics ?? {
     listingCount: listings.length,
     reviewCount: 0,
@@ -96,30 +95,10 @@ export function VendorAnalytics({
             </div>
 
             {/* Date range selector */}
-            <div style={{ display: "flex", gap: 8, background: "var(--color-cream)", padding: 4, borderRadius: 8 }}>
-              {[
-                { value: "7d" as const, label: "Last 7 days" },
-                { value: "30d" as const, label: "Last 30 days" },
-                { value: "all" as const, label: "All time" },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setDateRange(option.value)}
-                  style={{
-                    padding: "8px 16px",
-                    fontSize: 14,
-                    fontWeight: dateRange === option.value ? 600 : 400,
-                    background: dateRange === option.value ? "var(--color-forest)" : "transparent",
-                    color: dateRange === option.value ? "var(--color-cream)" : "var(--color-ink-muted)",
-                    border: "none",
-                    borderRadius: 6,
-                    cursor: "pointer",
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            {/* P-A round 30 (DATA HONESTY): removed the date-range pills — they
+                were decorative (the API never receives the range; the numbers
+                were always "all time"). A selector that fakes filtering is a
+                lie; removed until real date-scoped analytics exist. */}
           </div>
         </header>
 
@@ -132,7 +111,9 @@ export function VendorAnalytics({
             marginBottom: "var(--space-4)",
           }}
         >
-          <StatCard icon={<Eye size={24} />} label="Views" value={views} />
+          {/* P-A round 30 (DATA HONESTY): removed the fabricated "Views" card —
+              actual view tracking does not exist, so `views = saveCount +
+              followerCount` was a lie. Real metrics only. */}
           <StatCard icon={<MessageCircle size={24} />} label="Messages" value={analytics ? "—" : 0} />
           <StatCard icon={<Users size={24} />} label="Followers" value={display.followerCount} />
           <StatCard icon={<Heart size={24} />} label="Saves" value={display.saveCount} />
@@ -194,13 +175,6 @@ export function VendorAnalytics({
         {/* Performance insights */}
         <Section title="Performance insights" icon={<TrendingUp size={20} />}>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {views === 0 && (
-              <Insight
-                type="info"
-                title="Get started"
-                message="Create your first listing to start tracking views and engagement"
-              />
-            )}
             {display.reviewCount === 0 && listings.length > 0 && (
               <Insight
                 type="tip"
@@ -215,19 +189,9 @@ export function VendorAnalytics({
                 message="Share your social links and engage with students to gain more followers"
               />
             )}
-            {views > 0 && display.followerCount === 0 && (
-              <Insight
-                type="warning"
-                title="No messages yet"
-                message="Students are viewing your listings. Make sure your contact info is visible"
-              />
+            {display.followerCount === 0 && display.saveCount === 0 && display.reviewCount === 0 && (
+              <EmptyState message="Performance insights will appear here as you gain activity" />
             )}
-            {views === 0 &&
-              display.followerCount === 0 &&
-              display.saveCount === 0 &&
-              display.reviewCount === 0 && (
-                <EmptyState message="Performance insights will appear here as you gain activity" />
-              )}
           </div>
         </Section>
       </div>
