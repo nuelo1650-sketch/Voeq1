@@ -201,9 +201,10 @@ export default function NotificationsPage() {
             display: "flex",
             gap: 8,
             borderBottom: "1px solid var(--color-ink-subtle)",
-            overflowX: "auto",
-            paddingBottom: 2,
-          }}
+          flexWrap: "wrap",
+          gap: 4,
+          paddingBottom: 2,
+        }}
         >
           <FilterTab label="All" active={activeFilter === "all"} onClick={() => setActiveFilter("all")} />
           <FilterTab label="Unread" active={activeFilter === "unread"} onClick={() => setActiveFilter("unread")} count={unreadCount} />

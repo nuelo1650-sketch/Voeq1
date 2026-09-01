@@ -92,7 +92,7 @@ function RecommendationCard({ listing }: { listing: ExploreListing }) {
       href={`/listing/${listing.id}`}
       style={{
         flexShrink: 0,
-        width: 280,
+        width: "min(280px, 78vw)",
         border: "1px solid var(--role-border)",
         borderRadius: "var(--radius-lg)",
         overflow: "hidden",
