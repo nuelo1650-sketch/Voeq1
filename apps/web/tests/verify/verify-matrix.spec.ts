@@ -82,7 +82,7 @@ const PAGES: Array<[string, boolean?]> = [
   ["vendor/3647302d-a59a-404d-aa45-8d0f33eff748", true],
   ["listing/f36af9d9-5e06-44a5-93be-6c296fc73995", true],
   ["messages", false], // auth gated — expect redirect; still capture
-  ["saved", false], // MISSING page — expect 404; record
+  ["saved", false], // P-A r12: page EXISTS now (auth-gated — expect redirect); capture
   ["home", false], // auth gated
   ["settings", false],
   ["notifications", false],
@@ -98,7 +98,11 @@ for (const [pagePath, expectPublic] of PAGES) {
       if (m.type() === "error") errors.push(`console.error: ${m.text().slice(0, 160)}`);
     });
 
-    const resp = await page.goto(`/${pagePath}`, { waitUntil: "networkidle" });
+    // P-A round 22: use domcontentloaded + settle instead of networkidle —
+    // networkidle NEVER fires on Next.js dev (HMR websocket keeps traffic on),
+    // which made dev runs time out at 90s and drown real findings in noise.
+    const resp = await page.goto(`/${pagePath}`, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await page.waitForTimeout(2500); // settle: client fetch + render
     const status = resp?.status() ?? 0;
     const label = `/ ${pagePath}`;
 
