@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import type { ExploreFilters, ExploreListing } from "@voeq/data";
-import { PriceRangeSlider } from "./PriceRangeSlider";
 
 import { categories } from "@voeq/data";
 
@@ -118,27 +117,11 @@ export function Filters({
         </select>
       </Field>
 
-      {/* Price range — P-A round 9 (v4.1): manual Min/Max inputs (user types any
-          amount; no fake ceiling). Histogram stays as visual guidance. */}
+      {/* Price range — P-A round 15: manual Min/Max inputs ONLY (removed the
+          range slider entirely — user: 'price range still has sliders').
+          User types any amount; no fake ceiling. */}
       <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
         <legend style={legendStyle}>Price range (₦)</legend>
-        {priceStats && (
-          <PriceRangeSlider
-            min={priceStats.min}
-            max={priceStats.max}
-            valueMin={value.minPrice}
-            valueMax={value.maxPrice}
-            onChange={(min, max) => set({ minPrice: min, maxPrice: max })}
-            histogram={Array(12).fill(0).map((_, i) => {
-              const bucketMin = priceStats.min + (i / 12) * (priceStats.max - priceStats.min);
-              const bucketMax = priceStats.min + ((i + 1) / 12) * (priceStats.max - priceStats.min);
-              const bucket = priceStats.prices.filter(
-                (p) => p >= bucketMin && p < bucketMax && p >= (value.minPrice ?? priceStats.min) && p <= (value.maxPrice ?? priceStats.max)
-              );
-              return bucket.length;
-            })}
-          />
-        )}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
           <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px" }}>
             <span style={{ fontSize: 14, color: "var(--color-ink-muted, #7c7a6e)" }}>₦</span>

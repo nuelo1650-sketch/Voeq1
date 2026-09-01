@@ -4978,7 +4978,11 @@ header.AppShell,
 /* ---- Very small phones (360px) ---- */
 @media (max-width: 390px) {
   .explore-page [data-testid="explore-grid"] {
-    grid-template-columns: 1fr !important;
+    /* P-A round 15 (FIX): this legacy rule forced grid-template-columns:1fr!
+       at <=390px (the iPhone width) — beating the design system's 2-up rule
+       and making cards ONE per row (the 'big cards' the user kept seeing).
+       Align to the approved 2-up compact layout like round 6. */
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
