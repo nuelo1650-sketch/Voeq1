@@ -29,7 +29,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <main style={{ maxWidth: 640, margin: "0 auto", height: "80vh", display: "flex", flexDirection: "column" }}>
+    <main style={{ maxWidth: 640, margin: "0 auto", height: "100dvh", display: "flex", flexDirection: "column" }}>
       <ConversationView
         conversationId={id}
         currentIdentityId={identity.id}

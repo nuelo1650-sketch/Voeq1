@@ -128,9 +128,14 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
     <div className="vs-hero">
       {/* Hero header */}
       <header data-testid="storefront-hero" className="vs-hero-top">
-        {/* Avatar */}
-        <div data-testid="storefront-avatar" aria-hidden className="vs-avatar">
-          {initials(vendor.name)}
+        {/* Avatar — P-A round 31: render the vendor PHOTO when one exists
+            (Cloudinary) instead of always showing initials. */}
+        <div data-testid="storefront-avatar" aria-hidden className="vs-avatar" style={vendor.profilePhotoUrl ? { background: "none", boxShadow: "0 8px 20px rgba(15,42,29,.18)" } : undefined}>
+          {vendor.profilePhotoUrl ? (
+            <img src={vendor.profilePhotoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 24 }} />
+          ) : (
+            initials(vendor.name)
+          )}
         </div>
 
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px", minWidth: 0 }}>

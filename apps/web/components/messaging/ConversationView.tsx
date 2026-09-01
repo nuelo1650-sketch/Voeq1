@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { MessageBubble, DateSeparator } from "./MessageBubble";
 import { MessageComposer } from "./MessageComposer";
 import { TypingIndicator } from "./TypingIndicator";
@@ -203,10 +204,18 @@ export function ConversationView({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* Header with connection status (K2.6 #5) */}
-      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--role-border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div>
-          <strong style={{ fontFamily: "var(--role-font-ui)", fontSize: "16px" }}>{otherName}</strong>
+      {/* Header with back button + partner + connection status */}
+      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--role-border)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: "var(--role-surface)" }}>
+        <Link
+          href="/messages"
+          data-testid="thread-back"
+          aria-label="Back to messages"
+          style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--role-accent-strong)", textDecoration: "none", fontSize: 14, fontFamily: "var(--role-font-ui)", fontWeight: 600, flexShrink: 0 }}
+        >
+          ←
+        </Link>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <strong style={{ fontFamily: "var(--role-font-display)", fontSize: "17px", color: "var(--role-text)", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{otherName}</strong>
           {otherLastSeen && (
             <div data-testid="last-seen" style={{ fontSize: 12, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
               {formatLastSeen(otherLastSeen)}
@@ -222,6 +231,7 @@ export function ConversationView({
             fontSize: "12px",
             color: connectionStatus === "connected" ? "var(--color-forest)" : "var(--role-text-muted)",
             fontFamily: "var(--role-font-ui)",
+            flexShrink: 0,
           }}
         >
           <div style={{
@@ -235,7 +245,18 @@ export function ConversationView({
       </div>
       
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: 16, background: "var(--role-surface-sunken)" }}>
+        {all.length === 0 && !_typing && (
+          <div data-testid="thread-empty" style={{ textAlign: "center", padding: "48px 20px" }}>
+            <div style={{ fontSize: 34, marginBottom: 8 }}>💬</div>
+            <p style={{ margin: 0, fontFamily: "var(--role-font-display)", fontSize: "17px", color: "var(--role-text)", fontWeight: 600 }}>
+              No messages yet
+            </p>
+            <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
+              Say hello — this is the start of your conversation with {otherName}.
+            </p>
+          </div>
+        )}
         {all.map((m) => {
           const sep = !sameDay(lastDay, m.createdAt);
           lastDay = m.createdAt;
