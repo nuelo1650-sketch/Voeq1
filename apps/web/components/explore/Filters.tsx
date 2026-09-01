@@ -122,9 +122,9 @@ export function Filters({
           User types any amount; no fake ceiling. */}
       <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
         <legend style={legendStyle}>Price range (₦)</legend>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, width: "100%", minWidth: 0, boxSizing: "border-box" }}>
-          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px", minWidth: 0, maxWidth: "100%" }}>
-            <span style={{ fontSize: 14, color: "var(--color-ink-muted, #7c7a6e)" }}>₦</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, width: "100%", maxWidth: "100%", minWidth: 0, boxSizing: "border-box" }}>
+          <div style={{ flex: "1 1 0", display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px", minWidth: 0, maxWidth: "50%", boxSizing: "border-box", overflow: "hidden" }}>
+            <span style={{ fontSize: 14, color: "var(--color-ink-muted, #7c7a6e)", flexShrink: 0 }}>₦</span>
             <input
               data-testid="filter-price-min"
               type="number"
@@ -132,12 +132,12 @@ export function Filters({
               placeholder="Min"
               value={value.minPrice != null ? Math.round(value.minPrice / 100) : ""}
               onChange={(e) => set({ minPrice: e.target.value === "" ? undefined : Number(Number(e.target.value) * 100) })}
-              style={{ flex: 1, border: 0, outline: 0, background: "transparent", fontSize: 15, color: "var(--color-forest, #0F2A1D)", minWidth: 0 }}
+              style={{ flex: 1, width: "100%", border: 0, outline: 0, background: "transparent", fontSize: 15, color: "var(--color-forest, #0F2A1D)", minWidth: 0 }}
             />
           </div>
           <span style={{ color: "var(--color-ink-muted, #7c7a6e)", flexShrink: 0 }}>–</span>
-          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px", minWidth: 0, maxWidth: "100%" }}>
-            <span style={{ fontSize: 14, color: "var(--color-ink-muted, #7c7a6e)" }}>₦</span>
+          <div style={{ flex: "1 1 0", display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px", minWidth: 0, maxWidth: "50%", boxSizing: "border-box", overflow: "hidden" }}>
+            <span style={{ fontSize: 14, color: "var(--color-ink-muted, #7c7a6e)", flexShrink: 0 }}>₦</span>
             <input
               data-testid="filter-price-max"
               type="number"
@@ -145,7 +145,7 @@ export function Filters({
               placeholder="Max"
               value={value.maxPrice != null ? Math.round(value.maxPrice / 100) : ""}
               onChange={(e) => set({ maxPrice: e.target.value === "" ? undefined : Number(Number(e.target.value) * 100) })}
-              style={{ flex: 1, border: 0, outline: 0, background: "transparent", fontSize: 15, color: "var(--color-forest, #0F2A1D)", minWidth: 0 }}
+              style={{ flex: 1, width: "100%", border: 0, outline: 0, background: "transparent", fontSize: 15, color: "var(--color-forest, #0F2A1D)", minWidth: 0 }}
             />
           </div>
         </div>

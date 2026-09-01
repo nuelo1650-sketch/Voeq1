@@ -421,7 +421,10 @@ export function Explore({
                     broken featured banner). Now: filters → grid. Nothing at top
                     that clips. */}
 
-                {status === "success" && <RecentlyViewedRail items={recentItems} ids={recentIds} />}
+                {/* P-A round 28 (your call): RecentlyViewedRail REMOVED — it
+                    rendered full-size cards in a horizontal rail that read as
+                    'huge big listing cards' cluttering Explore. Grid only. */}
+
                 <div data-testid="explore-grid" className="voeq-grid">
                   {displayedData.map((l) => (
                     <Link
