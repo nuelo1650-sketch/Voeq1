@@ -122,8 +122,8 @@ export function Filters({
           User types any amount; no fake ceiling. */}
       <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
         <legend style={legendStyle}>Price range (₦)</legend>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, width: "100%", minWidth: 0, boxSizing: "border-box" }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px", minWidth: 0, maxWidth: "100%" }}>
             <span style={{ fontSize: 14, color: "var(--color-ink-muted, #7c7a6e)" }}>₦</span>
             <input
               data-testid="filter-price-min"
@@ -135,8 +135,8 @@ export function Filters({
               style={{ flex: 1, border: 0, outline: 0, background: "transparent", fontSize: 15, color: "var(--color-forest, #0F2A1D)", minWidth: 0 }}
             />
           </div>
-          <span style={{ color: "var(--color-ink-muted, #7c7a6e)" }}>–</span>
-          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px" }}>
+          <span style={{ color: "var(--color-ink-muted, #7c7a6e)", flexShrink: 0 }}>–</span>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px", minWidth: 0, maxWidth: "100%" }}>
             <span style={{ fontSize: 14, color: "var(--color-ink-muted, #7c7a6e)" }}>₦</span>
             <input
               data-testid="filter-price-max"
