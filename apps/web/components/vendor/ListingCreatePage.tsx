@@ -209,6 +209,15 @@ export function ListingCreatePage() {
       return;
     }
 
+    // P-A round 34 (FIX): never publish while photos are still uploading. The
+    // old code sent photos.map(p => p.url) — if the Cloudinary upload hadn't
+    // resolved, that was a LOCAL blob: URL that breaks the instant the page
+    // changes ("image uploads but doesn't show"). Block + tell the vendor.
+    if (photos.some((p) => p.uploading)) {
+      setErrors({ ...errors, submit: "Photo still uploading — give it a moment, then tap Publish again." });
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/listings", {
@@ -551,6 +560,29 @@ export function ListingCreatePage() {
               borderTop: "1px solid var(--color-ink-subtle)",
             }}
           >
+            {/* P-A round 34 (FIX): the submit error was NEVER RENDERED — vendors
+                clicked Publish, got a 409/400 silently, and saw nothing ("it
+                doesn't create, don't know the next process"). Always show it. */}
+            {errors.submit && (
+              <p
+                role="alert"
+                data-testid="listing-submit-error"
+                style={{
+                  flex: 1,
+                  margin: 0,
+                  fontSize: 13.5,
+                  color: "var(--role-danger, #B3261E)",
+                  fontFamily: "var(--role-font-ui)",
+                  background: "rgba(179,38,30,.08)",
+                  borderRadius: 10,
+                  padding: "10px 12px",
+                }}
+              >
+                {errors.submit === "nmu_migration_required"
+                  ? "Your campus has been split — please reselect your campus (Nigeria Maritime University → Okerenkoko or Kurutie) before publishing."
+                  : errors.submit}
+              </p>
+            )}
             <button
               type="button"
               onClick={saveDraft}
