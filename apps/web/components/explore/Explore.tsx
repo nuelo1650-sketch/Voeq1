@@ -248,7 +248,7 @@ export function Explore({
         {/* Category quick-pills - horizontal scroll */}
         {!categoryPreset && (
           <div style={{ marginBlock: "var(--space-3)", display: "flex", flexWrap: "wrap", paddingInline: "var(--nav-inline-pad)", gap: "var(--space-2)" }}>
-            <div style={{ display: "inline-flex", gap: "var(--space-2)" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
               <button
                 onClick={() => removeFilter('category')}
                 className={`voeq-pill${filters.category ? "" : " is-active"}`}
