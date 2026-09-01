@@ -59,11 +59,17 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   const contextFrom = SUPPORT_TEMPLATES.has(template)
     ? `Voeq Support <${VERIFIED_SENDERS.support}>`
     : `Voeq <${VERIFIED_SENDERS.default}>`;
-  const from =
+  let from =
     fromOverride ||
     process.env.RESEND_FROM ||
     process.env.RESEND_FROM_EMAIL ||
     contextFrom;
+  // P-A round 38 (FIX): the env override was often a BARE address
+  // ("hello@voeq.ng"), which makes Resend display the local part ("hello") as
+  // the sender name. Always wrap bare addresses with the brand display name.
+  if (!/<[^>]+>/.test(from)) {
+    from = `Voeq <${from}>`;
+  }
 
   // Dev fallback: no key configured.
   if (!apiKey) {

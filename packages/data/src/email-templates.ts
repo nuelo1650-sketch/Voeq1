@@ -38,18 +38,28 @@ export function renderEmail(
 }
 
 // ===== Base HTML wrapper =====
+// P-A round 38: MODERN premium redesign (user: "emails look so bland").
+// Warm cream canvas, forest header, amber CTA, serif wordmark, softer corners,
+// real hierarchy. All templates share this base so every email updates at once.
 const BASE_STYLE = `
-  body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F3EF; }
-  .email-container { max-width: 600px; margin: 40px auto; background: #FFFFFF; border-radius: 8px; overflow: hidden; }
-  .email-header { background: #0F2A1D; padding: 32px 24px; text-align: center; }
-  .email-logo { font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: 600; color: #F5F3EF; margin: 0; }
-  .email-body { padding: 32px 24px; color: #0F2A1D; }
-  .email-body h1 { font-size: 24px; font-weight: 600; margin: 0 0 16px; color: #0F2A1D; }
-  .email-body p { font-size: 16px; line-height: 1.6; margin: 0 0 16px; color: #4A5C52; }
-  .email-code { display: inline-block; font-family: 'Courier New', monospace; font-size: 32px; font-weight: 600; letter-spacing: 8px; padding: 16px 32px; background: #F5F3EF; border-radius: 8px; margin: 24px 0; color: #0F2A1D; }
-  .email-button { display: inline-block; padding: 14px 28px; background: #D4A054; color: #FFFFFF; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 16px 0; }
-  .email-footer { padding: 24px; background: #F5F3EF; text-align: center; font-size: 14px; color: #7A8C82; }
-  .email-footer a { color: #2D5A3D; text-decoration: none; }
+  body { margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F6F1E6; }
+  .email-container { max-width: 600px; margin: 24px auto; background: #FFFDF8; border-radius: 20px; overflow: hidden; border: 1px solid rgba(15,42,29,.08); box-shadow: 0 12px 40px rgba(15,42,29,.08); }
+  .email-header { background: #0F2A1D; padding: 30px 24px 26px; text-align: center; }
+  .email-logo { font-family: 'Playfair Display', Georgia, serif; font-size: 30px; font-weight: 700; color: #F6F1E6; margin: 0; letter-spacing: -.02em; }
+  .email-logo span { color: #E8A33D; }
+  .email-tagline { font-size: 12px; color: rgba(246,241,230,.7); margin: 6px 0 0; letter-spacing: .08em; text-transform: uppercase; font-family: 'Inter', sans-serif; }
+  .email-body { padding: 32px 28px; color: #0F2A1D; }
+  .email-body h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-weight: 600; margin: 0 0 14px; color: #0F2A1D; letter-spacing: -.01em; }
+  .email-body p { font-size: 15.5px; line-height: 1.65; margin: 0 0 14px; color: #4A5C52; }
+  .email-code-wrap { text-align: center; margin: 26px 0; }
+  .email-code { display: inline-block; font-family: 'SF Mono', 'Courier New', monospace; font-size: 34px; font-weight: 700; letter-spacing: 10px; padding: 18px 30px; background: #F6F1E6; border: 1px solid rgba(232,163,61,.35); border-radius: 14px; color: #0F2A1D; tab-size: 8; user-select: all; }
+  .email-copy { display: inline-block; margin-top: 10px; padding: 8px 18px; background: transparent; border: 1px solid #0F2A1D; color: #0F2A1D; border-radius: 999px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .email-button { display: inline-block; padding: 14px 30px; background: #E8A33D; color: #0F2A1D !important; text-decoration: none; border-radius: 999px; font-weight: 650; margin: 14px 0; font-size: 15px; box-shadow: 0 6px 16px rgba(232,163,61,.35); }
+  .email-list { line-height: 1.8; color: #4A5C52; font-size: 15px; padding-left: 20px; margin: 0 0 14px; }
+  .email-note { font-size: 13px; color: #7A8C82; margin: 0 0 14px !important; }
+  .email-footer { padding: 22px 24px; background: #F6F1E6; text-align: center; font-size: 13px; color: #7A8C82; border-top: 1px solid rgba(15,42,29,.06); }
+  .email-footer a { color: #2D5A3D; text-decoration: none; font-weight: 500; }
+  .email-footer .brand { font-family: 'Playfair Display', Georgia, serif; font-size: 16px; color: #0F2A1D; font-weight: 600; }
 `;
 
 function wrapHtml(body: string): string {
@@ -64,14 +74,15 @@ function wrapHtml(body: string): string {
 <body>
   <div class="email-container">
     <div class="email-header">
-      <h1 class="email-logo">Voeq</h1>
+      <h1 class="email-logo">voeq<span>.</span></h1>
+      <p class="email-tagline">The campus marketplace</p>
     </div>
     <div class="email-body">
       ${body}
     </div>
     <div class="email-footer">
-      <p>Voeq &mdash; The campus marketplace for Nigerian students</p>
-      <p><a href="https://voeq.ng">voeq.ng</a> &middot; <a href="https://voeq.ng/help">Help</a> &middot; <a href="https://voeq.ng/privacy">Privacy</a></p>
+      <span class="brand">Voeq</span> &mdash; The campus marketplace for Nigerian students
+      <p style="margin:8px 0 0"><a href="https://voeq.ng">voeq.ng</a> &middot; <a href="https://voeq.ng/help">Help</a> &middot; <a href="https://voeq.ng/privacy">Privacy</a></p>
     </div>
   </div>
 </body>
@@ -79,15 +90,37 @@ function wrapHtml(body: string): string {
   `.trim();
 }
 
+// Copy-code helper (works in clients that allow inline script — most mobile
+// mail apps; web clients fall back to the selectable code block).
+const COPY_SCRIPT = `
+<script>
+  function copyCode(btn){
+    var code = btn.getAttribute('data-code');
+    if (navigator.clipboard) { navigator.clipboard.writeText(code); }
+    var old = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    setTimeout(function(){ btn.textContent = old; }, 1600);
+  }
+</script>
+`;
+
+function otpCodeBlock(code: string): string {
+  return `
+  <div class="email-code-wrap">
+    <div class="email-code">${code}</div>
+    <br>
+    <button class="email-copy" data-code="${code}" onclick="copyCode(this)">Copy code</button>
+  </div>`;
+}
+
 // ===== OTP Verification Email (Registration) =====
 export const OTP_REGISTRATION: EmailTemplate = {
   subject: "Your Voeq verification code",
   html: wrapHtml(`
+    ${COPY_SCRIPT}
     <h1>Verify your email</h1>
-    <p>Welcome to Voeq! To complete your registration, enter this 6-digit code:</p>
-    <div style="text-align: center;">
-      <span class="email-code">{{code}}</span>
-    </div>
+    <p>Welcome to Voeq! To complete your registration, enter this 6-digit code — or tap <strong>Copy code</strong>:</p>
+    ${otpCodeBlock("{{code}}")}
     <p>This code expires in 10 minutes. If you didn't create a Voeq account, you can safely ignore this email.</p>
   `),
   text: `
@@ -109,11 +142,10 @@ https://voeq.ng
 export const OTP_LOGIN: EmailTemplate = {
   subject: "Your Voeq sign-in code",
   html: wrapHtml(`
+    ${COPY_SCRIPT}
     <h1>Sign in to Voeq</h1>
-    <p>Someone requested a sign-in code for your account. Enter this 6-digit code to continue:</p>
-    <div style="text-align: center;">
-      <span class="email-code">{{code}}</span>
-    </div>
+    <p>Someone requested a sign-in code for your account. Enter this 6-digit code — or tap <strong>Copy code</strong>:</p>
+    ${otpCodeBlock("{{code}}")}
     <p>This code expires in 10 minutes. If you didn't request this, someone may be trying to access your account. Consider changing your password.</p>
   `),
   text: `
