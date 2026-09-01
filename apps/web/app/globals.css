@@ -5393,3 +5393,8 @@ header.AppShell,
 /* Featured carousel: 1-up on phones, 2-up >>=640px */
 .featured-carousel-grid-voeq { grid-template-columns: 1fr !important; }
 @media (min-width: 640px) { .featured-carousel-grid-voeq { grid-template-columns: 1fr 1fr !important; } }
+
+/* ---- S4: storefront grid — mobile safe (FIND-13) ---- */
+.vs-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 768px) { .vs-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; } }
+@media (min-width: 1200px) { .vs-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

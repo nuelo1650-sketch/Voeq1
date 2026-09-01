@@ -64,11 +64,7 @@ export function StorefrontGrid({ listings }: { listings: ExploreListing[] }) {
       }}>
         Listings ({shown.length})
       </h2>
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-        gap: "var(--space-3)",
-      }}>
+      <div className="vs-grid" style={{ gap: "var(--space-3)" }}>
         {shown.map((l) => (
           <StorefrontListingCard key={l.id} listing={l} />
         ))}
