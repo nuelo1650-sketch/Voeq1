@@ -12,7 +12,6 @@ import { BrandLogo } from "../landing/BrandLogo";
 import { ListingCard } from "./ListingCard";
 import { Filters, CATEGORIES } from "./Filters";
 import { SearchBar } from "./SearchBar";
-import { TrendingRail } from "./TrendingRail";
 import { OnboardingBanner } from "./OnboardingBanner";
 import { RecentlyViewedRail, useRecentlyViewed } from "./RecentlyViewedRail";
 import { ExploreSkeleton } from "./ExploreSkeleton";
@@ -296,7 +295,7 @@ export function Explore({
             {filters.recentlyActive && (
               <FilterChip label="Recently active" onRemove={() => removeFilter('recentlyActive')} />
             )}
-            {filters.featuredOnly && (
+            {false && (
               <FilterChip label="Featured" onRemove={() => removeFilter('featuredOnly')} />
             )}
             <button
@@ -416,10 +415,12 @@ export function Explore({
                   </div>
                 )}
                 
-                {/* P-A round 7: Featured carousel REMOVED (per user: not valuable).
-                    Single clean flow: sorting toolbar → trending → grid. */}
-                
-                <TrendingRail items={trending} />
+                {/* P-A round 17: Trending/Featured rail removed from the top of
+                    Explore (user: 'featured listings no valuable' + it rendered
+                    'only in parts' — a clipping horizontal scroll rail read as a
+                    broken featured banner). Now: filters → grid. Nothing at top
+                    that clips. */}
+
                 {status === "success" && <RecentlyViewedRail items={recentItems} ids={recentIds} />}
                 <div data-testid="explore-grid" className="voeq-grid">
                   {displayedData.map((l) => (
@@ -616,211 +617,3 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
   );
 }
 
-// Featured carousel component - auto-advances every 5 seconds (K2.9 #3: Added swipe gestures)
-function FeaturedCarousel({ items }: { items: ExploreListing[] }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-
-  // Auto-advance timer
-  useEffect(() => {
-    if (items.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % items.length);
-    }, 5000); // Auto-advance every 5 seconds
-    return () => clearInterval(interval);
-  }, [items.length]);
-
-  if (items.length === 0) return null;
-
-  const currentItem = items[currentIndex];
-
-  // Swipe gesture handlers (K2.9 #3)
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe && currentIndex < items.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-    if (isRightSwipe && currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-
-    // Reset
-    setTouchStart(0);
-    setTouchEnd(0);
-  };
-
-  return (
-    <div style={{ marginBottom: "var(--space-4)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-2)" }}>
-        <h2 style={{ fontSize: "18px", fontWeight: 600, color: "var(--role-text)", fontFamily: "var(--role-font-display)", margin: 0 }}>
-          Featured
-        </h2>
-        {items.length > 1 && (
-          <div style={{ display: "flex", gap: 6 }}>
-            {items.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentIndex(idx)}
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  border: "none",
-                  background: idx === currentIndex ? "var(--color-amber)" : "var(--role-border)",
-                  cursor: "pointer",
-                  padding: 0,
-                  transition: "background 200ms ease",
-                }}
-                aria-label={`Go to featured listing ${idx + 1}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-      
-      <Link
-        href={`/listing/${currentItem.id}`}
-        style={{ textDecoration: "none", color: "inherit", display: "block" }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div style={{
-          position: "relative",
-          background: "var(--role-surface)",
-          border: "2px solid var(--color-amber)",
-          borderRadius: "var(--radius-lg)",
-          overflow: "hidden",
-          transition: "transform 200ms ease, box-shadow 200ms ease",
-          cursor: "pointer",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "translateY(-2px)";
-          e.currentTarget.style.boxShadow = "var(--shadow-lg)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "translateY(0)";
-          e.currentTarget.style.boxShadow = "none";
-        }}
-        >
-          {/* Featured badge */}
-          <div style={{
-            position: "absolute",
-            top: 12,
-            right: 12,
-            background: "var(--color-amber)",
-            color: "var(--color-ink)",
-            fontSize: "12px",
-            fontWeight: 600,
-            padding: "4px 10px",
-            borderRadius: 999,
-            fontFamily: "var(--role-font-ui)",
-            zIndex: 1,
-          }}>
-            FEATURED
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, minHeight: 280 }} className="featured-carousel-grid-voeq">
-            {/* Image side */}
-            <div 
-              className="featured-carousel-image"
-              style={{ 
-                backgroundImage: currentItem.image ? `url(${currentItem.image})` : "none",
-                backgroundColor: currentItem.image ? "transparent" : "var(--role-surface-sunken)",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                minHeight: 280,
-              }} 
-            />
-            
-            {/* Content side */}
-            <div style={{ padding: "var(--space-4)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-              <div>
-                <h3 style={{ 
-                  fontSize: "24px", 
-                  fontWeight: 600, 
-                  margin: "0 0 var(--space-2)", 
-                  fontFamily: "var(--role-font-display)",
-                  color: "var(--role-text)",
-                }}>
-                  {currentItem.title}
-                </h3>
-                {currentItem.vendorName && (
-                  <p style={{ 
-                    fontSize: "14px", 
-                    color: "var(--role-text-muted)", 
-                    margin: "0 0 var(--space-2)",
-                    fontFamily: "var(--role-font-ui)",
-                  }}>
-                    by {currentItem.vendorName}
-                  </p>
-                )}
-                {currentItem.categorySlug && (
-                  <span style={{
-                    display: "inline-block",
-                    fontSize: "12px",
-                    padding: "4px 10px",
-                    background: "var(--role-surface-sunken)",
-                    borderRadius: 999,
-                    color: "var(--role-text-muted)",
-                    fontFamily: "var(--role-font-ui)",
-                  }}>
-                    {CATEGORIES.find(c => c.slug === currentItem.categorySlug)?.label ?? currentItem.categorySlug}
-                  </span>
-                )}
-              </div>
-              
-              <div>
-                {typeof currentItem.vendorRatingAvg === "number" && (currentItem.vendorRatingCount ?? 0) > 0 ? (
-                  <div style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    gap: 4, 
-                    marginBottom: "var(--space-2)",
-                    fontSize: "14px",
-                    color: "var(--role-text)",
-                  }}>
-                    <span>⭐</span>
-                    <span style={{ fontWeight: 600 }}>{currentItem.vendorRatingAvg.toFixed(1)}</span>
-                    <span style={{ color: "var(--role-text-muted)", fontSize: 12 }}>({currentItem.vendorRatingCount})</span>
-                  </div>
-                ) : (
-                  <div style={{
-                    fontSize: "12px",
-                    color: "var(--role-text-muted)",
-                    marginBottom: "var(--space-2)",
-                  }}>
-                    New
-                  </div>
-                )}
-                <p style={{ 
-                  fontSize: "20px", 
-                  fontWeight: 600, 
-                  color: "var(--color-forest)", 
-                  margin: 0,
-                  fontFamily: "var(--role-font-ui)",
-                }}>
-                  ₦{(currentItem.priceMinor / 100).toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Link>
-    </div>
-  );
-}
