@@ -29,5 +29,10 @@ export async function POST(req: NextRequest) {
 
   await mockIdentityRepo.patch(identity.id, { campus });
   await logAudit("campus.selected", identity.id, { campus });
-  return NextResponse.json({ ok: true, redirect: "/onboarding/shopper" });
+  // P-A round 35 (FIX — the vendor→shopper routing root remains): the redirect
+  // was HARDCODED to /onboarding/shopper for EVERYONE. A user who signed up
+  // with intent=vendor then got SHOPPER onboarding + shopper dashboard (the
+  // original 'I got a shopper dashboard as a vendor' report). Branch on intent.
+  const redirect = identity.intent === "vendor" ? "/onboarding/vendor" : "/onboarding/shopper";
+  return NextResponse.json({ ok: true, redirect });
 }
