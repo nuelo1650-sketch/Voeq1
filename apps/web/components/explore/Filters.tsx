@@ -118,7 +118,8 @@ export function Filters({
         </select>
       </Field>
 
-      {/* Price range */}
+      {/* Price range — P-A round 9 (v4.1): manual Min/Max inputs (user types any
+          amount; no fake ceiling). Histogram stays as visual guidance. */}
       <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
         <legend style={legendStyle}>Price range (₦)</legend>
         {priceStats && (
@@ -138,6 +139,33 @@ export function Filters({
             })}
           />
         )}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px" }}>
+            <span style={{ fontSize: 14, color: "var(--color-ink-muted, #7c7a6e)" }}>₦</span>
+            <input
+              data-testid="filter-price-min"
+              type="number"
+              inputMode="numeric"
+              placeholder="Min"
+              value={value.minPrice != null ? Math.round(value.minPrice / 100) : ""}
+              onChange={(e) => set({ minPrice: e.target.value === "" ? undefined : Number(Number(e.target.value) * 100) })}
+              style={{ flex: 1, border: 0, outline: 0, background: "transparent", fontSize: 15, color: "var(--color-forest, #0F2A1D)", minWidth: 0 }}
+            />
+          </div>
+          <span style={{ color: "var(--color-ink-muted, #7c7a6e)" }}>–</span>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, background: "#fff", border: "1px solid var(--role-border, rgba(31,56,43,.1))", borderRadius: 12, padding: "9px 12px" }}>
+            <span style={{ fontSize: 14, color: "var(--color-ink-muted, #7c7a6e)" }}>₦</span>
+            <input
+              data-testid="filter-price-max"
+              type="number"
+              inputMode="numeric"
+              placeholder="Max"
+              value={value.maxPrice != null ? Math.round(value.maxPrice / 100) : ""}
+              onChange={(e) => set({ maxPrice: e.target.value === "" ? undefined : Number(Number(e.target.value) * 100) })}
+              style={{ flex: 1, border: 0, outline: 0, background: "transparent", fontSize: 15, color: "var(--color-forest, #0F2A1D)", minWidth: 0 }}
+            />
+          </div>
+        </div>
         {(value.minPrice || value.maxPrice) && (
           <p style={priceSummaryStyle}>
             {value.minPrice && value.maxPrice
