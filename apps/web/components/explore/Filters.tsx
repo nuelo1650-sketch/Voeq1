@@ -218,6 +218,12 @@ const panelStyle: React.CSSProperties = {
   borderRadius: 18,
   padding: "var(--space-3)",
   boxShadow: "0 6px 20px rgba(30,59,47,.06)",
+  /* P-A round 18: width-bound — the mobile sheet panel was wider than the
+     viewport (right side off-screen). Constrain to the container. */
+  width: "100%",
+  minWidth: 0,
+  maxWidth: "100%",
+  boxSizing: "border-box",
 };
 
 const panelTitleStyle: React.CSSProperties = {
@@ -255,8 +261,12 @@ const modernSelectStyle: React.CSSProperties = {
   background: "#f6f1e6",
   color: "var(--color-forest)",
   fontFamily: "var(--role-font-ui)",
-  fontSize: 14,
+  fontSize: 16, /* iOS no-zoom */
   cursor: "pointer",
+  width: "100%",
+  minWidth: 0,
+  maxWidth: "100%",
+  boxSizing: "border-box",
 };
 
 const priceSummaryStyle: React.CSSProperties = {

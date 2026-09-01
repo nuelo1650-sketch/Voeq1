@@ -554,6 +554,9 @@ const sheetStyle: React.CSSProperties = {
   right: 0,
   bottom: 0,
   zIndex: 50,
+  width: "100%",
+  maxWidth: "100%",
+  boxSizing: "border-box",
   background: "var(--role-surface)",
   borderTop: "1px solid var(--role-border)",
   borderTopLeftRadius: "var(--radius-lg)",
@@ -563,6 +566,7 @@ const sheetStyle: React.CSSProperties = {
   paddingBottom: "calc(var(--space-3) + env(safe-area-inset-bottom, 0px))",
   maxHeight: "calc(100dvh - env(safe-area-inset-top, 0px) - 12px)",
   overflowY: "auto",
+  overflowX: "hidden",
   boxShadow: "var(--shadow-2)",
 };
 
