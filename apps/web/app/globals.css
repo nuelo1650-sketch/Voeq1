@@ -2136,11 +2136,18 @@
   .listing-detail-grid {
     grid-template-columns: 1fr !important;
   }
+  /* P-A round 7 (FIND-01): the actions bar was hidden expecting a sticky bar
+     that no component renders — Share/Save/Like/Report were invisible on
+     mobile. Keep the actions bar visible (it stays in the flow, always 4
+     controls); the sticky variant below is unused. */
   .listing-detail-actions {
-    display: none !important; /* moved into the sticky bar on mobile */
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
   }
   .listing-detail-sticky {
-    display: flex !important;
+    display: none !important;
   }
 }
 
@@ -5196,16 +5203,16 @@ header.AppShell,
 .voeq-state p { margin: 0; color: var(--color-ink-muted, #6f6a5e); font-size: 14px; max-width: 340px; }
 .voeq-state-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 
-/* ---- Desktop enhancement (min-width tiers) — the EDGE CASE --------------- */
+/* ---- Desktop enhancement (min-width tiers) — the EDGE CASE ---------------
+   P-A round 7 (FIND-10 fix): the old duplicate .voeq-grid blocks below were
+   overriding the mobile-first tiers with auto-fill minmax(220/240px) — which
+   inverted column counts at 768/1024 and re-created half-width cards. Removed;
+   the 2/3/4-col mobile-first grid above now governs. */
 @media (min-width: 768px) {
-  .voeq-grid { grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 18px; }
   .voeq-card-image { aspect-ratio: 4 / 3; }
   .voeq-toolbar-count { flex: none; order: 0; }
   .voeq-toolbar-controls { order: 1; }
   .voeq-rail > * { width: 208px; }
-}
-@media (min-width: 1024px) {
-  .voeq-grid { grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 20px; }
 }
 
 /* ---- Restore ghost responsive classes (were only in a stale .next build) - */

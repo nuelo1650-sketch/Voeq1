@@ -58,8 +58,13 @@ export function PriceRangeSlider({
   }, [currentMin, currentMax]);
 
   // Debounced commit to parent filter state
+  // P-A round 7 (FIND-04): only commit AFTER a real user drag. Previously the
+  // sync effect set pending -> debounce fired on mount -> Explore received
+  // phantom Min/Max filters on load and re-fetched (infinite re-render loop).
+  const didDragRef = useRef(false);
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    if (!didDragRef.current) return;
     timerRef.current = setTimeout(() => {
       onChange(pendingMin, pendingMax);
     }, 150);
@@ -70,6 +75,7 @@ export function PriceRangeSlider({
 
   const handleMinChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      didDragRef.current = true;
       const v = Number(e.target.value);
       setPendingMin(Math.min(v, pendingMax));
     },
@@ -78,6 +84,7 @@ export function PriceRangeSlider({
 
   const handleMaxChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      didDragRef.current = true;
       const v = Number(e.target.value);
       setPendingMax(Math.max(v, pendingMin));
     },

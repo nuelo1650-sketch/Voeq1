@@ -50,16 +50,14 @@ export function Filters({
   }, [listings]);
 
   const hasActive =
-    value.category || value.minPrice || value.maxPrice || value.minRating ||
-    value.openNow || value.hasPhotos || value.verifiedOnly || value.featuredOnly || value.recentlyActive;
+    value.category || value.minPrice || value.maxPrice || value.verifiedOnly;
 
-  // Quick filters — richer set than before (verified/featured/recently-active added)
+  // P-A round 7 (per user: fewer filters, modern UX): only VERIFIED remains as
+  // a quick filter. openNow/featuredOnly/hasPhotos/recentlyActive/minRating were
+  // either mock-only (never populated by real data) or proven dead — removed
+  // to stop the panel feeling like clutter.
   const quickFilters = [
-    { key: "openNow" as const, testid: "filter-open-now-pill", label: "Open now", icon: "🕐" },
     { key: "verifiedOnly" as const, testid: "filter-verified-pill", label: "Verified", icon: "✓" },
-    { key: "featuredOnly" as const, testid: "filter-featured-pill", label: "Featured", icon: "★" },
-    { key: "hasPhotos" as const, testid: "filter-has-photos-pill", label: "Has photos", icon: "📷" },
-    { key: "recentlyActive" as const, testid: "filter-recently-active-pill", label: "Recently active", icon: "⚡" },
   ];
 
   return (
@@ -128,21 +126,6 @@ export function Filters({
           </p>
         )}
       </fieldset>
-
-      {/* Minimum rating */}
-      <Field label="Minimum rating">
-        <select
-          data-testid="filter-min-rating"
-          value={value.minRating ?? ""}
-          onChange={(e) => set({ minRating: e.target.value ? Number(e.target.value) : undefined })}
-          style={modernSelectStyle}
-        >
-          <option value="">Any rating</option>
-          <option value="3">⭐ 3+ stars</option>
-          <option value="4">⭐ 4+ stars</option>
-          <option value="4.5">⭐ 4.5+ stars</option>
-        </select>
-      </Field>
 
       <div style={{ height: 1, background: "var(--color-ink-subtle)", margin: 0 }} />
 

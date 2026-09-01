@@ -12,7 +12,6 @@ import { ContourEdge } from "@voeq/contour";
 import { BrandLogo } from "../landing/BrandLogo";
 import { CampusSelector } from "./CampusSelector";
 import { ListingCard } from "./ListingCard";
-import { ListingRow } from "./ListingRow";
 import { Filters, CATEGORIES } from "./Filters";
 import { SearchBar } from "./SearchBar";
 import { TrendingRail } from "./TrendingRail";
@@ -20,7 +19,7 @@ import { OnboardingBanner } from "./OnboardingBanner";
 import { RecentlyViewedRail, useRecentlyViewed } from "./RecentlyViewedRail";
 import { ExploreSkeleton } from "./ExploreSkeleton";
 import { EmptyState } from "./EmptyState";
-import { RefreshCw, ChevronDown, LayoutGrid, List } from "lucide-react";
+import { RefreshCw, ChevronDown } from "lucide-react";
 
 /**
  * Explore — PG-PUB-002 (Doc 04). The core discovery surface.
@@ -71,8 +70,10 @@ export function Explore({
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [forceError, setForceError] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
-  const [view, setView] = useState<"grid" | "list">("grid");
-  const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
+  // P-A round 7: list view + density toggles REMOVED. They were the source of
+  // "half cards"/"just listing": a persisted list view hijacked the grid, and
+  // density was a dead control (persisted but never applied). One clean,
+  // industrial card grid — mobile 2-up compact, desktop 3/4-up.
 
   const { ids: recentIds, record } = useRecentlyViewed();
   const { toggle: toggleBookmark, isBookmarked } = useBookmarks();
@@ -85,28 +86,8 @@ export function Explore({
     }
   }, []);
 
-  // Hydrate view/density from localStorage; default compact on mobile.
-  useEffect(() => {
-    // P-A fix (2026-08-31): phones ALWAYS use the compact 2-col grid.
-    // The persisted "list" view (or a previous render without this fix) made
-    // Explore look like a full-width "just listing" feed. Only desktop
-    // (>=768px) may honor a previously saved list view.
-    const isPhone = typeof window !== "undefined" && window.innerWidth < 768;
-    const v = localStorage.getItem("voeq:explore-view");
-    const d = localStorage.getItem("voeq:explore-density");
-    if (v === "list" && !isPhone) setView("list");
-    else setView("grid");
-    if (d === "comfortable" || d === "compact") setDensity(d);
-    else if (isPhone) setDensity("compact");
-  }, []);
-
-  // Persist view/density across sessions.
-  useEffect(() => {
-    localStorage.setItem("voeq:explore-view", view);
-  }, [view]);
-  useEffect(() => {
-    localStorage.setItem("voeq:explore-density", density);
-  }, [density]);
+  // P-A round 7: view/density persistence effects removed — no more list-view
+  // or density state to hydrate. Mobile always renders the compact 2-up grid.
 
   // Sync ?exploreError=1 (dev/test forced-failure path)
   useEffect(() => {
@@ -245,23 +226,24 @@ export function Explore({
         </div>
       )}
       
-      {/* Shared spatial anchor — mirrors Landing nav geometry exactly (D.4.1 component 2) */}
+      {/* P-A round 7 (your call): campus selector FIRST — front and visible.
+          Order: campus → logo → search. Mobile stacks: campus+logo row, then
+          full-width search. No more selector buried at the back. */}
       <header
         data-testid="explore-topbar"
         className="voeq-topbar"
       >
-        <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" className="voeq-topbar-wordmark" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
-          <BrandLogo width={64} />
-        </Link>
-
-        {/* Search bar — the alive, centered anchor of the header */}
-        <div className="voeq-topbar-search">
-          <SearchBar initial={query} onSearch={setQuery} listings={data} />
+        <div className="voeq-topbar-campus" style={{ order: 0 }}>
+          <CampusSelector currentCampus={campus} onChange={setCampus} viewerIdentityId={viewerIdentityId} />
         </div>
 
-        {/* Campus selector - right side, rich pill */}
-        <div className="voeq-topbar-campus">
-          <CampusSelector currentCampus={campus} onChange={setCampus} viewerIdentityId={viewerIdentityId} />
+        <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" className="voeq-topbar-wordmark" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0, order: 1 }}>
+          <BrandLogo width={56} />
+        </Link>
+
+        {/* Search bar — full width on its own row (mobile), flexible on desktop */}
+        <div className="voeq-topbar-search" style={{ order: 2 }}>
+          <SearchBar initial={query} onSearch={setQuery} listings={data} />
         </div>
       </header>
 
@@ -462,70 +444,15 @@ export function Explore({
                         </select>
                         <span className="voeq-select-caret"><ChevronDown size={16} /></span>
                       </div>
-
-                      {/* View + density toggles */}
-                      <div className="voeq-segmented" role="group" aria-label="View mode">
-                        <button
-                          data-testid="explore-view-grid"
-                          aria-pressed={view === "grid"}
-                          aria-label="Grid view"
-                          className={view === "grid" ? "is-active" : ""}
-                          onClick={() => setView("grid")}
-                        >
-                          <LayoutGrid size={16} />
-                        </button>
-                        <button
-                          data-testid="explore-view-list"
-                          aria-pressed={view === "list"}
-                          aria-label="List view"
-                          className={view === "list" ? "is-active" : ""}
-                          onClick={() => setView("list")}
-                        >
-                          <List size={16} />
-                        </button>
-                      </div>
-
-                      <div className="voeq-segmented" role="group" aria-label="Density">
-                        <button
-                          data-testid="explore-density-comfortable"
-                          aria-pressed={density === "comfortable"}
-                          aria-label="Comfortable density"
-                          className={density === "comfortable" ? "is-active" : ""}
-                          onClick={() => setDensity("comfortable")}
-                        >
-                          Comfortable
-                        </button>
-                        <button
-                          data-testid="explore-density-compact"
-                          aria-pressed={density === "compact"}
-                          aria-label="Compact density"
-                          className={density === "compact" ? "is-active" : ""}
-                          onClick={() => setDensity("compact")}
-                        >
-                          Compact
-                        </button>
-                      </div>
                     </div>
                   </div>
                 )}
                 
-                {/* Featured listings carousel - larger cards, auto-rolling every 5s */}
-                {data.some(l => l.featured) && (
-                  <FeaturedCarousel items={data.filter(l => l.featured)} />
-                )}
+                {/* P-A round 7: Featured carousel REMOVED (per user: not valuable).
+                    Single clean flow: sorting toolbar → trending → grid. */}
                 
                 <TrendingRail items={trending} />
                 {status === "success" && <RecentlyViewedRail items={recentItems} ids={recentIds} />}
-                {view === "list" ? (
-                  <div
-                    data-testid="explore-list"
-                    style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", marginTop: "var(--space-3)" }}
-                  >
-                    {displayedData.map((l) => (
-                      <ListingRow key={l.id} listing={l} onNavigate={onCardClick} />
-                    ))}
-                  </div>
-                ) : (
                 <div data-testid="explore-grid" className="voeq-grid">
                   {displayedData.map((l) => (
                     <Link
@@ -543,7 +470,6 @@ export function Explore({
                     </Link>
                   ))}
                 </div>
-                )}
                 
                 {/* Infinite scroll: Load more button (K2.9 #2) */}
                 {hasMore && (
