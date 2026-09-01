@@ -116,6 +116,38 @@ export async function GET(req: NextRequest) {
     return r;
   }
 
+  // P-A round 36 (FIX — 'repeated OTPs on Google login'): if the google subject
+  // isn't linked BUT an identity with this email already exists (email-first
+  // signup), LINK googleSubject to it instead of creating a duplicate pending
+  // identity + sending ANOTHER OTP every login. Previously the fall-through
+  // created a second identity and re-OTP'd every time.
+  const byEmail = await mockIdentityRepo.getByEmail(profile.email);
+  if (byEmail) {
+    if (byEmail.accountStatus === "suspended" || byEmail.accountStatus === "banned") {
+      await logAudit("google.login-email-denied", byEmail.id, { status: byEmail.accountStatus });
+      return NextResponse.redirect(new URL("/account-denied?reason=" + byEmail.accountStatus, req.url));
+    }
+    // Link the Google subject to the existing identity (idempotent).
+    await mockIdentityRepo.patch(byEmail.id, { googleSubject: profile.sub });
+    await logAudit("google.login-linked", byEmail.id, {});
+    const session = await createSession(byEmail.id);
+    const redirectUrl = new URL("/consent", req.url);
+    redirectUrl.searchParams.set("next", "/");
+    redirectUrl.searchParams.set("session", session.id);
+    // Auth status + session cookie for the linked account.
+    if (session) {
+      const jar = await cookies();
+      jar.set("sessionId", session.id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        expires: new Date(session.expiresAt),
+      });
+    }
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // New Google user: create pending, verify via OTP (NOT magic link).
   const identity = await mockIdentityRepo.createPending({
     email: profile.email,
