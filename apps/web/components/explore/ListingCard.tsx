@@ -15,7 +15,7 @@ import { Heart } from "lucide-react";
  * ZERO logic change — same props, same data-testids, same behaviours.
  */
 function formatPrice(minor: number): string {
-  return `₦ ${(minor / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
+  return `₦${(minor / 100).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 }
 
 const AVAIL_LABEL: Record<string, string> = { open: "Open now", closed: "Sold out", soon: "Opening soon" };
