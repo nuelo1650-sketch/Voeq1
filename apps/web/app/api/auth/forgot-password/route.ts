@@ -34,8 +34,15 @@ export async function POST(req: NextRequest) {
     const token = await mockMagicLinkRepo.issue(email);
     // D.5 — Real email via Resend (dev fallback logs when RESEND_API_KEY unset).
     const link = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://voeq.ng"}/reset-password?token=${token}`;
-    await sendEmail({ to: email, template: "PASSWORD_RESET", vars: { resetLink: link } });
-    await logAudit("reset.requested", identity.id, {});
+    // P-A round 37 (FIX): sendEmail returns {ok:false} on failure — it was
+    // awaited and the RESULT IGNORED, so every failure still returned 200
+    // "ok:true" (user told "sent" when nothing went out). Check it; keep the
+    // 200 for anti-enumeration but make failures loud in audits.
+    const result = await sendEmail({ to: email, template: "PASSWORD_RESET", vars: { resetLink: link } });
+    await logAudit("reset.requested", identity.id, { ok: result.ok, error: result.error ?? null });
+    if (!result.ok) {
+      console.error(`[forgot-password] sendEmail FAILED for ${email}: ${result.error}`);
+    }
   }
   // Always 200 — never confirm/deny account existence.
   return NextResponse.json({ ok: true });
