@@ -350,13 +350,13 @@ export function Explore({
 
             {status === "empty" && (
               <div data-testid="explore-empty" className="voeq-state">
-                <h2 style={{ margin: 0 }}>No vendors yet on {campus}</h2>
+                <h2 style={{ margin: 0 }}>Your campus is waking up</h2>
                 <p style={{ color: "var(--role-text-muted)" }}>
-                  Be the first to share what you’re selling near {campus}.
+                  There are no listings for this filter yet — but vendors are arriving every day. Be the first on the next one.
                 </p>
                 <div className="voeq-state-actions">
-                  <Link href="/" data-testid="explore-empty-browse" className="voeq-btn voeq-btn--primary">Browse other campuses</Link>
-                  <Link href="/for-vendors" data-testid="explore-empty-vendor" className="voeq-btn voeq-btn--ghost">Become a vendor</Link>
+                  <Link href="/become-vendor" data-testid="explore-empty-vendor" className="voeq-btn voeq-btn--primary">Be the first to post what you're selling →</Link>
+                  <Link href="/for-vendors" data-testid="explore-empty-browse" className="voeq-btn voeq-btn--ghost">How it works</Link>
                 </div>
               </div>
             )}
