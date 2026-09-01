@@ -21,8 +21,12 @@ export async function POST(req: NextRequest) {
   }
   await acceptConsent(identity.id, identity.method);
 
+  // P-A round 7 (A2): role-aware post-consent routing. Previously EVERYONE
+  // (vendors included) went to /select-campus -> /onboarding/shopper -> /home,
+  // which made a vendor who'd completed onboarding land in the SHOPPER flow
+  // and dashboard. Vendor identities keep their route.
   const url = new URL(req.url);
-  const next = sanitizeNext(url.searchParams.get("next") ?? undefined, "/select-campus");
+  const next = sanitizeNext(url.searchParams.get("next") ?? undefined, identity.vendorId ? "/vendor/dashboard" : "/select-campus");
   const intent = url.searchParams.get("intent") ?? "";
   const sep = next.includes("?") ? "&" : "?";
   const redirect = intent ? `${next}${sep}intent=${encodeURIComponent(intent)}` : next;

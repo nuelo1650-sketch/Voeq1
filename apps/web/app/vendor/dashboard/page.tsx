@@ -7,6 +7,7 @@ import {
   mockReviewRepo,
   mockCampusRepo,
 } from "@voeq/data";
+import { VendorGoLiveButton } from "@/components/vendor/VendorGoLiveButton";
 import { VendorDashboardClient } from "@/components/vendor/VendorDashboardClient";
 import { AppShell } from "@/components/shell/AppShell";
 
@@ -105,13 +106,7 @@ export default async function VendorDashboardPage() {
           </li>
         </ol>
         <div data-testid="can-go-live" style={{ marginTop: "var(--space-2)" }}>
-          {live ? (
-            <p style={{ color: "var(--color-forest-mid)", margin: 0 }}>All caught up! Your storefront is live. 🎉</p>
-          ) : (
-            <p style={{ color: "var(--color-ink-muted)", margin: 0 }}>
-              Create your first listing to go public. Need a photo first? You can go live without one — add a profile photo anytime in Settings.
-            </p>
-          )}
+          <VendorGoLiveButton live={live} />
         </div>
       </section>
 

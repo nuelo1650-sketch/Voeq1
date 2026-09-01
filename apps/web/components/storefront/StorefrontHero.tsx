@@ -72,7 +72,14 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
       
       if (res.ok) {
         const data = await res.json();
-        router.push(`/messages/${data.conversationId}`);
+        // P-A round 7 (A3): API returns { ok, conversation: { id } } —
+        // reading data.conversationId produced /messages/undefined.
+        const convId = data.conversation?.id ?? data.conversationId;
+        if (convId) {
+          router.push(`/messages/${convId}`);
+        } else {
+          router.push("/messages");
+        }
       }
     } catch {
       // Error handled silently (K2.6 will add proper error UI)
@@ -95,7 +102,10 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
         if (cancelled) return;
         if (res.ok) {
           const data = await res.json();
-          router.push(`/messages/${data.conversationId}`);
+          // P-A round 7 (A3): same response-shape fix as handleContactVendor.
+          const convId = data.conversation?.id ?? data.conversationId;
+          if (convId) router.push(`/messages/${convId}`);
+          else router.push("/messages");
         }
       } catch {
         // silent

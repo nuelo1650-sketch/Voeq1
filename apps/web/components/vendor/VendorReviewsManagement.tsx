@@ -24,30 +24,20 @@ interface Review {
   };
 }
 
-export function VendorReviewsManagement({ vendor, disabled }: { vendor: Vendor; disabled: boolean }) {
+export interface ReviewForVendor {
+  id: string;
+  shopperName: string;
+  rating: number;
+  body: string;
+  createdAt: Date;
+  response?: { body: string; createdAt: Date };
+}
+
+export function VendorReviewsManagement({ vendor, disabled, initialReviews = [] }: { vendor: Vendor; disabled: boolean; initialReviews?: ReviewForVendor[] }) {
   const router = useRouter();
-  
-  // Mock reviews data - in production would come from API
-  const [reviews, setReviews] = useState<Review[]>([
-    {
-      id: "1",
-      shopperName: "John D.",
-      rating: 5,
-      body: "Excellent service! Fast delivery and great quality products.",
-      createdAt: new Date(Date.now() - 2 * 24 * 3600000), // 2 days ago
-    },
-    {
-      id: "2",
-      shopperName: "Sarah M.",
-      rating: 4,
-      body: "Good experience overall, but delivery was a bit slow.",
-      createdAt: new Date(Date.now() - 5 * 24 * 3600000), // 5 days ago
-      response: {
-        body: "Thank you for your feedback! We're working on improving our delivery times.",
-        createdAt: new Date(Date.now() - 4 * 24 * 3600000),
-      },
-    },
-  ]);
+
+  // P-A round 7 (A5): REAL reviews from the server page (no fabricated fixtures).
+  const [reviews, setReviews] = useState<ReviewForVendor[]>(initialReviews);
 
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [responseText, setResponseText] = useState("");
