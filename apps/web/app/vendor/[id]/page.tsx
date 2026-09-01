@@ -77,7 +77,7 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
     : [];
 
   return (
-    <main data-env="deep" data-testid="storefront-page" style={{ minHeight: "100vh", background: "var(--role-bg)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
+    <main data-env="cream" data-testid="storefront-page" style={{ minHeight: "100vh", background: "var(--role-bg)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
       <StorefrontHero vendor={vendor} />
       <StorefrontGrid listings={vendor.listings} />
       <StorefrontTrust vendor={vendor} />

@@ -12,7 +12,7 @@ export function StorefrontPreview({ view }: { view: VendorStorefrontView }) {
   return (
     <div
       data-testid="storefront-preview"
-      data-env="deep"
+      data-env="cream"
       style={{
         border: "1px solid var(--role-border)",
         borderRadius: "var(--radius-lg)",

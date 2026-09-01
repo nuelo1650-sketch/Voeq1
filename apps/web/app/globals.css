@@ -5315,6 +5315,44 @@ header.AppShell,
   .vs-stats { gap: 20px; padding: 22px; }
 }
 
+/* ============================================================
+   STOREFRONT CLASSIER + MOBILE-FIRST (P-A round 27 — user:
+   "words invisible / not mobile responsive / look more classier").
+   Warm cream/forest/amber, premium editorial feel, ZERO logic change.
+   ============================================================ */
+@media (max-width: 767px) {
+  .vs-hero { padding: 16px 0 4px; }
+  .vs-hero-top { flex-direction: column; align-items: stretch; gap: 14px; }
+  .vs-avatar { width: 72px; height: 72px; font-size: 26px; }
+  .vs-name { font-size: 1.6rem; }
+  .vs-cta { width: 100%; justify-content: center; padding: 14px 20px; }
+  .vs-stats { grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px; }
+  .vs-stat-value { font-size: 20px; }
+  .vs-card { padding: 16px; }
+  .vs-trustrow { gap: 6px; font-size: 12.5px; }
+}
+
+/* Verified badge — honest, amber-on-cream (not a fake 'Student Vouched') */
+.vs-trust {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--color-forest); font-weight: 600;
+  background: rgba(232,163,61,.14); border: 1px solid rgba(232,163,61,.35);
+  padding: 2px 8px; border-radius: 999px; font-size: 12px;
+}
+.vs-trustrow > span[data-testid="storefront-campus"] {
+  color: var(--color-ink-muted, #6f6a5e);
+}
+/* Contact CTA — cream text on forest, amber hover, fuller pill */
+.vs-cta { border-radius: 999px; }
+.vs-cta:hover { background: var(--color-forest-light, #2D5A3D); }
+/* Stats row — warm card, tabular numbers, generous air */
+.vs-stats { background: var(--color-glass-white, #fffef9); }
+.vs-stat-value { color: var(--color-forest); }
+.vs-stat-label { color: var(--color-ink-muted, #6f6a5e); }
+/* About card — serif title, taller line height, subtle amber rule */
+.vs-card-title { letter-spacing: -.01em; }
+.vs-card-body { color: var(--color-ink, #23201a); }
+
 /* ============================================================================
    VOEQ ENGAGEMENT DESIGN SYSTEM (Phase A, 2026-08-30) — comments / likes / reviews.
    Same warm Voeq theme, mobile-first. ZERO logic change (testids preserved).

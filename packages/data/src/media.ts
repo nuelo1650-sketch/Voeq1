@@ -198,8 +198,15 @@ async function sightengineModerate(url: string): Promise<ModerationResult> {
 // --- Public entry point ----------------------------------------------------
 
 export async function uploadAndModerate(input: UploadInput): Promise<ModerationResult> {
-  // Dev fallback: no real provider secrets configured.
+  // P-A round 27 (F16 SECURITY/DATA FIX): never silently fall back to MOCK
+  // outside dev. The old code returned a fake "voeq-mock" Cloudinary URL when
+  // provider secrets were missing — which stored BROKEN images in real rows
+  // (the root cause of every 'image not showing' report). In production an
+  // upload with missing providers must FAIL LOUD, never fake a URL.
   if (!hasRealProviders()) {
+    if (process.env.NODE_ENV === "production") {
+      return { ok: false, reason: "Upload is unavailable: image providers are not configured." };
+    }
     return mockSightengineModerate(input);
   }
 
