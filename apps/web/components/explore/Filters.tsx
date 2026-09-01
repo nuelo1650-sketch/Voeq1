@@ -32,11 +32,17 @@ export function Filters({
   onChange,
   presetCategory,
   listings,
+  campus,
+  campusOptions = [],
+  onCampusChange,
 }: {
   value: ExploreFilters;
   onChange: (next: ExploreFilters) => void;
   presetCategory?: string;
   listings?: ExploreListing[];
+  campus?: string;
+  campusOptions?: { id: string; name: string }[];
+  onCampusChange?: (campus: string) => void;
 }) {
   const set = (patch: Partial<ExploreFilters>) => onChange({ ...value, ...patch });
 
@@ -63,6 +69,24 @@ export function Filters({
   return (
     <div data-testid="explore-filters" style={panelStyle}>
       <h3 style={panelTitleStyle}>Filters</h3>
+
+      {/* University — P-A round 9 (v4.1): campus selector lives INSIDE the
+          filter panel (was in the topbar). Only rendered when options exist. */}
+      {campusOptions.length > 0 && (
+        <Field label="University">
+          <select
+            data-testid="filter-university"
+            value={campus ?? ""}
+            onChange={(e) => onCampusChange?.(e.target.value)}
+            style={modernSelectStyle}
+          >
+            <option value="">All universities</option>
+            {campusOptions.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </Field>
+      )}
 
       {/* Category */}
       <Field label="Category">

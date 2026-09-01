@@ -4,13 +4,11 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useExploreData } from "@/lib/useExploreData";
-import { usePullToRefresh } from "@/lib/usePullToRefresh";
 import { useInfiniteScroll } from "@/lib/useInfiniteScroll";
 import { useBookmarks } from "@/lib/useBookmarks";
 import type { ExploreFilters, ExploreListing } from "@voeq/data";
 import { ContourEdge } from "@voeq/contour";
 import { BrandLogo } from "../landing/BrandLogo";
-import { CampusSelector } from "./CampusSelector";
 import { ListingCard } from "./ListingCard";
 import { Filters, CATEGORIES } from "./Filters";
 import { SearchBar } from "./SearchBar";
@@ -70,7 +68,9 @@ export function Explore({
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [forceError, setForceError] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
-  // P-A round 7: list view + density toggles REMOVED. They were the source of
+  // P-A round 9 (v4.1): campus options for the University dropdown in Filters.
+  const [campusOptions, setCampusOptions] = useState<{ id: string; name: string }[]>([]);
+  // P-A round 9 (v4.1): list view + density toggles REMOVED. They were the source of
   // "half cards"/"just listing": a persisted list view hijacked the grid, and
   // density was a dead control (persisted but never applied). One clean,
   // industrial card grid — mobile 2-up compact, desktop 3/4-up.
@@ -78,12 +78,27 @@ export function Explore({
   const { ids: recentIds, record } = useRecentlyViewed();
   const { toggle: toggleBookmark, isBookmarked } = useBookmarks();
 
+  // P-A round 9 (S0): pull-to-refresh REMOVED (was causing gesture problems).
+  // Refresh happens via normal re-entry; simpler and more reliable. Pull-to-
+  // refresh hook + indicator gone.
+
   // Load preferred campus from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem("voeq:preferred-campus");
     if (stored) {
       setCampus(stored);
     }
+  }, []);
+
+  // P-A round 9 (v4.1): fetch campus list (server /api/campuses/list) for the
+  // University dropdown inside Filters — no client mock data.
+  useEffect(() => {
+    fetch("/api/campuses/list")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { campuses?: { id: string; name: string }[] } | null) => {
+        if (d?.campuses?.length) setCampusOptions(d.campuses);
+      })
+      .catch(() => {});
   }, []);
 
   // P-A round 7: view/density persistence effects removed — no more list-view
@@ -122,17 +137,6 @@ export function Explore({
   );
 
   const hasMore = displayedCount < data.length;
-
-  // Pull-to-refresh handler (K2.9 #1)
-  const handleRefresh = useCallback(async () => {
-    await retry();
-    setDisplayedCount(ITEMS_PER_PAGE);
-  }, [retry]);
-
-  const { pulling, refreshing, pullDistance } = usePullToRefresh({
-    onRefresh: handleRefresh,
-    disabled: status === "loading",
-  });
 
   // Infinite scroll handler (K2.9 #2)
   const handleLoadMore = useCallback(async () => {
@@ -193,56 +197,20 @@ export function Explore({
 
   return (
     <div data-testid="explore" style={{ minHeight: "100vh", position: "relative" }}>
-      {/* Pull-to-refresh indicator (K2.9 #1) */}
-      {(pulling || refreshing) && (
-        <div 
-          data-testid="pull-to-refresh-indicator"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: Math.min(pullDistance, 80),
-            background: "var(--role-surface)",
-            borderBottom: "1px solid var(--role-border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 100,
-            transition: refreshing ? "none" : "height 200ms ease-out",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-forest)" }}>
-            <RefreshCw 
-              size={20} 
-              style={{ 
-                animation: refreshing ? "spin 1s linear infinite" : "none",
-              }} 
-            />
-            <span style={{ fontSize: "14px", fontFamily: "var(--role-font-ui)", fontWeight: 500 }}>
-              {refreshing ? "Refreshing..." : pullDistance >= 80 ? "Release to refresh" : "Pull to refresh"}
-            </span>
-          </div>
-        </div>
-      )}
+      {/* P-A round 9 (S0): pull-to-refresh indicator removed — gesture caused
+          more problems than it solved. Content refresh via normal navigation. */}
       
-      {/* P-A round 7 (your call): campus selector FIRST — front and visible.
-          Order: campus → logo → search. Mobile stacks: campus+logo row, then
-          full-width search. No more selector buried at the back. */}
+      {/* P-A round 9 (v4.1, your call): topbar = logo (left) + FREE search.
+          University moved into the Filters sheet (no dropdown up top). */}
       <header
         data-testid="explore-topbar"
         className="voeq-topbar"
       >
-        <div className="voeq-topbar-campus" style={{ order: 0 }}>
-          <CampusSelector currentCampus={campus} onChange={setCampus} viewerIdentityId={viewerIdentityId} />
-        </div>
-
-        <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" className="voeq-topbar-wordmark" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0, order: 1 }}>
-          <BrandLogo width={56} />
+        <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" className="voeq-topbar-wordmark" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0, order: 0 }}>
+          <BrandLogo width={94} />
         </Link>
 
-        {/* Search bar — full width on its own row (mobile), flexible on desktop */}
-        <div className="voeq-topbar-search" style={{ order: 2 }}>
+        <div className="voeq-topbar-search" style={{ order: 1 }}>
           <SearchBar initial={query} onSearch={setQuery} listings={data} />
         </div>
       </header>
@@ -258,7 +226,7 @@ export function Explore({
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "var(--space-2)", flexWrap: "wrap", marginBottom: "var(--space-4)", paddingInline: "var(--nav-inline-pad)" }}>
           <div>
             <h1 data-testid="explore-heading" style={{...headingStyle, marginBottom: 8}}>
-              {categoryPreset ? `Explore · ${categoryPreset}` : "Explore"}
+              {categoryPreset ? `Explore · ${categoryPreset}` : "Find it. Chat it. Get it."}
             </h1>
             <p style={{ fontSize: 15, color: "var(--role-muted)", margin: 0 }}>
               Discover vendors, services, and products on campus
@@ -360,7 +328,7 @@ export function Explore({
               overflowY: "auto",
             }}
           >
-            <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} />
+            <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} campus={campus} campusOptions={campusOptions} onCampusChange={setCampus} />
           </aside>
 
           <div>
@@ -520,7 +488,7 @@ export function Explore({
               Done
             </button>
           </div>
-          <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} />
+          <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} campus={campus} campusOptions={campusOptions} onCampusChange={setCampus} />
         </div>
       )}
     </div>
