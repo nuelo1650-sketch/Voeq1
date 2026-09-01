@@ -53,7 +53,22 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
   }, []);
 
   const handleContactVendor = async () => {
-    if (!isAuthenticated) {
+    // P-A round 32: check auth AT CLICK TIME (not from state — a race where the
+    // status fetch hadn't resolved made clicks silently no-op or bounce to login
+    // even though the session existed).
+    let authed = isAuthenticated;
+    if (!isAuthenticated || authLoading) {
+      try {
+        const s = await fetch("/api/auth/status");
+        const d = (await s.json()) as AuthStatusResponse | null;
+        authed = d?.authenticated ?? false;
+      } catch {
+        authed = false;
+      }
+      if (authed) setIsAuthenticated(true);
+      setAuthLoading(false);
+    }
+    if (!authed) {
       router.push(
         `/login?next=${encodeURIComponent(pathname)}&intent=${encodeURIComponent(`message:${vendor.id}`)}`,
       );
