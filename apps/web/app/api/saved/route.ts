@@ -13,10 +13,13 @@ import { SESSION_COOKIE } from "@/lib/session";
 export async function GET(req: Request) {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE)?.value;
-  if (!sessionId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+  if (!sessionId) {
+    return NextResponse.json({ ok: true, saved: false, anonymous: true }, { status: 200 });
+  }
   const identity = await mockAuthRepo.currentIdentity(sessionId);
-  if (!identity) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!identity) {
+    return NextResponse.json({ ok: true, saved: false, anonymous: true }, { status: 200 });
+  }
 
   const url = new URL(req.url);
   const targetType = url.searchParams.get("targetType");

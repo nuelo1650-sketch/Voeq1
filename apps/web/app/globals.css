@@ -2429,7 +2429,11 @@
   gap: var(--space-2);
   margin-bottom: var(--space-3);
   border-bottom: 1px solid var(--role-border);
-  overflow-x: auto;
+  /* P-A round 22 (matrix FIX): tabs WRAP on small screens instead of scrolling
+     off-screen (the 2 outer tabs rendered at x:438+ on a 390px viewport —
+     invisible with no cue = the 'clipped interactive elements' finding). */
+  flex-wrap: wrap;
+  overflow-x: visible;
 }
 
 .trending-rail-tab {

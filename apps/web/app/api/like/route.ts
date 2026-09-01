@@ -7,16 +7,20 @@ import { SESSION_COOKIE } from "@/lib/session";
  * GET /api/like?targetType=listing|vendor&targetId=... — P-A round 11 (S1).
  * Returns the CURRENT like state so the client can initialize its button
  * (like/follow/save used to start "false" → first click reversed a real like).
+ * Anonymous returns { liked:false } (no state → no 401 noise; POST still gates).
  * POST /api/like — toggle a like on a listing or vendor (VS6 — engagement).
  * Auth required. Actor = session identity. Cannot like your own listing/vendor.
  */
 export async function GET(req: Request) {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE)?.value;
-  if (!sessionId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+  if (!sessionId) {
+    return NextResponse.json({ ok: true, liked: false, anonymous: true }, { status: 200 });
+  }
   const identity = await mockAuthRepo.currentIdentity(sessionId);
-  if (!identity) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!identity) {
+    return NextResponse.json({ ok: true, liked: false, anonymous: true }, { status: 200 });
+  }
 
   const url = new URL(req.url);
   const targetType = url.searchParams.get("targetType");

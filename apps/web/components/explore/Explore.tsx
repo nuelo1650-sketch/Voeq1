@@ -247,7 +247,7 @@ export function Explore({
 
         {/* Category quick-pills - horizontal scroll */}
         {!categoryPreset && (
-          <div style={{ marginBlock: "var(--space-3)", overflowX: "auto", whiteSpace: "nowrap", paddingInline: "var(--nav-inline-pad)", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", maskImage: "linear-gradient(90deg, black 92%, transparent)", WebkitMaskImage: "linear-gradient(90deg, black 92%, transparent)" }}>
+          <div style={{ marginBlock: "var(--space-3)", display: "flex", flexWrap: "wrap", paddingInline: "var(--nav-inline-pad)", gap: "var(--space-2)" }}>
             <div style={{ display: "inline-flex", gap: "var(--space-2)" }}>
               <button
                 onClick={() => removeFilter('category')}
