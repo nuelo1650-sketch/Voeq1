@@ -439,6 +439,10 @@ export interface CommentRepo {
   create(input: { listingId: string; authorId: string; body: string }): Promise<Comment>;
   listByListing(listingId: string): Promise<Comment[]>;
   getById(id: string): Promise<Comment | null>;
+  /** P-A round 22: edit comment body (author-only, enforced in route). */
+  update(id: string, authorId: string, body: string): Promise<Comment | null>;
+  /** P-A round 22: delete comment (author-only, enforced in route). */
+  remove(id: string, authorId: string): Promise<boolean>;
 }
 
 export interface ReportRepo {

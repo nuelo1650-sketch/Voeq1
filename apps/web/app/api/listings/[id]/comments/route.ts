@@ -14,6 +14,11 @@ export async function GET(
 ) {
   const { id } = await params;
   const comments = await mockCommentRepo.listByListing(id);
+  // Resolve viewer so the client knows which comments are the author's own
+  // (isMine flag — no raw authorId leaked, but edit/delete UI can render).
+  const store = await cookies();
+  const sessionId = store.get(SESSION_COOKIE)?.value ?? null;
+  const viewer = sessionId ? await mockAuthRepo.currentIdentity(sessionId) : null;
   // Batch-resolve author names in ONE query (avoid N+1 per comment).
   const authorIds = Array.from(new Set(comments.map((c) => c.authorId)));
   const authors = authorIds.length
@@ -22,8 +27,14 @@ export async function GET(
   const nameById = new Map<string, string>();
   authors.forEach((a) => { if (a) nameById.set(a.id, a.name); });
   const withNames = comments.map((c) => ({
-    ...c,
+    // P-A round 22 (DATA FIX): pick PUBLIC fields only — previously `...c`
+    // shipped authorId/listingId/status to the client, contradicting the
+    // Omit<Comment,...> contract and leaking raw identity ids.
+    id: c.id,
+    body: c.body,
+    createdAt: c.createdAt,
     authorName: nameById.get(c.authorId) ?? "Shopper",
+    isMine: viewer ? viewer.id === c.authorId : false,
   }));
   return NextResponse.json({ comments: withNames });
 }

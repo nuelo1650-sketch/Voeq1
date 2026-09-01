@@ -198,6 +198,19 @@ const mockCommentRepoImpl: CommentRepo = {
   async getById(cid) {
     return comments.get(cid) ?? null;
   },
+  async update(cid, authorId, body) {
+    const c = comments.get(cid);
+    if (!c || c.authorId !== authorId) return null;
+    const updated = { ...c, body };
+    comments.set(cid, updated);
+    return updated;
+  },
+  async remove(cid, authorId) {
+    const c = comments.get(cid);
+    if (!c || c.authorId !== authorId) return false;
+    comments.delete(cid);
+    return true;
+  },
 };
 
 // ---- ReportRepo (creates a staff case) --------------------------------------

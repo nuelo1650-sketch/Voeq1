@@ -824,7 +824,7 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
 
       {/* Comments */}
       <section data-testid="listing-detail-comments" style={{ marginTop: "var(--space-6)", display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-        <CommentsList comments={comments} />
+        <CommentsList comments={comments} listingId={listing.id} />
         <CommentForm listingId={listing.id} />
       </section>
 

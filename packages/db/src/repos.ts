@@ -493,6 +493,13 @@ export const realListingsRepo = {
     return this.getById(lid);
   },
   async remove(lid: string): Promise<boolean> {
+    // P-A round 22 (DATA FIX): child-first delete — schema has NO onDelete
+    // cascade, so a single-row listing delete orphaned comments/likes/reports/
+    // wishlistItems forever (inflating counts, leaking deleted content).
+    await getDb().delete(s.likes).where(and(eq(s.likes.targetType, "listing"), eq(s.likes.targetId, lid)));
+    await getDb().delete(s.reports).where(and(eq(s.reports.targetType, "listing"), eq(s.reports.targetId, lid)));
+    await getDb().delete(s.comments).where(eq(s.comments.listingId, lid));
+    await getDb().delete(s.wishlistItems).where(eq(s.wishlistItems.listingId, lid));
     await getDb().delete(s.listings).where(eq(s.listings.id, lid));
     return true;
   },
@@ -759,6 +766,23 @@ export const realCommentRepo = {
   async getById(cid: string): Promise<Comment | null> {
     const row = await getDb().select().from(s.comments).where(eq(s.comments.id, cid)).limit(1);
     return row[0] ? mapComment(row[0]) : null;
+  },
+  async update(cid: string, authorId: string, body: string): Promise<Comment | null> {
+    // author-only: caller passes their identityId; if it doesn't match the
+    // comment's author, no row is touched (guard in route, enforced here too).
+    const rows = await getDb()
+      .update(s.comments)
+      .set({ body })
+      .where(and(eq(s.comments.id, cid), eq(s.comments.authorId, authorId)))
+      .returning();
+    return rows[0] ? mapComment(rows[0]) : null;
+  },
+  async remove(cid: string, authorId: string): Promise<boolean> {
+    const rows = await getDb()
+      .delete(s.comments)
+      .where(and(eq(s.comments.id, cid), eq(s.comments.authorId, authorId)))
+      .returning({ id: s.comments.id });
+    return rows.length > 0;
   },
 };
 
