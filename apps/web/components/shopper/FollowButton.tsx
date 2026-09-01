@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 /**
  * FollowButton — persisted follow toggle for a vendor (VS4.3).
  * Auth-gated: unauthed click → /login?next=<current path>.
+ * P-A round 11 (S1): GET /api/follow?vendorId to initialize with real state
+ * (previously always false → first click reversed a real follow).
  */
 export function FollowButton({
   vendorId,
@@ -20,6 +22,19 @@ export function FollowButton({
   const pathname = usePathname();
   const [following, setFollowing] = useState(initialFollowing);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    if (initialFollowing) return;
+    fetch(`/api/follow?vendorId=${encodeURIComponent(vendorId)}`, { method: "GET" })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        if (active && typeof data.following === "boolean") setFollowing(data.following);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [vendorId, initialFollowing]);
 
   async function onClick(e: React.MouseEvent) {
     e.preventDefault();

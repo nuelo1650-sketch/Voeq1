@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Heart } from "lucide-react";
 
@@ -8,6 +8,8 @@ import { Heart } from "lucide-react";
  * SaveButton — persisted save/wishlist toggle (VS4.2).
  * Auth-gated: if unauthed, redirect to /login?next=<current path> (Doc 03 §3.9).
  * If authed: POST /api/saved, optimistic heart fill.
+ * P-A round 11 (S1): GET /api/saved?targetType&targetId to initialize with the
+ * REAL saved state (previously false → first click reversed a real save).
  */
 export function SaveButton({
   targetType,
@@ -24,6 +26,19 @@ export function SaveButton({
   const pathname = usePathname();
   const [saved, setSaved] = useState(initialSaved);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    if (initialSaved) return;
+    fetch(`/api/saved?targetType=${targetType}&targetId=${encodeURIComponent(targetId)}`, { method: "GET" })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        if (active && typeof data.saved === "boolean") setSaved(data.saved);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [targetType, targetId, initialSaved]);
 
   async function onClick(e: React.MouseEvent) {
     e.preventDefault();

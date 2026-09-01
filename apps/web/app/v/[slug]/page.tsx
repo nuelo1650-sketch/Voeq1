@@ -14,7 +14,10 @@ export default async function VendorSharePage({ params }: { params: Promise<{ sl
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h2)" }}>{vendor.name}</h1>
       <p style={{ color: "var(--role-muted)" }}>{vendor.description}</p>
       <p style={{ marginTop: 16 }}>
-        <a href={`/v/${slug}`} style={{ color: "var(--role-accent-strong)" }}>Open on Voeq</a>
+        {/* P-A round 11 (F03): "Open on Voeq" linked to ITSELF (the /v/{slug}
+            share page) — QR/social visitors landed in a dead-end. Now points
+            to the live storefront. */}
+        <a href={`/vendor/${vendor.id}`} style={{ color: "var(--role-accent-strong)" }}>Open on Voeq</a>
       </p>
       <p style={{ fontSize: 13, color: "var(--role-muted)" }}>Shared from Voeq — campus commerce for Africa.</p>
     </main>
