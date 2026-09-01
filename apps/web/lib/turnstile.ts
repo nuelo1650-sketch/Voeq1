@@ -28,7 +28,19 @@ function approvedHostnames(): Set<string> {
   const fromEnv = (process.env.TURNSTILE_HOSTNAMES ?? process.env.CORS_ALLOWLIST ?? "")
     .split(",")
     .map((h) => h.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    // P-A round 21 (SECURITY FIX): strip URL schemes/paths. CORS_ALLOWLIST
+    // holds values like "https://voeq.ng" but Cloudflare reports a BARE
+    // hostname ("voeq.ng") in result.hostname — so the allowlist never matched
+    // and legits Turnstile checks failed / were inconsistent. Normalize both.
+    .map((h) => {
+      try {
+        const u = new URL(h.includes("://") ? h : `https://${h}`);
+        return u.hostname.toLowerCase();
+      } catch {
+        return h.toLowerCase().split("/")[0];
+      }
+    });
   // Always allow local dev hosts (never include these in a prod allowlist).
   return new Set([...fromEnv, "localhost", "127.0.0.1"]);
 }

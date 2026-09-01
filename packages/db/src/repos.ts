@@ -233,7 +233,9 @@ export const realOtpRepo = {
     const rows = await getDb().select().from(s.otps).where(and(eq(s.otps.email, email.toLowerCase()), eq(s.otps.purpose, purpose)));
     const match = rows.find((r) => r.code === code && Date.now() <= new Date(r.expiresAt).getTime());
     if (!match) return false;
-    await getDb().delete(s.otps).where(eq(s.otps.email, email.toLowerCase()));
+    // P-A round 21 (FIX): delete only THIS purpose's OTPs (was deleting ALL otps
+    // for the email — a google-verify OTP would wipe a signup OTP mid-flow).
+    await getDb().delete(s.otps).where(and(eq(s.otps.email, email.toLowerCase()), eq(s.otps.purpose, purpose)));
     return true;
   },
   async revoke(email: string, purpose: OtpPurpose): Promise<void> {

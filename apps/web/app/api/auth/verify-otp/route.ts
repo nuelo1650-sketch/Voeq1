@@ -6,6 +6,7 @@ import {
   mockNotificationRepo,
   verifyOtp,
   consumePendingToken,
+  peekPendingToken,
   checkRateLimit,
   logAudit,
   sendEmail,
@@ -37,19 +38,25 @@ export async function POST(req: NextRequest) {
   }
   const { token, code } = parsed.data;
 
-  const pending = await consumePendingToken(token);
-  if (!pending) {
-    return NextResponse.json(
-      { error: "This verification link is invalid or has expired. Please sign up again." },
-      { status: 400 },
-    );
-  }
+  // P-A round 21 (SECURITY FIX): verify the OTP BEFORE consuming the pending
+  // token. Previously consumePendingToken ran first — a wrong/expired code
+  // destroyed the token, so a typo (or expired code) forced re-signup instead
+  // of a retry. Now: wrong code leaves the token + OTP intact for a retry.
 
-  const rl = await checkRateLimit(`otp:${pending.email}`, OTP_LIMIT, OTP_WINDOW_MS);
+  const rl = await checkRateLimit(`otp:${token}`, OTP_LIMIT, OTP_WINDOW_MS);
   if (!rl.allowed) {
     return NextResponse.json(
       { error: "Too many attempts. Request a new code." },
       { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } },
+    );
+  }
+
+  // Find the pending token WITHOUT consuming it (pure read).
+  const pending = await peekPendingToken(token);
+  if (!pending) {
+    return NextResponse.json(
+      { error: "This verification link is invalid or has expired. Please sign up again." },
+      { status: 400 },
     );
   }
 
@@ -60,6 +67,10 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
+
+  // OTP verified → consume the pending token (authority for activation) and let
+  // any failure be impossible at this point (token already validated above).
+  await consumePendingToken(token);
 
   const identity = await mockIdentityRepo.getByEmail(pending.email);
   if (!identity) {
