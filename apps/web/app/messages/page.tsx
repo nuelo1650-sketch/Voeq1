@@ -9,12 +9,20 @@ export default async function MessagesPage() {
   const identity = await getCurrentIdentity();
   if (!identity) redirect("/login?next=/messages");
 
-  const { mockConversationRepo, mockMessageRepo, mockIdentityRepo } = await import("@voeq/data");
+  const { mockConversationRepo, mockMessageRepo, mockIdentityRepo, mockVendorRepo } = await import("@voeq/data");
   const conversations = await mockConversationRepo.listForIdentity(identity.id);
   const rows: ConversationRow[] = await Promise.all(
     conversations.map(async (c) => {
       const otherId = c.participantIds.find((p) => p !== identity.id) ?? "";
       const other = otherId ? await mockIdentityRepo.getById(otherId) : null;
+      // P-A round 50: the person's photo lives in TWO places — Identity.avatarUrl
+      // (shoppers) and vendors.profilePhotoUrl (vendors). Resolve both so the
+      // inbox shows real photos, not always initials.
+      let photo: string | null | undefined = other?.avatarUrl ?? null;
+      if (!photo && otherId) {
+        const vendor = await mockVendorRepo.getByIdentityId(otherId);
+        if (vendor?.profilePhotoUrl) photo = vendor.profilePhotoUrl;
+      }
       const msgs = await mockMessageRepo.listByConversation(c.id, null, 1);
       const last = msgs[msgs.length - 1];
       const allMsgs = await mockMessageRepo.listByConversation(c.id, null, 200);
@@ -27,8 +35,7 @@ export default async function MessagesPage() {
         lastMessagePreview: last?.body ?? "",
         lastMessageAt: c.lastMessageAt,
         unread,
-        // P-A round 49: inbox avatar (identity profile photo when set).
-        photo: other?.avatarUrl ?? null
+        photo,
       };
     }),
   );
