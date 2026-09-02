@@ -39,6 +39,7 @@ export function ConversationView({
   otherLastSeen,
   readOnly,
   readOnlyReason,
+  listingContext,
 }: {
   conversationId: string;
   currentIdentityId: string;
@@ -46,6 +47,8 @@ export function ConversationView({
   otherLastSeen?: string;
   readOnly?: boolean;
   readOnlyReason?: string;
+  /** P-A round 45: the listing this conversation is about (if any). */
+  listingContext?: { id: string; title: string; priceMinor: number; image: string | null } | null;
 }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,7 +275,52 @@ export function ConversationView({
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Shared header (back + name + connection) — defined above */}
       {header}
-      
+
+      {/* P-A round 45: listing context chip — WHAT this chat is about.
+          Shown when the conversation was opened from a listing. */}
+      {listingContext && (
+        <Link
+          href={`/listing/${listingContext.id}`}
+          data-testid="thread-listing-context"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "10px 16px",
+            background: "var(--role-surface)",
+            borderBottom: "1px solid var(--role-border)",
+            textDecoration: "none",
+          }}
+        >
+          {listingContext.image && (
+            <img
+              src={listingContext.image}
+              alt=""
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                objectFit: "cover",
+                background: "var(--role-surface-sunken)",
+                flexShrink: 0,
+              }}
+              // eslint-disable-next-line @next/next/no-img-element
+            />
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.4px", textTransform: "uppercase", color: "var(--role-accent-strong)", fontFamily: "var(--role-font-ui)" }}>
+              About this listing
+            </div>
+            <div style={{ fontFamily: "var(--role-font-ui)", fontSize: 14, fontWeight: 600, color: "var(--role-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {listingContext.title}
+            </div>
+          </div>
+          <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "var(--role-text)", flexShrink: 0 }}>
+            ₦ {(listingContext.priceMinor / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 })}
+          </div>
+        </Link>
+      )}
+
       {/* Messages */}
       <div style={{ flex: 1, overflowY: "auto", padding: 16, background: "var(--role-surface-sunken)" }}>
         {all.length === 0 && !_typing && (

@@ -320,11 +320,15 @@ export function SearchBar({
           size={18}
           style={{
             position: "absolute",
-            left: 12,
+            left: 14,
             top: "50%",
             transform: "translateY(-50%)",
             color: "var(--role-text-muted)",
             pointerEvents: "none",
+            // P-A round 45: guarantee visibility even if a global rule hides svg
+            opacity: 1,
+            display: "block",
+            zIndex: 1,
           }}
         />
         <input

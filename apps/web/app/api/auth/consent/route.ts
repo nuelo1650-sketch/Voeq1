@@ -26,7 +26,15 @@ export async function POST(req: NextRequest) {
   // which made a vendor who'd completed onboarding land in the SHOPPER flow
   // and dashboard. Vendor identities keep their route.
   const url = new URL(req.url);
-  const next = sanitizeNext(url.searchParams.get("next") ?? undefined, identity.vendorId ? "/vendor/dashboard" : "/select-campus");
+  // P-A round 44 (staff routing): a super_admin/staff identity must land on
+  // /admin — not /select-campus -> /onboarding/shopper (the "got a shopper
+  // account" report with owidavid2002@gmail.com).
+  const defaultNext = identity.staffRole
+    ? "/admin"
+    : identity.vendorId
+      ? "/vendor/dashboard"
+      : "/select-campus";
+  const next = sanitizeNext(url.searchParams.get("next") ?? undefined, defaultNext);
   const intent = url.searchParams.get("intent") ?? "";
   const sep = next.includes("?") ? "&" : "?";
   const redirect = intent ? `${next}${sep}intent=${encodeURIComponent(intent)}` : next;

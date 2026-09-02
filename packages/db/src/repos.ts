@@ -595,6 +595,10 @@ export const realConversationRepo = {
       lastMessageAt: t,
       createdAt: t,
       lastSeen: {},
+      // P-A round 45: the schema HAS listing_id but the repo dropped it —
+      // conversations were never tagged with their listing, so the thread
+      // (#1) wasn't shown. Persist it now.
+      listingId: input.listingId ?? null,
     };
     await getDb().insert(s.conversations).values(conv);
     return conv;

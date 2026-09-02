@@ -176,6 +176,8 @@ export const conversations = pgTable("conversations", {
   lastMessageAt: text("last_message_at").notNull(),
   createdAt: text("created_at").notNull(),
   lastSeen: jsonb("last_seen").$type<Record<string, string>>().notNull().default({}),
+  // P-A round 45: listing the conversation is about (opened from a listing).
+  listingId: text("listing_id"),
 });
 
 export const messages = pgTable("messages", {

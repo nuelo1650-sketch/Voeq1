@@ -100,6 +100,8 @@ export interface Conversation {
   createdAt: string;
   /** VS6.16: honest last-seen per participant (identityId -> ISO ts). */
   lastSeen: Record<string, string>;
+  /** The listing this chat is about (opened from a listing), if any. */
+  listingId?: string | null;
 }
 
 export interface Message {
