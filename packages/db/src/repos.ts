@@ -539,6 +539,9 @@ function mapStaffCase(r: typeof s.staffCases.$inferSelect): StaffCase {
     status: r.status as StaffCase["status"],
     assignedTo: r.assignedTo ?? null,
     resolution: r.resolution ?? null,
+    // P-A round 57 (C3)
+    payload: r.payload ?? null,
+    createdAt: r.createdAt ?? null,
   };
 }
 function mapLike(r: typeof s.likes.$inferSelect): Like {
@@ -670,12 +673,39 @@ export const realMessageRepo = {
 
 // ---- StaffRepo --------------------------------------------------------------
 export const realStaffRepo = {
-  async create(input: { queue: string; decision: string | null; consequence: string | null }): Promise<StaffCase> {
-    const rec: StaffCase = { id: id(), queue: input.queue, decision: input.decision, consequence: input.consequence, status: "open" };
-    await getDb().insert(s.staffCases).values(rec);
+  async create(input: { queue: string; decision: string | null; consequence: string | null; payload?: Record<string, unknown> | null; createdAt?: string | null }): Promise<StaffCase> {
+    const rec: StaffCase = {
+      id: id(),
+      queue: input.queue,
+      decision: input.decision,
+      consequence: input.consequence,
+      status: "open",
+      // P-A round 57 (C3): structured payload + real createdAt.
+      payload: input.payload ?? {},
+      createdAt: input.createdAt ?? now(),
+    };
+    // Insert with explicit non-null values (StaffCase fields are nullable in
+    // the interface for reads; Drizzle insert wants the concrete shapes).
+    await getDb().insert(s.staffCases).values({
+      id: rec.id,
+      queue: rec.queue,
+      decision: rec.decision,
+      consequence: rec.consequence,
+      status: rec.status,
+      payload: rec.payload ?? {},
+      createdAt: rec.createdAt ?? "",
+    });
     return rec;
   },
   async listCases(queue: string): Promise<StaffCase[]> {
+    // P-A round 57 (audit C1): queue="" must mean ALL cases. The old code ran
+    // `WHERE queue=''` for the "all" lookup — which matches NOTHING, so triage
+    // lookups (assign/resolve/dismiss) always 404ed, and the admin analytics
+    // always saw zero open reports. Root of both C1 and C2.
+    if (!queue) {
+      const rows = await getDb().select().from(s.staffCases);
+      return rows.map(mapStaffCase);
+    }
     const rows = await getDb().select().from(s.staffCases).where(eq(s.staffCases.queue, queue));
     return rows.map(mapStaffCase);
   },

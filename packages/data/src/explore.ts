@@ -268,10 +268,14 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
 
     if (params.query) {
       const q = params.query.trim().toLowerCase();
-      // Real search: filter the already-fetched Neon listings by title.
-      // (Previously used mockSearchRepo over a fake dev dataset — removed so
-      // production search never touches MOCK_EXPLORE_LISTINGS.)
-      mapped = mapped.filter((m) => m.title.toLowerCase().includes(q));
+      // P-A round 57 (C6): real search matched listing TITLES only — a shopper
+      // searching a VENDOR's name ("Glam", "Legacy", "Mama Nkechi") got the
+      // "campus is waking up" empty state. Now match vendor name too.
+      mapped = mapped.filter((m) => {
+        const title = (m.title ?? "").toLowerCase();
+        const vendor = (m.vendorName ?? "").toLowerCase();
+        return title.includes(q) || vendor.includes(q);
+      });
     }
 
     const filtered = applySort(applyFilters(mapped, { ...params, category: categorySlug }), params.sort);

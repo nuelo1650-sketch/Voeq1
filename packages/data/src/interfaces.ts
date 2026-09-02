@@ -129,6 +129,9 @@ export interface StaffCase {
   status: "open" | "triaged" | "resolved" | "dismissed";
   assignedTo?: string | null; // identityId of handling staff
   resolution?: string | null; // free-text resolution
+  /** P-A round 57 (C3): structured payload (report metadata) + real creation time. */
+  payload?: Record<string, unknown> | null;
+  createdAt?: string | null;
 }
 
 export interface ListingsRepo {
@@ -161,7 +164,7 @@ export interface MessagesRepo {
 }
 
 export interface StaffRepo {
-  create(input: { queue: string; decision: string | null; consequence: string | null }): Promise<StaffCase>;
+  create(input: { queue: string; decision: string | null; consequence: string | null; payload?: Record<string, unknown> | null; createdAt?: string | null }): Promise<StaffCase>;
   listCases(queue: string): Promise<StaffCase[]>;
   /** VS7.1: triage mutations. */
   assignCase(caseId: string, assignedTo: string): Promise<StaffCase | null>;

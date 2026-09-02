@@ -197,6 +197,11 @@ export const staffCases = pgTable("staff_cases", {
   decision: text("decision"),
   consequence: text("consequence"),
   status: text("status").notNull().default("open"),
+  // P-A round 57 (C3): structured payload (report id/target type/category/
+  // reporter + createdAt) so the moderation queue shows REAL data instead
+  // of fabricated rows ("Case xxxxxxxx", "just now").
+  payload: jsonb("payload").$type<Record<string, unknown>>().notNull().default({}),
+  createdAt: text("created_at").notNull().default(""),
   assignedTo: text("assigned_to"),
   resolution: text("resolution"),
 });

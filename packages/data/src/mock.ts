@@ -213,7 +213,8 @@ const mockStaffRepoImpl: StaffRepo = {
     return c;
   },
   async listCases(queue) {
-    return staffCases.filter((c) => c.queue === queue);
+    // P-A round 57: "" means ALL (mirrors real repo fix — C1).
+    return queue ? staffCases.filter((c) => c.queue === queue) : staffCases;
   },
   async assignCase(caseId, assignedTo) {
     const c = staffCases.find((x) => x.id === caseId);

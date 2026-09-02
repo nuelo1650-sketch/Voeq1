@@ -38,6 +38,12 @@ const PROTECTED_PREFIXES = [
   "/messages",
   "/staff",
   "/admin",
+  // P-A round 57 (A1): these two were NOT protected — their server components
+  // redirect() only AFTER the layout streams, returning 200 + a meta-refresh
+  // hack to anon visitors (crawlers see 200; users get a dead flash). The
+  // middleware now 307s them to /login properly, like every other gated page.
+  "/select-campus",
+  "/become-vendor",
 ];
 
 const PUBLIC_EXACT = new Set([
@@ -47,7 +53,6 @@ const PUBLIC_EXACT = new Set([
   "/reset-password",
   "/verify-otp",
   "/consent",
-  "/select-campus",
   "/account-state",
 ]);
 
@@ -93,5 +98,7 @@ export const config = {
     "/messages/:path*",
     "/staff/:path*",
     "/admin/:path*",
+    "/select-campus",
+    "/become-vendor",
   ],
 };

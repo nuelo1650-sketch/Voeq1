@@ -41,22 +41,27 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid category" }, { status: 400 });
   }
 
-  // IDOR/self-report guard: cannot report your own item.
+  // P-A round 57 (C4): self-report guard uses the AUTHORITATIVE link —
+  // identity.vendorId (set for vendor sessions) vs the target's vendor id.
+  // The old check compared vendor.identityId === identity.id, which fails for
+  // dev sessions / legacy rows where vendor.identityId is null/not set.
   if (targetType === "listing") {
     const listing = await mockListingsRepo.getById(targetId);
     if (!listing) return NextResponse.json({ error: "not_found" }, { status: 404 });
-    const vendor = await mockVendorRepo.getById(listing.vendorId);
-    if (vendor?.identityId && vendor.identityId === identity.id) {
+    if (identity.vendorId && listing.vendorId === identity.vendorId) {
       return NextResponse.json({ error: "cannot_report_self" }, { status: 400 });
     }
   } else {
     const vendor = await mockVendorRepo.getById(targetId);
     if (!vendor) return NextResponse.json({ error: "not_found" }, { status: 404 });
-    if (vendor.identityId && vendor.identityId === identity.id) {
+    if (identity.vendorId && vendor.id === identity.vendorId) {
       return NextResponse.json({ error: "cannot_report_self" }, { status: 400 });
     }
   }
 
+  // P-A round 57 (C3): full report metadata into the staff case payload so the
+  // moderation queue shows REAL rows (target, category, reporter) — not the old
+  // truncated strings + fabricated dates.
   const report = await mockReportRepo.create({
     reporterId: identity.id,
     targetType,
@@ -64,15 +69,20 @@ export async function POST(req: Request) {
     category,
     body: text,
   });
-  // P-A round 54 (REPORT WAVE): reports landed in `reports` but the moderation
-  // queue reads `staffCases` (queue=reports) — NOTHING bridged them, so the
-  // admin queue was ALWAYS empty despite real reports. Create the staff case
-  // so reports actually reach review (VS7.11 triage).
   try {
     await mockStaffRepo.create({
       queue: "reports",
-      decision: `${category} — ${targetType}:${targetId.slice(0, 8)}…`,
-      consequence: text ? `"${text.slice(0, 80)}"` : null,
+      decision: `${category}`,
+      consequence: text ? `"${text.slice(0, 120)}"` : null,
+      payload: {
+        reportId: report.id,
+        targetType,
+        targetId,
+        category,
+        reporterId: identity.id,
+        reportedAt: report.createdAt,
+        body: text,
+      },
     });
   } catch (e) {
     console.error(`[reports] staff case create failed: ${e instanceof Error ? e.message : e}`);

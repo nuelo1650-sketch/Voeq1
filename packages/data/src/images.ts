@@ -67,8 +67,18 @@ export async function uploadImage(input: ImageUploadInput): Promise<UploadResult
     }
   }
 
-  // Context-aware size guard (client sends bytes; server enforces).
-  if (typeof bytes === "number" && bytes > CONTEXT_MAX_BYTES[context]) {
+  // Context-aware size guard. P-A round 57 (C5): NEVER trust the client's
+  // `bytes` — it was self-reported, and `bytes:1` on a 5.8MB payload sailed
+  // through the 5MB cap into Cloudinary. Measure the ACTUAL base64 payload
+  // the client sent; the sent value is a hint only.
+  const measuredBytes = (() => {
+    if (typeof dataUrl === "string" && dataUrl.length > 0) {
+      const b64 = dataUrl.includes(",") ? dataUrl.split(",")[1] ?? "" : dataUrl;
+      return Math.round((b64.length * 3) / 4);
+    }
+    return typeof bytes === "number" ? bytes : 0;
+  })();
+  if (measuredBytes > CONTEXT_MAX_BYTES[context]) {
     return { ok: false, reason: "File exceeds the maximum allowed size.", retryable: false };
   }
   if (!ALLOWED_EXT.test(fileName)) {

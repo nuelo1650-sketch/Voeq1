@@ -72,7 +72,12 @@ export async function computePlatformAnalytics(): Promise<PlatformAnalytics> {
   const newSignups24h = identities.filter((i: Identity) => new Date(i.createdAt).getTime() >= since24h).length;
   const messageVolume24h = messages.filter((m: Message) => new Date(m.createdAt).getTime() >= since24h).length;
   const staffCount = identities.filter((i: Identity) => i.staffRole).length;
-  const openReports = cases.filter((c: StaffCase) => c.status === "open" || c.status === "triaged").length;
+  // P-A round 57 (C2): openReports = open/triaged cases in the REPORTS queue
+  // only (listCases("") now means ALL — counting everything would inflate the
+  // reports metric with verifications/content-moderation cases).
+  const openReports = cases.filter(
+    (c: StaffCase) => c.queue === "reports" && (c.status === "open" || c.status === "triaged"),
+  ).length;
 
   return {
     userCount: identities.length,

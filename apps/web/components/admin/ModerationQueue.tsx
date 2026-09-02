@@ -56,6 +56,8 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
   const [actionReason, setActionReason] = useState("");
   const [reports, setReports] = useState<Report[]>([]);
   const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
+  // P-A round 57 (C3): toast so failed actions are no longer silent.
+  const [toast, setToast] = useState<{ kind: "success" | "error"; text: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,28 +71,29 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         if (cancelled) return;
         if (rep?.ok) {
           setReports(
-            (rep.cases as Array<{ id: string; queue: string; status: string; resolution?: string | null }>).map((c) => ({
+            (rep.cases as Array<{ id: string; queue: string; status: string; resolution?: string | null; payload?: Record<string, unknown> | null; createdAt?: string | null; consequence?: string | null }>).map((c) => ({
               id: c.id,
-              type: (c.queue as Report["type"]) ?? "listing",
-              targetId: c.id,
-              targetName: `Case ${c.id.slice(0, 8)}`,
-              reporterName: "—",
-              category: c.queue,
-              date: new Date(),
+              type: ((c.payload?.["targetType"] as Report["type"]) ?? "listing"),
+              targetId: ((c.payload?.["targetId"] as string) ?? c.id),
+              targetName: (c.payload?.["body"] as string)?.slice(0, 60) || "—",
+              reporterName: (c.payload?.["reporterId"] as string)?.slice(0, 8) ?? "—",
+              category: ((c.payload?.["category"] as string) ?? c.queue ?? "reports"),
+              // P-A round 57 (C3): real creation time — was `new Date()` (fabricated "just now" for every row).
+              date: c.createdAt ? new Date(c.createdAt) : new Date(0),
               status: c.status as Report["status"],
-              description: c.resolution ?? "No description recorded.",
+              description: c.consequence ?? "No description recorded.",
             })),
           );
         }
         if (ver?.ok) {
           setVerifications(
-            (ver.cases as Array<{ id: string; queue: string; status: string; resolution?: string | null }>).map(
+            (ver.cases as Array<{ id: string; queue: string; status: string; resolution?: string | null; payload?: Record<string, unknown> | null; createdAt?: string | null }>).map(
               (c) => ({
                 id: c.id,
-                vendorId: c.id,
-                vendorName: `Vendor ${c.id.slice(0, 8)}`,
-                requestDate: new Date(),
-                submittedInfo: c.resolution ?? "Pending review.",
+                vendorId: ((c.payload?.["vendorId"] as string) ?? c.id),
+                vendorName: ((c.payload?.["vendorName"] as string) ?? `Vendor ${c.id.slice(0, 8)}`),
+                requestDate: c.createdAt ? new Date(c.createdAt) : new Date(0),
+                submittedInfo: ((c.payload?.["description"] as string) ?? c.resolution ?? "Pending review."),
                 status: c.status as VerificationRequest["status"],
               }),
             ),
@@ -134,6 +137,38 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
   const confirmAction = async () => {
     if (!actionModal) return;
     const caseId = actionModal.itemId;
+    if (activeTab === "verifications") {
+      // P-A round 57 (C7): a verification decision is NOT a generic case
+      // triage — it must call the real verify API (VS7.8) to flip vendor.verified.
+      const detail = verifications.find((v) => v.id === caseId);
+      try {
+        const res = await fetch("/api/staff/verify-vendor", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            vendorId: detail?.vendorId ?? caseId,
+            decision: actionModal.action === "approve" ? "approve" : "deny",
+            reason: actionReason || undefined,
+          }),
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          setToast({ kind: "error", text: `Verification failed: ${(d as { error?: string }).error ?? res.status}` });
+        } else {
+          setToast({ kind: "success", text: `${actionModal.action === "approve" ? "Approved" : "Denied"} ✓` });
+          setSelectedItems((prev) => {
+            const n = new Set(prev);
+            n.delete(caseId);
+            return n;
+          });
+        }
+      } catch {
+        setToast({ kind: "error", text: "Network error — action not applied." });
+      }
+      setActionModal(null);
+      setActionReason("");
+      return;
+    }
     // Map UI action to triage action; resolution required by backend.
     const triageAction =
       actionModal.action === "approve" || actionModal.action === "resolve"
@@ -142,7 +177,7 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
           ? "dismiss"
           : "assign";
     try {
-      await fetch("/api/staff/cases", {
+      const res = await fetch("/api/staff/cases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -151,6 +186,18 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
           resolution: actionReason || `${actionModal.action} via moderation queue`,
         }),
       });
+      // P-A round 57 (C3): the old code NEVER checked res.ok — the backend
+      // 404'd every action (listCases("") matched nothing) and the UI silently
+      // cleared the selection, so staff believed they'd resolved cases. Now:
+      // surface the failure instead of swallowing it.
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setToast({ kind: "error", text: `Action failed: ${(d as { error?: string }).error ?? res.status}` });
+        setActionModal(null);
+        setActionReason("");
+        return;
+      }
+      setToast({ kind: "success", text: "Action applied ✓" });
       // Optimistically clear selection for the acted item.
       setSelectedItems((prev) => {
         const n = new Set(prev);
@@ -158,7 +205,7 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         return n;
       });
     } catch {
-      // swallow — UI reflects server state on next load
+      setToast({ kind: "error", text: "Network error — action not applied." });
     }
     setActionModal(null);
     setActionReason("");
@@ -166,6 +213,31 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--role-surface-sunken)", padding: "var(--space-4)" }}>
+      {/* P-A round 57 (C3): action feedback toast */}
+      {toast && (
+        <div
+          data-testid="moderation-toast"
+          role="status"
+          style={{
+            position: "fixed",
+            top: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            padding: "10px 18px",
+            borderRadius: 999,
+            fontFamily: "var(--role-font-ui)",
+            fontSize: 14,
+            fontWeight: 600,
+            color: toast.kind === "success" ? "var(--color-cream)" : "var(--role-danger)",
+            background: toast.kind === "success" ? "var(--color-forest)" : "color-mix(in srgb, var(--role-danger) 10%, var(--role-surface))",
+            border: `1px solid ${toast.kind === "success" ? "transparent" : "color-mix(in srgb, var(--role-danger) 40%, transparent)"}`,
+            boxShadow: "0 10px 28px rgba(15,42,29,.18)",
+          }}
+        >
+          {toast.text}
+        </div>
+      )}
       <div style={{ maxWidth: 1400, margin: "0 auto" }}>
         {/* Header */}
         <header style={{ marginBottom: "var(--space-4)" }}>
