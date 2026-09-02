@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockReportRepo, mockListingsRepo, mockVendorRepo } from "@voeq/data";
+import { mockAuthRepo, mockReportRepo, mockListingsRepo, mockVendorRepo, mockStaffRepo, logAudit } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 import type { ReportCategory } from "@voeq/data";
 
@@ -64,5 +64,19 @@ export async function POST(req: Request) {
     category,
     body: text,
   });
+  // P-A round 54 (REPORT WAVE): reports landed in `reports` but the moderation
+  // queue reads `staffCases` (queue=reports) — NOTHING bridged them, so the
+  // admin queue was ALWAYS empty despite real reports. Create the staff case
+  // so reports actually reach review (VS7.11 triage).
+  try {
+    await mockStaffRepo.create({
+      queue: "reports",
+      decision: `${category} — ${targetType}:${targetId.slice(0, 8)}…`,
+      consequence: text ? `"${text.slice(0, 80)}"` : null,
+    });
+  } catch (e) {
+    console.error(`[reports] staff case create failed: ${e instanceof Error ? e.message : e}`);
+  }
+  await logAudit("report.submitted", identity.id, { targetType, targetId, category });
   return NextResponse.json({ ok: true, reportId: report.id });
 }

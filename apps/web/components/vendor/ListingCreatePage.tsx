@@ -35,6 +35,8 @@ export function ListingCreatePage() {
   // UI state
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  // P-A round 55 (W2-1): success state after publish.
+  const [published, setPublished] = useState<{ id: string; title: string } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   // Load draft on mount
@@ -237,8 +239,15 @@ export function ListingCreatePage() {
       if (res.ok) {
         const data = await res.json();
         localStorage.removeItem(DRAFT_KEY);
-        // Toast notification would go here
-        router.push(`/listing/${data.id}`);
+        // P-A round 55 (W2-1): show a success state instead of a silent jump —
+        // "published ✓" + View listing / Add another. Kills the 'I don't know
+        // the next process' dead-end.
+        setPublished({
+          id: data.id,
+          title: title.trim(),
+        });
+        setSubmitting(false);
+        return;
       } else {
         const error = await res.json().catch(() => ({ error: "Failed to create listing" }));
         setErrors({ submit: error.error });
@@ -259,6 +268,72 @@ export function ListingCreatePage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--color-glass-white)", padding: "var(--space-4)" }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
+        {/* P-A round 55 (W2-1): PUBLISH SUCCESS state — visible confirmation
+            + clear next actions instead of a silent jump. */}
+        {published && (
+          <div
+            data-testid="listing-published-success"
+            style={{
+              background: "var(--color-cream)",
+              border: "1px solid rgba(15,42,29,.12)",
+              borderRadius: 18,
+              padding: "var(--space-5)",
+              marginBottom: "var(--space-4)",
+              textAlign: "center",
+              fontFamily: "var(--role-font-ui)",
+            }}
+          >
+            <div style={{ fontSize: 38, marginBottom: 8 }}>🎉</div>
+            <h1 style={{ fontFamily: "var(--role-font-display)", fontSize: 24, margin: "0 0 6px", color: "var(--color-forest)" }}>
+              Listing published
+            </h1>
+            <p style={{ margin: "0 0 16px", color: "var(--color-ink-muted)", fontSize: 14.5 }}>
+              “{published.title}” is live on your storefront and in Explore.
+            </p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+              <Link
+                href={`/listing/${published.id}`}
+                data-testid="published-view-listing"
+                style={{
+                  padding: "12px 22px",
+                  background: "var(--color-forest)",
+                  color: "var(--color-cream)",
+                  borderRadius: 999,
+                  textDecoration: "none",
+                  fontWeight: 650,
+                  fontSize: 14.5,
+                }}
+              >
+                View listing
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setPublished(null);
+                  setTitle("");
+                  setDescription("");
+                  setMinPrice("");
+                  setMaxPrice("");
+                  setCategoryId("");
+                  setPhotos([]);
+                }}
+                data-testid="published-add-another"
+                style={{
+                  padding: "12px 22px",
+                  background: "transparent",
+                  color: "var(--color-forest)",
+                  border: "1px solid var(--color-forest)",
+                  borderRadius: 999,
+                  fontWeight: 650,
+                  fontSize: 14.5,
+                  cursor: "pointer",
+                }}
+              >
+                Add another
+              </button>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-4)" }}>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, margin: 0, color: "var(--color-forest)" }}>
