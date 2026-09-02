@@ -187,14 +187,68 @@ export function ConversationView({
     }
   }
 
+  // P-A round 42 (polish): the header includes BACK + name + connection status
+  // and must render in EVERY state (loading/error/loaded) — previously it only
+  // rendered after messages resolved, so the thread opened as a bare page.
+  const header = (
+    <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--role-border)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: "var(--role-surface)" }}>
+      <Link
+        href="/messages"
+        data-testid="thread-back"
+        aria-label="Back to messages"
+        style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--role-accent-strong)", textDecoration: "none", fontSize: 14, fontFamily: "var(--role-font-ui)", fontWeight: 600, flexShrink: 0 }}
+      >
+        ←
+      </Link>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <strong style={{ fontFamily: "var(--role-font-display)", fontSize: "17px", color: "var(--role-text)", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{otherName}</strong>
+        {otherLastSeen && (
+          <div data-testid="last-seen" style={{ fontSize: 12, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
+            {formatLastSeen(otherLastSeen)}
+          </div>
+        )}
+      </div>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)", flexShrink: 0 }}>
+        <span data-testid="connection-dot" style={{ width: 8, height: 8, borderRadius: "50%", background: connectionStatus === "connected" ? "var(--color-forest)" : connectionStatus === "connecting" ? "#f59e0b" : "#ef4444" }} />
+        {connectionStatus === "connected" ? "Connected" : connectionStatus === "connecting" ? "Connecting…" : "Offline"}
+      </div>
+    </div>
+  );
+
   if (loading) {
-    return <div data-testid="thread-loading" style={{ padding: 16, fontFamily: "var(--role-font-ui)" }}>Loading conversation…</div>;
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        {header}
+        <div
+          data-testid="thread-loading"
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            gap: 10,
+            background: "var(--role-bg)",
+            fontFamily: "var(--role-font-ui)",
+            color: "var(--role-text-muted)",
+            fontSize: 14,
+          }}
+        >
+          <div aria-hidden style={{ width: 34, height: 34, borderRadius: "50%", border: "3px solid var(--role-border)", borderTopColor: "var(--role-accent-strong)", animation: "voeq-spin 0.8s linear infinite", display: "inline-block" }} />
+          Loading conversation…
+        </div>
+        <style>{`@keyframes voeq-spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
   }
   if (error && messages.length === 0) {
     return (
-      <div data-testid="thread-error" style={{ padding: 16, color: "var(--role-danger)", fontFamily: "var(--role-font-ui)" }}>
-        {error}
-        <button onClick={load} style={{ marginLeft: 8 }}>Retry</button>
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        {header}
+        <div data-testid="thread-error" style={{ padding: 16, color: "var(--role-danger)", fontFamily: "var(--role-font-ui)" }}>
+          {error}
+          <button onClick={load} style={{ marginLeft: 8 }}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -204,45 +258,8 @@ export function ConversationView({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* Header with back button + partner + connection status */}
-      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--role-border)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: "var(--role-surface)" }}>
-        <Link
-          href="/messages"
-          data-testid="thread-back"
-          aria-label="Back to messages"
-          style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--role-accent-strong)", textDecoration: "none", fontSize: 14, fontFamily: "var(--role-font-ui)", fontWeight: 600, flexShrink: 0 }}
-        >
-          ←
-        </Link>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <strong style={{ fontFamily: "var(--role-font-display)", fontSize: "17px", color: "var(--role-text)", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{otherName}</strong>
-          {otherLastSeen && (
-            <div data-testid="last-seen" style={{ fontSize: 12, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
-              {formatLastSeen(otherLastSeen)}
-            </div>
-          )}
-        </div>
-        <div 
-          data-testid="connection-status"
-          style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            gap: 6,
-            fontSize: "12px",
-            color: connectionStatus === "connected" ? "var(--color-forest)" : "var(--role-text-muted)",
-            fontFamily: "var(--role-font-ui)",
-            flexShrink: 0,
-          }}
-        >
-          <div style={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: connectionStatus === "connected" ? "var(--color-forest)" : connectionStatus === "connecting" ? "#f59e0b" : "#ef4444",
-          }} />
-          {connectionStatus === "connected" ? "Connected" : connectionStatus === "connecting" ? "Connecting…" : "Offline"}
-        </div>
-      </div>
+      {/* Shared header (back + name + connection) — defined above */}
+      {header}
       
       {/* Messages */}
       <div style={{ flex: 1, overflowY: "auto", padding: 16, background: "var(--role-surface-sunken)" }}>
