@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { prepareImageForUpload } from "@/lib/image-prep";
+import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
 import { X, Upload, GripVertical, AlertCircle, Trash2 } from "lucide-react";
 import { categories } from "@voeq/data";
 import type { Listing } from "@voeq/data";
@@ -114,28 +115,18 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
       setPhotos((prev) => [...prev, { id, url: preview, alt: "", uploading: true }]);
 
       try {
-        // P-A round 56: compress BEFORE upload (same fix as listing create).
+        // P-A round 65: DIRECT upload — browser -> Cloudinary (signed token),
+        // server never sees the bytes. Client prep still downscales + errors.
         const prep = await prepareImageForUpload(file);
         if ("error" in prep) {
           setErrors((prev) => ({ ...prev, photos: prep.error }));
           setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false } : p)));
           continue;
         }
-        const res = await fetch("/api/images/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fileName: file.name,
-            context: "listing_photo",
-            mimeType: prep.mimeType,
-            bytes: prep.bytes,
-            dataUrl: prep.dataUrl,
-            existingCount: photos.length,
-          }),
-        });
-        const result = await res.json();
-        if (!res.ok || !result.url) {
-          throw new Error((result.reason as string) || result.error || "Upload failed");
+        const uploadFile = prep.blob ? new File([prep.blob], file.name, { type: prep.mimeType || file.type }) : file;
+        const result = await uploadPhotoDirect(uploadFile, "listing_photo", { existingCount: photos.length });
+        if (!result.ok) {
+          throw new Error(result.reason || "Upload failed");
         }
         URL.revokeObjectURL(preview);
         setPhotos((prev) =>

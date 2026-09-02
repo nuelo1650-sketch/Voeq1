@@ -1,67 +1,80 @@
 "use client";
 
 /**
- * Image preparation helpers — P-A round 56.
+ * P-A round 65 — browser-side image preparation.
  *
- * WHY: Android/iOS gallery photos are 4-12MB. The upload pipeline caps
- * vendor_photo at 5MB, so raw phone photos were ALWAYS rejected with
- * "File exceeds the maximum allowed size" — then the client's error read
- * mismatch scrapped the reason → "Photo upload failed." (the user's bug).
+ * Outputs a Blob/File ready for DIRECT Cloudinary upload (no base64 anywhere
+ * in the new pipeline). `dataUrl` is still produced for the LEGACY
+ * /api/images/upload data-url path (message attachments / tests / mock).
  *
- * Solution: compress client-side BEFORE hitting the API. Downscale to
- * maxDim (1600) + re-encode as JPEG q0.82 — a 7MB photo becomes ~300-600KB.
- * Also: HEIC photos (iPhone) can't be canvas-decoded by most browsers —
- * fall back to the original file so the server gives a clear reason.
+ * HEIC: browsers can't decode HEIC, so this function never converts it —
+ * but the DIRECT path no longer needs to: Cloudinary decodes HEIC server-side.
+ * The old 5MB HEIC block existed only because base64-in-JSON hit Next's body
+ * wall; the direct path has no such wall.
  */
 
 export interface PreparedImage {
-  dataUrl: string;
-  bytes: number;
+  /** Blob to upload directly to Cloudinary (compressed when possible). */
+  blob: Blob;
   mimeType: string;
-  /** True when the image was actually compressed (vs passed through). */
+  bytes: number;
   compressed: boolean;
+  /** Legacy base64 data URL (kept for the legacy endpoint/tests). */
+  dataUrl: string;
 }
+
+export type PrepareResult = PreparedImage | { error: string };
 
 const MAX_DIM = 1600;
 const JPEG_QUALITY = 0.82;
 
-function isImageType(file: File): boolean {
-  return /^image\//.test(file.type) || /\.(jpe?g|png|webp|gif|avif|heic)$/i.test(file.name);
-}
-
-/**
- * Prepare an image for the /api/images/upload endpoint.
- * Returns null with a reason if the file can't be handled.
- */
-export async function prepareImageForUpload(file: File): Promise<PreparedImage | { error: string }> {
-  if (!isImageType(file)) {
-    return { error: "Unsupported image type. Use JPEG, PNG or WebP." };
-  }
-
-  const originalDataUrl = await new Promise<string>((resolve, reject) => {
+function readAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
     const r = new FileReader();
     r.onload = () => resolve(r.result as string);
     r.onerror = () => reject(new Error("read_failed"));
     r.readAsDataURL(file);
   });
+}
 
-  // HEIC/HEIF: browsers can't draw these to canvas reliably — send as-is so
-  // the server's format guard gives a precise reason, not a silent blank.
-  if (/\.heic$/i.test(file.name) || /image\/heic/i.test(file.type)) {
-    // P-A round 58 (R2-A1): a size pre-check here prevents the DOOMED payload.
-    // An iPhone HEIC > ~7.9MB base64-inflates past Next's req.json() body wall
-    // (verified: 12MB HEIC → 400 invalid_body), so the server's clear size
-    // guard NEVER runs and the user sees a cryptic error. Fail fast with the
-    // honest reason instead of shipping a payload that can't parse.
-    if (file.size > 5 * 1024 * 1024) {
-      return { error: "HEIC photos over 5MB can't be uploaded. Please convert or resize the image first." };
+/** canvas.toBlob promisified (prefer it; single path, no double base64). */
+function canvasToBlob(canvas: HTMLCanvasElement, mime: string, quality: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob_failed"))), mime, quality);
+  });
+}
+
+export async function prepareImageForUpload(file: File): Promise<PrepareResult> {
+  const type = (file.type || "").toLowerCase();
+
+  // JPEG/PNG/WebP — client checks + reencode (already small? keep). All
+  // sizes subject to a hard 15MB sanity cap (Cloudinary's own limit).
+  if (!/image\/(jpeg|png|webp|heic|heif)/.test(type)) {
+    return { error: "Unsupported image type. Use JPEG, PNG or WebP." };
+  }
+
+  // HEIC/HEIF — browsers can't draw these to canvas. Send AS-IS to Cloudinary
+  // (it decodes HEIC server-side; new DIRECT path has no body wall). Only a
+  // hard-capped sanity check remains.
+  if (/heic|heif/i.test(type)) {
+    if (file.size > 15 * 1024 * 1024) {
+      return { error: "This photo is larger than 15MB. Pick a smaller one." };
     }
+    const originalDataUrl = await readAsDataUrl(file).catch(() => "");
     return {
-      dataUrl: originalDataUrl,
+      blob: file,
+      mimeType: "image/heic",
       bytes: file.size,
-      mimeType: file.type || "image/jpeg",
       compressed: false,
+      dataUrl: originalDataUrl,
     };
+  }
+
+  let originalDataUrl = "";
+  try {
+    originalDataUrl = await readAsDataUrl(file);
+  } catch {
+    return { error: "Could not read this image on your device." };
   }
 
   try {
@@ -72,17 +85,12 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage |
       i.src = originalDataUrl;
     });
 
-    const scale = Math.min(1, MAX_DIM / Math.max(img.naturalWidth, img.naturalHeight));
-    // Already small enough — don't degrade quality pointlessly.
-    if (scale === 1 && file.size < 700 * 1024) {
-      return {
-        dataUrl: originalDataUrl,
-        bytes: file.size,
-        mimeType: file.type || "image/jpeg",
-        compressed: false,
-      };
+    // Already small enough — no point recompressing.
+    if (img.naturalWidth <= MAX_DIM && file.size < 700 * 1024) {
+      return { blob: file, mimeType: file.type || "image/jpeg", bytes: file.size, compressed: false, dataUrl: originalDataUrl };
     }
 
+    const scale = Math.min(1, MAX_DIM / Math.max(img.naturalWidth, img.naturalHeight));
     const w = Math.max(1, Math.round(img.naturalWidth * scale));
     const h = Math.max(1, Math.round(img.naturalHeight * scale));
     const canvas = document.createElement("canvas");
@@ -92,22 +100,20 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage |
     if (!ctx) return { error: "Could not prepare the image on this device." };
     ctx.drawImage(img, 0, 0, w, h);
 
-    // JPEG gives the smallest payload; PNG only when alpha/wireframe matters.
-    const out = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
-    const outBytes = Math.round(((out.split(",")[1] ?? "").length * 3) / 4);
+    // JPEG blob for delivery (smallest); PNG only when alpha matters.
+    const needsAlpha = /image\/png$/.test(type) || /image\/webp$/.test(type);
+    const outMime = needsAlpha ? "image/png" : "image/jpeg";
+    const blob = await canvasToBlob(canvas, outMime, JPEG_QUALITY);
+    const outDataUrl = canvas.toDataURL(outMime, JPEG_QUALITY);
     return {
-      dataUrl: out,
-      bytes: outBytes,
-      mimeType: "image/jpeg",
+      blob,
+      mimeType: outMime,
+      bytes: blob.size,
       compressed: true,
+      dataUrl: outDataUrl,
     };
   } catch {
     // Decode failed (rare) — pass through; the server decides.
-    return {
-      dataUrl: originalDataUrl,
-      bytes: file.size,
-      mimeType: file.type || "image/jpeg",
-      compressed: false,
-    };
+    return { blob: file, mimeType: file.type || "image/jpeg", bytes: file.size, compressed: false, dataUrl: originalDataUrl };
   }
 }

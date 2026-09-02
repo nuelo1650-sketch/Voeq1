@@ -8,6 +8,7 @@ import { ContourEdge, CampusFingerprint } from "@voeq/contour";
 import { SaveButton } from "@/components/shopper/SaveButton";
 import { LikeButton } from "@/components/shopper/LikeButton";
 import { CommentForm } from "@/components/shopper/CommentForm";
+import { cdnTransform } from "@/lib/image-upload";
 import type { AuthStatusResponse, CommentsResponse, CreateResponse } from "@/lib/apiTypes";
 import { CommentsList, type DisplayComment } from "@/components/shopper/CommentsList";
 import { ReportForm } from "@/components/shopper/ReportForm";
@@ -411,10 +412,12 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
           >
             {galleryImages.length > 0 ? (
               <img
-                src={galleryImages[selectedImageIndex]}
+                src={cdnTransform(galleryImages[selectedImageIndex], 900)}
                 alt={listing.title}
                 data-testid="listing-detail-image"
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                loading="lazy"
+                decoding="async"
               />
             ) : (
               <CampusFingerprint
@@ -444,7 +447,7 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
                     padding: 0,
                   }}
                 >
-                  <img src={img} alt={`${listing.title} ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                  <img src={cdnTransform(img, 160)} alt={`${listing.title} ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} loading="lazy" decoding="async" />
                 </button>
               ))}
             </div>

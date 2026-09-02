@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Camera, Upload, CheckCircle, AlertCircle, X } from "lucide-react";
 import { categories } from "@voeq/data";
 import type { Vendor } from "@voeq/data";
+import { prepareImageForUpload } from "@/lib/image-prep";
+import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
 
 /**
  * K3b.4 — Comprehensive storefront management with modern tabbed/sectioned layout.
@@ -208,26 +210,17 @@ function ProfilePhotoSection({ vendor, disabled }: { vendor: Vendor; disabled: b
     setError(null);
 
     try {
-      // Read the real file as a base64 data URL and upload to the server
-      // (Cloudinary + Sightengine moderation). No mock in production.
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error("read_failed"));
-        reader.readAsDataURL(file);
-      });
-
-      const res = await fetch("/api/vendor/photo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: file.name, dataUrl }),
-      });
-
-      if (res.ok) {
+      // P-A round 65: DIRECT upload — browser -> Cloudinary (signed token),
+      // server moderates the URL only. Same moderation + fail-closed rules,
+      // but no base64 through our server.
+      const prep = await prepareImageForUpload(file);
+      if ("error" in prep) { setError(prep.error); return; }
+      const uploadFile = prep.blob ? new File([prep.blob], file.name, { type: prep.mimeType || file.type }) : file;
+      const result = await uploadPhotoDirect(uploadFile, "vendor_photo");
+      if (result.ok) {
         router.refresh();
       } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Upload failed");
+        setError(result.reason ?? "Upload failed");
       }
     } catch {
       setError("Network error");

@@ -6,6 +6,7 @@ import { ChevronLeft, Building2, MapPin, FileText, Check } from "lucide-react";
 import { categories, type Campus } from "@voeq/data";
 import { VENDOR_AGREEMENT_TEXT, CURRENT_VENDOR_AGREEMENT_VERSION } from "@voeq/data";
 import { prepareImageForUpload } from "@/lib/image-prep";
+import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
 
 /**
  * VS3.2 Phase A wizard + VS3.7 resume/abandon + K3a.6 modern layout.
@@ -111,32 +112,19 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
     setUploading(true);
     setError(null);
     try {
-      // P-A round 56: compress/prepare BEFORE upload. Android gallery photos
-      // (4-12MB) were rejected by the 5MB cap; the client then hid the real
-      // reason behind a generic message (the 'profile picture doesn't work'
-      // report). One small image now goes out instead of the raw megabyte blob.
+      // P-A round 65: DIRECT upload — browser -> Cloudinary (signed token),
+      // our server never sees the bytes. prepareImageForUpload still gives
+      // precise client-side errors + a leaner file for HEIC/large photos.
       const prep = await prepareImageForUpload(file);
       if ("error" in prep) {
         setError(prep.error);
         return null;
       }
-      const res = await fetch("/api/images/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          context: "vendor_photo",
-          mimeType: prep.mimeType,
-          bytes: prep.bytes,
-          dataUrl: prep.dataUrl,
-        }),
-      });
-      const result = await res.json();
-      if (!res.ok || !result.url) {
-        // Read `reason` (the API's real field) + fall back to the generic line.
-        // Old code read result.error which the API never returns — the actual
-        // reason ("File exceeds...") was silently replaced by this fallback.
-        setError((result.reason as string) || result.error || "Photo upload failed. You can add it later in settings.");
+      // Use the prepared blob (compressed) when available; else the raw file.
+      const uploadFile = prep.blob ? new File([prep.blob], file.name, { type: prep.mimeType || file.type }) : file;
+      const result = await uploadPhotoDirect(uploadFile, "vendor_photo");
+      if (!result.ok) {
+        setError(result.reason || "Photo upload failed. You can add it later in settings.");
         return null;
       }
       return result.url as string;

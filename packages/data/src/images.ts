@@ -11,7 +11,7 @@
  * approved. Rejected uploads return a clear reason + retryable flag.
  */
 
-import { uploadAndModerate } from "./media";
+import { uploadAndModerate, uploadAndModerateByUrl } from "./media";
 import type { ImageContext, UploadResult } from "./interfaces";
 
 /** D.4 — Hard cap on images per listing (defense in depth with listing CRUD). */
@@ -90,4 +90,37 @@ export async function uploadImage(input: ImageUploadInput): Promise<UploadResult
     return { ok: false, reason: result.reason ?? "Image did not pass automated content review.", retryable: true };
   }
   return { ok: true, url: result.url as string, publicId: publicIdFor(fileName), context };
+}
+
+/**
+ * P-A round 65 — DIRECT upload path. The file was uploaded by the BROWSER to
+ * Cloudinary (signed token from /api/images/sign); here we only moderate the
+ * returned URL (Sightengine), enforce the Cloudinary-only gate (C13), and on
+ * rejection remove the already-uploaded asset (no orphaning). Size/type
+ * checks run client-side with precise errors before the upload starts.
+ */
+export async function uploadImageByUrl(input: ImageUploadInput & { url: string; publicId?: string }): Promise<UploadResult> {
+  const { fileName, context, force, url, publicId, existingCount } = input;
+
+  // D.4 — 5-image cap (listing photos only; vendor photo is singular).
+  if (context === "listing_photo" && typeof existingCount === "number") {
+    if (existingCount >= MAX_IMAGES_PER_LISTING) {
+      return {
+        ok: false,
+        reason: `You can attach at most ${MAX_IMAGES_PER_LISTING} images per listing.`,
+        retryable: false,
+      };
+    }
+  }
+
+  // Cloudinary-only gate (C13 keeps arbitrary external URLs out).
+  if (!/^https:\/\/(res\.)?cloudinary\.com\//.test(url)) {
+    return { ok: false, reason: "Only Cloudinary-hosted photos are allowed.", retryable: false };
+  }
+
+  const result = await uploadAndModerateByUrl({ fileName, url, publicId, force, context });
+  if (!result.ok) {
+    return { ok: false, reason: result.reason ?? "Image did not pass automated content review.", retryable: result.retryable ?? true };
+  }
+  return { ok: true, url: result.url as string, publicId: publicId ?? publicIdFor(fileName), context };
 }

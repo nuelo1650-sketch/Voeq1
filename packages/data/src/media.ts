@@ -19,7 +19,13 @@
  * without keys), we degrade to the deterministic mock so the UI still works.
  * In production the secrets are always present (validated by validateEnv),
  * so the real path is enforced.
+ *
+ * P-A round 65: the app's NEW path is uploadAndModerateByUrl — the browser
+ * uploads the file DIRECTLY to Cloudinary (signed token), this module only
+ * moderates the URL + cleans up on rejection. The base64 dataUrl path remains
+ * for legacy/mock/tests.
  */
+import type { ImageContext } from "./interfaces";
 
 export interface ModerationResult {
   ok: boolean;
@@ -27,17 +33,21 @@ export interface ModerationResult {
   url?: string;
   /** Present when ok === false. Never leaks PII. */
   reason?: string;
+  /** Present when ok === false and the failure is transient (retryable). */
+  retryable?: boolean;
 }
 
 export interface UploadInput {
   fileName: string;
   /** Raw image bytes (preferred). */
   bytes?: number;
-  /** base64 data URL (data:image/...;base64,....) — used by the web client. */
+  /** b64 data URL (data:image/...;base64,....) — used by the web client. */
   dataUrl?: string;
   mimeType?: string;
   /** Test/override hook to force a decision (dev only; ignored in prod). */
   force?: "pass" | "fail";
+  /** Image context (used by the by-url moderation path for audit/cap). */
+  context?: ImageContext;
 }
 
 const MOCK_CLOUDINARY_BASE = "https://res.cloudinary.com/voeq-mock/image/upload";
@@ -178,17 +188,17 @@ async function sightengineModerate(url: string): Promise<ModerationResult> {
     if (!r.ok) {
       const bodyText = await r.text().catch(() => "");
       console.error(`[sightengine] HTTP ${r.status} for ${url}: ${bodyText.slice(0, 300)}`);
-      return { ok: false, reason: "Content review unavailable. Please try again." };
+      return { ok: false, reason: "Content review unavailable. Please try again.", retryable: r.status >= 500 };
     }
     json = await r.json();
   } catch (e) {
     // Network/timeout -> fail closed.
     console.error(`[sightengine] fetch failed for ${url}: ${e instanceof Error ? e.message : String(e)}`);
-    return { ok: false, reason: "Content review unavailable. Please try again." };
+    return { ok: false, reason: "Content review unavailable. Please try again.", retryable: true };
   }
 
   if (json.status !== "success") {
-    return { ok: false, reason: "Content review unavailable. Please try again." };
+    return { ok: false, reason: "Content review unavailable. Please try again.", retryable: true };
   }
   const nudity = json.nudity;
   const score =
@@ -239,4 +249,25 @@ export async function uploadAndModerate(input: UploadInput): Promise<ModerationR
     return { ok: false, reason: moderation.reason ?? "Image did not pass automated content review." };
   }
   return { ok: true, url: uploaded.url };
+}
+
+/**
+ * P-A round 65 — DIRECT upload moderation path.
+ * The file is already on Cloudinary (uploaded by the browser with a signed
+ * token from /api/images/sign). This only moderates the URL and (on failure)
+ * removes the asset, so a rejected photo never stays orphaned on the CDN.
+ */
+export async function uploadAndModerateByUrl(input: UploadInput & { url: string; publicId?: string }): Promise<ModerationResult> {
+  const url = input.url;
+  if (!/^https:\/\/(res\.)?cloudinary\.com\//.test(url)) {
+    return { ok: false, reason: "Only Cloudinary-hosted photos are allowed." };
+  }
+
+  const moderation = await sightengineModerate(url);
+  if (!moderation.ok) {
+    // Fail-closed: delete the orphaned asset before rejecting.
+    if (input.publicId) await cloudinaryDestroy(input.publicId).catch(() => {});
+    return { ok: false, reason: moderation.reason ?? "Image did not pass automated content review.", retryable: moderation.retryable };
+  }
+  return { ok: true, url };
 }

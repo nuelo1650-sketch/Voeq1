@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ExploreListing } from "@voeq/data";
 import { CampusFingerprint } from "@voeq/contour";
 import { Heart } from "lucide-react";
+import { cdnTransform } from "@/lib/image-upload";
 
 /**
  * ListingCard — THE identity-defining marketplace card (Voeq Design System, 2026-08-30).
@@ -63,6 +64,9 @@ export function ListingCard({
   const images = listing.images && listing.images.length > 0 ? listing.images : img ? [img] : [];
   const [hovered, setHovered] = useState(false);
   const displayImg = hovered && images[1] ? images[1] : images[0];
+  // P-A round 65: delivery transforms (f_auto,q_auto,w=400) + lazy — the
+  // raw full-size Cloudinary file was the "slow, page shrinks" culprit.
+  const displayImgCdn = cdnTransform(displayImg ?? "", 400);
   const categoryName = listing.categorySlug ? SLUG_TO_NAME[listing.categorySlug] ?? listing.categorySlug : null;
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
@@ -83,7 +87,7 @@ export function ListingCard({
         {loading ? (
           <div data-testid="listing-shimmer" style={shimmerStyle} />
         ) : img ? (
-          <img src={displayImg} alt={listing.title} data-testid="listing-image" />
+          <img src={displayImgCdn} alt={listing.title} data-testid="listing-image" loading="lazy" decoding="async" />
         ) : (
           <CampusFingerprint
             data-testid="listing-monogram"
