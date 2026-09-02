@@ -4961,7 +4961,12 @@ header.AppShell,
   .explore-page header[data-testid="explore-topbar"] input[type="text"],
   .explore-page header[data-testid="explore-topbar"] input[type="search"] {
     font-size: 16px !important; /* prevents iOS zoom-on-focus */
-    padding: 12px 14px !important;
+    /* P-A round 64 (root fix): this old rule's `padding: 12px 14px !important`
+       overrode the SearchBar's 42px left gutter (inline styles lose to
+       !important) => the magnifier icon overlapped the placeholder
+       ("earch vendors, listings..."). Keep the iOS font + top/bottom, but
+       preserve the icon gutter on the left. */
+    padding: 12px 40px 12px 42px !important;
   }
 
   /* View toggles: comfortable, not half-sized */

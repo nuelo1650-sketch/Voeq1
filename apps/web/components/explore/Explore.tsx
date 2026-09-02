@@ -16,7 +16,7 @@ import { OnboardingBanner } from "./OnboardingBanner";
 import { RecentlyViewedRail, useRecentlyViewed } from "./RecentlyViewedRail";
 import { ExploreSkeleton } from "./ExploreSkeleton";
 import { EmptyState } from "./EmptyState";
-import { RefreshCw, ChevronDown } from "lucide-react";
+import { RefreshCw, ChevronDown, ChevronLeft } from "lucide-react";
 
 /**
  * Explore — PG-PUB-002 (Doc 04). The core discovery surface.
@@ -124,6 +124,18 @@ export function Explore({
 
   const onCardClick = (id: string) => record(id);
 
+  // P-A round 64 (root fix): while the mobile filter sheet is open, lock the
+  // body scroll — the user reported the main page scrolled behind the sheet,
+  // which makes the sheet feel like a dead overlay, not a modal.
+  useEffect(() => {
+    if (!mobileFiltersOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileFiltersOpen]);
+
   // Reset pagination when filters change (K2.9 #2)
   useEffect(() => {
     setDisplayedCount(ITEMS_PER_PAGE);
@@ -205,6 +217,25 @@ export function Explore({
         data-testid="explore-topbar"
         className="voeq-topbar"
       >
+        {/* P-A round 64 (root fix): explicit Back affordance — the wordmark
+            looked like branding, not navigation, so Explore felt entry-less.
+            The arrow survives on all sizes; navigates history (or home). */}
+        <button
+          aria-label="Back"
+          data-testid="explore-back"
+          onClick={() => {
+            if (window.history.length > 1) window.history.back();
+            else window.location.href = "/";
+          }}
+          style={{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            width: 40, height: 40, borderRadius: 999, flexShrink: 0, order: 0,
+            border: "1px solid var(--role-border)", background: "var(--role-surface)",
+            color: "var(--role-text)", cursor: "pointer",
+          }}
+        >
+          <ChevronLeft size={20} />
+        </button>
         <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" className="voeq-topbar-wordmark" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0, order: 0 }}>
           <BrandLogo width={94} />
         </Link>

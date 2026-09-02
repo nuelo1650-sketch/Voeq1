@@ -36,13 +36,14 @@ export async function POST(req: NextRequest) {
   // Create or reuse the vendor linked to this identity.
   let vendor = identity.vendorId ? await mockVendorRepo.getById(identity.vendorId) : null;
   if (!vendor) {
-    if (!identity.campus) {
-      return NextResponse.json({ error: "Campus required", message: "Please select a campus before setting up your vendor account." }, { status: 400 });
-    }
+    // P-A round 64 (root fix): campus is chosen in STEP 2 of this wizard
+    // (step-2 patches vendor.campus + identity.campus). Requiring it HERE
+    // locked every first-time vendor out — they could never pass step-1 to
+    // reach the campus picker ("Campus required" dead end, reproduced on prod).
     vendor = await mockVendorRepo.create({
       identityId: identity.id,
       name,
-      campus: identity.campus,
+      campus: "",
       categoryIds: [categoryId],
       description,
       profilePhotoUrl: profilePhotoUrl || null,
