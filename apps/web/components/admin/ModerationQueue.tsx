@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { AlertCircle, CheckCircle, Flag, User, X, Check } from "lucide-react";
+import { AlertCircle, CheckCircle, Flag, User, X, Check, Eye, EyeOff } from "lucide-react";
 import type { Capability } from "@voeq/data";
 
 /**
@@ -56,8 +56,13 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
   const [actionReason, setActionReason] = useState("");
   const [reports, setReports] = useState<Report[]>([]);
   const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
-  // P-A round 57 (C3): toast so failed actions are no longer silent.
+  // P-A round 60 (C3): toast so failed actions are no longer silent.
   const [toast, setToast] = useState<{ kind: "success" | "error"; text: string } | null>(null);
+  // P-A round 60: content-moderation queue (reviews).
+  const [contentItems, setContentItems] = useState<Array<{
+    id: string; authorId: string; vendorId: string; rating: number; body: string;
+    status: string; createdAt: string;
+  }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -99,6 +104,14 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
             ),
           );
         }
+        // P-A round 60: content-moderation queue (reviews).
+        fetch("/api/staff/content")
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            if (cancelled || !d?.ok) return;
+            setContentItems((d.items as Array<{ id: string; authorId: string; vendorId: string; rating: number; body: string; status: string; createdAt: string }>) ?? []);
+          })
+          .catch(() => {});
       })
       .catch(() => {})
       .finally(() => !cancelled && setLoading(false));
@@ -209,6 +222,26 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
     }
     setActionModal(null);
     setActionReason("");
+  };
+
+  const toggleContentStatus = async (item: { id: string; status: string }) => {
+    const action = item.status === "visible" ? "hide" : "show";
+    try {
+      const res = await fetch("/api/staff/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId: item.id, action }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setToast({ kind: "error", text: `Action failed: ${(d as { error?: string }).error ?? res.status}` });
+        return;
+      }
+      setToast({ kind: "success", text: action === "hide" ? "Review hidden ✓" : "Review restored ✓" });
+      setContentItems((prev) => prev.map((x) => (x.id === item.id ? { ...x, status: action === "hide" ? "hidden" : "visible" } : x)));
+    } catch {
+      setToast({ kind: "error", text: "Network error — action not applied." });
+    }
   };
 
   return (
@@ -323,7 +356,61 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         )}
 
         {activeTab === "content" && (
-          <EmptyTab message="Content moderation tab - flagged listings and reviews would appear here" />
+          <section data-testid="content-tab" style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 20 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px", color: "var(--role-text)" }}>Content Moderation — Reviews</h2>
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--role-text-muted)" }}>
+              {contentItems.length} reviews · hide removes a review from public display (audited).
+            </p>
+            {contentItems.length === 0 ? (
+              <p style={{ color: "var(--role-text-muted)", fontSize: 14 }}>No reviews yet.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {contentItems.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                      padding: 12, borderRadius: 8, border: "1px solid var(--role-border)",
+                      background: item.status === "hidden" ? "color-mix(in srgb, var(--role-danger) 6%, var(--role-surface))" : "var(--role-surface)",
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--role-text)" }}>
+                        ★ {item.rating} · {"◦".repeat(0)}<span style={{ color: "var(--role-text-muted)", fontWeight: 400 }}>vendor {item.vendorId.slice(0, 8)}</span>
+                      </div>
+                      <p style={{ margin: "4px 0 0", fontSize: 14, color: "var(--role-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {item.body || "(no text)"}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                      <span style={{
+                        fontSize: 11, padding: "3px 8px", borderRadius: 999, fontWeight: 700,
+                        color: item.status === "hidden" ? "var(--role-danger)" : "var(--role-accent)",
+                        background: item.status === "hidden" ? "color-mix(in srgb, var(--role-danger) 10%, transparent)" : "color-mix(in srgb, var(--role-accent) 10%, transparent)",
+                      }}>
+                        {item.status === "hidden" ? "HIDDEN" : "VISIBLE"}
+                      </span>
+                      <button
+                        data-testid={`content-${item.status}-${item.id.slice(0, 8)}`}
+                        onClick={() => toggleContentStatus(item)}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 4,
+                          fontSize: 12, fontWeight: 600, fontFamily: "var(--role-font-ui)",
+                          padding: "6px 12px", borderRadius: 999, cursor: "pointer",
+                          background: item.status === "visible" ? "color-mix(in srgb, var(--role-danger) 8%, transparent)" : "color-mix(in srgb, var(--role-accent) 10%, transparent)",
+                          color: item.status === "visible" ? "var(--role-danger)" : "var(--role-accent)",
+                          border: `1px solid ${item.status === "visible" ? "color-mix(in srgb, var(--role-danger) 30%, transparent)" : "color-mix(in srgb, var(--role-accent) 30%, transparent)"}`,
+                        }}
+                      >
+                        {item.status === "visible" ? <EyeOff size={14} /> : <Eye size={14} />}
+                        {item.status === "visible" ? "Hide" : "Restore"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         )}
 
         {activeTab === "users" && (

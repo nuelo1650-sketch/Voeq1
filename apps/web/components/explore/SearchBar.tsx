@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Search, X, MapPin, TrendingUp, Clock } from "lucide-react";
+import { trackEvent } from "@/lib/track";
 import type { Campus } from "@voeq/data";
 import type { ExploreListing } from "@voeq/data";
 import { CATEGORIES } from "./Filters";
@@ -239,6 +240,8 @@ export function SearchBar({
 
   const submitSearch = (query: string) => {
     saveRecentSearch(query);
+    // P-A round 60: search volume for admin analytics (query text NOT sent).
+    trackEvent("search", { path: `/explore` });
     onSearch(query);
     setIsOpen(false);
     setSelectedIndex(-1);

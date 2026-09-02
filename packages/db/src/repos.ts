@@ -361,6 +361,78 @@ export const realAuditStore = {
   },
 };
 
+// ---- PageEventsStore (P-A round 60) ----------------------------------------
+// Append-only activity ledger for the admin analytics views. Privacy-respecting:
+// identity_id + event type + refId only — never email/name/message body.
+export const realPageEventStore = {
+  async log(event: {
+    identityId?: string | null;
+    type: string;
+    refId?: string | null;
+    path?: string | null;
+    platform?: string | null;
+    ipHash?: string | null;
+  }): Promise<void> {
+    await getDb().insert(s.pageEvents).values({
+      id: id(),
+      identityId: event.identityId ?? null,
+      type: event.type,
+      refId: event.refId ?? null,
+      path: event.path ?? null,
+      platform: event.platform ?? null,
+      ipHash: event.ipHash ?? null,
+      at: now(),
+    });
+  },
+  async query(filter?: {
+    type?: string;
+    identityId?: string;
+    refId?: string;
+    since?: number;
+    limit?: number;
+  }): Promise<Array<{
+    id: string;
+    identityId: string | null;
+    type: string;
+    refId: string | null;
+    path: string | null;
+    platform: string | null;
+    ipHash: string | null;
+    at: string;
+  }>> {
+    let q = getDb().select().from(s.pageEvents).orderBy(desc(s.pageEvents.at));
+    if (filter?.type) q = q.where(eq(s.pageEvents.type, filter.type)) as typeof q;
+    if (filter?.identityId) q = q.where(eq(s.pageEvents.identityId, filter.identityId)) as typeof q;
+    if (filter?.refId) q = q.where(eq(s.pageEvents.refId, filter.refId)) as typeof q;
+    const rows = filter?.limit ? await q.limit(filter.limit) : await q;
+    let out = rows.map((r) => ({
+      id: r.id,
+      identityId: r.identityId ?? null,
+      type: r.type,
+      refId: r.refId ?? null,
+      path: r.path ?? null,
+      platform: r.platform ?? null,
+      ipHash: r.ipHash ?? null,
+      at: r.at,
+    }));
+    if (filter?.since) {
+      out = out.filter((e) => new Date(e.at).getTime() >= (filter.since ?? 0));
+    }
+    return out;
+  },
+  async countByType(filter?: { since?: number; type?: string }): Promise<Array<{ type: string; count: number }>> {
+    const rows = await getDb().select({ type: s.pageEvents.type, at: s.pageEvents.at }).from(s.pageEvents);
+    const since = filter?.since ?? 0;
+    const counts = new Map<string, number>();
+    for (const r of rows) {
+      if (filter?.type && r.type !== filter.type) continue;
+      if (since && new Date(r.at).getTime() < since) continue;
+      counts.set(r.type, (counts.get(r.type) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
+  },
+};
+
 // ---- VendorRepo -------------------------------------------------------------
 function mapVendor(r: typeof s.vendors.$inferSelect): Vendor {
   return {

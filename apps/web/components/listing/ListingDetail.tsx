@@ -12,6 +12,7 @@ import type { AuthStatusResponse, CommentsResponse, CreateResponse } from "@/lib
 import { CommentsList, type DisplayComment } from "@/components/shopper/CommentsList";
 import { ReportForm } from "@/components/shopper/ReportForm";
 import { usePendingIntent } from "@/lib/usePendingIntent";
+import { trackEvent } from "@/lib/track";
 import { Heart, Share2, Flag, X, ChevronLeft, ChevronRight, MessageCircle, Link2 } from "lucide-react";
 
 /**
@@ -51,6 +52,11 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
   const [isMobile, setIsMobile] = useState(false);
   
   // Detect mobile on mount
+  // P-A round 60: record the listing view (admin visibility; privacy-safe).
+  useEffect(() => {
+    if (id) trackEvent("listing_view", { refId: id, path: `/listing/${id}` });
+  }, [id]);
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
@@ -294,6 +300,8 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
   );
 
   const handleMessageVendor = async () => {
+    // P-A round 60: message-click event (admin analytics; no content).
+    if (listing?.id) trackEvent("message_click", { refId: listing.id, path: `/listing/${listing.id}` });
     if (!listing?.vendorId) return;
     if (!isAuthenticated) {
       // Phase 1: carry the message intent through the auth gate so after login

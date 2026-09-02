@@ -117,6 +117,27 @@ export const auditLog = pgTable("audit_log", {
   at: text("at").notNull(),
 });
 
+/**
+ * page_events (P-A round 60) — append-only privacy-respecting activity ledger.
+ * WHY: the admin panel had NO visibility into "who visited what" — the biggest
+ * gap for real administration and trust-and-safety.
+ *
+ * Privacy by design:
+ *  - identity_id nullable (anon visits count too); NEVER an email/name.
+ *  - NO message bodies, NO search text, NO PII — just event type + reference id.
+ *  - ip_hash is a salted hash (never raw IP) for device/abuse dedup only.
+ */
+export const pageEvents = pgTable("page_events", {
+  id: text("id").primaryKey(),
+  identityId: text("identity_id"),
+  type: text("type").notNull(),
+  refId: text("ref_id"),
+  path: text("path"),
+  platform: text("platform"),
+  ipHash: text("ip_hash"),
+  at: text("at").notNull(),
+});
+
 // ---- Marketplace ------------------------------------------------------------
 export const vendors = pgTable("vendors", {
   id: text("id").primaryKey(),

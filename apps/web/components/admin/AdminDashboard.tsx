@@ -33,6 +33,8 @@ interface AdminDashboardProps {
 
 export function AdminDashboard({ staff, capabilities, metrics }: AdminDashboardProps) {
   const canReviewCases = capabilities.includes("case.review");
+  // P-A round 60: team management link (promote UI).
+  const canPromote = capabilities.includes("staff.promote");
   const canVerifyVendors = capabilities.includes("vendor.verify");
   const canViewAnalytics = capabilities.includes("analytics.read");
   const canEditConfig = capabilities.includes("config.write");
@@ -224,6 +226,7 @@ export function AdminDashboard({ staff, capabilities, metrics }: AdminDashboardP
             {canReviewCases && <QuickLinkCard title="Moderation Queue" href="/staff/moderation" icon={<AlertCircle size={20} />} />}
             {canVerifyVendors && <QuickLinkCard title="Verifications" href="/staff/moderation?tab=verifications" icon={<CheckCircle size={20} />} />}
             {canViewAnalytics && <QuickLinkCard title="Analytics" href="/staff/analytics" icon={<Activity size={20} />} />}
+            {canPromote && <QuickLinkCard title="Team & Roles" href="/staff/team" icon={<Users size={20} />} />}
             {canViewAudit && <QuickLinkCard title="Audit Log" href="/staff/audit" icon={<MessageSquare size={20} />} />}
             {canEditConfig && <QuickLinkCard title="Configuration" href="/staff/config" icon={<Settings size={20} />} />}
           </div>

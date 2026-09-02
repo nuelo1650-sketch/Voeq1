@@ -1,15 +1,24 @@
 /**
- * Audit log (mock phase). Stores server-side security/consent events.
+ * Audit log.
+ *
+ * P-A round 59 (found while building analytics): the audit trail was
+ * IN-MEMORY — an array on the server process. Every `logAudit` call died with
+ * the process: deployed events (reports, consents, admin actions) vanished on
+ * restart, and the staff Audit Log showed nothing in production.
+ * `realAuditStore` (DB-backed, append-only) already existed in @voeq/db but
+ * was wired to NOTHING. Now: same factory rule as every other repo —
+ * DATABASE_URL present → DB-backed; else in-memory (dev/test).
  *
  * HARD RULE (Doc 09 §9.16): metadata MUST NOT contain PII — no email, name,
  * phone, or raw tokens. Reference identities by `identityId` only.
- *
- * Phase 9: swap for a real append-only store (DB/queue) — same signature.
  */
 import { randomUUID } from "crypto";
 import type { AuditEntry } from "./interfaces";
+import { realAuditStore } from "@voeq/db";
 
-const log: AuditEntry[] = [];
+const USE_REAL = !!process.env.DATABASE_URL;
+
+const memoryLog: AuditEntry[] = [];
 
 export async function logAudit(
   type: string,
@@ -23,7 +32,11 @@ export async function logAudit(
     metadata,
     at: new Date().toISOString(),
   };
-  log.push(entry);
+  if (USE_REAL) {
+    await realAuditStore.log({ type, identityId, metadata, adminAction: false });
+    return;
+  }
+  memoryLog.push(entry);
 }
 
 export async function queryAudit(filter?: {
@@ -31,7 +44,10 @@ export async function queryAudit(filter?: {
   identityId?: string;
   limit?: number;
 }): Promise<AuditEntry[]> {
-  let out = log;
+  if (USE_REAL) {
+    return realAuditStore.query(filter);
+  }
+  let out = memoryLog;
   if (filter?.type) out = out.filter((e) => e.type === filter.type);
   if (filter?.identityId) out = out.filter((e) => e.identityId === filter.identityId);
   out = [...out].sort((a, b) => (a.at < b.at ? 1 : -1));
@@ -41,5 +57,5 @@ export async function queryAudit(filter?: {
 
 /** Dev/test-only: clear the audit log between harness assertions. Not imported by any prod path. */
 export function resetAudit(): void {
-  log.length = 0;
+  memoryLog.length = 0;
 }

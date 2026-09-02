@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { VendorStorefrontView } from "@voeq/data";
 import type { AuthStatusResponse } from "@/lib/authStatus";
+import { trackEvent } from "@/lib/track";
 import { OpenNowBadge } from "@/components/vendor/OpenNowBadge";
 import { usePendingIntent } from "@/lib/usePendingIntent";
 import { MessageCircle } from "lucide-react";
@@ -39,6 +40,11 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const { pending: pendingIntent, consume: consumeIntent } = usePendingIntent();
+
+  // P-A round 60: record storefront visits (admin visibility; privacy-safe).
+  useEffect(() => {
+    if (vendor?.id) trackEvent("storefront_view", { refId: vendor.id, path: `/vendor/${vendor.id}` });
+  }, [vendor?.id]);
 
   useEffect(() => {
     fetch("/api/auth/status")
