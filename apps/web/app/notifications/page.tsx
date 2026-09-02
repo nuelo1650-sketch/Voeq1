@@ -453,15 +453,18 @@ function FilterTab({
     <button
       onClick={onClick}
       style={{
-        padding: "8px 16px",
-        fontSize: 14,
-        fontWeight: 500,
-        background: "transparent",
-        color: active ? "var(--color-forest)" : "var(--color-ink-muted)",
-        border: "none",
-        borderBottom: active ? "2px solid var(--color-forest)" : "2px solid transparent",
+        padding: "8px 14px",
+        fontSize: 13,
+        fontWeight: 600,
+        fontFamily: "var(--role-font-ui)",
+        // P-A round 49: modern pill tabs (was flat underline — read as bare)
+        background: active ? "var(--color-forest)" : "transparent",
+        color: active ? "var(--color-cream)" : "var(--color-ink-muted)",
+        border: `1px solid ${active ? "var(--color-forest)" : "var(--color-ink-subtle)"}`,
+        borderRadius: 999,
         cursor: "pointer",
         whiteSpace: "nowrap",
+        transition: "background 120ms ease, color 120ms ease",
       }}
       data-testid={`filter-${label.toLowerCase()}`}
     >
@@ -470,11 +473,12 @@ function FilterTab({
         <span
           style={{
             marginLeft: 6,
-            background: "var(--color-forest-light)",
-            color: "var(--color-cream)",
+            background: active ? "var(--color-amber)" : "var(--color-forest-light)",
+            color: active ? "var(--color-forest)" : "var(--color-cream)",
             borderRadius: 999,
-            padding: "2px 6px",
-            fontSize: 12,
+            padding: "1px 7px",
+            fontSize: 11,
+            fontWeight: 700,
           }}
         >
           {count}
@@ -502,11 +506,13 @@ function NotificationItem({
       style={{
         display: "flex",
         gap: 12,
-        padding: "16px",
+        padding: "14px 16px",
         background: notification.read ? "var(--color-cream)" : "var(--color-glass-white)",
         border: "1px solid var(--color-ink-subtle)",
         borderLeft: notification.read ? "1px solid var(--color-ink-subtle)" : "3px solid var(--color-forest)",
-        borderRadius: 8,
+        // P-A round 49: warmer cards (was sharp 8px — flattening the premium feel)
+        borderRadius: 14,
+        transition: "box-shadow 120ms ease, transform 120ms ease",
         cursor: notification.read ? "default" : "pointer",
       }}
       onClick={() => !notification.read && onMarkRead()}

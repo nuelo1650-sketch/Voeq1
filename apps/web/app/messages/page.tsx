@@ -27,6 +27,8 @@ export default async function MessagesPage() {
         lastMessagePreview: last?.body ?? "",
         lastMessageAt: c.lastMessageAt,
         unread,
+        // P-A round 49: inbox avatar (identity profile photo when set).
+        photo: other?.avatarUrl ?? null
       };
     }),
   );
