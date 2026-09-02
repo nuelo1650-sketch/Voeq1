@@ -52,6 +52,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const patch: Record<string, unknown> = {};
   if (typeof body.title === "string" && body.title.trim().length >= 3) patch.title = body.title.trim();
   if (typeof body.description === "string") patch.description = body.description;
+  // P-A round 57 (C9): persist the one-liner on edit too (was validated + dropped).
+  if (typeof body.shortDescription === "string") patch.shortDescription = body.shortDescription;
   if (body.priceMinMinor != null) {
     const p = Number(body.priceMinMinor);
     if (Number.isFinite(p) && p > 0) patch.priceMinMinor = p;
@@ -62,7 +64,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
   if (typeof body.categoryId === "string" && body.categoryId) patch.categoryId = body.categoryId;
   if (Array.isArray(body.images)) {
-    const imgs = (body.images as string[]).filter((x) => typeof x === "string");
+    // P-A round 57 (C13): images must come from the moderation-approved
+    // pipeline (Cloudinary). Arbitrary external URLs were accepted, bypassing
+    // Sightengine entirely. Our own demo/seed URLs are Cloudinary-hosted too.
+    const imgs = (body.images as string[]).filter((x) => typeof x === "string" && /^https:\/\/(res\.)?cloudinary\.com\//.test(x));
+    if (imgs.length !== (body.images as string[]).length) {
+      return NextResponse.json({ error: "Only Cloudinary-hosted images are allowed." }, { status: 400 });
+    }
     if (imgs.length > MAX_IMAGES_PER_LISTING) {
       return NextResponse.json(
         { error: `At most ${MAX_IMAGES_PER_LISTING} images per listing.` },

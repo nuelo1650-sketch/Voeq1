@@ -51,6 +51,8 @@ export interface Listing {
   priceMaxMinor: number | null;
   categoryId: string;
   description: string | null;
+  /** P-A round 57 (C9): vendor one-liner — was validated+sent+discarded. */
+  shortDescription?: string | null;
   /** VS3.4: listing lifecycle. active = publicly listed. */
   status: "active" | "removed";
   /** VS7.9: staff feature flag (surfaces listing in highlights). */

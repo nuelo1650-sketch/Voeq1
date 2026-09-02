@@ -129,10 +129,13 @@ export function VendorDashboardClient({
         </div>
       </div>
 
-      {/* Mobile responsive */}
+      {/* Mobile responsive — P-A round 57 (C10): the old selector matched
+          camelCase `gridTemplateColumns` but React serializes inline styles in
+          KEBAB-CASE (`grid-template-columns`), so the rule NEVER matched and
+          the 2-col grid stayed 2-up on phones. */}
       <style>{`
         @media (max-width: 768px) {
-          [style*="gridTemplateColumns"][style*="1fr 1fr"] {
+          [style*="grid-template-columns"][style*="1fr 1fr"] {
             grid-template-columns: 1fr !important;
           }
         }

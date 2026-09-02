@@ -29,7 +29,10 @@ export default async function VendorDashboardPage() {
       ...l,
       vendorName: vendor.name,
       rating: undefined,
-      verified: (l as { verified?: boolean }).verified,
+      // P-A round 57 (C11): `verified` was read off the LISTING — a field that
+      // does not exist (verification lives on the VENDOR). Rows showed
+      // "verified: $undefined" and verifiedCount was forever 0.
+      verified: vendor.verified,
       categorySlug: l.categoryId,
       image: l.images?.[0],
     }));

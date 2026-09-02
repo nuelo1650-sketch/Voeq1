@@ -47,8 +47,12 @@ const NUDITY_THRESHOLD = 0.6; // reject above this combined nudity score
 function hasRealProviders(): boolean {
   const seUser = process.env.SIGHTENGINE_API_USER ?? process.env.SIGHTENGINE_USER;
   const seSecret = process.env.SIGHTENGINE_API_SECRET ?? process.env.SIGHTENGINE_SECRET;
+  // P-A round 57 (C12): accept the NEXT_PUBLIC_ alias too — env.ts already
+  // validates it as a fallback, but media.ts ONLY read the CLOUDINARY_CLOUD_NAME
+  // form, so a deploy that validated "ok" could still hard-fail uploads.
+  const cloud = process.env.CLOUDINARY_CLOUD_NAME ?? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   return Boolean(
-    process.env.CLOUDINARY_CLOUD_NAME &&
+    cloud &&
       process.env.CLOUDINARY_API_KEY &&
       process.env.CLOUDINARY_API_SECRET &&
       seUser &&
@@ -87,7 +91,8 @@ function mockSightengineModerate(input: UploadInput): ModerationResult {
 // --- Real Cloudinary upload ------------------------------------------------
 
 async function cloudinaryUpload(input: UploadInput): Promise<{ url: string; publicId: string }> {
-  const cloud = process.env.CLOUDINARY_CLOUD_NAME!;
+  // P-A round 57 (C12): alias-aware cloud name (see hasRealProviders).
+  const cloud = process.env.CLOUDINARY_CLOUD_NAME ?? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "";
   const apiKey = process.env.CLOUDINARY_API_KEY!;
   const apiSecret = process.env.CLOUDINARY_API_SECRET!;
   const file = input.dataUrl ?? "";

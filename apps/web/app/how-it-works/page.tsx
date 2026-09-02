@@ -85,7 +85,7 @@ export default function HowItWorksPage() {
         </div>
 
         <p style={{ marginTop: "var(--space-5)", color: "var(--role-text-muted)", fontSize: "0.9rem" }}>
-          Ready to start? <a href="/login" style={{ color: "var(--color-forest)", fontWeight: 600 }}>Sign up free</a> — or{" "}
+          Ready to start? <a href="/signup" style={{ color: "var(--color-forest)", fontWeight: 600 }}>Sign up free</a> — or{" "}
           <a href="/for-vendors" style={{ color: "var(--color-forest)", fontWeight: 600 }}>see what it takes to become a vendor</a>.
         </p>
       </div>

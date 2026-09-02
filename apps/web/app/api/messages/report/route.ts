@@ -33,13 +33,15 @@ export async function POST(req: NextRequest) {
   const message = await mockMessageRepo.getById(messageId);
   if (!message) return NextResponse.json({ error: "message_not_found" }, { status: 404 });
 
-  const category = (typeof body.category === "string" ? body.category : "harassment") as
-    | "not_on_campus"
-    | "scam"
-    | "inappropriate"
-    | "impersonation"
-    | "harassment"
-    | "other";
+  // P-A round 57 (C8): validate category against the allowed set. The old code
+  // cast ANY client string into the enum type — `category:"banana"` hit a PG
+  // enum violation → 500 and the report was never created.
+  const RAW_CATEGORIES = ["not_on_campus", "scam", "inappropriate", "impersonation", "harassment", "other"] as const;
+  const rawCategory = typeof body.category === "string" ? body.category : "harassment";
+  if (!RAW_CATEGORIES.includes(rawCategory as (typeof RAW_CATEGORIES)[number])) {
+    return NextResponse.json({ error: "invalid category" }, { status: 400 });
+  }
+  const category = rawCategory as (typeof RAW_CATEGORIES)[number];
   const report = await mockReportRepo.create({
     reporterId: identity.id,
     targetType: "message",

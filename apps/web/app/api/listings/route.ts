@@ -46,7 +46,16 @@ export async function POST(req: NextRequest) {
 
   const priceMaxMinor = body.priceMaxMinor != null ? Number(body.priceMaxMinor) : null;
   const description = typeof body.description === "string" ? body.description : null;
-  const images = Array.isArray(body.images) ? (body.images as string[]).filter((x) => typeof x === "string") : [];
+  // P-A round 57 (C9): vendor one-liner was accepted, validated, and thrown
+  // away — now persisted on create.
+  const shortDescription = typeof body.shortDescription === "string" ? body.shortDescription : null;
+  // P-A round 57 (C13): same Cloudinary-only gate on create (moderation bypass).
+  const images = Array.isArray(body.images)
+    ? (body.images as string[]).filter((x) => typeof x === "string" && /^https:\/\/(res\.)?cloudinary\.com\//.test(x))
+    : [];
+  if (Array.isArray(body.images) && images.length !== (body.images as string[]).length) {
+    return NextResponse.json({ error: "Only Cloudinary-hosted images are allowed." }, { status: 400 });
+  }
   if (images.length > MAX_IMAGES_PER_LISTING) {
     return NextResponse.json(
       { error: `At most ${MAX_IMAGES_PER_LISTING} images per listing.` },
@@ -61,6 +70,7 @@ export async function POST(req: NextRequest) {
     priceMaxMinor: priceMaxMinor != null && Number.isFinite(priceMaxMinor) ? priceMaxMinor : null,
     categoryId,
     description,
+    shortDescription,
     images,
     isPublished: true,
     status: "active",

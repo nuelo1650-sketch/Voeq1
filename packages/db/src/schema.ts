@@ -152,6 +152,9 @@ export const listings = pgTable("listings", {
   priceMaxMinor: integer("price_max_minor"),
   categoryId: text("category_id").notNull(),
   description: text("description"),
+  // P-A round 57 (C9): the vendor one-liner was validated + sent + DISCARDED
+  // (never in schema/interface/insert). Now persisted.
+  shortDescription: text("short_description"),
   status: text("status").notNull().default("active"),
   isFeatured: boolean("is_featured").notNull().default(false),
   featuredUntil: text("featured_until"),
