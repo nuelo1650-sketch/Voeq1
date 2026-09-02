@@ -171,8 +171,21 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
               {hasRating && (
                 <span data-testid="storefront-rating">★ {vendor.ratingAvg!.toFixed(1)} ({vendor.ratingCount} {vendor.ratingCount === 1 ? 'review' : 'reviews'})</span>
               )}
-              <span data-testid="storefront-campus">{vendor.campus}</span>
-              <Link href="/explore" data-testid="storefront-back" style={{ color: "var(--color-ink-muted, #6f6a5e)", textDecoration: "none" }}>
+              <span data-testid="storefront-campus" style={{ color: "var(--color-ink-muted, #6f6a5e)", fontSize: 13.5 }}>{vendor.campus}</span>
+              <span aria-hidden style={{ color: "var(--color-ink-subtle, #d9d2c3)" }}>·</span>
+              <Link
+                href="/explore"
+                data-testid="storefront-back"
+                style={{
+                  color: "var(--color-forest-mid, #2d5a3d)",
+                  textDecoration: "none",
+                  fontSize: 13.5,
+                  fontWeight: 550,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}
+              >
                 ← Explore
               </Link>
             </div>
