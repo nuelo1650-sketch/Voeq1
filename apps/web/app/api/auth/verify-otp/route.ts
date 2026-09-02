@@ -117,8 +117,15 @@ export async function POST(req: NextRequest) {
       to: identity.email,
       template: "WELCOME",
       vars: { name: identity.name || "there" },
-    }).catch(() => {
-      /* welcome email is best-effort; sendEmail logs its own failures */
+    }).then((r) => {
+      // P-A round 47: sendEmail returns {ok:false} on failure — the old
+      // .catch() only caught REJECTIONS; a returned failure was SILENT, so a
+      // broken welcome email looked like "no email sent" with no trace.
+      if (!r.ok) {
+        console.error(`[welcome] sendEmail FAILED for ${identity.email}: ${r.error}`);
+      } else {
+        console.log(`[welcome] sent to ${identity.email} (${r.id ?? "dev"})`);
+      }
     });
   }
 
