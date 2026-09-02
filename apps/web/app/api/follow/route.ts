@@ -55,5 +55,18 @@ export async function POST(req: Request) {
   }
 
   const result = await mockFollowRepo.toggle({ followerId: identity.id, vendorId });
+  // P-A round 39 (notifications): new_follower to the vendor on a real follow
+  // (not unfollow). No PII beyond a short first name.
+  if (result.following && vendor.identityId && vendor.identityId !== identity.id) {
+    const { mockNotificationRepo } = await import("@voeq/data");
+    const first = (identity.name?.trim() ?? "Someone").split(/\s+/)[0]?.slice(0, 24) || "Someone";
+    await mockNotificationRepo.create({
+      recipientId: vendor.identityId,
+      type: "new_follower",
+      title: `${first} followed you`,
+      body: `${first} started following ${vendor.name}`,
+      refId: vendor.id,
+    });
+  }
   return NextResponse.json({ ok: true, following: result.following });
 }

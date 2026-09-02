@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockCommentRepo, mockListingsRepo } from "@voeq/data";
+import { mockAuthRepo, mockCommentRepo, mockListingsRepo, mockVendorRepo } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
@@ -65,5 +65,20 @@ export async function POST(
   }
 
   const comment = await mockCommentRepo.create({ listingId: id, authorId: identity.id, body: text });
+  // P-A round 39 (notifications): notify the LISTING OWNER (vendor) of a new
+  // comment — in-app only, first name in copy, no PII leak. Resolve the owner
+  // through the vendor linked to this listing.
+  const ownerVendor = await mockVendorRepo.getById(listing.vendorId);
+  if (ownerVendor?.identityId && ownerVendor.identityId !== identity.id) {
+    const { mockNotificationRepo } = await import("@voeq/data");
+    const first = (identity.name?.trim() ?? "Someone").split(/\s+/)[0]?.slice(0, 24) || "Someone";
+    await mockNotificationRepo.create({
+      recipientId: ownerVendor.identityId,
+      type: "system",
+      title: `${first} commented on ${listing.title}`,
+      body: text.slice(0, 120),
+      refId: id,
+    });
+  }
   return NextResponse.json({ ok: true, comment });
 }

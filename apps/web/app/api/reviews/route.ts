@@ -3,6 +3,12 @@ import { cookies } from "next/headers";
 import { mockAuthRepo, mockReviewRepo, mockVendorRepo } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
+// P-A round 39: safe first-name for notification copy (never full identity).
+function usernameSafe(name: string): string {
+  const first = name.trim().split(/\s+/)[0] ?? name;
+  return first.slice(0, 24);
+}
+
 /**
  * POST /api/reviews — create/update a review for a vendor (Doc 09 §9.8: one per
  * shopper-vendor, upsert). Auth required. Cannot review your own vendor account.
@@ -43,5 +49,18 @@ export async function POST(req: Request) {
     rating,
     body: reviewBody.trim(),
   });
+  // P-A round 39 (notifications): notify the VENDOR of a new review (in-app;
+  // recipient = vendor identity). Reuses the real repo; never leaks the
+  // reviewer's identity into the notification body.
+  if (vendor.identityId && vendor.identityId !== identity.id) {
+    const { mockNotificationRepo } = await import("@voeq/data");
+    await mockNotificationRepo.create({
+      recipientId: vendor.identityId,
+      type: "new_review",
+      title: usernameSafe(identity.name) + " left a review",
+      body: `${rating}★ — ${reviewBody.trim().slice(0, 120)}`,
+      refId: vendor.id,
+    });
+  }
   return NextResponse.json({ ok: true, review });
 }
