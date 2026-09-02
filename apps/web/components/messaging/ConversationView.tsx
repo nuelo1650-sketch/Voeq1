@@ -89,12 +89,24 @@ export function ConversationView({
         });
         lastSeenIdRef.current = sseMsg.id;
         
-        // Clear from optimistic queue if it was a pending message
+        // Clear the optimistic (temp) bubble that showed while sending.
+        // P-A round 43 (fix DUPLICATE bubbles): this matched the optimistic
+        // message against the OFFLINE queue only — online sends live in the
+        // `optimistic` state, so the temp bubble survived and rendered twice.
+        // Match by clientMsgId (server echoes it back) OR by sent body.
+        setOptimistic((prev) => {
+          const match = prev.find(
+            (m) =>
+              (m.id !== undefined && m.id === sseMsg.id) ||
+              (m.body && sseMsg.body === m.body),
+          );
+          if (!match) return prev;
+          return prev.filter((m) => m !== match);
+        });
         const queued = getQueue(conversationId);
-        const match = queued.find((q) => q.body === sseMsg.body);
-        if (match) {
-          clearMessage(match.tempId);
-          setOptimistic((prev) => prev.filter((m) => m.clientMsgId !== match.tempId));
+        const qmatch = queued.find((q) => q.body === sseMsg.body);
+        if (qmatch) {
+          clearMessage(qmatch.tempId);
         }
       },
       
