@@ -3795,14 +3795,38 @@
   }
 }
 
-/* ===== Auth pages (VS2) — Functional tier, Cream role tokens ===== */
-/* Reuses InfoPageShell wrapper. Quiet, utility-first, no decorative motion. */
+/* ===== Auth pages (VS2) — P-A round 52 redesign: premium form system ===== */
+/* Kept the cream/forest/editorial bones; the FORM SYSTEM was the weak layer:
+   borderless inputs (looked like placeholders), off-palette blue checkbox,
+   unstyled Turnstile, flat card. All fixed below on the existing classes. */
 .auth-card {
   max-width: 440px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  background: var(--role-surface, #fffdf8);
+  border: 1px solid rgba(15, 42, 29, 0.08);
+  border-radius: 20px;
+  padding: var(--space-5) var(--space-5);
+  box-shadow: 0 18px 50px rgba(15, 42, 29, 0.10);
+  /* P-A round 52b: warm hairline + amber edge accent — ties it to landing */
+  position: relative;
+  overflow: hidden;
+}
+.auth-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-forest, #0f2a1d), var(--color-amber, #e8a33d));
+}
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
 }
 .auth-lede {
   font-family: var(--role-font-ui);
@@ -3830,9 +3854,9 @@
   gap: 2px;
   padding: var(--space-3);
   border: 1px solid var(--role-border);
-  border-radius: var(--radius);
+  border-radius: 14px;
   cursor: pointer;
-  background: var(--role-surface);
+  background: var(--role-bg);
   font-family: var(--role-font-ui);
 }
 .auth-intent-opt span {
@@ -3861,16 +3885,23 @@
 }
 .auth-field input {
   font-family: var(--role-font-ui);
-  font-size: var(--text-body);
+  font-size: 16px; /* iOS-safe (no zoom) */
   color: var(--role-text);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--role-border);
-  border-radius: var(--radius);
-  background: var(--role-bg);
+  padding: 14px 16px;
+  /* P-A round 52b: crisp 1.5px warm border + white fill so fields read as
+     controls against the cream card (52 was too subtle — 'flat voids') */
+  border: 1.5px solid rgba(15, 42, 29, 0.22);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: inset 0 1px 2px rgba(15, 42, 29, 0.05);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
 }
+.auth-field input::placeholder { color: var(--role-text-muted); opacity: .75; }
+.auth-field input:hover { border-color: rgba(15, 42, 29, 0.4); }
 .auth-field input:focus-visible {
-  outline: 2px solid var(--role-accent-strong);
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--role-accent-strong);
+  box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.22);
 }
 .auth-consent {
   display: flex;
@@ -3881,7 +3912,13 @@
   color: var(--role-text);
   line-height: var(--leading-body);
 }
-.auth-consent input { margin-top: 3px; }
+/* P-A round 52: brand the checkbox (was default BLUE — off-palette) */
+.auth-consent input {
+  margin-top: 3px;
+  accent-color: var(--color-forest, #0f2a1d);
+  width: 16px;
+  height: 16px;
+}
 .auth-consent a { color: var(--role-accent-strong); text-decoration: underline; }
 .auth-error {
   font-family: var(--role-font-ui);
@@ -3894,24 +3931,26 @@
   color: var(--role-danger);
   background: color-mix(in srgb, var(--role-danger) 8%, var(--role-surface));
   border: 1px solid color-mix(in srgb, var(--role-danger) 30%, transparent);
-  border-radius: var(--radius);
+  border-radius: 12px;
   padding: var(--space-3);
 }
 .auth-submit {
   font-family: var(--role-font-ui);
-  font-size: var(--text-body);
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 650;
   color: var(--role-on-accent);
   background: var(--role-accent-strong);
   border: none;
-  border-radius: var(--radius);
-  padding: var(--space-3) var(--space-4);
+  border-radius: 999px;
+  padding: 15px 24px;
   cursor: pointer;
-  transition: transform 120ms ease;
+  margin-top: 4px;
+  box-shadow: 0 8px 20px rgba(232, 163, 61, 0.28);
+  transition: transform 120ms ease, box-shadow 120ms ease;
 }
-.auth-submit:hover:not(:disabled) { transform: translateY(-1px); }
+.auth-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(232, 163, 61, 0.36); }
 .auth-submit:focus-visible { outline: 2px solid var(--role-accent-strong); outline-offset: 2px; }
-.auth-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.auth-submit:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
 
 .auth-divider {
   display: flex;
@@ -3928,6 +3967,15 @@
   flex: 1;
   height: 1px;
   background: var(--role-border);
+}
+/* P-A round 52: mute the Turnstile widget into the card's visual language */
+.auth-turnstile {
+  display: flex;
+  justify-content: center;
+  background: #f6f1e6;
+  border: 1px solid rgba(15, 42, 29, 0.10);
+  border-radius: 12px;
+  padding: 10px 12px;
 }
 
 .auth-google-btn {
