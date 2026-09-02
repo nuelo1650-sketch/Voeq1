@@ -24,10 +24,23 @@ export interface EnvReport {
 
 const WEB_REQUIRED = [
   "NEXT_PUBLIC_API_URL",
-  "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME",
-  "NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET",
   "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
 ] as const;
+
+// P-A round 40: runtime names are split across deploy dashboards (audit
+// finding F23). present() accept the canonical name OR its fallback twin, so
+// validation matches reality instead of failing on a legacy alias:
+//   SIGHTENGINE_USER        <-> SIGHTENGINE_API_USER
+//   RESEND_FROM_EMAIL       <-> RESEND_FROM
+//   SUPER_ADMIN_EMAIL       <-> VOEQ_SUPER_ADMIN_EMAIL
+//   CLOUDINARY_CLOUD_NAME   <-> NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME (api-side)
+const ALIASES: Record<string, string[]> = {
+  SIGHTENGINE_USER: ["SIGHTENGINE_API_USER"],
+  SIGHTENGINE_SECRET: ["SIGHTENGINE_API_SECRET"],
+  RESEND_FROM_EMAIL: ["RESEND_FROM"],
+  SUPER_ADMIN_EMAIL: ["VOEQ_SUPER_ADMIN_EMAIL"],
+  CLOUDINARY_CLOUD_NAME: ["NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME"],
+};
 
 const API_REQUIRED = [
   "DATABASE_URL",
@@ -48,7 +61,12 @@ const API_REQUIRED = [
 
 function present(name: string): boolean {
   const v = process.env[name];
-  return v !== undefined && v !== "";
+  if (v !== undefined && v !== "") return true;
+  // Accept the fallback twin (e.g. SIGHTENGINE_API_USER for SIGHTENGINE_USER).
+  return (ALIASES[name] ?? []).some((a) => {
+    const av = process.env[a];
+    return av !== undefined && av !== "";
+  });
 }
 
 export function validateEnv(target: DeployTarget): EnvReport {
