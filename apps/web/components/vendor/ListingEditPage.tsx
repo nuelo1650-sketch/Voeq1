@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { prepareImageForUpload } from "@/lib/image-prep";
 import { X, Upload, GripVertical, AlertCircle, Trash2 } from "lucide-react";
 import { categories } from "@voeq/data";
 import type { Listing } from "@voeq/data";
@@ -113,27 +114,28 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
       setPhotos((prev) => [...prev, { id, url: preview, alt: "", uploading: true }]);
 
       try {
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        // P-A round 56: compress BEFORE upload (same fix as listing create).
+        const prep = await prepareImageForUpload(file);
+        if ("error" in prep) {
+          setErrors((prev) => ({ ...prev, photos: prep.error }));
+          setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false } : p)));
+          continue;
+        }
         const res = await fetch("/api/images/upload", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             fileName: file.name,
             context: "listing_photo",
-            mimeType: file.type,
-            bytes: file.size,
-            dataUrl,
+            mimeType: prep.mimeType,
+            bytes: prep.bytes,
+            dataUrl: prep.dataUrl,
             existingCount: photos.length,
           }),
         });
         const result = await res.json();
         if (!res.ok || !result.url) {
-          throw new Error(result.error ?? "Upload failed");
+          throw new Error((result.reason as string) || result.error || "Upload failed");
         }
         URL.revokeObjectURL(preview);
         setPhotos((prev) =>

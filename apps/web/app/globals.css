@@ -5496,3 +5496,9 @@ header.AppShell,
 /* P-A round 28: price inputs can never exceed the filter panel */
 .voeq-grid + [data-testid=explore-filters] input[type=number],
 [data-testid=explore-filters] input[type=number] { min-width: 0; max-width: 100%; }
+
+/* ===== P-A round 56: messaging entrance animation ===== */
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}

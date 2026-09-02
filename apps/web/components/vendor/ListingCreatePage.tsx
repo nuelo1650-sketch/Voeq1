@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { prepareImageForUpload } from "@/lib/image-prep";
 import Link from "next/link";
 import { X, Upload, GripVertical, AlertCircle } from "lucide-react";
 import { categories } from "@voeq/data";
@@ -145,27 +146,30 @@ export function ListingCreatePage() {
       setPhotos((prev) => [...prev, { id, url: preview, alt: "", uploading: true }]);
 
       try {
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        // P-A round 56: compress BEFORE upload (Android gallery photos are
+        // 4-12MB; the 5MB server cap silently killed them + the client read
+        // result.error which the API never returns). One downscaled JPEG now.
+        const prep = await prepareImageForUpload(file);
+        if ("error" in prep) {
+          setErrors((prev) => ({ ...prev, photos: prep.error }));
+          setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false } : p)));
+          continue;
+        }
         const res = await fetch("/api/images/upload", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             fileName: file.name,
             context: "listing_photo",
-            mimeType: file.type,
-            bytes: file.size,
-            dataUrl,
+            mimeType: prep.mimeType,
+            bytes: prep.bytes,
+            dataUrl: prep.dataUrl,
             existingCount: photos.length,
           }),
         });
         const result = await res.json();
         if (!res.ok || !result.url) {
-          throw new Error(result.error ?? "Upload failed");
+          throw new Error((result.reason as string) || result.error || "Upload failed");
         }
         URL.revokeObjectURL(preview);
         setPhotos((prev) =>

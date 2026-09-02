@@ -12,7 +12,11 @@ const schema = z.object({
   name: z.string().trim().min(2, "Business name is required."),
   description: z.string().trim().min(50, "Description must be at least 50 characters."),
   categoryId: z.string().min(1, "Choose a category."),
-  profilePhotoUrl: z.string().url().optional().or(z.literal("")),
+  // P-A round 56: profilePhotoUrl is null when no photo was chosen. The old
+  // `.optional()` accepts undefined ONLY — a null (the wizard's state default)
+  // made Zod fail with a generic "Validation failed" even though every visible
+  // field was filled. Accept null/empty/url.
+  profilePhotoUrl: z.string().url().optional().or(z.literal("")).or(z.undefined()).nullable(),
 });
 
 export async function POST(req: NextRequest) {

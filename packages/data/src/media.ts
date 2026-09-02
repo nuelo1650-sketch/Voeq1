@@ -168,10 +168,17 @@ async function sightengineModerate(url: string): Promise<ModerationResult> {
       signal: AbortSignal.timeout(15_000),
       body: params,
     });
-    if (!r.ok) return { ok: false, reason: "Content review unavailable. Please try again." };
+    // P-A round 56: log the REAL status/body so diagnosis isn't blind. The old
+    // code mapped every non-200 to "Content review unavailable" — meaningless.
+    if (!r.ok) {
+      const bodyText = await r.text().catch(() => "");
+      console.error(`[sightengine] HTTP ${r.status} for ${url}: ${bodyText.slice(0, 300)}`);
+      return { ok: false, reason: "Content review unavailable. Please try again." };
+    }
     json = await r.json();
-  } catch {
+  } catch (e) {
     // Network/timeout -> fail closed.
+    console.error(`[sightengine] fetch failed for ${url}: ${e instanceof Error ? e.message : String(e)}`);
     return { ok: false, reason: "Content review unavailable. Please try again." };
   }
 
@@ -213,7 +220,10 @@ export async function uploadAndModerate(input: UploadInput): Promise<ModerationR
   let uploaded: { url: string; publicId: string };
   try {
     uploaded = await cloudinaryUpload(input);
-  } catch {
+  } catch (e) {
+    // P-A round 56: the old catch threw away the reason (e.g. Cloudinary 400
+    // "Could not decode base64") — diagnosis was blind. Log the real error.
+    console.error(`[cloudinary] upload failed: ${e instanceof Error ? e.message : String(e)}`);
     return { ok: false, reason: "Upload failed. Please try again." };
   }
 
