@@ -132,7 +132,8 @@ export async function GET(req: NextRequest) {
     await logAudit("google.login-linked", byEmail.id, {});
     const session = await createSession(byEmail.id);
     const redirectUrl = new URL("/consent", req.url);
-    redirectUrl.searchParams.set("next", "/");
+    // P-A round 65b: staff identities continue to /admin, not the landing page.
+    redirectUrl.searchParams.set("next", byEmail.staffRole ? "/admin" : "/");
     redirectUrl.searchParams.set("session", session.id);
     // Auth status + session cookie for the linked account.
     if (session) {
