@@ -48,6 +48,14 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage |
   // HEIC/HEIF: browsers can't draw these to canvas reliably — send as-is so
   // the server's format guard gives a precise reason, not a silent blank.
   if (/\.heic$/i.test(file.name) || /image\/heic/i.test(file.type)) {
+    // P-A round 58 (R2-A1): a size pre-check here prevents the DOOMED payload.
+    // An iPhone HEIC > ~7.9MB base64-inflates past Next's req.json() body wall
+    // (verified: 12MB HEIC → 400 invalid_body), so the server's clear size
+    // guard NEVER runs and the user sees a cryptic error. Fail fast with the
+    // honest reason instead of shipping a payload that can't parse.
+    if (file.size > 5 * 1024 * 1024) {
+      return { error: "HEIC photos over 5MB can't be uploaded. Please convert or resize the image first." };
+    }
     return {
       dataUrl: originalDataUrl,
       bytes: file.size,
