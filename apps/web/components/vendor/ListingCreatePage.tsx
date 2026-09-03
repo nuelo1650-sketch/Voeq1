@@ -261,9 +261,11 @@ export function ListingCreatePage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--color-glass-white)", padding: "var(--space-4)" }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
-        {/* P-A round 55 (W2-1): PUBLISH SUCCESS state — visible confirmation
-            + clear next actions instead of a silent jump. */}
-        {published && (
+        {/* P-A round 72 (FIX 'appeared at the top'): when published, show ONLY
+            the success state — the form is hidden. Previously the success panel
+            rendered ABOVE the header, so after clicking Publish the page showed
+            the banner at top and the stale form below — confusing. */}
+        {published ? (
           <div
             data-testid="listing-published-success"
             style={{
@@ -271,9 +273,9 @@ export function ListingCreatePage() {
               border: "1px solid rgba(15,42,29,.12)",
               borderRadius: 18,
               padding: "var(--space-5)",
-              marginBottom: "var(--space-4)",
               textAlign: "center",
               fontFamily: "var(--role-font-ui)",
+              marginTop: "var(--space-5)",
             }}
           >
             <div style={{ fontSize: 38, marginBottom: 8 }}>🎉</div>
@@ -323,11 +325,12 @@ export function ListingCreatePage() {
                 }}
               >
                 Add another
-              </button>
-            </div>
-          </div>
-        )}
-        {/* Header */}
+                </button>
+                </div>
+                </div>
+                ) : (
+                <>
+                {/* Header */}
         <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-4)" }}>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, margin: 0, color: "var(--color-forest)" }}>
             Create a new listing
@@ -686,6 +689,8 @@ export function ListingCreatePage() {
             </button>
           </div>
         </form>
+        </>
+        )}
       </div>
     </div>
   );

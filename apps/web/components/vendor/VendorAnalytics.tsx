@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { TrendingUp, MessageCircle, Users, Heart, Star, Calendar } from "lucide-react";
+import { TrendingUp, MessageCircle, Users, Heart, Star, Calendar, Eye } from "lucide-react";
 import type { Vendor, Listing } from "@voeq/data";
 
 /**
@@ -30,6 +30,8 @@ export function VendorAnalytics({
     ratingAvg: number;
     openNow: boolean | null;
   } | null>(null);
+  // P-A round 72: real weekly numbers (page_events views + messages).
+  const [weekly, setWeekly] = useState<{ views: number; messages: number }>({ views: 0, messages: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +52,15 @@ export function VendorAnalytics({
       })
       .catch(() => {})
       .finally(() => !cancelled && setLoading(false));
+
+    // P-A round 72: real weekly metrics (views/messages from page_events).
+    fetch("/api/vendor/weekly")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d?.ok) return;
+        setWeekly({ views: d.week?.views ?? 0, messages: d.week?.messages ?? 0 });
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -111,10 +122,11 @@ export function VendorAnalytics({
             marginBottom: "var(--space-4)",
           }}
         >
-          {/* P-A round 30 (DATA HONESTY): removed the fabricated "Views" card —
-              actual view tracking does not exist, so `views = saveCount +
-              followerCount` was a lie. Real metrics only. */}
-          <StatCard icon={<MessageCircle size={24} />} label="Messages" value={analytics ? "—" : 0} />
+          {/* P-A round 72 (FIX 'analytics is mock/bare'): Messages was a
+              hardcoded "—" with no fetch. Pull from /api/vendor/analytics +
+              /api/vendor/weekly (real page_events counts). */}
+          <StatCard icon={<MessageCircle size={24} />} label="Messages" value={weekly.messages} />
+          <StatCard icon={<Eye size={24} />} label="Views (7d)" value={weekly.views} />
           <StatCard icon={<Users size={24} />} label="Followers" value={display.followerCount} />
           <StatCard icon={<Heart size={24} />} label="Saves" value={display.saveCount} />
           <StatCard icon={<Star size={24} />} label="Reviews" value={display.reviewCount} />
@@ -224,7 +236,10 @@ function StatCard({
       <div style={{ color: "var(--color-forest-mid)" }}>{icon}</div>
       <div>
         <p style={{ margin: 0, fontSize: 32, fontWeight: 700, fontFamily: "var(--font-display)", color: "var(--color-forest)" }}>
-          {value === 0 ? "—" : value}
+          {/* P-A round 72: 0 is a REAL number — show it. The old rule
+              (value === 0 ? "—") hid live zeroes as dashes, making the page
+              look like mock/empty data when it was just an honest 0. */}
+          {value}
         </p>
         <p style={{ margin: 0, fontSize: 14, color: "var(--color-ink-muted)", marginTop: 4 }}>{label}</p>
       </div>

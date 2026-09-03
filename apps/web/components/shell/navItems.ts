@@ -25,7 +25,7 @@ export const PRIMARY_NAV: Record<AppRole, NavItem[]> = {
   ],
   vendor: [
     { href: "/vendor/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/vendor/listings/create", label: "Listings", icon: Package },
+    { href: "/vendor/listings", label: "Listings", icon: Package },
     { href: "/vendor/analytics", label: "Analytics", icon: BarChart3 },
     { href: "/messages", label: "Messages", icon: MessageSquare },
     { href: "/settings", label: "You", icon: User },
@@ -44,8 +44,9 @@ export const SIDE_NAV: Record<Exclude<AppRole, "staff">, NavItem[]> = {
   ],
   vendor: [
     { href: "/vendor/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/vendor/listings/create", label: "Listings", icon: Package },
+    { href: "/vendor/listings", label: "Listings", icon: Package },
     { href: "/vendor/analytics", label: "Analytics", icon: BarChart3 },
+    { href: "/explore", label: "Explore", icon: Search },
     { href: "/messages", label: "Messages", icon: MessageSquare },
     { href: "/settings", label: "You", icon: User },
   ],

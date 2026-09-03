@@ -37,8 +37,14 @@ export default async function SettingsPage() {
   }));
   const campusList = await mockCampusRepo.list(identity.id);
 
+  // P-A round 72: shell role follows the real persona — the old code
+  // hardcoded role="shopper", so a VENDOR clicking "You" got the shopper
+  // bottom nav (Home/Explore/Saved/Messages/You). Same bug class as /home.
+  const vendor = identity.vendorId ? await mockVendorRepo.getById(identity.vendorId) : null;
+  const shellRole = vendor ? "vendor" : "shopper";
+
   return (
-    <AppShell role="shopper" userName={identity.name} staffRole={staff?.staffRole ?? null}>
+    <AppShell role={shellRole} userName={vendor?.name ?? identity.name ?? "You"} staffRole={staff?.staffRole ?? null}>
       <main
         data-testid="settings-page"
         style={{
