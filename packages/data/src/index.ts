@@ -1,6 +1,7 @@
 export * from "./interfaces";
 export * from "./mock";
 export * from "./auth";
+export * from "./auth-events";
 export * from "./rate-limit";
 export * from "./audit";
 export * from "./events";

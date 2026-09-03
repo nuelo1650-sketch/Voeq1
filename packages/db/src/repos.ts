@@ -138,6 +138,11 @@ export const realIdentityRepo = {
   },
   async setStatus(iid: string, status: AccountStatus): Promise<void> {
     await getDb().update(s.identities).set({ accountStatus: status, updatedAt: now() }).where(eq(s.identities.id, iid));
+    // Eager revoke (staff batch 1): parity with the mock path — a suspend/ban
+    // kills every live session NOW, not lazily at the next request.
+    if (status === "suspended" || status === "banned" || status === "deleted") {
+      await getDb().delete(s.sessions).where(eq(s.sessions.identityId, iid));
+    }
   },
 };
 
@@ -434,6 +439,52 @@ export const realPageEventStore = {
       counts.set(r.type, (counts.get(r.type) ?? 0) + 1);
     }
     return [...counts.entries()].map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
+  },
+};
+
+// ---- AuthEventStore (staff batch 1 / P6a) -----------------------------------
+// Append-only authentication forensics: who authenticated, from which IP/device,
+// when — including failures. Readable by admin+ staff only (investigation layer).
+export const realAuthEventStore = {
+  async log(event: {
+    identityId?: string | null;
+    event: string;
+    email?: string | null;
+    ip?: string | null;
+    userAgent?: string | null;
+  }): Promise<void> {
+    await getDb().insert(s.authEvents).values({
+      id: id(),
+      identityId: event.identityId ?? null,
+      event: event.event,
+      email: event.email ?? null,
+      ip: event.ip ?? null,
+      userAgent: event.userAgent ? event.userAgent.slice(0, 300) : null,
+      at: now(),
+    });
+  },
+  async queryBy(filter: { identityId?: string; email?: string; limit?: number }): Promise<Array<{
+    id: string;
+    identityId: string | null;
+    event: string;
+    email: string | null;
+    ip: string | null;
+    userAgent: string | null;
+    at: string;
+  }>> {
+    let q = getDb().select().from(s.authEvents).orderBy(desc(s.authEvents.at));
+    if (filter.identityId) q = q.where(eq(s.authEvents.identityId, filter.identityId)) as typeof q;
+    if (filter.email) q = q.where(eq(s.authEvents.email, filter.email)) as typeof q;
+    const rows = await q.limit(filter.limit ?? 50);
+    return rows.map((r) => ({
+      id: r.id,
+      identityId: r.identityId ?? null,
+      event: r.event,
+      email: r.email ?? null,
+      ip: r.ip ?? null,
+      userAgent: r.userAgent ?? null,
+      at: r.at,
+    }));
   },
 };
 
