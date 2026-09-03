@@ -407,6 +407,7 @@ export type NotificationType =
   | "review_response"
   | "new_follower"
   | "comment"
+  | "account_action"
   | "system";
 
 export interface Notification {

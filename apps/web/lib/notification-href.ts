@@ -54,6 +54,9 @@ export function notificationHref(
     case "comment":
       return refId ? `/listing/${refId}` : "/explore";
     case "system":
+      // Enforcement notices (warn/suspend/ban) point at account settings, where
+      // the user can see their status and reach support to appeal.
+      if (type === "account_action") return "/settings";
       if (viewerRole === "staff") return "/admin";
       if (refId && viewerRole === "vendor") return "/vendor/dashboard";
       return "/explore";

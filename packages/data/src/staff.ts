@@ -101,7 +101,7 @@ export function canAccountAction(
   actorId: string,
   targetId: string,
   targetRole: StaffRole | null | undefined,
-  action: "suspend" | "ban" | "reinstate",
+  action: "warn" | "suspend" | "ban" | "reinstate",
 ): { ok: boolean; reason?: string } {
   if (!actorRole || ROLE_RANK[actorRole] < ROLE_RANK.admin) {
     return { ok: false, reason: "admin_required" };
