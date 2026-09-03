@@ -7,6 +7,8 @@ import {
   logAudit,
   isConsentCurrent,
   liftExpiredSuspension,
+  recordAuthEvent,
+  clientIpFrom,
 } from "@voeq/data";
 import { z } from "zod";
 import { verifyTurnstile } from "@/lib/turnstile";
@@ -66,6 +68,7 @@ export async function POST(req: NextRequest) {
   // Uniform response: never reveal whether the email exists.
   if (!identity || !identity.passwordHash) {
     await logAudit("login.failed", identity?.id ?? null, { reason: "no_identity_or_no_pw" });
+    await recordAuthEvent({ identityId: identity?.id ?? null, event: "login_failed", email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
     return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
   }
 
@@ -77,6 +80,7 @@ export async function POST(req: NextRequest) {
   }
   if (!ok) {
     await logAudit("login.failed", identity.id, { reason: "bad_password" });
+    await recordAuthEvent({ identityId: identity.id, event: "login_failed", email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
     return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
   }
 
@@ -123,6 +127,7 @@ export async function POST(req: NextRequest) {
     expires: new Date(session.expiresAt),
   });
   await logAudit("login.success", identity.id, { remember: rememberSession, consentOk });
+  await recordAuthEvent({ identityId: identity.id, event: "login", email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
   return res;
 }
 

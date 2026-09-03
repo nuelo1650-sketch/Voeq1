@@ -17,7 +17,7 @@ export type AuthEventKind =
   | "login_failed"
   | "signup"
   | "otp_verified"
-  | "google_callback"
+  | "google_login"
   | "account_action";
 
 export interface AuthEventInput {

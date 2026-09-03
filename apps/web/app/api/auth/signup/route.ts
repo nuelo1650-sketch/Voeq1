@@ -7,6 +7,8 @@ import {
   checkRateLimit,
   logAudit,
   sendEmail,
+  recordAuthEvent,
+  clientIpFrom,
 } from "@voeq/data/server";
 import { z } from "zod";
 import { verifyTurnstile } from "@/lib/turnstile";
@@ -149,6 +151,7 @@ export async function POST(req: NextRequest) {
   
   const pendingToken = await issuePendingToken(email, "registration");
   await logAudit("signup.initiated", identity.id, { method: "email", intent });
+  await recordAuthEvent({ identityId: identity.id, event: "signup", email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
 
   return NextResponse.json({ pendingToken, purpose: "registration" });
 }

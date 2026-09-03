@@ -10,6 +10,8 @@ import {
   checkRateLimit,
   logAudit,
   sendEmail,
+  recordAuthEvent,
+  clientIpFrom,
 } from "@voeq/data/server";
 import { z } from "zod";
 
@@ -100,6 +102,7 @@ export async function POST(req: NextRequest) {
   });
 
   await logAudit("signup.verified", identity.id, { method: identity.method });
+  await recordAuthEvent({ identityId: identity.id, event: "otp_verified", email: identity.email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
 
   // Seed one honest system notification (VS4.8) — welcome, not a fake count.
   await mockNotificationRepo.create({

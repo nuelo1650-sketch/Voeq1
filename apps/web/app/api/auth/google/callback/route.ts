@@ -9,6 +9,8 @@ import {
   logAudit,
   sendEmail,
   isConsentCurrent,
+  recordAuthEvent,
+  clientIpFrom,
 } from "@voeq/data/server";
 import { roleHomeFor } from "@/lib/postAuth";
 
@@ -124,6 +126,7 @@ export async function GET(req: NextRequest) {
       path: "/",
     });
     await logAudit("google.login", existing.id, { consentOk });
+    await recordAuthEvent({ identityId: existing.id, event: "google_login", email: existing.email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
     return r;
   }
 
@@ -136,11 +139,13 @@ export async function GET(req: NextRequest) {
   if (byEmail) {
     if (byEmail.accountStatus === "suspended" || byEmail.accountStatus === "banned") {
       await logAudit("google.login-email-denied", byEmail.id, { status: byEmail.accountStatus });
+      await recordAuthEvent({ identityId: byEmail.id, event: "login_failed", email: byEmail.email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
       return NextResponse.redirect(new URL("/account-denied?reason=" + byEmail.accountStatus, req.url));
     }
     // Link the Google subject to the existing identity (idempotent).
     await mockIdentityRepo.patch(byEmail.id, { googleSubject: profile.sub });
     await logAudit("google.login-linked", byEmail.id, {});
+    await recordAuthEvent({ identityId: byEmail.id, event: "google_login", email: byEmail.email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
     const session = await createSession(byEmail.id);
     // P-A round 67: linked accounts skip /consent when their acceptance is
     // current (same fix as the existing-user branch — no re-agreement wall).
@@ -192,6 +197,7 @@ export async function GET(req: NextRequest) {
   });
 
   await logAudit("google.signup", identity.id, {});
+  await recordAuthEvent({ identityId: identity.id, event: "signup", email: profile.email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
 
   const redirectUrl = new URL(`/verify-otp?token=${pendingToken}&purpose=google_verify`, req.url);
   return NextResponse.redirect(redirectUrl);
