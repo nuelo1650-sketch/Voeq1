@@ -19,6 +19,7 @@ export * from "./feature-flags";
 export * from "./retention";
 export * from "./admin-notifications";
 export * from "./user-notifications";
+export * from "./appeal-token";
 export * from "./enforcement-sweep";
 export * from "./email-templates";
 export * from "./env";

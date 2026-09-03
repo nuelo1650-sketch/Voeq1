@@ -11,9 +11,29 @@
  * third party, so echoing it into the target's own notification is safe.
  */
 import { mockNotificationRepo } from "./shopper";
+import { mockIdentityRepo } from "./auth";
+import { appealLink } from "./appeal-token";
 import type { NotificationType } from "./interfaces";
 
 export const APPEAL_LINE = "If you believe this is a mistake, email support@voeq.ng to appeal.";
+
+/**
+ * Batch 2 (T6): the promise becomes a path. Primary = a one-click appeal link
+ * bound to this identity (HMAC token, verified at /api/auth/appeal); the email
+ * stays as fallback so the copy is honest even if the link can't be minted.
+ * Falls back to the plain email line if the identity/email/secret is missing.
+ */
+async function appealLineFor(recipientId: string): Promise<string> {
+  try {
+    const ident = await mockIdentityRepo.getById(recipientId);
+    if (ident?.email) {
+      return `If you believe this is a mistake, appeal here: ${appealLink(ident.id, ident.email)} (or email support@voeq.ng).`;
+    }
+  } catch {
+    /* no secret / lookup failed — keep the email-only promise honest */
+  }
+  return APPEAL_LINE;
+}
 
 export type EnforcementAction = "warn" | "suspend" | "ban" | "reinstate" | "auto_reinstate";
 
@@ -47,7 +67,7 @@ export async function notifyEnforcement(opts: {
   if (opts.action === "reinstate") {
     parts.push("A staff member has reactivated your account. You can use Voeq normally again.");
   }
-  parts.push(APPEAL_LINE);
+  parts.push(await appealLineFor(opts.recipientId));
   const type: NotificationType = "account_action";
   await mockNotificationRepo.create({
     recipientId: opts.recipientId,
@@ -67,7 +87,7 @@ export async function notifyContentAction(opts: {
 }): Promise<void> {
   const parts: string[] = [];
   if (opts.reason) parts.push(`Reason: ${opts.reason}`);
-  parts.push(APPEAL_LINE);
+  parts.push(await appealLineFor(opts.recipientId));
   await mockNotificationRepo.create({
     recipientId: opts.recipientId,
     type: "account_action",
