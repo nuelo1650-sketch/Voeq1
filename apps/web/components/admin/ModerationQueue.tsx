@@ -7,6 +7,7 @@ import { AlertCircle, CheckCircle, Flag, User, X, Check, Eye, EyeOff } from "luc
 import type { Capability } from "@voeq/data";
 import { UsersPanel } from "./UsersPanel";
 import { ListingsPanel } from "./ListingsPanel";
+import { CommentsPanel } from "./CommentsPanel";
 
 /**
  * K3c.6 — Moderation queue component.
@@ -428,6 +429,14 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
                 ))}
               </div>
             )}
+          </section>
+
+          <section data-testid="comments-tab" style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 20, marginTop: 16 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px", color: "var(--role-text)" }}>Comment Moderation</h2>
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--role-text-muted)" }}>
+              Hide is reversible (audited) and notifies the author with your reason. Hidden comments disappear from the listing publicly.
+            </p>
+            <CommentsPanel capabilities={capabilities} />
           </section>
 
           <section data-testid="listings-tab" style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 20, marginTop: 16 }}>
