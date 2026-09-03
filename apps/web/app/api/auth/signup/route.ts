@@ -82,6 +82,22 @@ export async function POST(req: NextRequest) {
         { status: 409 },
       );
     }
+    // Staff batch 1 — ban evasion block: a banned/suspended email must NOT be
+    // able to mint a fresh registration (OTP path would otherwise hand them a
+    // clean account). Deliberate enumeration trade-off: the user needs to know
+    // they are banned and how to appeal.
+    if (existing.accountStatus === "banned") {
+      return NextResponse.json(
+        { error: "This email is banned from Voeq. Email support@voeq.ng to appeal." },
+        { status: 403 },
+      );
+    }
+    if (existing.accountStatus === "suspended") {
+      return NextResponse.json(
+        { error: "This account is suspended. Log in to see details, or email support@voeq.ng to appeal." },
+        { status: 403 },
+      );
+    }
     // Pretend success; do not reveal the account exists.
     return NextResponse.json({
       pendingToken: await issuePendingToken(email, "registration"),
