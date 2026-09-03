@@ -901,6 +901,14 @@ export const realStaffRepo = {
     const row = await getDb().select().from(s.staffCases).where(eq(s.staffCases.id, caseId)).limit(1);
     return row[0] ? mapStaffCase(row[0]) : null;
   },
+  async reopenCase(caseId: string): Promise<StaffCase | null> {
+    await getDb()
+      .update(s.staffCases)
+      .set({ status: "open", resolution: null })
+      .where(eq(s.staffCases.id, caseId));
+    const row = await getDb().select().from(s.staffCases).where(eq(s.staffCases.id, caseId)).limit(1);
+    return row[0] ? mapStaffCase(row[0]) : null;
+  },
 };
 
 // ---- Relationship repos (wishlist / follow / like) --------------------------

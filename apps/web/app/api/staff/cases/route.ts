@@ -3,10 +3,14 @@ import {
   mockStaffRepo,
   mockIdentityRepo,
   mockNotificationRepo,
+  mockListingsRepo,
+  mockVendorRepo,
+  mockAuthEventStore,
   logAudit,
   notifyStaff,
   notifyEnforcement,
   canAccountAction,
+  hasCapability,
   recordAuthEvent,
   clientIpFrom,
 } from "@voeq/data";
@@ -29,13 +33,80 @@ import { requireCapability } from "@/lib/session";
  *    decision with the staff resolution verbatim — no silent denials.
  */
 export async function GET(req: NextRequest) {
+  let actor;
   try {
-    await requireCapability("case.review");
+    actor = await requireCapability("case.review");
   } catch (e) {
     if (e instanceof Response) return new NextResponse(null, { status: e.status });
     throw e;
   }
-  const queue = req.nextUrl.searchParams.get("queue") ?? "";
+  const { searchParams } = req.nextUrl;
+  const queue = searchParams.get("queue") ?? "";
+
+  // Batch 2 (T9): ?id=<caseId> returns the case DETAIL — the case itself plus
+  // resolved subject/target context and a forensic timeline of the subject's
+  // auth events since the case opened. Raw IPs follow the same rule as
+  // /api/staff/users: only staff with account.suspend see them.
+  const id = searchParams.get("id");
+  if (id) {
+    const all = await mockStaffRepo.listCases("");
+    const theCase = all.find((c) => c.id === id);
+    if (!theCase) return NextResponse.json({ ok: false, error: "case_not_found" }, { status: 404 });
+
+    const payload = (theCase.payload ?? {}) as Record<string, unknown>;
+    const subjectId = typeof payload.identityId === "string" ? payload.identityId : "";
+    const targetListingId = typeof payload.targetId === "string" && payload.targetType === "listing" ? payload.targetId : "";
+    const targetVendorId = typeof payload.targetId === "string" && payload.targetType === "vendor" ? payload.targetId : "";
+
+    const [subject, targetListing, targetVendor] = await Promise.all([
+      subjectId ? mockIdentityRepo.getById(subjectId).catch(() => null) : Promise.resolve(null),
+      targetListingId ? mockListingsRepo.getById(targetListingId).catch(() => null) : Promise.resolve(null),
+      targetVendorId ? mockVendorRepo.getById(targetVendorId).catch(() => null) : Promise.resolve(null),
+    ]);
+
+    const maySeeRawIp = hasCapability(actor.staffRole, "account.suspend");
+    let timeline: Array<{ event: string; at: string; userAgent: string | null; ip?: string | null }> = [];
+    if (subjectId) {
+      const since = theCase.createdAt ?? undefined;
+      const events = await mockAuthEventStore
+        .queryBy({ identityId: subjectId, limit: 50 })
+        .catch(() => []);
+      timeline = events
+        .filter((e) => !since || e.at >= since)
+        .map((e) => ({
+          event: e.event,
+          at: e.at,
+          userAgent: e.userAgent ?? null,
+          ip: maySeeRawIp ? e.ip : undefined,
+        }));
+    }
+
+    return NextResponse.json({
+      ok: true,
+      case: theCase,
+      subject: subject
+        ? {
+            id: subject.id,
+            email: subject.email,
+            name: subject.name,
+            role: subject.role,
+            staffRole: subject.staffRole,
+            accountStatus: subject.accountStatus ?? "active",
+          }
+        : subjectId
+          ? { id: subjectId, deleted: true }
+          : null,
+      target: targetListing
+        ? { kind: "listing", id: targetListing.id, title: targetListing.title, status: targetListing.status, isPublished: targetListing.isPublished, vendorId: targetListing.vendorId }
+        : targetVendor
+          ? { kind: "vendor", id: targetVendor.id, name: targetVendor.name, status: targetVendor.status }
+          : targetListingId || targetVendorId
+            ? { kind: payload.targetType ?? "unknown", id: targetListingId || targetVendorId, missing: true }
+            : null,
+      timeline,
+    });
+  }
+
   const cases = await mockStaffRepo.listCases(queue);
   if (queue === "appeals") {
     // Resolve current subject status once per identity, not once per case.
@@ -65,7 +136,7 @@ export async function POST(req: NextRequest) {
     throw e;
   }
 
-  let body: { caseId?: string; action?: "assign" | "resolve" | "dismiss"; assignedTo?: string; resolution?: string; reinstate?: boolean };
+  let body: { caseId?: string; action?: "assign" | "resolve" | "dismiss" | "reopen" | "note"; assignedTo?: string; resolution?: string; reinstate?: boolean; note?: string };
   try {
     body = await req.json();
   } catch {
@@ -100,6 +171,21 @@ export async function POST(req: NextRequest) {
   if (action === "assign") {
     const assignedTo = typeof body.assignedTo === "string" ? body.assignedTo.trim() : actor.id;
     result = await mockStaffRepo.assignCase(caseId, assignedTo);
+  } else if (action === "reopen") {
+    // Batch 2 (T9): a closed case that needs another look goes back to open.
+    // Resolution text is cleared (the repo sets it null) so the drawer never
+    // shows a stale decision next to an OPEN pill.
+    result = await mockStaffRepo.reopenCase(caseId);
+  } else if (action === "note") {
+    // Batch 2 (T9): internal staff note — appended to payload.notes (JSONB
+    // merge replaces the array wholesale, so we read-modify-write). Never
+    // shown to the subject; it is staff working context, not a decision.
+    const text = typeof body.note === "string" ? body.note.trim() : "";
+    if (text.length < 2 || text.length > 2000) return NextResponse.json({ error: "note_invalid" }, { status: 400 });
+    const existingNotes = Array.isArray(theCase.payload?.notes) ? (theCase.payload.notes as unknown[]) : [];
+    result = await mockStaffRepo.patchCasePayload(caseId, {
+      notes: [...existingNotes, { at: new Date().toISOString(), by: actor.id, text }],
+    });
   } else {
     const resolution = typeof body.resolution === "string" ? body.resolution.trim() : "";
     if (resolution.length < 1) return NextResponse.json({ error: "resolution_required" }, { status: 400 });

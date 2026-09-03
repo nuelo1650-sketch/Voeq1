@@ -177,6 +177,8 @@ export interface StaffRepo {
   resolveCase(caseId: string, resolution: string, status?: "resolved" | "dismissed"): Promise<StaffCase | null>;
   /** Batch 2 (T7): merge fields into a case's JSONB payload (appeal amendments). */
   patchCasePayload(caseId: string, patch: Record<string, unknown>): Promise<StaffCase | null>;
+  /** Batch 2 (T9): reopen a closed case (resolved/dismissed -> open). */
+  reopenCase(caseId: string): Promise<StaffCase | null>;
 }
 
 export interface SearchRepo {

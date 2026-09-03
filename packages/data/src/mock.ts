@@ -245,6 +245,13 @@ const mockStaffRepoImpl: StaffRepo = {
     c.payload = { ...(c.payload ?? {}), ...patch };
     return c;
   },
+  async reopenCase(caseId) {
+    const c = staffCases.find((x) => x.id === caseId);
+    if (!c) return null;
+    c.status = "open";
+    c.resolution = null;
+    return c;
+  },
 };
 
 export const mockSearchRepo: SearchRepo = {
