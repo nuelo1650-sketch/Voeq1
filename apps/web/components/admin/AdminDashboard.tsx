@@ -144,7 +144,7 @@ export function AdminDashboard({ staff, capabilities, metrics }: AdminDashboardP
                 title="Suspended Accounts"
                 count={metrics.suspendedAccounts}
                 description="Needing review"
-                href="/staff/moderation?tab=users"
+                href="/staff/team"
                 color="var(--role-danger, #dc2626)"
               />
             )}
@@ -182,16 +182,20 @@ export function AdminDashboard({ staff, capabilities, metrics }: AdminDashboardP
             Platform Health
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
-            <MetricCard label="Users" value={metrics.totalUsers} icon={<Users size={20} />} />
-            <MetricCard label="Vendors" value={metrics.totalVendors} icon={<Package size={20} />} />
-            <MetricCard label="Listings" value={metrics.totalListings} icon={<Package size={20} />} />
-            <MetricCard label="Messages (24h)" value={metrics.messageVolume24h} icon={<MessageSquare size={20} />} />
+            {/* P-A round 81 (FIX — 'I can't click on the boxes and see the
+                details'): MetricCards were pure divs. Each now links to the
+                page that shows the underlying records. */}
+            <MetricCard label="Users" value={metrics.totalUsers} icon={<Users size={20} />} href={canPromote ? "/staff/team" : undefined} />
+            <MetricCard label="Vendors" value={metrics.totalVendors} icon={<Package size={20} />} href={canVerifyVendors ? "/staff/moderation?tab=verifications" : undefined} />
+            <MetricCard label="Listings" value={metrics.totalListings} icon={<Package size={20} />} href={canViewAnalytics ? "/staff/analytics" : undefined} />
+            <MetricCard label="Messages (24h)" value={metrics.messageVolume24h} icon={<MessageSquare size={20} />} href={canViewAudit ? "/staff/audit" : undefined} />
             {canReviewCases && (
               <MetricCard
                 label="Open Reports"
                 value={metrics.openReports}
                 icon={<AlertCircle size={20} />}
                 color={metrics.openReports > 0 ? "var(--role-danger, #dc2626)" : undefined}
+                href="/staff/moderation"
               />
             )}
             {canVerifyVendors && (
@@ -200,9 +204,10 @@ export function AdminDashboard({ staff, capabilities, metrics }: AdminDashboardP
                 value={metrics.pendingVerifications}
                 icon={<CheckCircle size={20} />}
                 color={metrics.pendingVerifications > 0 ? "var(--role-warning, #d97706)" : undefined}
+                href="/staff/moderation?tab=verifications"
               />
             )}
-            <MetricCard label="New Signups (24h)" value={metrics.newSignups24h} icon={<Activity size={20} />} />
+            <MetricCard label="New Signups (24h)" value={metrics.newSignups24h} icon={<Activity size={20} />} href={canViewAnalytics ? "/staff/analytics" : undefined} />
           </div>
         </section>
 
@@ -380,19 +385,33 @@ function MetricCard({
   value,
   icon,
   color = "var(--role-accent-strong, #0F2A1D)",
+  href,
 }: {
   label: string;
   value: number;
   icon: React.ReactNode;
   color?: string;
+  href?: string;
 }) {
-  return (
+  const inner = (
     <div
       style={{
         background: "var(--role-surface, #fff)",
         border: "1px solid var(--role-border, #e6e1d6)",
         borderRadius: 8,
         padding: 12,
+        height: "100%",
+        transition: "border-color 120ms ease, transform 120ms ease",
+      }}
+      onMouseEnter={(e) => {
+        if (!href) return;
+        e.currentTarget.style.borderColor = "var(--role-accent-strong, #0F2A1D)";
+        e.currentTarget.style.transform = "translateY(-2px)";
+      }}
+      onMouseLeave={(e) => {
+        if (!href) return;
+        e.currentTarget.style.borderColor = "var(--role-border, #e6e1d6)";
+        e.currentTarget.style.transform = "translateY(0)";
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -405,6 +424,14 @@ function MetricCard({
         {label}
       </div>
     </div>
+  );
+  // P-A round 81: clickable when a destination is provided (hover affordance
+  // above); plain div otherwise.
+  if (!href) return inner;
+  return (
+    <Link href={href} style={{ textDecoration: "none", display: "block" }} aria-label={`${label} — view details`}>
+      {inner}
+    </Link>
   );
 }
 

@@ -12,6 +12,22 @@
  * gate: after login+consent, the action re-triggers automatically.
  */
 
+/**
+ * P-A round 81 (FIX — 'returning users dumped on landing/consent instead of
+ * their dashboard'): one source of truth for where an authenticated identity
+ * belongs after login. Staff -> /staff; vendors -> their dashboard; everyone
+ * else -> /home (which itself redirects to onboarding when feed prefs are
+ * unset, so it is safe for brand-new shoppers too).
+ */
+export function roleHomeFor(identity: {
+  staffRole?: string | null;
+  vendorId?: string | null;
+}): string {
+  if (identity.staffRole) return "/staff";
+  if (identity.vendorId) return "/vendor/dashboard";
+  return "/home";
+}
+
 /** A pending action a user was trying to perform before the auth gate. */
 export type PendingIntent =
   | { kind: "message"; vendorId: string }

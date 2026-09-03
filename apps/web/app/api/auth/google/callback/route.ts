@@ -10,6 +10,7 @@ import {
   sendEmail,
   isConsentCurrent,
 } from "@voeq/data/server";
+import { roleHomeFor } from "@/lib/postAuth";
 
 const GOOGLE_STATE_COOKIE = "google_oauth_state";
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://voeq.ng";
@@ -112,9 +113,9 @@ export async function GET(req: NextRequest) {
     // version has changed (isConsentCurrent). This removes the wall that
     // forced re-agreement on EVERY Google login.
     const consentOk = await isConsentCurrent(existing.id).catch(() => false);
-    const land = consentOk
-      ? (existing.staffRole ? "/admin/" : "/")
-      : "/consent";
+    // P-A round 81: consentOk users land on THEIR app (staff -> /staff,
+    // vendor -> /vendor/dashboard, else /home), not the marketing landing.
+    const land = consentOk ? roleHomeFor(existing) : "/consent";
     const r = NextResponse.redirect(new URL(land, req.url));
     r.cookies.set("sessionId", session.id, {
       httpOnly: true,
@@ -144,13 +145,11 @@ export async function GET(req: NextRequest) {
     // P-A round 67: linked accounts skip /consent when their acceptance is
     // current (same fix as the existing-user branch — no re-agreement wall).
     const consentOk = await isConsentCurrent(byEmail.id).catch(() => false);
-    const dest = consentOk
-      ? (byEmail.staffRole ? "/admin/" : "/")
-      : "/consent";
+    // P-A round 81: role-aware landing (was staff->/admin, everyone->/).
+    const dest = consentOk ? roleHomeFor(byEmail) : "/consent";
     const redirectUrl = new URL(dest, req.url);
-    // P-A round 65b: staff identities continue to /admin, not the landing page.
     if (!consentOk) {
-      redirectUrl.searchParams.set("next", byEmail.staffRole ? "/admin" : "/");
+      redirectUrl.searchParams.set("next", roleHomeFor(byEmail));
       redirectUrl.searchParams.set("session", session.id);
     }
     // Auth status + session cookie for the linked account.

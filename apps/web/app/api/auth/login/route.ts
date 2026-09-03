@@ -5,9 +5,11 @@ import {
   mockSessionRepo,
   checkRateLimit,
   logAudit,
+  isConsentCurrent,
 } from "@voeq/data";
 import { z } from "zod";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { roleHomeFor, sanitizeNext } from "@/lib/postAuth";
 
 const LOGIN_LIMIT = 5;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 5 / email / 15min
@@ -99,7 +101,14 @@ export async function POST(req: NextRequest) {
   const ttlMs = rememberSession ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
   const session = await mockSessionRepo.create(identity.id, { ttlMs });
   // Phase 1: preserve the user's pending intent so post-auth the action resumes.
-  const res = NextResponse.json({ ok: true, redirect: resolveNext(next, intent) });
+  // P-A round 81 (FIX — 'returning users sent to Review & accept'): the old
+  // roleHome() returned /consent UNCONDITIONALLY for any login without ?next,
+  // so every returning email user re-hit the consent wall. Now: consent
+  // current -> role home (staff/vendor/shopper); only stale/missing consent
+  // routes through /consent.
+  const consentOk = await isConsentCurrent(identity.id).catch(() => false);
+  const home = consentOk ? roleHomeFor(identity) : "/consent";
+  const res = NextResponse.json({ ok: true, redirect: resolveNext(next, intent, home) });
   res.cookies.set("sessionId", session.id, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -107,34 +116,18 @@ export async function POST(req: NextRequest) {
     path: "/",
     expires: new Date(session.expiresAt),
   });
-  await logAudit("login.success", identity.id, { remember: rememberSession });
+  await logAudit("login.success", identity.id, { remember: rememberSession, consentOk });
   return res;
 }
 
-/** Doc 09 §9.16: only same-origin relative paths are allowed as ?next targets. */
-function sanitizeNext(next?: string): string {
-  if (!next) return roleHome();
-  // Reject protocol-relative, absolute, and non-/-starting paths.
-  if (!next.startsWith("/") || next.startsWith("//") || next.includes("://")) {
-    return roleHome();
-  }
-  // Block path traversal.
-  if (next.includes("..")) return roleHome();
-  return next;
-}
-
 /**
- * Phase 1: sanitize `next`, then re-attach the user's pending `intent` so the
- * post-auth action resumes. If `intent` is present and valid, it's appended to
- * the target; the client reads it via usePendingIntent() and re-triggers.
+ * Phase 1: sanitize `next` (shared helper — Doc 09 §9.16: only same-origin
+ * relative paths), falling back to the caller-computed role/consent home, then
+ * re-attach the user's pending `intent` so the post-auth action resumes.
  */
-function resolveNext(next?: string, intent?: string): string {
-  const base = sanitizeNext(next);
+function resolveNext(next: string | undefined, intent: string | undefined, home: string): string {
+  const base = sanitizeNext(next, home);
   if (!intent) return base;
   const sep = base.includes("?") ? "&" : "?";
   return `${base}${sep}intent=${encodeURIComponent(intent)}`;
-}
-
-function roleHome(): string {
-  return "/consent"; // consent gate enforces before app; VS2.7/2.8 route after
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AlertCircle, CheckCircle, Flag, User, X, Check, Eye, EyeOff } from "lucide-react";
 import type { Capability } from "@voeq/data";
 
@@ -45,8 +46,22 @@ interface VerificationRequest {
   status: "open" | "triaged" | "resolved" | "dismissed";
 }
 
+const TABS: Tab[] = ["reports", "verifications", "content", "users"];
+
 export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("reports");
+  // P-A round 81 (FIX — '?tab=verifications' deep links always opened
+  // 'reports'): the tab was hardcoded initial state. Now the URL query wins
+  // on mount AND on later param changes (clicking a second deep link while
+  // already on the page).
+  const searchParams = useSearchParams();
+  const initialTab: Tab = (TABS as string[]).includes(searchParams.get("tab") ?? "")
+    ? (searchParams.get("tab") as Tab)
+    : "reports";
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    if (t && (TABS as string[]).includes(t)) setActiveTab(t as Tab);
+  }, [searchParams]);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [detailPanelId, setDetailPanelId] = useState<string | null>(null);
   const [actionModal, setActionModal] = useState<{
