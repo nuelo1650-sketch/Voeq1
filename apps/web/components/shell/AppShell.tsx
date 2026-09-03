@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, Bell, LogOut, X } from "lucide-react";
+import { Menu, Bell, LogOut, X, ShieldCheck } from "lucide-react";
 import { AppRole, PRIMARY_NAV, CENTER_NAV, STAFF_SIDE_NAV, SIDE_NAV, NavItem } from "./navItems";
 import { BrandLogo } from "@/components/landing/BrandLogo";
 import { NotificationBell } from "@/components/shopper/NotificationBell";
@@ -131,6 +131,11 @@ function NavLink({ item, active, onClick }: { item: NavItem; active: boolean; on
     >
       <Icon size={18} />
       <span>{item.label}</span>
+      {item.badge && (
+        <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 999, background: "var(--role-success-bg)", color: "var(--role-success-text)" }}>
+          {item.badge}
+        </span>
+      )}
     </Link>
   );
 }
@@ -152,10 +157,15 @@ export function AppShell({
   role,
   userName,
   children,
+  staffRole,
 }: {
   role: AppRole;
   userName: string;
   children: React.ReactNode;
+  /** P-A round 69: identity.staffRole (super_admin/admin/moderator) — when
+      present, the shell surfaces an ADMIN entry in nav (sidebar + drawer).
+      Previously admin lived buried in /settings; it belongs in the shell. */
+  staffRole?: string | null;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -167,8 +177,16 @@ export function AppShell({
   const primary = PRIMARY_NAV[role];
   const center = CENTER_NAV[role];
   const isStaff = role === "staff";
+  // P-A round 69: staffRole holders get an Admin entry even when their app role
+  // is shopper/vendor (the "shopper with super_admin" case — David's identity).
+  const adminItem = staffRole
+    ? [{ href: "/admin", label: "Admin", icon: ShieldCheck, badge: staffRole }]
+    : [];
+  const primaryWithAdmin = [...primary, ...adminItem];
+  const centerWithAdmin = [...center, ...adminItem];
+  const sideWithAdmin = isStaff ? STAFF_SIDE_NAV : [...SIDE_NAV[role as Exclude<AppRole, "staff">], ...adminItem];
   // Desktop sidebar items: staff uses STAFF_SIDE_NAV, shopper/vendor use SIDE_NAV
-  const sideItems = isStaff ? STAFF_SIDE_NAV : SIDE_NAV[role as Exclude<AppRole, "staff">];
+  const sideItems = sideWithAdmin;
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -208,9 +226,9 @@ export function AppShell({
         </div>
 
         {/* Center nav (desktop ≥1024px only; sidebar handles <1024px) */}
-        {center.length > 0 && (
+        {centerWithAdmin.length > 0 && (
           <nav className="app-shell-center" style={SHELL_CSS.centerLinks}>
-            {center.map((item) => (
+            {centerWithAdmin.map((item) => (
               <NavLink key={item.href} item={item} active={isActive(item.href)} />
             ))}
           </nav>
@@ -253,9 +271,9 @@ export function AppShell({
       </div>
 
       {/* Bottom tab — mobile <1024px only */}
-      {primary.length > 0 && (
+      {primaryWithAdmin.length > 0 && (
         <nav className="app-shell-bottom" style={SHELL_CSS.bottomTab}>
-          {primary.map((item) => (
+          {primaryWithAdmin.map((item) => (
             <BottomItem key={item.href} item={item} active={isActive(item.href)} />
           ))}
         </nav>
@@ -273,7 +291,7 @@ export function AppShell({
                 <X size={20} />
               </button>
             </div>
-            {(isStaff ? STAFF_SIDE_NAV : CENTER_NAV[role]).map((item) => (
+            {sideItems.map((item) => (
               <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={() => setDrawerOpen(false)} />
             ))}
             <button

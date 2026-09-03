@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { requireConsent } from "@/lib/session";
+import { requireConsent, getStaffIdentity } from "@/lib/session";
 import { mockUserPrefRepo, mockCampusRepo } from "@voeq/data";
 import { ShopperDashboard } from "@/components/shopper/ShopperDashboard";
 import { AppShell } from "@/components/shell/AppShell";
@@ -10,9 +10,28 @@ import { AppShell } from "@/components/shell/AppShell";
  * real dashboard (Saved / Following / Recommended / Activity / Notifications).
  * Auth redirect preserves ?next= so post-login returns here (Doc 03 §3.9).
  * FIX #2: Now enforces consent acceptance before allowing access.
+ *
+ * P-A round 69 (ROLE SEMANTICS — "shopper becoming a vendor: what dashboard
+ * does he have?"): the AppShell role is now DERIVED from the identity — a
+ * vendor (vendorId + role vendor/live) sees the VENDOR shell (dashboard/
+ * listings/analytics), not the shopper bottom nav. The old code hardcoded
+ * role="shopper" here, so a live vendor's Home was the shopper home + a
+ * "Become a vendor" CTA for someone who ALREADY is one.
  */
 export default async function HomePage() {
   const identity = await requireConsent("/home");
+
+  // P-A round 69: staffRole is a SEPARATE dimension (super_admin/admin/
+  // moderator) — surface Admin in the shell wherever their app role lands.
+  const staff = await getStaffIdentity();
+
+  // Vendor? (identity.role widens to "vendor" at go-live; vendorId set at
+  // onboarding) -> vendor shell, NOT shopper home. MUST run before the
+  // shopper-prefs gate: a vendor has no shopper feed preferences, so the old
+  // order dumped valid vendors into /onboarding/shopper forever.
+  if (identity.vendorId != null && identity.role === "vendor") {
+    redirect("/vendor/dashboard");
+  }
 
   const prefs = await mockUserPrefRepo.get(identity.id);
   if (!prefs || !prefs.feedPrefsSetAt) redirect("/onboarding/shopper");
@@ -23,7 +42,7 @@ export default async function HomePage() {
     : "your campus";
 
   return (
-    <AppShell role="shopper" userName={identity.name}>
+    <AppShell role="shopper" userName={identity.name} staffRole={staff?.staffRole ?? null}>
       <div data-testid="shopper-home">
         <ShopperDashboard name={identity.name || "shopper"} campus={campusLabel} />
 

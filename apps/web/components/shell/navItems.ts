@@ -7,6 +7,8 @@ export interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
+  /** Optional short tag rendered next to the label (e.g. staff role name). */
+  badge?: string;
 }
 
 /**

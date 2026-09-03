@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentIdentity } from "@/lib/session";
+import { getCurrentIdentity, getStaffIdentity } from "@/lib/session";
 import { mockVendorRepo, mockListingsRepo } from "@voeq/data";
 import { VendorAnalytics } from "@/components/vendor/VendorAnalytics";
 import { AppShell } from "@/components/shell/AppShell";
@@ -11,6 +11,7 @@ import { AppShell } from "@/components/shell/AppShell";
  */
 export default async function AnalyticsPage() {
   const identity = await getCurrentIdentity();
+  const staff = await getStaffIdentity();
   if (!identity) redirect("/login?next=/vendor/analytics");
   if (!identity.vendorId) redirect("/onboarding/vendor");
 
@@ -22,7 +23,7 @@ export default async function AnalyticsPage() {
   const listings = allListings.filter(l => l.vendorId === vendor.id);
 
   return (
-    <AppShell role="vendor" userName={vendor.name}>
+    <AppShell role="vendor" userName={vendor.name} staffRole={staff?.staffRole ?? null}>
       <VendorAnalytics
         vendor={vendor}
         listings={listings}

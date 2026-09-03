@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentIdentity } from "@/lib/session";
+import { getCurrentIdentity, getStaffIdentity } from "@/lib/session";
 import { mockVendorRepo } from "@voeq/data";
 import { StorefrontManagement } from "@/components/vendor/StorefrontManagement";
 import { AppShell } from "@/components/shell/AppShell";
@@ -10,6 +10,7 @@ import { AppShell } from "@/components/shell/AppShell";
  */
 export default async function StorefrontPage() {
   const identity = await getCurrentIdentity();
+  const staff = await getStaffIdentity();
   if (!identity) redirect("/login?next=/vendor/storefront");
   if (!identity.vendorId) redirect("/onboarding/vendor");
 
@@ -17,7 +18,7 @@ export default async function StorefrontPage() {
   if (!vendor) redirect("/onboarding/vendor");
 
   return (
-    <AppShell role="vendor" userName={vendor.name}>
+    <AppShell role="vendor" userName={vendor.name} staffRole={staff?.staffRole ?? null}>
       <StorefrontManagement vendor={vendor} disabled={vendor.status === "suspended"} />
     </AppShell>
   );

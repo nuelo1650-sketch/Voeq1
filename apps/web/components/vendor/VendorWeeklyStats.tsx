@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Eye, MessageSquare, Heart, Bookmark } from "lucide-react";
+import Link from "next/link";
+import { Eye, MessageSquare, Heart, Bookmark, ArrowUpRight } from "lucide-react";
 
 interface WeeklyData {
   week: {
@@ -63,22 +64,27 @@ export function VendorWeeklyStats() {
       }}
     >
       {items.map((it) => (
-        <div
+        <Link
           key={it.label}
+          href="/vendor/analytics"
+          data-testid={`weekly-${it.label.toLowerCase().replace(/\s+/g, "-")}`}
           style={{
             background: "var(--role-surface)",
             border: "1px solid var(--role-border)",
             borderRadius: "var(--radius-md)",
             padding: "14px 16px",
             boxShadow: "0 2px 8px rgba(15,42,29,.05)",
+            textDecoration: "none",
+            color: "inherit",
+            display: "block",
           }}
         >
           <div style={{ color: "var(--role-muted)", display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
             {it.icon}
             {it.label}
+            <ArrowUpRight size={12} style={{ marginLeft: "auto", color: "var(--role-gold)" }} />
           </div>
           <div
-            data-testid={`weekly-${it.label.toLowerCase().replace(/\s+/g, "-")}`}
             style={{
               fontFamily: "var(--role-font-display)",
               fontSize: 28,
@@ -89,7 +95,7 @@ export function VendorWeeklyStats() {
           >
             {data ? it.value : "…"}
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

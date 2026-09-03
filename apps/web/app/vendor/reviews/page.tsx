@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentIdentity } from "@/lib/session";
+import { getCurrentIdentity, getStaffIdentity } from "@/lib/session";
 import { mockVendorRepo, mockReviewRepo } from "@voeq/data";
 import { VendorReviewsManagement, type ReviewForVendor } from "@/components/vendor/VendorReviewsManagement";
 import { AppShell } from "@/components/shell/AppShell";
@@ -11,6 +11,7 @@ import { AppShell } from "@/components/shell/AppShell";
  */
 export default async function ReviewsPage() {
   const identity = await getCurrentIdentity();
+  const staff = await getStaffIdentity();
   if (!identity) redirect("/login?next=/vendor/reviews");
   if (!identity.vendorId) redirect("/onboarding/vendor");
 
@@ -34,7 +35,7 @@ export default async function ReviewsPage() {
   }));
 
   return (
-    <AppShell role="vendor" userName={vendor.name}>
+    <AppShell role="vendor" userName={vendor.name} staffRole={staff?.staffRole ?? null}>
       <VendorReviewsManagement vendor={vendor} disabled={vendor.status === "suspended"} initialReviews={reviews} />
     </AppShell>
   );

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { requireConsent } from "@/lib/session";
+import { requireConsent, getStaffIdentity } from "@/lib/session";
 import {
   mockVendorRepo,
   mockListingsRepo,
@@ -18,6 +18,7 @@ import { AppShell } from "@/components/shell/AppShell";
  */
 export default async function VendorDashboardPage() {
   const identity = await requireConsent("/vendor/dashboard");
+  const staff = await getStaffIdentity();
   if (!identity.vendorId) redirect("/onboarding/vendor");
 
   const vendor = await mockVendorRepo.getById(identity.vendorId);
@@ -63,7 +64,7 @@ export default async function VendorDashboardPage() {
     : { label: "Pending listings", color: "var(--color-status-pending)" };
 
   return (
-    <AppShell role="vendor" userName={vendor.name}>
+    <AppShell role="vendor" userName={vendor.name} staffRole={staff?.staffRole ?? null}>
       <div data-testid="vendor-dashboard" style={{ minHeight: "100vh", background: "var(--color-glass-white)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
       {/* K3b.1 Header */}
       <header style={{ marginBottom: "var(--space-4)" }}>

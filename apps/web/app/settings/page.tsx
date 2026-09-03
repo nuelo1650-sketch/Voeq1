@@ -38,7 +38,7 @@ export default async function SettingsPage() {
   const campusList = await mockCampusRepo.list(identity.id);
 
   return (
-    <AppShell role="shopper" userName={identity.name}>
+    <AppShell role="shopper" userName={identity.name} staffRole={staff?.staffRole ?? null}>
       <main
         data-testid="settings-page"
         style={{
@@ -159,50 +159,6 @@ export default async function SettingsPage() {
         </section>
       )}
 
-      {/* P-A round 66: ADMIN CONSOLE path — staff roles had NO link from the
-          shopper/vendor UI. super_admin/admin/moderator now see it here. */}
-      {isStaff && (
-        <section
-          style={{
-            marginTop: "var(--space-4)",
-            border: "1px solid var(--color-forest)",
-            borderRadius: 8,
-            padding: "var(--space-3)",
-            background: "var(--color-cream)",
-            maxWidth: 600,
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: 22,
-              margin: "0 0 8px",
-              color: "var(--color-forest)",
-            }}
-          >
-            Admin console
-          </h2>
-          <p style={{ fontSize: 14, color: "var(--color-ink-muted)", marginBottom: 12 }}>
-            Staff role: <strong>{staff!.staffRole}</strong>.
-          </p>
-          <Link
-            href="/admin"
-            data-testid="settings-admin-console"
-            style={{
-              display: "inline-block",
-              padding: "10px 20px",
-              background: "var(--color-forest)",
-              color: "var(--color-cream)",
-              textDecoration: "none",
-              borderRadius: 6,
-              fontSize: 14,
-              fontWeight: 500,
-            }}
-          >
-            Open admin console
-          </Link>
-        </section>
-      )}
     </main>
     </AppShell>
   );
