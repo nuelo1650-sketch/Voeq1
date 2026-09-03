@@ -49,7 +49,7 @@ describe.skipIf(!runHttp)("staff batch 1 — HTTP round-trip", () => {
     // Sign up the victim for real (OTP is logged in dev; we only need the identity row).
     const { res, data } = await api({}, "/api/auth/signup", {
       method: "POST",
-      body: JSON.stringify({ email: victimEmail, password: "VictimPass123!", name: "R82 Victim", intent: "shopper", turnstileToken: TURNSTILE }),
+      body: JSON.stringify({ email: victimEmail, password: "VictimPass123!", name: "R82 Victim", intent: "shopper", consent: true, turnstileToken: TURNSTILE }),
     });
     expect(res.status).toBe(200);
     // Admin session via dev route (test server only).
@@ -87,7 +87,7 @@ describe.skipIf(!runHttp)("staff batch 1 — HTTP round-trip", () => {
 
     const reReg = await api({}, "/api/auth/signup", {
       method: "POST",
-      body: JSON.stringify({ email: victimEmail, password: "EvaderPass123!", name: "Evader", intent: "shopper", turnstileToken: TURNSTILE }),
+      body: JSON.stringify({ email: victimEmail, password: "EvaderPass123!", name: "Evader", intent: "shopper", consent: true, turnstileToken: TURNSTILE }),
     });
     expect(reReg.res.status).toBe(403);
     expect(String(reReg.data.error)).toContain("banned");

@@ -11,7 +11,9 @@ export async function POST() {
     return NextResponse.json({ error: "unavailable" }, { status: 404 });
   }
   await bootstrapSuperAdmin(); // idempotent
-  const envEmail = process.env.VOEQ_SUPER_ADMIN_EMAIL;
+  // Same precedence as bootstrapSuperAdmin — the two env twins can hold
+  // different emails; reading only one here caused super_admin_not_found.
+  const envEmail = process.env.SUPER_ADMIN_EMAIL ?? process.env.VOEQ_SUPER_ADMIN_EMAIL;
   if (!envEmail) return NextResponse.json({ error: "no_super_admin_email" }, { status: 400 });
   const identity = await mockIdentityRepo.getByEmail(envEmail.trim().toLowerCase());
   if (!identity) return NextResponse.json({ error: "super_admin_not_found" }, { status: 404 });
