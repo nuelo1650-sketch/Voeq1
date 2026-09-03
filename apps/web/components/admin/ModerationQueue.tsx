@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AlertCircle, CheckCircle, Flag, User, X, Check, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, CheckCircle, Flag, User, X, Check, Eye, EyeOff, Inbox } from "lucide-react";
 import type { Capability } from "@voeq/data";
 import { UsersPanel } from "./UsersPanel";
 import { ListingsPanel } from "./ListingsPanel";
 import { CommentsPanel } from "./CommentsPanel";
+import { AppealsPanel } from "./AppealsPanel";
 
 /**
  * K3c.6 — Moderation queue component.
@@ -24,7 +25,7 @@ interface ModerationQueueProps {
   capabilities: Capability[];
 }
 
-type Tab = "reports" | "verifications" | "content" | "users";
+type Tab = "reports" | "verifications" | "content" | "users" | "appeals";
 
 // Real case shape (from /api/staff/cases). The backend stores generic cases;
 // we surface queue + status + decision honestly (no invented reporter names).
@@ -49,7 +50,7 @@ interface VerificationRequest {
   status: "open" | "triaged" | "resolved" | "dismissed";
 }
 
-const TABS: Tab[] = ["reports", "verifications", "content", "users"];
+const TABS: Tab[] = ["reports", "verifications", "content", "users", "appeals"];
 
 export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
   // P-A round 81 (FIX — '?tab=verifications' deep links always opened
@@ -317,6 +318,9 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
           <TabButton active={activeTab === "users"} onClick={() => setActiveTab("users")} icon={<User size={16} />}>
             Users
           </TabButton>
+          <TabButton active={activeTab === "appeals"} onClick={() => setActiveTab("appeals")} icon={<Inbox size={16} />}>
+            Appeals
+          </TabButton>
         </div>
 
         {/* Bulk actions bar */}
@@ -451,6 +455,16 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
 
         {activeTab === "users" && (
           <UsersPanel capabilities={capabilities} />
+        )}
+
+        {activeTab === "appeals" && (
+          <section data-testid="appeals-tab" style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 20 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px", color: "var(--role-text)" }}>Appeals</h2>
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--role-text-muted)" }}>
+              Token-bound appeals submitted via /appeal. Resolve can reinstate the account (admin+); every decision notifies the appellant.
+            </p>
+            <AppealsPanel />
+          </section>
         )}
 
         {/* Action confirmation modal */}
