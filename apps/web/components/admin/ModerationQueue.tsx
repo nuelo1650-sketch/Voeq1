@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AlertCircle, CheckCircle, Flag, User, X, Check, Eye, EyeOff } from "lucide-react";
 import type { Capability } from "@voeq/data";
+import { UsersPanel } from "./UsersPanel";
 
 /**
  * K3c.6 — Moderation queue component.
@@ -429,7 +430,7 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         )}
 
         {activeTab === "users" && (
-          <EmptyTab message="User moderation tab - user search and account actions would appear here" />
+          <UsersPanel capabilities={capabilities} />
         )}
 
         {/* Action confirmation modal */}
@@ -598,21 +599,6 @@ function VerificationsTab({
           ))}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-function EmptyTab({ message }: { message: string }) {
-  return (
-    <div style={{
-      background: "var(--role-surface)",
-      border: "1px solid var(--role-border)",
-      borderRadius: 8,
-      padding: "var(--space-6)",
-      textAlign: "center",
-      color: "var(--role-text-muted)",
-    }}>
-      <p style={{ margin: 0, fontSize: 14 }}>{message}</p>
     </div>
   );
 }
