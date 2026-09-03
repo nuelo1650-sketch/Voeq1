@@ -237,7 +237,13 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
   // ("food"). Resolve slug -> id for the repo layer; applyFilters (lower down)
   // still uses the slug against categorySlug. Without this, EVERY category
   // filter silently returned empty on real data.
-  const categorySlug = params.categoryPreset ?? params.category;
+  // P-A round 76 (CONSISTENCY FIX): the API accepted BOTH the category ID
+  // ('beauty') and slug ('beauty-care'); the ID path resolved to the repo but
+  // applyFilters then matched categorySlug against the ID => silent 0 results
+  // (e.g. ?category=beauty -> empty, ?category=beauty-care -> 4). Normalize an
+  // ID to its canonical slug FIRST so both forms behave identically.
+  const rawSlug = params.categoryPreset ?? params.category;
+  const categorySlug = rawSlug ? (CATEGORY_ID_TO_SLUG[rawSlug] ?? rawSlug) : undefined;
   const categoryId = categorySlug ? CATEGORY_SLUG_TO_ID[categorySlug] ?? categorySlug : undefined;
   const categoryForRepo = categoryId;
   const listingsRepo = params.forceError ? mockListingsRepoThatFails : mockListingsRepo;

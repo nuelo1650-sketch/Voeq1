@@ -157,7 +157,7 @@ function BusinessIdentitySection({ vendor, disabled }: { vendor: Vendor; disable
           minLength={50}
         />
         <span style={{ fontSize: 12, color: description.length >= 50 ? "var(--color-forest-mid)" : "var(--color-ink-muted)" }}>
-          {description.length}/50 minimum
+          {description.length}/50 {description.length < 50 ? "min" : "characters"}
         </span>
       </Field>
 
