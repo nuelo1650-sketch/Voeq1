@@ -120,13 +120,8 @@ export default async function VendorDashboardPage() {
       <hr style={{ border: 0, borderTop: "1px solid var(--role-border)", margin: "var(--space-4) 0" }} />
 
       <VendorDashboardClient
-        vendor={vendor}
+        vendor={{ id: vendor.id, name: vendor.name, status: vendor.status }}
         listings={listings}
-        ratingAvg={ratingAvg}
-        ratingCount={ratingCount}
-        verifiedCount={verifiedCount}
-        reviews={reviews}
-        disabled={vendor.status === "suspended"}
       />
       </div>
     </AppShell>
