@@ -131,7 +131,13 @@ export function VendorListingsManager({ vendor, isPublic, listings }: Props) {
         <ul data-testid="listings-grid" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
           {listings.map((l) => (
             <li key={l.id} data-testid={`listing-row-${l.id}`} style={{ border: "1px solid var(--role-border)", borderRadius: 12, background: "var(--role-surface)", overflow: "hidden" }}>
-              <Link href={`/listing/${l.id}`} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, textDecoration: "none", color: "inherit" }}>
+              {/* P-A round 74: was a <Link> (row) wrapping View/Edit <Link>s —
+                  nested <a> = hydration error (browser console). Row is now a
+                  plain container; only inner links are anchors. */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 12 }}>
+                {/* Row click-to-view wraps ONLY image+text — actions are
+                    siblings so no nested <a> (hydration error fixed properly). */}
+                <Link href={`/listing/${l.id}`} aria-label={`View ${l.title}`} style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none", color: "inherit", flex: 1, minWidth: 0 }}>
                 <div style={{ width: 64, height: 64, borderRadius: 10, overflow: "hidden", background: "var(--role-surface-sunken)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--role-muted)" }}>
                   {l.images[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -159,11 +165,12 @@ export function VendorListingsManager({ vendor, isPublic, listings }: Props) {
                     {l.description ? ` · ${l.description.slice(0, 42)}${l.description.length > 42 ? "…" : ""}` : ""}
                   </div>
                 </div>
+                </Link>
                 <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
                   <Link href={`/listing/${l.id}`} style={{ fontSize: 12, color: "var(--role-accent-strong)", fontWeight: 600, textDecoration: "none" }}>View</Link>
                   <Link href={`/vendor/listings/${l.id}/edit`} style={{ fontSize: 12, color: "var(--role-accent-strong)", fontWeight: 600, textDecoration: "none" }}>Edit</Link>
                 </div>
-              </Link>
+              </div>
             </li>
           ))}
         </ul>

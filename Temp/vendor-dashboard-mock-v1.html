@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq Vendor Dashboard — Mock v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #0F2A1D;
+    --forest-lite: #1C4630;
+    --amber: #E8A33D;
+    --cream: #F6F1E6;
+    --ink: #1F2B24;
+    --muted: #5B6B60;
+    --line: #E3DCCB;
+    --surface: #FFFFFF;
+    --surface-warm: #FBFAF5;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #F2EDE0; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .shell { max-width: 1280px; margin: 0 auto; background: var(--surface-warm); min-height: 100vh; }
+  /* TOPBAR */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+  .brand { display: flex; align-items: center; gap: 8px; font-family: 'Fraunces', serif; font-weight: 600; font-size: 20px; color: var(--forest); }
+  .brand-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--amber); display: inline-block; }
+  .top-actions { display: flex; gap: 10px; align-items: center; }
+  .icon-btn { width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 17px; color: var(--ink); cursor: pointer; position: relative; }
+  .icon-btn .badge { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; border-radius: 999px; background: var(--amber); color: var(--forest); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid var(--surface); }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--amber), #D38B24); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; }
+  /* HERO */
+  .hero { padding: 24px 16px 8px; }
+  .hero h1 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; color: var(--forest); }
+  .hero .campus { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .hero-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 12px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1.5px solid transparent; text-decoration: none; white-space: nowrap; }
+  .btn-amber { background: var(--amber); color: var(--forest); box-shadow: 0 6px 16px rgba(232,163,61,.35); }
+  .btn-outline { background: transparent; color: var(--forest); border-color: #C8C0AE; }
+  .btn-forest { background: var(--forest); color: var(--cream); }
+  /* SECTIONS */
+  .section-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--forest); margin: 22px 16px 10px; display: flex; justify-content: space-between; align-items: baseline; }
+  .section-title .see { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--amber); text-decoration: none; }
+  .content { padding: 0 16px 90px; }
+  /* THIS WEEK */
+  .week-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (min-width: 700px) { .week-grid { grid-template-columns: repeat(4, 1fr); } }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; box-shadow: 0 2px 8px rgba(15,42,29,.05); }
+  .stat .ico { font-size: 18px; }
+  .stat .num { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; color: var(--forest); margin-top: 6px; }
+  .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .stat .delta { font-size: 11px; font-weight: 700; margin-top: 4px; }
+  .up { color: #2C7A4B; } .flat { color: var(--muted); }
+  /* LISTINGS */
+  .list-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (min-width: 700px) { .list-grid { grid-template-columns: repeat(3, 1fr); } }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 8px rgba(15,42,29,.05); cursor: pointer; }
+  .card img, .ph { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: linear-gradient(120deg, #EAE5D8, #F7F3E9); display: flex; align-items: center; justify-content: center; color: #B8AF99; font-family: 'Fraunces', serif; font-size: 22px; }
+  .card .body { padding: 10px 12px 12px; }
+  .card .title { font-weight: 600; font-size: 13.5px; color: var(--ink); }
+  .card .price { font-weight: 600; font-size: 13px; color: var(--forest); margin-top: 3px; }
+  .card .meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 11px; color: var(--muted); }
+  .pill { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: #E5F1E9; color: #2C7A4B; }
+  .pill.warn { background: #FBEEDC; color: #A96A0C; }
+  /* STOREFRONT & OTHERS */
+  .wide-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+  .wide-card .em { width: 46px; height: 46px; border-radius: 12px; background: var(--forest); color: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .wide-card .t { font-weight: 600; font-size: 14px; color: var(--ink); }
+  .wide-card .d { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .wide-card .go { margin-left: auto; color: var(--amber); font-weight: 600; font-size: 13px; }
+  /* FAB QUICK ACTIONS bottom */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--forest); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 10px; z-index: 20; }
+  .bottom-nav .spacer { flex: 1; }
+  .bottom-nav .nav-icon { color: var(--cream); opacity: .85; font-size: 17px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+  .bottom-nav .nav-icon.active { background: var(--forest-lite); opacity: 1; }
+  .btn-cta { padding: 12px 18px; border-radius: 999px; background: var(--amber); color: var(--forest); font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span>voeq</div>
+    <div class="top-actions">
+      <button class="icon-btn">🔔<span class="badge">2</span></button>
+      <button class="icon-btn">↗</button>
+      <div class="avatar">H</div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Good evening, Hermes setup</h1>
+    <div class="campus">Nigeria Maritime University (Okerenkoko)</div>
+    <div class="hero-actions">
+      <a class="btn btn-amber">＋ Create listing</a>
+      <a class="btn btn-outline">Edit storefront</a>
+    </div>
+  </section>
+
+  <!-- THIS WEEK (real data) -->
+  <div class="section-title">This week</div>
+  <div class="content">
+    <div class="week-grid">
+      <div class="stat"><div class="ico">👁</div><div class="num">42</div><div class="lbl">Storefront views</div><div class="delta up">▲ 18% vs last week</div></div>
+      <div class="stat"><div class="ico">💬</div><div class="num">7</div><div class="lbl">Messages</div><div class="delta flat">3 new</div></div>
+      <div class="stat"><div class="ico">🤍</div><div class="num">5</div><div class="lbl">Saves</div><div class="delta up">▲ 2 this week</div></div>
+      <div class="stat"><div class="ico">★</div><div class="num">4.8</div><div class="lbl">Avg. rating</div><div class="delta flat">6 reviews</div></div>
+    </div>
+  </div>
+
+  <!-- LISTINGS -->
+  <div class="section-title">My listings <a class="see">See all →</a></div>
+  <div class="content">
+    <div class="list-grid">
+      <div class="card">
+        <div class="ph">Jollof</div>
+        <div class="body">
+          <div class="title">Jollof &amp; Plantain Bowl</div>
+          <div class="price">₦6,500</div>
+          <div class="meta"><span class="pill">Live</span><span>👁 18</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ph">Braids</div>
+        <div class="body">
+          <div class="title">Box Braids + Extensions</div>
+          <div class="price">₦12,000</div>
+          <div class="meta"><span class="pill">Live</span><span>👁 24</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ph">→</div>
+        <div class="body">
+          <div class="title">Add another</div>
+          <div class="price" style="color:var(--muted);font-weight:500;">Empty slot</div>
+          <div class="meta"><span class="pill warn">Draft</span><span>—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTHER SECTIONS -->
+  <div class="section-title">More</div>
+  <div class="content">
+    <div class="wide-card">
+      <div class="em">🏪</div>
+      <div><div class="t">Storefront preview</div><div class="d">Public view of your shop</div></div>
+      <div class="go">Open →</div>
+    </div>
+    <div class="wide-card">
+      <div class="em">⭐</div>
+      <div><div class="t">Reviews &amp; ratings</div><div class="d">6 reviews · 4.8 avg</div></div>
+      <div class="go">Manage →</div>
+    </div>
+    <div class="wide-card">
+      <div class="em">📈</div>
+      <div><div class="t">Analytics</div><div class="d">Trends &amp; top listings</div></div>
+      <div class="go">View →</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <span class="btn-cta">＋ New listing</span>
+    <span class="nav-icon active">▦</span>
+    <span class="nav-icon">🔍</span>
+    <span class="nav-icon">💬</span>
+    <div class="spacer"></div>
+    <span class="nav-icon">👤</span>
+  </nav>
+</div>
+</body>
+</html>

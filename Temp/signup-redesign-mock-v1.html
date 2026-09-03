@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq — Create account (Redesign v1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #0F2A1D;
+    --amber: #E8A33D;
+    --ink: #1F2B24;
+    --muted: #6B7A70;
+    --line: #E3DCCB;
+    --surface: #FFFFFF;
+    --danger: #B3261E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #F2EDE0; color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; -webkit-font-smoothing: antialiased; }
+  .card { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 10px 34px rgba(15,42,29,.10); padding: 26px 22px 22px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-family: 'Fraunces', serif; font-weight: 700; font-size: 22px; color: var(--forest); margin-bottom: 2px; }
+  .brand-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--amber); display: inline-block; }
+  h1 { font-family: 'Fraunces', serif; font-size: 25px; font-weight: 600; color: var(--forest); margin: 14px 0 4px; }
+  .sub { font-size: 13.5px; color: var(--muted); margin-bottom: 18px; }
+  /* GOOGLE — one tap */
+  .btn-google { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; border: 1.5px solid #D7D0C1; border-radius: 12px; padding: 12px 16px; font-size: 14.5px; font-weight: 600; color: var(--ink); cursor: pointer; transition: background .15s, border-color .15s; }
+  .btn-google:hover { background: #FBFAF6; border-color: var(--amber); }
+  .g { width: 20px; height: 20px; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+  .divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--muted); font-size: 12px; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .inp { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 11px; font-size: 14px; background: #fff; color: var(--ink); outline: none; }
+  .inp:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(232,163,61,.12); }
+  .inp.err { border-color: var(--danger); }
+  .field { margin-bottom: 13px; }
+  .err-msg { color: var(--danger); font-size: 11.5px; margin-top: 5px; display: block; }
+  /* CONSENT — the ONE place it belongs (first-time signup) */
+  .consent { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0 14px; font-size: 12.5px; color: var(--ink); line-height: 1.5; }
+  .consent input { accent-color: var(--amber); width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; }
+  .consent a { color: var(--amber); font-weight: 600; }
+  /* TURNSTILE */
+  .turnstile { display: flex; justify-content: center; margin: 12px 0 14px; }
+  .ts-w { width: 100%; max-width: 300px; height: 65px; border: 1px dashed #CFC7B6; border-radius: 10px; background: #FCFBF8; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .btn-email { width: 100%; background: var(--forest); color: #F6F1E6; border: 0; border-radius: 11px; padding: 13px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .foot { margin-top: 16px; font-size: 12.5px; color: var(--muted); text-align: center; }
+  .foot a { color: var(--amber); font-weight: 600; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand"><span class="brand-dot"></span>voeq</div>
+  <h1>Create your account</h1>
+  <p class="sub">One account for shopping and selling on campus.</p>
+
+  <!-- Google — one tap, then OTP + consent (first time only) -->
+  <button class="btn-google"><span class="g">G</span> Continue with Google</button>
+
+  <div class="divider">or with email</div>
+
+  <form>
+    <div class="field">
+      <label>Full name</label>
+      <input class="inp" type="text" placeholder="Ada Okafor" autocomplete="name">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input class="inp" type="email" placeholder="you@campus.edu" autocomplete="email">
+      <span class="err-msg">Enter a valid email address.</span>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input class="inp" type="password" placeholder="At least 8 characters" autocomplete="new-password">
+    </div>
+
+    <!-- consent lives HERE — first acceptance, recorded server-side forever -->
+    <label class="consent">
+      <input type="checkbox">
+      <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</span>
+    </label>
+
+    <div class="turnstile">
+      <div class="ts-w">🛡️ Turnstile widget</div>
+    </div>
+
+    <button class="btn-email" type="button">Create account</button>
+  </form>
+
+  <div class="foot">Already have an account? <a href="#">Sign in</a></div>
+</div>
+</body>
+</html>

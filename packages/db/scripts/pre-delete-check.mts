@@ -1,0 +1,11 @@
+import { neon } from "@neondatabase/serverless";
+import { readFileSync } from "fs";
+const env = readFileSync("C:/Users/Legacy/Documents/voeq/apps/web/.env.local", "utf8");
+const m = env.match(/DATABASE_URL=([^\n\r]+)/);
+const sql = neon(m[1]);
+const rs: any[] = await sql`SELECT id, reporter_id, category, body FROM reports ORDER BY created_at`;
+console.log("ALL REPORT ROWS:", rs.length);
+for (const r of rs) console.log(" -", r.id.slice(0, 8), "| reporter:", r.reporter_id?.slice(0, 8), "| cat:", r.category, "| body:", (r.body ?? "").slice(0, 60));
+const cs: any[] = await sql`SELECT id, queue, decision, status FROM staff_cases`;
+console.log("ALL CASE ROWS:", cs.length);
+for (const c of cs) console.log(" -", c.id.slice(0, 8), "|", c.queue, "|", c.decision, "|", c.status);

@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+access-control-allow-credentials: true
+access-control-allow-headers: Content-Type, Authorization, Cookie
+access-control-allow-methods: GET,POST,PUT,DELETE,OPTIONS
+access-control-allow-origin: https://voeq.ng
+access-control-max-age: 86400
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+content-type: application/json
+set-cookie: sessionId=00a446a6-cbb5-4d7f-b5cf-2b64482b26b3; Path=/; Expires=Fri, 02 Oct 2026 18:33:49 GMT; HttpOnly; SameSite=lax
+Date: Wed, 02 Sep 2026 18:33:49 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+

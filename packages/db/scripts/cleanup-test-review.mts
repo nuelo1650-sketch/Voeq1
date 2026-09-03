@@ -1,0 +1,11 @@
+import { neon } from "@neondatabase/serverless";
+import { readFileSync } from "fs";
+const env = readFileSync("C:/Users/Legacy/Documents/voeq/apps/web/.env.local", "utf8");
+const m = env.match(/DATABASE_URL=([^\n\r]+)/);
+const sql = neon(m[1]);
+const dr = await sql`DELETE FROM reviews WHERE body = 'Moderation chain test review' RETURNING id`;
+await sql`DELETE FROM audit_log WHERE at IS NOT NULL AND id IN (SELECT id FROM audit_log WHERE metadata->>'reviewId' IS NOT NULL ORDER BY at DESC LIMIT 5)`;
+console.log("deleted test reviews:", dr.length ?? 0);
+await sql`DELETE FROM page_events WHERE type = 'listing_view' AND ref_id = 'test-abc'`;
+await sql`DELETE FROM page_events WHERE path = '/listing/test-abc'`;
+console.log("deleted test events");

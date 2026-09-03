@@ -1,0 +1,21 @@
+const fs = require("fs");
+const env = fs.readFileSync("C:/Users/Legacy/Documents/voeq/apps/web/.env.local", "utf8");
+const m = env.match(/DATABASE_URL="?([^"\n]+)"?/);
+const url = m ? m[1] : "";
+const { neon } = require("C:/Users/Legacy/Documents/voeq/node_modules/@neondatabase/serverless");
+const sql = neon(url);
+(async () => {
+  const me = "de0ae9fa-6ecc-49a0-a8e8-2754242e55a9";
+  const n = await sql`select id, type, title, body, ref_id, read from notifications where recipient_id = ${me} order by created_at desc limit 10`;
+  console.log("MY NOTIFS:", JSON.stringify(n));
+  const w = await sql`select ref_id, title from notifications where ref_id is not null limit 10`;
+  console.log("NOTIFS W/ REF:", JSON.stringify(w));
+  const msgs = await sql`select id, body, sender_id, state, created_at from messages where conversation_id = '2501d058-a688-4db7-b067-14ffbb82b980' order by created_at`;
+  console.log("CONV 2501d058 MSGS:", JSON.stringify(msgs));
+  const like = await sql`select * from likes where target_type='listing' limit 5`;
+  console.log("LIKES:", JSON.stringify(like));
+  const saved = await sql`select * from wishlist_items limit 5`;
+  console.log("SAVED/WISHLIST cols:", JSON.stringify(saved));
+  const flw = await sql`select * from follows limit 5`;
+  console.log("FOLLOWS:", JSON.stringify(flw));
+})().catch((e) => { console.log("ERR", e.message); process.exit(1); });

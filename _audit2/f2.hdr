@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+access-control-allow-credentials: true
+access-control-allow-headers: Content-Type, Authorization, Cookie
+access-control-allow-methods: GET,POST,PUT,DELETE,OPTIONS
+access-control-allow-origin: https://voeq.ng
+access-control-max-age: 86400
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+content-type: application/json
+Date: Wed, 02 Sep 2026 18:33:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
