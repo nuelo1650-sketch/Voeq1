@@ -63,6 +63,9 @@ export const identities = pgTable("identities", {
   >().notNull().default([]),
   vendorId: text("vendor_id"),
   avatarUrl: text("avatar_url"),
+  // Enforcement ladder (staff batch 1): set while suspended, cleared on reinstate/ban.
+  suspensionExpiresAt: text("suspension_expires_at"),
+  warningCount: integer("warning_count").notNull().default(0),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
@@ -137,6 +140,23 @@ export const pageEvents = pgTable("page_events", {
   ipHash: text("ip_hash"),
   at: text("at").notNull(),
 });
+
+// ---- Auth forensics (staff batch 1 / P6a) ------------------------------------
+// Append-only record of authentication events with raw IP + user-agent, kept so
+// the platform can carry out real investigations (disputes, abuse, legal
+// process). Personal data: admin+ only reads, 12-month retention (batch 2).
+export const authEvents = pgTable("auth_events", {
+  id: text("id").primaryKey(),
+  identityId: text("identity_id"),
+  // login | login_failed | signup | otp_verified | google_callback | account_action
+  event: text("event").notNull(),
+  email: text("email"),
+  ip: text("ip"),
+  userAgent: text("user_agent"),
+  at: text("at").notNull(),
+}, (t) => ({
+  identityAtIdx: index("auth_events_identity_at_idx").on(t.identityId, t.at),
+}));
 
 // ---- Marketplace ------------------------------------------------------------
 export const vendors = pgTable("vendors", {

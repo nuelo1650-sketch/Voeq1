@@ -222,6 +222,10 @@ export interface Identity {
   vendorId: string | null;
   /** Profile picture URL (Cloudinary), set via account settings. null = default avatar. */
   avatarUrl?: string | null;
+  /** Staff enforcement ladder: when a suspension self-lifts (ISO). null unless suspended. */
+  suspensionExpiresAt?: string | null;
+  /** Number of formal warnings issued by staff (persists across reinstate — history). */
+  warningCount?: number;
   createdAt: string;
   updatedAt: string;
 }
