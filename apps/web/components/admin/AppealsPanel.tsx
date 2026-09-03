@@ -33,7 +33,7 @@ interface AppealCase {
   subjectAccountStatus?: string;
 }
 
-export function AppealsPanel() {
+export function AppealsPanel({ onOpenDetail, refreshKey = 0 }: { onOpenDetail?: (id: string) => void; refreshKey?: number }) {
   const [cases, setCases] = useState<AppealCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -61,7 +61,7 @@ export function AppealsPanel() {
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, refreshKey]);
 
   const openForm = (c: AppealCase, action: "resolve" | "dismiss") => {
     setFormId(c.id);
@@ -163,6 +163,11 @@ export function AppealsPanel() {
           {p.reinstateApplied && <span style={{ fontSize: 11, color: "#1d6b3c", fontWeight: 600 }}>reinstated</span>}
           <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 600, color: closed ? "var(--role-muted)" : "#8a5a10", textTransform: "uppercase" }}>{c.status}</span>
         </div>
+        {onOpenDetail && (
+          <button type="button" onClick={() => onOpenDetail(c.id)} style={{ ...btnStyle("ghost"), marginTop: 8, fontSize: 12 }}>
+            Open case file
+          </button>
+        )}
         <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--role-text)", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{p.message ?? "(no message)"}</p>
         {c.resolution && (
           <p style={{ margin: "8px 0 0", fontSize: 12, color: "var(--role-muted)" }}>

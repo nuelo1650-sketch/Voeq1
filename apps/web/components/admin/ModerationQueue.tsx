@@ -9,6 +9,7 @@ import { UsersPanel } from "./UsersPanel";
 import { ListingsPanel } from "./ListingsPanel";
 import { CommentsPanel } from "./CommentsPanel";
 import { AppealsPanel } from "./AppealsPanel";
+import { CaseDrawer } from "./CaseDrawer";
 
 /**
  * K3c.6 — Moderation queue component.
@@ -68,6 +69,8 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
   }, [searchParams]);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [detailPanelId, setDetailPanelId] = useState<string | null>(null);
+  // T10: bump after a drawer action so the underlying tab lists re-fetch.
+  const [refreshKey, setRefreshKey] = useState(0);
   const [actionModal, setActionModal] = useState<{
     action: string;
     itemId: string;
@@ -137,7 +140,7 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshKey]);
 
   const toggleSelection = (id: string) => {
     const newSelection = new Set(selectedItems);
@@ -373,6 +376,7 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
             selectedItems={selectedItems} 
             onToggleSelection={toggleSelection} 
             onSelectAll={selectAll}
+            onOpenDetail={setDetailPanelId}
             onAction={handleAction}
           />
         )}
@@ -463,8 +467,17 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
             <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--role-text-muted)" }}>
               Token-bound appeals submitted via /appeal. Resolve can reinstate the account (admin+); every decision notifies the appellant.
             </p>
-            <AppealsPanel />
+            <AppealsPanel onOpenDetail={setDetailPanelId} refreshKey={refreshKey} />
           </section>
+        )}
+
+        {/* T10: case detail drawer — opened from Reports target names, Appeals, and Verifications. */}
+        {detailPanelId && (
+          <CaseDrawer
+            caseId={detailPanelId}
+            onClose={() => setDetailPanelId(null)}
+            onChanged={() => setRefreshKey((k) => k + 1)}
+          />
         )}
 
         {/* Action confirmation modal */}
@@ -572,12 +585,14 @@ function VerificationsTab({
   selectedItems, 
   onToggleSelection, 
   onSelectAll,
+  onOpenDetail,
   onAction,
 }: {
   verifications: VerificationRequest[];
   selectedItems: Set<string>;
   onToggleSelection: (id: string) => void;
   onSelectAll: () => void;
+  onOpenDetail: (id: string) => void;
   onAction: (action: string, id: string) => void;
 }) {
   return (
@@ -619,6 +634,9 @@ function VerificationsTab({
               <td style={tdStyle}>{verification.submittedInfo}</td>
               <td style={tdStyle}>
                 <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => onOpenDetail(verification.id)} style={linkButton} title="Open case detail">
+                    Details
+                  </button>
                   <button onClick={() => onAction("approve", verification.id)} style={{ ...actionButtonStyle, color: "var(--role-success-text)" }}>
                     <Check size={16} />
                     Approve
