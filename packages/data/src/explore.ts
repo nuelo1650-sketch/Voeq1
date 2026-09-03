@@ -247,17 +247,24 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
       listingsRepo.list({ campus: params.campus, category: categoryForRepo, publicOnly: true }),
       mockVendorRepo.listVendors({ campus: params.campus, publicOnly: true }),
     ]);
-    const vendorRatings = await computeVendorRatings(vendors.map((v) => v.id));
+    // P-A round 75 (N+1 FIX — the 'Neon flaky' root cause): the old code ran
+    // computeVendorRatings + countSavesByVendor + listByVendor for EVERY vendor
+    // the DB knows (219!) even though only vendors WITH listings matter. That
+    // spawned ~650 parallel fetches -> Neon pooler -> 'fetch failed' -> the
+    // explore 'zzz' test intermittently errored. Restrict to vendors that
+    // actually appear in the result listing set.
+    const relevantVendorIds = Array.from(new Set(listings.map((l) => l.vendorId)));
+    const vendorRatings = await computeVendorRatings(relevantVendorIds);
 
     // Phase 2: real engagement signal per vendor (saves + follows) for the relevance score.
     const vendorEngagement: Map<string, { saves: number; follows: number }> = new Map();
     await Promise.all(
-      vendors.map(async (v) => {
+      relevantVendorIds.map(async (vid) => {
         const [saves, follows] = await Promise.all([
-          countSavesByVendor(v.id),
-          mockFollowRepo.listByVendor(v.id).then((f) => f.length),
+          countSavesByVendor(vid),
+          mockFollowRepo.listByVendor(vid).then((f) => f.length),
         ]);
-        vendorEngagement.set(v.id, { saves, follows });
+        vendorEngagement.set(vid, { saves, follows });
       }),
     );
 
