@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Menu, Bell, LogOut, X } from "lucide-react";
 import { AppRole, PRIMARY_NAV, CENTER_NAV, STAFF_SIDE_NAV, SIDE_NAV, NavItem } from "./navItems";
 import { BrandLogo } from "@/components/landing/BrandLogo";
+import { NotificationBell } from "@/components/shopper/NotificationBell";
 
 const SHELL_CSS = {
   root: {
@@ -216,9 +217,10 @@ export function AppShell({
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Link href="/notifications" aria-label="Notifications" style={SHELL_CSS.iconBtn}>
-            <Bell size={18} />
-          </Link>
+          {/* P-A round 66: REAL bell (unread badge + dropdown). The AppShell
+              previously rendered a bare <Bell> Link with NO badge — a user
+              with an unread notification saw nothing. */}
+          <NotificationBell />
           <button aria-label="Sign out" style={SHELL_CSS.iconBtn} onClick={logout}>
             <LogOut size={18} />
           </button>

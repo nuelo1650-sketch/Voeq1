@@ -39,5 +39,21 @@ export async function POST(req: NextRequest) {
   });
   if (!vendor) return NextResponse.json({ error: "Vendor not found." }, { status: 404 });
 
+  // P-A round 66: vendor-created notification. The user signed up as a vendor
+  // and finished onboarding — tell them (in-app). Previous behavior: nothing
+  // fired, so the bell stayed empty after completing a vendor profile.
+  try {
+    const { mockNotificationRepo } = await import("@voeq/data");
+    await mockNotificationRepo.create({
+      recipientId: identity.id,
+      type: "system",
+      title: "Your vendor profile is ready 🎉",
+      body: "Add your first listing to start selling on campus.",
+      refId: identity.vendorId ?? null,
+    });
+  } catch {
+    // Non-blocking — notification must never fail onboarding.
+  }
+
   return NextResponse.json({ ok: true, nextStep: "complete", vendorId: vendor.id, status: vendor.status });
 }

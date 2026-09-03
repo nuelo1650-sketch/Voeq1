@@ -8,6 +8,7 @@ import {
   mockCampusRepo,
 } from "@voeq/data";
 import { VendorGoLiveButton } from "@/components/vendor/VendorGoLiveButton";
+import { GreetingText } from "@/components/vendor/GreetingText";
 import { VendorDashboardClient } from "@/components/vendor/VendorDashboardClient";
 import { AppShell } from "@/components/shell/AppShell";
 
@@ -47,9 +48,12 @@ export default async function VendorDashboardPage() {
   const campus = campusList.find((c) => c.id === vendor.campus);
   const campusName = campus?.name || vendor.campus;
 
-  // Time-aware greeting
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  // Time-aware greeting. P-A round 66: the SERVER version used UTC
+  // (new Date().getHours() is UTC on Render/Vercel) — wrong for West Africa
+  // Time (UTC+1): e.g. 00:30 Lagos read "Good evening" at 23:30 UTC.
+  // Greeting is rendered by a client component (GreetingText) so the hour
+  // follows the visitor's LOCAl clock; server passes the vendor name only.
+  const greetingValue = "Good day"; // client overrides immediately
 
   // Status badge
   const statusBadge = vendor.status === "suspended" 
@@ -64,7 +68,7 @@ export default async function VendorDashboardPage() {
       {/* K3b.1 Header */}
       <header style={{ marginBottom: "var(--space-4)" }}>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 36, margin: 0, marginBottom: 12, color: "var(--color-forest)" }}>
-          {greeting}, {vendor.name}
+          <GreetingText name={vendor.name} />
         </h1>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <span style={{

@@ -9,6 +9,7 @@ import { StorefrontHoursForm } from "@/components/vendor/StorefrontHoursForm";
 import { StorefrontSocialsForm } from "@/components/vendor/StorefrontSocialsForm";
 import { StorefrontPreview } from "@/components/vendor/StorefrontPreview";
 import { ListingManager } from "@/components/vendor/ListingManager";
+import { VendorWeeklyStats } from "@/components/vendor/VendorWeeklyStats";
 import { VendorReviewsManager } from "@/components/vendor/VendorReviewsManager";
 import { VendorAnalyticsPanel } from "@/components/vendor/VendorAnalyticsPanel";
 import { VendorFollowersPanel } from "@/components/vendor/VendorFollowersPanel";
@@ -51,17 +52,12 @@ export function VendorDashboardClient({
 
   return (
     <>
-      {/* K3b.1 Performance summary - honest data only */}
+      {/* P-A round 66: REAL weekly data (page_events + messages + saves + follows). Previous block was hardcoded dashes — honest but dead. */}
       <section style={{ marginBottom: "var(--space-4)" }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0, marginBottom: "var(--space-3)", color: "var(--color-forest)" }}>
           This week
         </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
-          <StatCard icon={Eye} label="Views" value="—" />
-          <StatCard icon={MessageSquare} label="Messages" value="—" />
-          <StatCard icon={Heart} label="New followers" value="—" />
-          <StatCard icon={Bookmark} label="Saves" value="—" />
-        </div>
+        <VendorWeeklyStats />
       </section>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", alignItems: "start", paddingBottom: 80 }}>

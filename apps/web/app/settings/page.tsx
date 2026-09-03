@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getCurrentIdentity, SESSION_COOKIE } from "@/lib/session";
+import { getCurrentIdentity, getStaffIdentity, SESSION_COOKIE } from "@/lib/session";
 import { mockVendorRepo, mockUserPrefRepo, mockSessionRepo, mockCampusRepo } from "@voeq/data";
 import { SettingsForms } from "@/components/shopper/SettingsForms";
 import { AppShell } from "@/components/shell/AppShell";
@@ -18,6 +18,10 @@ export default async function SettingsPage() {
 
   const isVendor = !!identity.vendorId;
   const vendorLabel = isVendor ? (await mockVendorRepo.getById(identity.vendorId!))?.name : null;
+  // P-A round 66: staff (super_admin/admin/moderator) get a clear path to the
+  // admin console. Previously there was NO admin link from shopper/vendor UI.
+  const staff = await getStaffIdentity();
+  const isStaff = !!staff;
   const prefs = await mockUserPrefRepo.get(identity.id);
   const notifPrefs = (prefs?.notificationPrefs ?? {}) as Record<string, "email" | "in_app" | "both" | "off">;
 
@@ -151,6 +155,51 @@ export default async function SettingsPage() {
             }}
           >
             Go to dashboard
+          </Link>
+        </section>
+      )}
+
+      {/* P-A round 66: ADMIN CONSOLE path — staff roles had NO link from the
+          shopper/vendor UI. super_admin/admin/moderator now see it here. */}
+      {isStaff && (
+        <section
+          style={{
+            marginTop: "var(--space-4)",
+            border: "1px solid var(--color-forest)",
+            borderRadius: 8,
+            padding: "var(--space-3)",
+            background: "var(--color-cream)",
+            maxWidth: 600,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: 22,
+              margin: "0 0 8px",
+              color: "var(--color-forest)",
+            }}
+          >
+            Admin console
+          </h2>
+          <p style={{ fontSize: 14, color: "var(--color-ink-muted)", marginBottom: 12 }}>
+            Staff role: <strong>{staff!.staffRole}</strong>.
+          </p>
+          <Link
+            href="/admin"
+            data-testid="settings-admin-console"
+            style={{
+              display: "inline-block",
+              padding: "10px 20px",
+              background: "var(--color-forest)",
+              color: "var(--color-cream)",
+              textDecoration: "none",
+              borderRadius: 6,
+              fontSize: 14,
+              fontWeight: 500,
+            }}
+          >
+            Open admin console
           </Link>
         </section>
       )}

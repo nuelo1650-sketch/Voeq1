@@ -30,15 +30,15 @@ export function NotificationBell() {
   const [loaded, setLoaded] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
 
-  // Load notifications — only when a session exists (avoids 401 noise on
-  // public/auth pages where there is no logged-in user).
+  // Load notifications. P-A round 66: the old code sniffed
+  // document.cookie.includes("sessionId=") — but the session cookie is
+  // httpOnly, so document.cookie NEVER contains it. The bell therefore
+  // thought EVERY user was unauth and rendered "Sign in" instead of the
+  // badge — the reason no one ever saw an unread count. The API itself is
+  // the truth (it returns {notifications:[],unread:0} gracefully when no
+  // session), so just fetch it.
   useEffect(() => {
     if (typeof document === "undefined") return;
-    if (!document.cookie.includes("sessionId=")) {
-      setLoaded(true);
-      setIsAuthed(false);
-      return;
-    }
     let cancelled = false;
     fetch("/api/notifications")
       .then((r) => {
