@@ -8,7 +8,7 @@
  * (matching the mock layer's convention).
  */
 import { randomUUID } from "crypto";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, lt, inArray } from "drizzle-orm";
 import { getDb } from "./client";
 import * as s from "./schema";
 import type {
@@ -452,6 +452,7 @@ export const realAuthEventStore = {
     email?: string | null;
     ip?: string | null;
     userAgent?: string | null;
+    at?: string;
   }): Promise<void> {
     await getDb().insert(s.authEvents).values({
       id: id(),
@@ -460,7 +461,7 @@ export const realAuthEventStore = {
       email: event.email ?? null,
       ip: event.ip ?? null,
       userAgent: event.userAgent ? event.userAgent.slice(0, 300) : null,
-      at: now(),
+      at: event.at ?? now(),
     });
   },
   async queryBy(filter: { identityId?: string; email?: string; limit?: number }): Promise<Array<{
@@ -485,6 +486,25 @@ export const realAuthEventStore = {
       userAgent: r.userAgent ?? null,
       at: r.at,
     }));
+  },
+  /**
+   * Batch 2 / P6a retention: hard-delete forensic events older than `cutoffIso`
+   * (ISO string; `at` is TEXT so lexicographic compare is correct for ISO).
+   * Postgres has no DELETE...LIMIT, so we select the capped batch of ids first
+   * and delete by id — a first-run purge of years of backlog can't lock the
+   * table. Returns the deleted ids for the audit trail.
+   */
+  async purgeOlderThan(cutoffIso: string, limit = 1000): Promise<string[]> {
+    const candidates = await getDb()
+      .select({ id: s.authEvents.id })
+      .from(s.authEvents)
+      .where(lt(s.authEvents.at, cutoffIso))
+      .limit(limit);
+    if (candidates.length === 0) return [];
+    await getDb()
+      .delete(s.authEvents)
+      .where(inArray(s.authEvents.id, candidates.map((r) => r.id)));
+    return candidates.map((r) => r.id);
   },
 };
 

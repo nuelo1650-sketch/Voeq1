@@ -12,6 +12,7 @@
 import { mockIdentityRepo } from "./auth";
 import { logAudit } from "./audit";
 import { notifyEnforcement } from "./user-notifications";
+import { purgeAuthEventsOlderThan } from "./auth-events";
 
 export interface SweepReport {
   reinstated: number;
@@ -59,4 +60,32 @@ export async function liftExpiredSuspension(identityId: string, now: number = Da
   });
   await notifyEnforcement({ recipientId: ident.id, action: "auto_reinstate" });
   return true;
+}
+
+/**
+ * Batch 2 / P6b — lazy retention purge on the login path.
+ *
+ * No cron infra: the 12-month auth_events purge rides logins, throttled to at
+ * most once per hour per process (Render free tier = single instance, so the
+ * module-level throttle is sufficient). Fire-and-forget from the caller's
+ * perspective — a purge failure must never affect a login. When rows are
+ * deleted, an `auth_events.purge` audit entry records the count (never the
+ * deleted rows' contents — that's the point of the purge).
+ */
+const PURGE_INTERVAL_MS = 60 * 60 * 1000;
+let lastPurgeAt = 0;
+
+export async function maybePurgeAuthEvents(now: number = Date.now()): Promise<number> {
+  if (now - lastPurgeAt < PURGE_INTERVAL_MS) return 0;
+  lastPurgeAt = now;
+  try {
+    const purged = await purgeAuthEventsOlderThan(now);
+    if (purged > 0) {
+      await logAudit("auth_events.purge", "system", { purged, adminAction: true });
+    }
+    return purged;
+  } catch (e) {
+    console.error(`[retention] auth_events purge failed: ${e instanceof Error ? e.message : e}`);
+    return 0;
+  }
 }

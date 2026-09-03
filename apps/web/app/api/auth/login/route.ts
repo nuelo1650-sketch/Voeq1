@@ -7,6 +7,7 @@ import {
   logAudit,
   isConsentCurrent,
   liftExpiredSuspension,
+  maybePurgeAuthEvents,
   recordAuthEvent,
   clientIpFrom,
 } from "@voeq/data";
@@ -128,6 +129,9 @@ export async function POST(req: NextRequest) {
   });
   await logAudit("login.success", identity.id, { remember: rememberSession, consentOk });
   await recordAuthEvent({ identityId: identity.id, event: "login", email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
+  // Batch 2 / P6b: the 12-month auth_events retention purge rides logins
+  // (throttled internally to 1h/process, never throws — see maybePurgeAuthEvents).
+  void maybePurgeAuthEvents();
   return res;
 }
 

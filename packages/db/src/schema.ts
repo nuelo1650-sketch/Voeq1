@@ -156,6 +156,8 @@ export const authEvents = pgTable("auth_events", {
   at: text("at").notNull(),
 }, (t) => ({
   identityAtIdx: index("auth_events_identity_at_idx").on(t.identityId, t.at),
+  // Batch 2 / P6b: the retention purge scans by age alone (WHERE at < cutoff).
+  atIdx: index("auth_events_at_idx").on(t.at),
 }));
 
 // ---- Marketplace ------------------------------------------------------------

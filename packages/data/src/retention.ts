@@ -10,12 +10,14 @@
 import { pruneExpiredCredentials } from "./auth";
 import { mockStaffRepo } from "./mock";
 import { mockCampusRepo } from "./config";
+import { purgeAuthEventsOlderThan } from "./auth-events";
 
 export interface RetentionReport {
   prunedCredentials: number;
   resolvedStaffCases: number;
   unverifiedCampuses: string[];
   softDeletedStubsRemoved: number; // Phase 9 target (currently 0 — no soft-delete model)
+  authEventsPurged: number; // batch 2 / P6b — raw-IP events past the 12-month window
 }
 
 /** Run all retention passes. `now` injectable for tests. */
@@ -29,10 +31,15 @@ export async function runRetentionPasses(now: number = Date.now()): Promise<Rete
   const campuses = await mockCampusRepo.list();
   const unverifiedCampuses = campuses.filter((c) => c.status === "unverified").map((c) => c.id);
 
+  // P6b: forensic events (raw IP + UA) are personal data — hard-delete past the
+  // retention window. Capped per run; the login-path sweep drains the backlog.
+  const authEventsPurged = await purgeAuthEventsOlderThan(now);
+
   return {
     prunedCredentials,
     resolvedStaffCases,
     unverifiedCampuses,
     softDeletedStubsRemoved: 0,
+    authEventsPurged,
   };
 }
