@@ -5212,6 +5212,9 @@ header.AppShell,
   font-family: var(--role-font-ui); border: 1px solid rgba(30,59,47,.14);
   background: transparent; color: var(--color-forest); cursor: pointer; white-space: nowrap;
   transition: background .15s ease, border-color .15s ease, color .15s ease;
+  /* P-A round 78: pills measured 38px tall at 390px — under the 44px touch
+     target. min-height 44 keeps the pill look; taps reliable on phones. */
+  min-height: 44px;
 }
 .voeq-pill:hover { background: rgba(30,59,47,.05); border-color: rgba(30,59,47,.28); }
 .voeq-pill.is-active { background: var(--color-forest); color: var(--color-cream, #f6f1e6); border-color: var(--color-forest); }

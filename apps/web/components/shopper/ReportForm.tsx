@@ -50,8 +50,12 @@ export function ReportForm({
         return;
       }
       if (res.ok) {
+        // P-A round 78 (FIX 'report submitted with no feedback'): onDone()
+        // closed the panel IMMEDIATELY, unmounting the success state before
+        // the user ever saw 'Report submitted'. Show the confirmation first;
+        // the panel stays open with the done message (user closes via the
+        // Report button which toggles reportOpen off).
         setDone(true);
-        onDone?.();
       } else {
         const d = await res.json().catch(() => ({}));
         setErr(d.error ?? "Could not submit report.");
