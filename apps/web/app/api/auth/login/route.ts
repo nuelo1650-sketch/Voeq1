@@ -92,9 +92,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "inactive", redirect: "/consent" }, { status: 403 });
   }
 
-  const session = await mockSessionRepo.create(identity.id);
-  // Remember-me extends to 30d (default already 30d; non-remember could be shorter,
-  // but mock phase keeps 30d for both — Phase 9 can shorten non-remember).
+  // P-A round 67 (FIX — 'Keep me signed in' did nothing): unchecked remember =
+  // 1-day session; checked = 30-day session. Both server (repo) and cookie
+  // expire identically — previously BOTH were 30d, so the box was a lie.
+  const rememberSession = parsed.data.remember !== false;
+  const ttlMs = rememberSession ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+  const session = await mockSessionRepo.create(identity.id, { ttlMs });
   // Phase 1: preserve the user's pending intent so post-auth the action resumes.
   const res = NextResponse.json({ ok: true, redirect: resolveNext(next, intent) });
   res.cookies.set("sessionId", session.id, {
@@ -104,7 +107,7 @@ export async function POST(req: NextRequest) {
     path: "/",
     expires: new Date(session.expiresAt),
   });
-  await logAudit("login.success", identity.id, {});
+  await logAudit("login.success", identity.id, { remember: rememberSession });
   return res;
 }
 

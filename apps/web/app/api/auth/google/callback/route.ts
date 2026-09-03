@@ -8,6 +8,7 @@ import {
   createSession,
   logAudit,
   sendEmail,
+  isConsentCurrent,
 } from "@voeq/data/server";
 
 const GOOGLE_STATE_COOKIE = "google_oauth_state";
@@ -105,14 +106,23 @@ export async function GET(req: NextRequest) {
     }
 
     const session = await createSession(existing.id);
-    const r = NextResponse.redirect(new URL("/consent", req.url));
+    // P-A round 67 (FIX — 'always accept policies at login'): existing users
+    // were ALWAYS redirected to /consent even though consent is recorded
+    // server-side. Only re-ask when the acceptance is missing or the policy
+    // version has changed (isConsentCurrent). This removes the wall that
+    // forced re-agreement on EVERY Google login.
+    const consentOk = await isConsentCurrent(existing.id).catch(() => false);
+    const land = consentOk
+      ? (existing.staffRole ? "/admin/" : "/")
+      : "/consent";
+    const r = NextResponse.redirect(new URL(land, req.url));
     r.cookies.set("sessionId", session.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
     });
-    await logAudit("google.login", existing.id, {});
+    await logAudit("google.login", existing.id, { consentOk });
     return r;
   }
 
@@ -131,10 +141,18 @@ export async function GET(req: NextRequest) {
     await mockIdentityRepo.patch(byEmail.id, { googleSubject: profile.sub });
     await logAudit("google.login-linked", byEmail.id, {});
     const session = await createSession(byEmail.id);
-    const redirectUrl = new URL("/consent", req.url);
+    // P-A round 67: linked accounts skip /consent when their acceptance is
+    // current (same fix as the existing-user branch — no re-agreement wall).
+    const consentOk = await isConsentCurrent(byEmail.id).catch(() => false);
+    const dest = consentOk
+      ? (byEmail.staffRole ? "/admin/" : "/")
+      : "/consent";
+    const redirectUrl = new URL(dest, req.url);
     // P-A round 65b: staff identities continue to /admin, not the landing page.
-    redirectUrl.searchParams.set("next", byEmail.staffRole ? "/admin" : "/");
-    redirectUrl.searchParams.set("session", session.id);
+    if (!consentOk) {
+      redirectUrl.searchParams.set("next", byEmail.staffRole ? "/admin" : "/");
+      redirectUrl.searchParams.set("session", session.id);
+    }
     // Auth status + session cookie for the linked account.
     if (session) {
       const jar = await cookies();

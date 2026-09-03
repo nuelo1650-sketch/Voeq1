@@ -288,7 +288,8 @@ export interface IdentityRepo {
 }
 
 export interface SessionRepo {
-  create(identityId: string): Promise<Session>;
+  /** ttlMs: override the default TTL (e.g. remember=false → 1 day). */
+  create(identityId: string, opts?: { ttlMs?: number }): Promise<Session>;
   get(id: string): Promise<Session | null>;
   listForIdentity(identityId: string): Promise<Session[]>;
   revoke(id: string): Promise<void>;

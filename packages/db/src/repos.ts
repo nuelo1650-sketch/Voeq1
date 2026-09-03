@@ -139,14 +139,14 @@ export const realIdentityRepo = {
 
 // ---- SessionRepo (server-side, sameSite=lax cookie maps to `sessions` row) ---
 export const realSessionRepo = {
-  async create(identityId: string): Promise<Session> {
+  async create(identityId: string, opts?: { ttlMs?: number }): Promise<Session> {
     const t = now();
     const sess: Session = {
       id: id(),
       identityId,
       createdAt: t,
-      // 30-day idle (Doc 09 §9.5). Stored as ISO; get() enforces expiry.
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      // Default 30-day (Doc 09 §9.5). remember=false → 1-day via opts.ttlMs.
+      expiresAt: new Date(Date.now() + (opts?.ttlMs ?? 30 * 24 * 60 * 60 * 1000)).toISOString(),
     };
     await getDb().insert(s.sessions).values(sess);
     return sess;

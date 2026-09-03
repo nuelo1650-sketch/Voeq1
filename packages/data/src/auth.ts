@@ -135,14 +135,15 @@ const mockIdentityRepoImpl: IdentityRepo = {
 
 // ---- SessionRepo -------------------------------------------------------------
 const mockSessionRepoImpl: SessionRepo = {
-  async create(identityId) {
+  async create(identityId, opts) {
     const id = randomUUID();
     const now = Date.now();
+    const ttl = opts?.ttlMs ?? SESSION_TTL_MS;
     const s: Session = {
       id,
       identityId,
       createdAt: new Date(now).toISOString(),
-      expiresAt: new Date(now + SESSION_TTL_MS).toISOString(),
+      expiresAt: new Date(now + ttl).toISOString(),
     };
     sessions.set(id, s);
     return s;

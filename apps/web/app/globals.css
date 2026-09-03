@@ -4823,7 +4823,47 @@
 }
 .auth-submit:hover:not(:disabled) { transform: translateY(-2px) !important; box-shadow: 0 14px 30px rgba(30,59,47,.26) !important; }
 
-/* --- Google button: warm outline --- */
+/* --- P-A round 67: BEAUTY PASS — warm ambient backdrop, serif headline, refined card.
+       Keeps the neutral/efficient card; lifts the environment around it. --- */
+.info-page-main {
+  position: relative;
+}
+.info-page-main::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 420px at 12% -10%, rgba(232,163,61,.14), transparent 60%),
+    radial-gradient(600px 400px at 95% 8%, rgba(15,42,29,.10), transparent 62%),
+    linear-gradient(180deg, #f2ede0 0%, #eee7d6 100%);
+}
+.auth-card {
+  box-shadow: 0 24px 60px rgba(15,42,29,.14), 0 2px 8px rgba(15,42,29,.05);
+}
+.auth-header-logo img, .auth-header-logo svg { filter: saturate(1.05); }
+.auth-header-lede {
+  font-family: 'Fraunces', var(--role-font-display, serif) !important;
+  font-size: 26px !important;
+  line-height: 1.2 !important;
+  font-weight: 500 !important;
+  color: var(--color-forest, #0f2a1d) !important;
+  margin: 6px 0 2px !important;
+  letter-spacing: -.01em !important;
+}
+.auth-header { gap: 10px !important; }
+.auth-divider span {
+  font-size: 11px !important;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.auth-divider { margin: 4px 0 !important; }
+.auth-alt { font-size: 13px !important; }
+
+/* P-A round 67: end of beauty pass */
+
 .auth-google-btn {
   border: 1px solid rgba(30,59,47,.14) !important;
   border-radius: 999px !important;
@@ -4831,6 +4871,34 @@
   font-weight: 600 !important;
 }
 .auth-google-btn:hover { background: rgba(224,163,61,.08) !important; }
+
+/* --- P-A round 67: OFFICIAL Google-brand button (spec from Google Identity
+       — white, 1px #dadce0, radius 4px, Roboto Medium, hover #f8f9fa). The
+       "Continue with Google" CTA must look like Google's, not a Voeq pill. */
+.auth-google-btn-brand {
+  border: 1px solid #dadce0 !important;
+  border-radius: 4px !important;
+  background: #ffffff !important;
+  font-family: 'Roboto', 'Arial', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: .25px !important;
+  color: #3c4043 !important;
+  height: 48px !important;
+  padding: 12px 16px !important;
+  box-shadow: none !important;
+  transition: background .12s, box-shadow .12s !important;
+}
+.auth-google-btn-brand:hover {
+  background: #f8f9fa !important;
+  box-shadow: 0 1px 2px rgba(60,64,67,.12) !important;
+  transform: none !important;
+}
+.auth-google-btn-brand:active { background: #f1f3f4 !important; }
+.auth-google-btn-brand:focus-visible {
+  outline: 2px solid #4285F4 !important;
+  outline-offset: 2px !important;
+}
 
 /* --- Divider + alt links: gold/forest --- */
 .auth-divider span { color: var(--color-ink-muted); }
