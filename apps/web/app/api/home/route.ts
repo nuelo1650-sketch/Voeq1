@@ -52,10 +52,17 @@ export async function GET() {
     })
   );
 
-  // Recommended: campus-wide trending (graceful if no campus set).
+  // Recommended: campus-wide trending. P-A round 72 (FIX empty shopper home):
+  // the old fallback was campus: identity.campus ?? campuses[0]?.id ?? "NMU" —
+  // "NMU" is NOT a real slug (real: "nmu-okerenkoko"), so a shopper who hadn't
+  // picked a campus got loadExplore("NMU") -> EMPTY -> recommended: [] -> the
+  // whole dashboard rendered as empty boxes while Explore had real listings.
+  // Honest rule: filter by campus ONLY when the identity has one; otherwise
+  // show the full public feed (the shopper hasn't CHOOSEN a campus yet —
+  // hiding every listing until they do is not product, it's a bug).
   const explore = await loadExplore({
     query: "",
-    campus: identity.campus ?? campuses[0]?.id ?? "NMU",
+    campus: identity.campus ?? undefined,
   });
 
   return NextResponse.json({
@@ -67,6 +74,9 @@ export async function GET() {
     notifications: notifications.slice(0, 5),
     unreadNotifications,
     unreadMessages,
-    recommended: explore.trending ?? explore.data ?? [],
+    // P-A round 73: `??` only falls back on null/undefined — trending being an
+    // EMPTY array (no featured listings) left recommended=[] forever even when
+    // explore.data had real listings. Fall back on length, not null.
+    recommended: explore.trending.length > 0 ? explore.trending : explore.data,
   });
 }
