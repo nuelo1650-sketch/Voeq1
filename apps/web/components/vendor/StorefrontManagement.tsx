@@ -217,7 +217,21 @@ function ProfilePhotoSection({ vendor, disabled }: { vendor: Vendor; disabled: b
       if ("error" in prep) { setError(prep.error); return; }
       const uploadFile = prep.blob ? new File([prep.blob], file.name, { type: prep.mimeType || file.type }) : file;
       const result = await uploadPhotoDirect(uploadFile, "vendor_photo");
-      if (result.ok) {
+      if (result.ok && result.url) {
+        // P-A round 71 (REAL FIX): uploadPhotoDirect moderates + returns the URL
+        // but NEVER persisted it — the old base64 flow POSTed the dataUrl, and
+        // my round-65 swap dropped that step. Persist profilePhotoUrl via the
+        // route's URL-save mode, then refresh.
+        const save = await fetch("/api/vendor/photo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileName: file.name, url: result.url }),
+        });
+        if (!save.ok) {
+          const sd = await save.json().catch(() => ({}));
+          setError(sd.error ?? "Could not save your photo. Please try again.");
+          return;
+        }
         router.refresh();
       } else {
         setError(result.reason ?? "Upload failed");

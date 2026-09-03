@@ -28,12 +28,26 @@ export async function POST(req: NextRequest) {
   const auth = await requireVendor();
   if ("error" in auth) return auth.error;
 
-  let body: { fileName?: string; dataUrl?: string; force?: "pass" | "fail" };
+  let body: { fileName?: string; dataUrl?: string; url?: string; force?: "pass" | "fail" };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
+
+  // P-A round 71 (DIRECT-upload mode): the browser already uploaded the file
+  // to Cloudinary (signed token) and it's been moderated by /api/images/upload.
+  // Here we ONLY persist profilePhotoUrl — no re-upload, no re-moderation.
+  // The legacy dataUrl path still works for tests/mock.
+  if (body.url) {
+    if (!/^https:\/\/(res\.)?cloudinary\.com\//.test(body.url)) {
+      return NextResponse.json({ error: "Only Cloudinary-hosted photos are allowed." }, { status: 422 });
+    }
+    const vendor = await mockVendorRepo.patch(auth.vendor.id, { profilePhotoUrl: body.url });
+    await enforceVisibilityAfterMutation(auth.vendor.id).catch(() => {});
+    return NextResponse.json({ ok: true, profilePhotoUrl: vendor?.profilePhotoUrl });
+  }
+
   if (!body.fileName) return NextResponse.json({ error: "fileName is required." }, { status: 400 });
 
   const result = await uploadImage({ fileName: body.fileName, dataUrl: body.dataUrl, force: body.force, context: "vendor_photo" });
