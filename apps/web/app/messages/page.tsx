@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentIdentity } from "@/lib/session";
+import { getCurrentIdentity, getStaffIdentity } from "@/lib/session";
 import { ConversationList, type ConversationRow } from "@/components/messaging/ConversationList";
 import { AppShell } from "@/components/shell/AppShell";
 
@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function MessagesPage() {
   const identity = await getCurrentIdentity();
   if (!identity) redirect("/login?next=/messages");
+  const staff = await getStaffIdentity();
 
   const { mockConversationRepo, mockMessageRepo, mockIdentityRepo, mockVendorRepo } = await import("@voeq/data");
   const conversations = await mockConversationRepo.listForIdentity(identity.id);
@@ -40,10 +41,27 @@ export default async function MessagesPage() {
     }),
   );
 
+  // P-A round 70: vendor persona gets the VENDOR shell (the old page hardcoded
+  // role="shopper" — a vendor's Messages tab showed shopper nav + never the
+  // vendor route's messaging affordances).
+  const vendor = identity.vendorId
+    ? await mockVendorRepo.getById(identity.vendorId)
+    : null;
+  const shellRole = vendor ? "vendor" : "shopper";
+
   return (
-    <AppShell role="shopper" userName={identity.name}>
+    <AppShell role={shellRole} userName={vendor?.name ?? identity.name ?? "You"} staffRole={staff?.staffRole ?? null}>
       <main style={{ maxWidth: 640, margin: "0 auto", padding: 16 }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h2)" }}>Messages</h1>
+        <header style={{ marginBottom: "var(--space-3)", padding: "0 4px" }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "28px", margin: 0, color: "var(--color-forest)" }}>
+            Messages
+          </h1>
+          <p style={{ fontSize: 13.5, color: "var(--role-text-muted)", margin: "4px 0 0" }}>
+            {rows.length === 0
+              ? "Start a conversation with any vendor or listing."
+              : `${rows.length} conversation${rows.length === 1 ? "" : "s"} · unread marked bold`}
+          </p>
+        </header>
         <ConversationList rows={rows} />
       </main>
     </AppShell>

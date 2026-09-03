@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
-import { getCurrentIdentity } from "@/lib/session";
+import { getCurrentIdentity, getStaffIdentity } from "@/lib/session";
 import { mockConversationRepo, mockVendorRepo, mockIdentityRepo, mockListingsRepo } from "@voeq/data";
 import { ConversationView } from "@/components/messaging/ConversationView";
+import { AppShell } from "@/components/shell/AppShell";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,13 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   const conv = await mockConversationRepo.getById(id);
   if (!conv) notFound();
   if (!conv.participantIds.includes(identity.id)) notFound();
+
+  // P-A round 70: shell role follows the REAL persona (vendor vs shopper),
+  // plus staff surface for admins — the old bare <main> had no nav at all,
+  // and a shopper-vendor reading messages got trapped with no back nav.
+  const staff = await getStaffIdentity();
+  const vendor = identity.vendorId ? await mockVendorRepo.getById(identity.vendorId) : null;
+  const shellRole = vendor ? "vendor" : "shopper";
 
   const otherId = conv.participantIds.find((p) => p !== identity.id) ?? "";
   const other = otherId ? await mockIdentityRepo.getById(otherId) : null;
@@ -51,16 +59,18 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <main style={{ maxWidth: 640, margin: "0 auto", height: "100dvh", display: "flex", flexDirection: "column" }}>
-      <ConversationView
-        conversationId={id}
-        currentIdentityId={identity.id}
-        otherName={other?.name ?? "Someone"}
-        otherLastSeen={conv.lastSeen[otherId]}
-        readOnly={readOnly}
-        readOnlyReason={readOnlyReason}
-        listingContext={listingContext}
-      />
-    </main>
+    <AppShell role={shellRole} userName={vendor?.name ?? identity.name ?? "You"} staffRole={staff?.staffRole ?? null}>
+      <main style={{ height: "calc(100dvh - 64px)", display: "flex", flexDirection: "column" }}>
+        <ConversationView
+          conversationId={id}
+          currentIdentityId={identity.id}
+          otherName={other?.name ?? "Someone"}
+          otherLastSeen={conv.lastSeen[otherId]}
+          readOnly={readOnly}
+          readOnlyReason={readOnlyReason}
+          listingContext={listingContext}
+        />
+      </main>
+    </AppShell>
   );
 }
