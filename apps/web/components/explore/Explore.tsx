@@ -551,7 +551,12 @@ const chipStyle: React.CSSProperties = {
   background: "var(--role-surface-sunken)",
   border: "1px solid var(--role-border)",
   borderRadius: 999,
-  padding: "4px 10px",
+  // P-A round 78: chips measured 38px tall at 390px — under the 44px touch
+  // target. Min-height 44 keeps the pill look while making taps reliable.
+  padding: "10px 14px",
+  minHeight: 44,
+  display: "inline-flex",
+  alignItems: "center",
 };
 const headingStyle: React.CSSProperties = {
   fontSize: "28px",
@@ -568,6 +573,11 @@ const ghostBtn: React.CSSProperties = {
   border: "1px solid var(--role-border)",
   background: "transparent",
   color: "var(--role-text)",
+  // P-A round 78: Filters button measured 39px — bump to 44px touch target.
+  minHeight: 44,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
   cursor: "pointer",
   textDecoration: "none",
 };
