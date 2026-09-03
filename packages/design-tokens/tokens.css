@@ -39,6 +39,21 @@
   --color-status-closing: #D4922A;
   --color-status-closed: #B85C3E;
 
+  /* P-A round 80: --color-danger is used in 15+ places (remove/delete buttons,
+     suspended banner, delete-listing) but was NEVER defined — so every one of
+     those rendered white-on-white (invisible "Remove" button). Alias it to the
+     danger hue. A defined token beats 15 scattered patches. */
+  --color-danger: #B85C3E;
+  /* Round 80: four more tokens were referenced but never defined — the vendor
+     dashboard "Live"/"Pending" status badges and several text accents went
+     invisible (color:undefined -> initial/inherited, not the intended hue).
+     Give them real values from the same palette. */
+  --color-status-live: #2D5A3D;
+  --color-status-pending: #D4922A;
+  --color-cream-light: #FBF8F0;
+  --color-forest-dark: #0B211A;
+  --color-ink-deep: #0A0A0A;
+
   /* ---- GLASS EFFECTS ---- */
   --glass-bg: rgba(245, 241, 232, 0.08);
   --glass-bg-strong: rgba(245, 241, 232, 0.15);

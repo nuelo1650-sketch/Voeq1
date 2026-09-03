@@ -399,21 +399,27 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
                 {sessions.length === 0 ? (
                   <p style={{ fontSize: 14, color: "var(--color-ink-muted)" }}>No active sessions</p>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {sessions.map((session) => (
+                  <>
+                    {/* P-A round 80: this list rendered EVERY non-expired session as
+                        a tall two-line card, so any user with many logins got a wall
+                        of duplicates ("sessions logs are way too much"). Cap to the
+                        most recent few and make each row compact. "Sign out all
+                        devices" below is the escape hatch for the rest. */}
+                    {sessions.slice(0, 5).map((session) => (
                       <div
                         key={session.id}
                         style={{
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          padding: 12,
+                          gap: 8,
+                          padding: "8px 12px",
                           background: "var(--color-cream)",
                           borderRadius: 6,
                         }}
                       >
-                        <div>
-                          <div style={{ fontSize: 14, fontWeight: 500 }}>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 500 }}>
                             Session {session.id.slice(0, 8)}…
                             {session.current && (
                               <span
@@ -431,12 +437,13 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
                               </span>
                             )}
                           </div>
-                          <div style={{ fontSize: 12, color: "var(--color-ink-muted)" }}>
-                            Signed in {new Date(session.createdAt).toLocaleString()} · expires {new Date(session.expiresAt).toLocaleDateString()}
+                          <div style={{ fontSize: 11, color: "var(--color-ink-muted)" }}>
+                            {new Date(session.createdAt).toLocaleDateString()}
                           </div>
                         </div>
                         <button
                           style={{
+                            flexShrink: 0,
                             padding: "6px 12px",
                             fontSize: 13,
                             background: "transparent",
@@ -450,7 +457,12 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
                         </button>
                       </div>
                     ))}
-                  </div>
+                  </>
+                )}
+                {sessions.length > 5 && (
+                  <p style={{ fontSize: 12, color: "var(--color-ink-muted)", margin: "8px 0 0" }}>
+                    + {sessions.length - 5} more · <strong>Sign out all</strong> below to clear them
+                  </p>
                 )}
                 <button
                   onClick={signOutAll}

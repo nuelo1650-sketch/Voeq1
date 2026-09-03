@@ -201,11 +201,18 @@ export function AppShell({
         .app-shell-bottom { display: flex !important; }
         .app-shell-hamburger { display: flex !important; }
         .app-shell-center { display: none !important; }
+        /* P-A round 80: the bottom tab is position:fixed with no fixed height,
+           but <main> only reserved env(safe-area-inset-bottom) (=0 on Android)
+           — so the fixed nav covered the bottom 50-60px of every mobile page
+           (Settings Save button, message composer, sessions list hidden). Give
+           the main content a real bottom inset to sit above the bottom tab. */
+        .app-shell-main { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0)) !important; }
         @media (min-width: 1024px) {
           .app-shell-sidebar { display: flex !important; }
           .app-shell-bottom { display: none !important; }
           .app-shell-hamburger { display: none !important; }
           .app-shell-center { display: flex !important; }
+          .app-shell-main { padding-bottom: env(safe-area-inset-bottom, 0) !important; }
         }
       `}</style>
 
@@ -266,7 +273,7 @@ export function AppShell({
         </nav>
 
         {/* Main content */}
-        <main style={{ flex: 1, padding: "var(--space-3, 16px) var(--nav-inline-pad, 16px)", minWidth: 0, paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
+        <main className="app-shell-main" style={{ flex: 1, padding: "var(--space-3, 16px) var(--nav-inline-pad, 16px)", minWidth: 0, paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
           {children}
         </main>
       </div>
