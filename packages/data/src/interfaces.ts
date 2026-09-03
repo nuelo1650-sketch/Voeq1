@@ -62,7 +62,7 @@ export interface Listing {
 }
 
 export interface VendorRepo {
-  listVendors(params?: { campus?: string }): Promise<Vendor[]>;
+  listVendors(params?: { campus?: string; publicOnly?: boolean }): Promise<Vendor[]>;
   getById(id: string): Promise<Vendor | null>;
   getByIdentityId(identityId: string): Promise<Vendor | null>;
   create(input: Partial<Vendor> & { identityId: string; name: string; campus: string; categoryIds: string[] }): Promise<Vendor>;
@@ -137,7 +137,11 @@ export interface StaffCase {
 }
 
 export interface ListingsRepo {
-  list(params?: { campus?: string; category?: string }): Promise<Listing[]>;
+  /** publicOnly (default false): rows that backend surfaces on PUBLIC surfaces
+      (Explore/storefront) must be isPublished + status="active" AND owned by a
+      LIVE vendor. This is the single source of truth — repo layer decided,
+      not each page. */
+  list(params?: { campus?: string; category?: string; publicOnly?: boolean }): Promise<Listing[]>;
   getById(id: string): Promise<Listing | null>;
   create(input: Partial<Listing> & { vendorId: string; title: string; priceMinMinor: number; categoryId: string }): Promise<Listing>;
   /** VS5.7: edit a listing (inline form). Ownership enforced by caller. */
@@ -147,7 +151,7 @@ export interface ListingsRepo {
 }
 
 export interface VendorsRepo {
-  listVendors(params?: { campus?: string }): Promise<Vendor[]>;
+  listVendors(params?: { campus?: string; publicOnly?: boolean }): Promise<Vendor[]>;
   getById(id: string): Promise<Vendor | null>;
 }
 

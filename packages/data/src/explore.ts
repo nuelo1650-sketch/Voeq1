@@ -243,8 +243,9 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
   const listingsRepo = params.forceError ? mockListingsRepoThatFails : mockListingsRepo;
   try {
     const [listings, vendors] = await Promise.all([
-      listingsRepo.list({ campus: params.campus, category: categoryForRepo }),
-      mockVendorRepo.listVendors({ campus: params.campus }),
+      // P-A round 69: Explore is PUBLIC -> publicOnly (published+active+live vendor).
+      listingsRepo.list({ campus: params.campus, category: categoryForRepo, publicOnly: true }),
+      mockVendorRepo.listVendors({ campus: params.campus, publicOnly: true }),
     ]);
     const vendorRatings = await computeVendorRatings(vendors.map((v) => v.id));
 

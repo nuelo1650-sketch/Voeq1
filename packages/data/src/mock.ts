@@ -79,10 +79,16 @@ const vendorName = (id: string) => MOCK_VENDORS.find((v) => v.id === id)?.name ?
 
 // ---- Repos ---------------------------------------------------------------------
 const mockListingsRepoImpl: ListingsRepo = {
-  async list(params?: { campus?: string; category?: string }) {
+  async list(params?: { campus?: string; category?: string; publicOnly?: boolean }) {
     // Mock: ignore campus (all sample data is "nmu"); filter by category if given.
     const cat = params?.category;
-    return cat ? MOCK_EXPLORE_LISTINGS.filter((l) => l.categorySlug === cat) : MOCK_EXPLORE_LISTINGS;
+    let base = cat ? MOCK_EXPLORE_LISTINGS.filter((l) => l.categorySlug === cat) : MOCK_EXPLORE_LISTINGS;
+    // P-A round 69: publicOnly parity with the real repo (published+active+live).
+    if (params?.publicOnly) {
+      const liveVendorIds = MOCK_VENDORS.filter((v) => v.status === "live").map((v) => v.id);
+      base = base.filter((l) => l.isPublished !== false && l.status !== "removed" && liveVendorIds.includes(l.vendorId));
+    }
+    return base;
   },
   async getById(id: string) {
     return MOCK_EXPLORE_LISTINGS.find((l) => l.id === id) ?? null;
@@ -144,7 +150,10 @@ export const mockListingsRepoThatFails: ListingsRepo = {
 };
 
 const mockVendorRepoImpl: VendorRepo = {
-  async listVendors() {
+  async listVendors(params?) {
+    // P-A round 69: publicOnly filters to live vendors in mock mode too
+    // (parity with the real repo).
+    if (params?.publicOnly) return MOCK_VENDORS.filter((v) => v.status === "live");
     return MOCK_VENDORS;
   },
   async getById(id) {

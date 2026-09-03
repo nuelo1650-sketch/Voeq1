@@ -455,11 +455,18 @@ function mapVendor(r: typeof s.vendors.$inferSelect): Vendor {
   };
 }
 export const realVendorRepo = {
-  async listVendors(params?: { campus?: string }): Promise<Vendor[]> {
+  async listVendors(params?: { campus?: string; publicOnly?: boolean }): Promise<Vendor[]> {
     const rows = params?.campus
       ? await getDb().select().from(s.vendors).where(eq(s.vendors.campus, params.campus))
       : await getDb().select().from(s.vendors);
-    return rows.map(mapVendor);
+    let vendors = rows.map(mapVendor);
+    if (params?.publicOnly) {
+      // P-A round 69: public surfaces (Explore) only show LIVE vendors. A
+      // pending_listings vendor is not yet public — their storefront 404s;
+      // their listings must not leak either.
+      vendors = vendors.filter((v) => v.status === "live");
+    }
+    return vendors;
   },
   async getById(vid: string): Promise<Vendor | null> {
     const row = await getDb().select().from(s.vendors).where(eq(s.vendors.id, vid)).limit(1);
@@ -521,7 +528,7 @@ function mapListing(r: typeof s.listings.$inferSelect): Listing {
   };
 }
 export const realListingsRepo = {
-  async list(params?: { campus?: string; category?: string }): Promise<Listing[]> {
+  async list(params?: { campus?: string; category?: string; publicOnly?: boolean }): Promise<Listing[]> {
     const rows = await getDb().select().from(s.listings);
     let listings = rows.map(mapListing);
     if (params?.campus) {
@@ -530,6 +537,23 @@ export const realListingsRepo = {
       ).map((v) => v.id);
       const idSet = new Set(campusVendorIds);
       listings = listings.filter((l) => idSet.has(l.vendorId));
+    }
+    if (params?.publicOnly) {
+      // P-A round 69 (Explore visibility audit): PUBLIC surfaces must not show
+      // drafts, removed listings, or anything owned by a NON-live vendor.
+      // The old list() returned EVERYTHING, so a draft or a pending_listings
+      // vendor's post leaked to Explore (while their storefront 404'd!). Filter
+      // at the repo layer = single source of truth for every public read.
+      const liveVendorIds = (
+        await getDb()
+          .select({ id: s.vendors.id })
+          .from(s.vendors)
+          .where(eq(s.vendors.status, "live"))
+      ).map((v) => v.id);
+      const liveSet = new Set(liveVendorIds);
+      listings = listings.filter(
+        (l) => l.isPublished === true && l.status === "active" && liveSet.has(l.vendorId),
+      );
     }
     return listings
       .filter((l) => (params?.category ? l.categoryId === params.category : true));
