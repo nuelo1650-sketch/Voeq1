@@ -30,7 +30,13 @@ export async function POST(req: NextRequest) {
   if (!listing) return NextResponse.json({ error: "listing_not_found" }, { status: 404 });
 
   if (action === "remove") {
-    await mockListingsRepo.remove(listing.id);
+    // P-A round 79: was mockListingsRepo.remove() — a HARD delete. The route's
+    // own contract (line 7) says "remove -> status='removed'" (soft), and the
+    // response below reads updated?.status, which a hard delete makes undefined.
+    // Soft-remove: keeps the row for auditing/restore, and publicOnly filters
+    // status="active" so it drops off Explore immediately. Moderation must be
+    // reversible, not destructive.
+    await mockListingsRepo.update(listing.id, { status: "removed", isPublished: false });
   } else if (action === "feature") {
     const until = new Date(Date.now() + 30 * 86400000).toISOString();
     await mockListingsRepo.update(listing.id, { isFeatured: true, featuredUntil: until });

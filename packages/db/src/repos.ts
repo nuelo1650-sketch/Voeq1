@@ -960,6 +960,11 @@ export const realNotificationRepo = {
     await getDb().update(s.notifications).set({ read: true }).where(eq(s.notifications.recipientId, recipientId));
     return true;
   },
+  async remove(nid: string, recipientId: string): Promise<boolean> {
+    // Recipient-scoped: a caller can only ever delete their OWN notification.
+    const deleted = await getDb().delete(s.notifications).where(and(eq(s.notifications.id, nid), eq(s.notifications.recipientId, recipientId))).returning({ id: s.notifications.id });
+    return deleted.length > 0;
+  },
 };
 
 // ---- AgreementRepo / FeatureFlagRepo / ActivityRepo -------------------------

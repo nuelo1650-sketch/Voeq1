@@ -273,6 +273,12 @@ const mockNotificationRepoImpl: INotificationRepo = {
     }
     return true;
   },
+  async remove(nid, recipientId) {
+    const n = notifications.get(nid);
+    if (!n || n.recipientId !== recipientId) return false; // IDOR guard
+    notifications.delete(nid);
+    return true;
+  },
 };
 
 // ---- Dev/test reset ----------------------------------------------------------

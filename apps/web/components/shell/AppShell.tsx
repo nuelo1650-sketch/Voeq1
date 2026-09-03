@@ -237,8 +237,9 @@ export function AppShell({
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {/* P-A round 66: REAL bell (unread badge + dropdown). The AppShell
               previously rendered a bare <Bell> Link with NO badge — a user
-              with an unread notification saw nothing. */}
-          <NotificationBell />
+              with an unread notification saw nothing. Round 79: pass the
+              viewer role so new_message/new_review deep-links route correctly. */}
+          <NotificationBell viewerRole={staffRole ? "staff" : role === "vendor" ? "vendor" : "shopper"} />
           <button aria-label="Sign out" style={SHELL_CSS.iconBtn} onClick={logout}>
             <LogOut size={18} />
           </button>

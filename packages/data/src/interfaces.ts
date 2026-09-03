@@ -402,6 +402,7 @@ export type NotificationType =
   | "new_review"
   | "review_response"
   | "new_follower"
+  | "comment"
   | "system";
 
 export interface Notification {
@@ -467,6 +468,9 @@ export interface NotificationRepo {
   list(recipientId: string): Promise<Notification[]>;
   markRead(id: string, recipientId: string): Promise<boolean>;
   markAllRead(recipientId: string): Promise<boolean>;
+  /** P-A round 79: recipient-scoped delete (the /notifications page bulk-delete
+   *  was calling DELETE /api/notifications/[id] which never existed). */
+  remove(id: string, recipientId: string): Promise<boolean>;
 }
 
 /**

@@ -4,10 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Bell, MessageCircle, Heart, UserPlus, AlertCircle } from "lucide-react";
+import { notificationGroup, notificationHref, type NotificationViewerRole } from "@/lib/notification-href";
 
 interface Notification {
   id: string;
-  type: "message" | "review" | "follower" | "system";
+  /** Real producer types are new_message/new_review/new_follower/comment/
+   *  system (see @voeq/data interfaces) — the old union here ("message" |
+   *  "review" | ...) never matched anything, so icons fell through to the
+   *  default bell. P-A round 79. */
+  type: string;
   title: string;
   body: string;
   read: boolean;
@@ -19,7 +24,7 @@ interface Notification {
  * NotificationBell — VS4.8 + K3a.3 enhanced. Shows unread badge, dropdown with
  * last 10 notifications, mark-read on click, SSE real-time updates. Auth-gated.
  */
-export function NotificationBell() {
+export function NotificationBell({ viewerRole = "shopper" }: { viewerRole?: NotificationViewerRole }) {
   const pathname = usePathname();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -119,17 +124,21 @@ export function NotificationBell() {
   }
 
   const markRead = async (notif: Notification) => {
-    if (notif.read) return;
-    
-    await fetch(`/api/notifications/${notif.id}/read`, { method: "PATCH" });
-    setItems((prev) => prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n)));
-    setUnread((u) => Math.max(0, u - 1));
-    
-    // Navigate to refId
-    setOpen(false);
-    if (notif.refId) {
-      router.push(notif.refId);
+    // P-A round 79: navigate via the href mapper for ALL notifications (read or
+    // unread). Before, this returned early for a read notif (click did nothing)
+    // and pushed the RAW refId (a UUID) as a path -> the message/storefront/
+    // listing URL it was supposed to open always 404'd. That was the "click a
+    // message notification and nothing happens" bug.
+    const href = notificationHref(notif.type, notif.refId, viewerRole);
+
+    if (!notif.read) {
+      await fetch(`/api/notifications/${notif.id}/read`, { method: "PATCH" }).catch(() => {});
+      setItems((prev) => prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n)));
+      setUnread((u) => Math.max(0, u - 1));
     }
+
+    setOpen(false);
+    if (href) router.push(href);
   };
 
   const markAllRead = async () => {
@@ -139,13 +148,17 @@ export function NotificationBell() {
   };
 
   const getNotificationIcon = (type: string) => {
-    switch (type) {
+    // P-A round 79: switch on the canonical GROUP (the real types carry a
+    // new_/comment prefix) so message/review/follower icons actually match.
+    switch (notificationGroup(type)) {
       case "message":
         return <MessageCircle size={16} style={{ color: "var(--color-forest-mid)" }} />;
       case "review":
         return <Heart size={16} style={{ color: "var(--color-amber)" }} />;
       case "follower":
         return <UserPlus size={16} style={{ color: "var(--color-forest-light)" }} />;
+      case "comment":
+        return <AlertCircle size={16} style={{ color: "var(--color-ink-muted)" }} />;
       case "system":
         return <AlertCircle size={16} style={{ color: "var(--color-ink-muted)" }} />;
       default:

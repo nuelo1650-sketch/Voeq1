@@ -3,24 +3,27 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MessageCircle, Heart, UserPlus, AlertCircle, Bell, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { notificationGroup, notificationHref, type NotificationViewerRole } from "@/lib/notification-href";
 
 interface Notification {
   id: string;
-  type: "message" | "review" | "follower" | "system" | "all";
+  type: string;
   title: string;
   body: string;
   read: boolean;
   createdAt: string;
-  refId?: string;
+  refId?: string | null;
 }
 
-type FilterType = "all" | "unread" | "message" | "review" | "follower" | "system";
+type FilterType = "all" | "unread" | "message" | "review" | "follower" | "comment" | "system";
 
 /**
  * /notifications — K3a.4 enhanced full notification list with filter tabs,
  * bulk actions, date grouping, pagination. Auth-gated client view.
  */
 export default function NotificationsPage() {
+  const router = useRouter();
   const [items, setItems] = useState<Notification[]>([]);
   const [filteredItems, setFilteredItems] = useState<Notification[]>([]);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
@@ -51,7 +54,10 @@ export default function NotificationsPage() {
     if (activeFilter === "unread") {
       filtered = items.filter((n) => !n.read);
     } else if (activeFilter !== "all") {
-      filtered = items.filter((n) => n.type === activeFilter);
+      // P-A round 79: filter by canonical GROUP (real types are new_message/
+      // new_review/...). Before, n.type === "message" matched nothing, so the
+      // Messages/Reviews/Followers tabs were always empty.
+      filtered = items.filter((n) => notificationGroup(n.type) === activeFilter);
     }
     
     setFilteredItems(filtered);
@@ -107,13 +113,16 @@ export default function NotificationsPage() {
   };
 
   const getNotificationIcon = (type: string) => {
-    switch (type) {
+    // P-A round 79: switch on canonical GROUP (real types are new_message/...).
+    switch (notificationGroup(type)) {
       case "message":
         return <MessageCircle size={18} style={{ color: "var(--color-forest-mid)" }} />;
       case "review":
         return <Heart size={18} style={{ color: "var(--color-amber)" }} />;
       case "follower":
         return <UserPlus size={18} style={{ color: "var(--color-forest-light)" }} />;
+      case "comment":
+        return <AlertCircle size={18} style={{ color: "var(--color-ink-muted)" }} />;
       case "system":
         return <AlertCircle size={18} style={{ color: "var(--color-ink-muted)" }} />;
       default:
@@ -303,6 +312,14 @@ export default function NotificationsPage() {
                       selected={selectedIds.has(notif.id)}
                       onToggleSelect={() => toggleSelect(notif.id)}
                       onMarkRead={() => markRead(notif.id)}
+                      onOpen={() => {
+                        // P-A round 79: deep-link on item click (mark read if
+                        // unread, then navigate). Before, clicks only fired
+                        // onMarkRead for unread items and never navigated.
+                        if (!notif.read) markRead(notif.id);
+                        const href = notificationHref(notif.type, notif.refId, "shopper");
+                        if (href) router.push(href);
+                      }}
                       icon={getNotificationIcon(notif.type)}
                     />
                   ))}
@@ -493,12 +510,14 @@ function NotificationItem({
   selected,
   onToggleSelect,
   onMarkRead,
+  onOpen,
   icon,
 }: {
   notification: Notification;
   selected: boolean;
   onToggleSelect: () => void;
   onMarkRead: () => void;
+  onOpen: () => void;
   icon: React.ReactNode;
 }) {
   return (
@@ -513,9 +532,11 @@ function NotificationItem({
         // P-A round 49: warmer cards (was sharp 8px — flattening the premium feel)
         borderRadius: 14,
         transition: "box-shadow 120ms ease, transform 120ms ease",
-        cursor: notification.read ? "default" : "pointer",
+        cursor: "pointer",
       }}
-      onClick={() => !notification.read && onMarkRead()}
+      // P-A round 79: always navigate on click (read or unread). Before, a read
+      // item got cursor:default and did nothing — click went nowhere.
+      onClick={onOpen}
       data-testid="notification-item"
     >
       <input

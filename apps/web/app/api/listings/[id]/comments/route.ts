@@ -74,7 +74,10 @@ export async function POST(
     const first = (identity.name?.trim() ?? "Someone").split(/\s+/)[0]?.slice(0, 24) || "Someone";
     await mockNotificationRepo.create({
       recipientId: ownerVendor.identityId,
-      type: "system",
+      // P-A round 79: was "system" — the /notifications page (and bell) now
+      // deep-links "comment" -> /listing/[id]. "system" has no listing refId
+      // route, so a comment notification would click to nowhere.
+      type: "comment",
       title: `${first} commented on ${listing.title}`,
       body: text.slice(0, 120),
       refId: id,
