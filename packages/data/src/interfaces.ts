@@ -175,6 +175,8 @@ export interface StaffRepo {
   /** VS7.1: triage mutations. */
   assignCase(caseId: string, assignedTo: string): Promise<StaffCase | null>;
   resolveCase(caseId: string, resolution: string, status?: "resolved" | "dismissed"): Promise<StaffCase | null>;
+  /** Batch 2 (T7): merge fields into a case's JSONB payload (appeal amendments). */
+  patchCasePayload(caseId: string, patch: Record<string, unknown>): Promise<StaffCase | null>;
 }
 
 export interface SearchRepo {

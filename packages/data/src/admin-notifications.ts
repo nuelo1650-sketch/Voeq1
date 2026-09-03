@@ -9,6 +9,7 @@ import type { NotificationType } from "./interfaces";
 
 type AdminEvent =
   | "new_report"
+  | "new_appeal"
   | "high_message_volume"
   | "pending_verification_24h"
   | "bulk_action_failed"
@@ -17,6 +18,7 @@ type AdminEvent =
 
 const EVENT_BODY: Record<AdminEvent, string> = {
   new_report: "A new report needs triage.",
+  new_appeal: "A user submitted an account appeal.",
   high_message_volume: "Unusual message volume detected from an account.",
   pending_verification_24h: "A vendor verification has been pending over 24h.",
   bulk_action_failed: "A bulk admin action failed.",

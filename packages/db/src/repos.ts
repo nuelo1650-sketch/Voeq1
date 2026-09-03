@@ -892,6 +892,15 @@ export const realStaffRepo = {
     const row = await getDb().select().from(s.staffCases).where(eq(s.staffCases.id, caseId)).limit(1);
     return row[0] ? mapStaffCase(row[0]) : null;
   },
+  async patchCasePayload(caseId: string, patch: Record<string, unknown>): Promise<StaffCase | null> {
+    // JSONB merge (payload || patch) — top-level keys overwritten, rest kept.
+    await getDb()
+      .update(s.staffCases)
+      .set({ payload: sql`${s.staffCases.payload} || ${JSON.stringify(patch)}::jsonb` })
+      .where(eq(s.staffCases.id, caseId));
+    const row = await getDb().select().from(s.staffCases).where(eq(s.staffCases.id, caseId)).limit(1);
+    return row[0] ? mapStaffCase(row[0]) : null;
+  },
 };
 
 // ---- Relationship repos (wishlist / follow / like) --------------------------

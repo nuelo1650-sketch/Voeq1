@@ -239,6 +239,12 @@ const mockStaffRepoImpl: StaffRepo = {
     c.status = status;
     return c;
   },
+  async patchCasePayload(caseId, patch) {
+    const c = staffCases.find((x) => x.id === caseId);
+    if (!c) return null;
+    c.payload = { ...(c.payload ?? {}), ...patch };
+    return c;
+  },
 };
 
 export const mockSearchRepo: SearchRepo = {
