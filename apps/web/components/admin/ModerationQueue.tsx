@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { AlertCircle, CheckCircle, Flag, User, X, Check, Eye, EyeOff } from "lucide-react";
 import type { Capability } from "@voeq/data";
 import { UsersPanel } from "./UsersPanel";
+import { ListingsPanel } from "./ListingsPanel";
 
 /**
  * K3c.6 — Moderation queue component.
@@ -372,6 +373,7 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         )}
 
         {activeTab === "content" && (
+          <>
           <section data-testid="content-tab" style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 20 }}>
             <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px", color: "var(--role-text)" }}>Content Moderation — Reviews</h2>
             <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--role-text-muted)" }}>
@@ -427,6 +429,15 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
               </div>
             )}
           </section>
+
+          <section data-testid="listings-tab" style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 20, marginTop: 16 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px", color: "var(--role-text)" }}>Listing Moderation</h2>
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--role-text-muted)" }}>
+              Remove is soft (reversible, audited) and notifies the vendor with your reason. Feature runs 30 days.
+            </p>
+            <ListingsPanel capabilities={capabilities} />
+          </section>
+          </>
         )}
 
         {activeTab === "users" && (
