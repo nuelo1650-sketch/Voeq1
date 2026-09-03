@@ -455,12 +455,17 @@ export interface ReviewRepo {
 
 export interface CommentRepo {
   create(input: { listingId: string; authorId: string; body: string }): Promise<Comment>;
-  listByListing(listingId: string): Promise<Comment[]>;
+  /** Public read excludes hidden by default (staff queue passes includeHidden). */
+  listByListing(listingId: string, opts?: { includeHidden?: boolean }): Promise<Comment[]>;
   getById(id: string): Promise<Comment | null>;
   /** P-A round 22: edit comment body (author-only, enforced in route). */
   update(id: string, authorId: string, body: string): Promise<Comment | null>;
   /** P-A round 22: delete comment (author-only, enforced in route). */
   remove(id: string, authorId: string): Promise<boolean>;
+  /** Staff batch 2: moderation status change (hide/restore). Capability-gated in route. */
+  setStatus(id: string, status: Comment["status"]): Promise<Comment | null>;
+  /** Staff batch 2: recent comments across all listings (moderation queue), newest first. */
+  listRecent(limit?: number): Promise<Comment[]>;
 }
 
 export interface ReportRepo {

@@ -190,9 +190,9 @@ const mockCommentRepoImpl: CommentRepo = {
     comments.set(comment.id, comment);
     return comment;
   },
-  async listByListing(listingId) {
+  async listByListing(listingId, opts) {
     return [...comments.values()]
-      .filter((c) => c.listingId === listingId && c.status !== "hidden")
+      .filter((c) => c.listingId === listingId && (opts?.includeHidden || c.status !== "hidden"))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt)); // newest first (flat)
   },
   async getById(cid) {
@@ -210,6 +210,18 @@ const mockCommentRepoImpl: CommentRepo = {
     if (!c || c.authorId !== authorId) return false;
     comments.delete(cid);
     return true;
+  },
+  async setStatus(cid, status) {
+    const c = comments.get(cid);
+    if (!c) return null;
+    const updated = { ...c, status };
+    comments.set(cid, updated);
+    return updated;
+  },
+  async listRecent(limit = 50) {
+    return [...comments.values()]
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, limit);
   },
 };
 

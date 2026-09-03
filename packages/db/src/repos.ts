@@ -966,9 +966,14 @@ export const realCommentRepo = {
     await getDb().insert(s.comments).values(rec);
     return rec;
   },
-  async listByListing(listingId: string): Promise<Comment[]> {
+  async listByListing(listingId: string, opts?: { includeHidden?: boolean }): Promise<Comment[]> {
+    // Batch 2 / T2: public reads must exclude hidden (staff moderation). The
+    // mock path always did; the real path leaked them. Staff queue passes
+    // includeHidden:true explicitly.
     const rows = await getDb().select().from(s.comments).where(eq(s.comments.listingId, listingId));
-    return rows.map(mapComment);
+    const mapped = rows.map(mapComment);
+    const visible = opts?.includeHidden ? mapped : mapped.filter((c) => c.status !== "hidden");
+    return visible.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
   async getById(cid: string): Promise<Comment | null> {
     const row = await getDb().select().from(s.comments).where(eq(s.comments.id, cid)).limit(1);
@@ -990,6 +995,22 @@ export const realCommentRepo = {
       .where(and(eq(s.comments.id, cid), eq(s.comments.authorId, authorId)))
       .returning({ id: s.comments.id });
     return rows.length > 0;
+  },
+  async setStatus(cid: string, status: Comment["status"]): Promise<Comment | null> {
+    const rows = await getDb()
+      .update(s.comments)
+      .set({ status })
+      .where(eq(s.comments.id, cid))
+      .returning();
+    return rows[0] ? mapComment(rows[0]) : null;
+  },
+  async listRecent(limit = 50): Promise<Comment[]> {
+    const rows = await getDb()
+      .select()
+      .from(s.comments)
+      .orderBy(desc(s.comments.createdAt))
+      .limit(limit);
+    return rows.map(mapComment);
   },
 };
 
