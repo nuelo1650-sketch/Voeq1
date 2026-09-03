@@ -6,6 +6,7 @@ import {
   checkRateLimit,
   logAudit,
   isConsentCurrent,
+  liftExpiredSuspension,
 } from "@voeq/data";
 import { z } from "zod";
 import { verifyTurnstile } from "@/lib/turnstile";
@@ -80,8 +81,13 @@ export async function POST(req: NextRequest) {
   }
 
   // Account state gate (Doc 04 PG-AUTH-004 / Doc 09 §9.5).
+  // Staff batch 1: a suspension whose expiry has passed self-lifts here, so
+  // the user can log back in the moment their term ends (no cron needed).
   if (identity.accountStatus === "suspended") {
-    return NextResponse.json({ error: "suspended", redirect: "/account-state?status=suspended" }, { status: 403 });
+    const lifted = await liftExpiredSuspension(identity.id);
+    if (!lifted) {
+      return NextResponse.json({ error: "suspended", redirect: "/account-state?status=suspended" }, { status: 403 });
+    }
   }
   if (identity.accountStatus === "banned") {
     return NextResponse.json({ error: "banned", redirect: "/account-state?status=banned" }, { status: 403 });
