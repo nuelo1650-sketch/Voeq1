@@ -5585,3 +5585,9 @@ header.AppShell,
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: none; }
 }
+
+/* Vendor listings card LIVE pill pulse (2026-09-04 redesign) */
+@keyframes listingPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
