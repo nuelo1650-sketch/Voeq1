@@ -67,7 +67,6 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
     const t = searchParams.get("tab");
     if (t && (TABS as string[]).includes(t)) setActiveTab(t as Tab);
   }, [searchParams]);
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [detailPanelId, setDetailPanelId] = useState<string | null>(null);
   // T10: bump after a drawer action so the underlying tab lists re-fetch.
   const [refreshKey, setRefreshKey] = useState(0);
@@ -142,28 +141,6 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
     };
   }, [refreshKey]);
 
-  const toggleSelection = (id: string) => {
-    const newSelection = new Set(selectedItems);
-    if (newSelection.has(id)) {
-      newSelection.delete(id);
-    } else {
-      newSelection.add(id);
-    }
-    setSelectedItems(newSelection);
-  };
-
-  const selectAll = () => {
-    if (activeTab === "reports") {
-      setSelectedItems(new Set(reports.map((r) => r.id)));
-    } else if (activeTab === "verifications") {
-      setSelectedItems(new Set(verifications.map((v) => v.id)));
-    }
-  };
-
-  const clearSelection = () => {
-    setSelectedItems(new Set());
-  };
-
   const handleAction = async (action: string, itemId: string) => {
     setActionModal({ action, itemId });
     setActionReason("");
@@ -191,11 +168,6 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
           setToast({ kind: "error", text: `Verification failed: ${(d as { error?: string }).error ?? res.status}` });
         } else {
           setToast({ kind: "success", text: `${actionModal.action === "approve" ? "Approved" : "Denied"} ✓` });
-          setSelectedItems((prev) => {
-            const n = new Set(prev);
-            n.delete(caseId);
-            return n;
-          });
         }
       } catch {
         setToast({ kind: "error", text: "Network error — action not applied." });
@@ -233,12 +205,6 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         return;
       }
       setToast({ kind: "success", text: "Action applied ✓" });
-      // Optimistically clear selection for the acted item.
-      setSelectedItems((prev) => {
-        const n = new Set(prev);
-        n.delete(caseId);
-        return n;
-      });
     } catch {
       setToast({ kind: "error", text: "Network error — action not applied." });
     }
@@ -327,44 +293,10 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         </div>
 
         {/* Bulk actions bar */}
-        {selectedItems.size > 0 && (
-          <div style={{
-            background: "var(--role-accent-strong)",
-            color: "var(--role-on-accent)",
-            padding: 12,
-            borderRadius: 8,
-            marginBottom: 16,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}>
-            <span style={{ fontSize: 14, fontWeight: 500 }}>
-              {selectedItems.size} selected
-            </span>
-            <div style={{ display: "flex", gap: 12 }}>
-              <button onClick={() => alert("Bulk assign (mock)")} style={bulkActionBtn}>
-                Assign to me
-              </button>
-              <button onClick={() => alert("Bulk resolve (mock)")} style={bulkActionBtn}>
-                Resolve
-              </button>
-              <button onClick={() => alert("Bulk dismiss (mock)")} style={bulkActionBtn}>
-                Dismiss
-              </button>
-              <button onClick={clearSelection} style={{ ...bulkActionBtn, background: "transparent", border: "1px solid #fff" }}>
-                Clear
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Content */}
         {activeTab === "reports" && (
           <ReportsTab 
             reports={reports} 
-            selectedItems={selectedItems} 
-            onToggleSelection={toggleSelection} 
-            onSelectAll={selectAll}
             onOpenDetail={setDetailPanelId}
             onAction={handleAction}
           />
@@ -373,9 +305,6 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         {activeTab === "verifications" && (
           <VerificationsTab 
             verifications={verifications} 
-            selectedItems={selectedItems} 
-            onToggleSelection={toggleSelection} 
-            onSelectAll={selectAll}
             onOpenDetail={setDetailPanelId}
             onAction={handleAction}
           />
@@ -498,16 +427,10 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
 // Tab components
 function ReportsTab({ 
   reports, 
-  selectedItems, 
-  onToggleSelection, 
-  onSelectAll,
   onOpenDetail,
   onAction,
 }: {
   reports: Report[];
-  selectedItems: Set<string>;
-  onToggleSelection: (id: string) => void;
-  onSelectAll: () => void;
   onOpenDetail: (id: string) => void;
   onAction: (action: string, id: string) => void;
 }) {
@@ -516,14 +439,6 @@ function ReportsTab({
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ background: "var(--role-surface-sunken)", borderBottom: "1px solid var(--role-border)" }}>
-            <th style={thStyle}>
-              <input 
-                type="checkbox" 
-                onChange={onSelectAll} 
-                checked={selectedItems.size === reports.length && reports.length > 0}
-                style={{ cursor: "pointer" }}
-              />
-            </th>
             <th style={thStyle}>Type</th>
             <th style={thStyle}>Target</th>
             <th style={thStyle}>Reporter</th>
@@ -536,14 +451,6 @@ function ReportsTab({
         <tbody>
           {reports.map((report) => (
             <tr key={report.id} style={{ borderBottom: "1px solid var(--role-surface-sunken)" }}>
-              <td style={tdStyle}>
-                <input 
-                  type="checkbox" 
-                  checked={selectedItems.has(report.id)} 
-                  onChange={() => onToggleSelection(report.id)}
-                  style={{ cursor: "pointer" }}
-                />
-              </td>
               <td style={tdStyle}>
                 <span style={{ ...badgeStyle, background: "var(--role-accent-subtle)", color: "var(--role-accent-strong)" }}>
                   {report.type}
@@ -582,16 +489,10 @@ function ReportsTab({
 
 function VerificationsTab({ 
   verifications, 
-  selectedItems, 
-  onToggleSelection, 
-  onSelectAll,
   onOpenDetail,
   onAction,
 }: {
   verifications: VerificationRequest[];
-  selectedItems: Set<string>;
-  onToggleSelection: (id: string) => void;
-  onSelectAll: () => void;
   onOpenDetail: (id: string) => void;
   onAction: (action: string, id: string) => void;
 }) {
@@ -600,14 +501,6 @@ function VerificationsTab({
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ background: "var(--role-surface-sunken)", borderBottom: "1px solid var(--role-border)" }}>
-            <th style={thStyle}>
-              <input 
-                type="checkbox" 
-                onChange={onSelectAll} 
-                checked={selectedItems.size === verifications.length && verifications.length > 0}
-                style={{ cursor: "pointer" }}
-              />
-            </th>
             <th style={thStyle}>Vendor</th>
             <th style={thStyle}>Request Date</th>
             <th style={thStyle}>Info Submitted</th>
@@ -617,14 +510,6 @@ function VerificationsTab({
         <tbody>
           {verifications.map((verification) => (
             <tr key={verification.id} style={{ borderBottom: "1px solid var(--role-surface-sunken)" }}>
-              <td style={tdStyle}>
-                <input 
-                  type="checkbox" 
-                  checked={selectedItems.has(verification.id)} 
-                  onChange={() => onToggleSelection(verification.id)}
-                  style={{ cursor: "pointer" }}
-                />
-              </td>
               <td style={tdStyle}>
                 <Link href={`/vendor/${verification.vendorId}`} style={linkButton}>
                   {verification.vendorName}
@@ -846,17 +731,6 @@ const actionButtonStyle: React.CSSProperties = {
   gap: 4,
   color: "var(--role-text-muted)",
   transition: "all 120ms ease",
-};
-
-const bulkActionBtn: React.CSSProperties = {
-  background: "rgba(255,255,255,0.2)",
-  border: "none",
-  color: "var(--role-on-accent)",
-  padding: "6px 14px",
-  borderRadius: 6,
-  fontSize: 13,
-  fontWeight: 500,
-  cursor: "pointer",
 };
 
 const primaryButton: React.CSSProperties = {
