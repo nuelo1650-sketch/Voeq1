@@ -12,6 +12,25 @@ import { AppealsPanel } from "./AppealsPanel";
 import { CaseDrawer } from "./CaseDrawer";
 
 /**
+ * Mobile-layout breakpoint hook (admin mobile fix, 2026-09-04): the Reports /
+ * Verifications tables were desktop-first — the ACTIONS column (✓/✗) landed
+ * at x=671-763 on a 390px phone, unreachable without horizontal scroll the
+ * table container didn't have. Under 768px both tabs now render stacked cards
+ * with every action visible; the table remains on desktop.
+ */
+function useIsMobile(breakpoint = 768): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [breakpoint]);
+  return isMobile;
+}
+
+/**
  * K3c.6 — Moderation queue component.
  * Four tabs: Reports, Verifications, Content, Users.
  * Bulk actions, detail panels, audit logging.
@@ -434,8 +453,38 @@ function ReportsTab({
   onOpenDetail: (id: string) => void;
   onAction: (action: string, id: string) => void;
 }) {
+  const isMobile = useIsMobile();
   return (
     <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, overflow: "hidden" }}>
+      {isMobile ? (
+        <div data-testid="reports-mobile-cards" style={{ display: "flex", flexDirection: "column" }}>
+          {reports.map((report) => (
+            <div key={report.id} data-testid={`report-card-${report.id}`} style={{ padding: "14px 16px", borderBottom: "1px solid var(--role-surface-sunken)", display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ ...badgeStyle, background: "var(--role-accent-subtle)", color: "var(--role-accent-strong)" }}>
+                  {report.type}
+                </span>
+                <span style={getStatusBadge(report.status)}>{report.status}</span>
+                <span style={{ fontSize: 12, color: "var(--role-text-muted)", marginLeft: "auto" }}>{formatRelativeTime(report.date)}</span>
+              </div>
+              <button onClick={() => onOpenDetail(report.id)} style={{ ...linkButton, fontSize: 15, fontWeight: 600 }}>
+                {report.targetName}
+              </button>
+              <div style={{ fontSize: 12.5, color: "var(--role-text-muted)" }}>
+                Reported by {report.reporterName} · {report.category}
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => onAction("resolve", report.id)} style={{ ...actionButtonStyle, flex: 1, justifyContent: "center", color: "var(--role-success-text)" }} title="Resolve">
+                  <Check size={15} /> Resolve
+                </button>
+                <button onClick={() => onAction("dismiss", report.id)} style={{ ...actionButtonStyle, flex: 1, justifyContent: "center", color: "var(--role-danger)" }} title="Dismiss">
+                  <X size={15} /> Dismiss
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ background: "var(--role-surface-sunken)", borderBottom: "1px solid var(--role-border)" }}>
@@ -483,6 +532,7 @@ function ReportsTab({
           ))}
         </tbody>
       </table>
+      )}
     </div>
   );
 }
@@ -496,8 +546,37 @@ function VerificationsTab({
   onOpenDetail: (id: string) => void;
   onAction: (action: string, id: string) => void;
 }) {
+  const isMobile = useIsMobile();
   return (
     <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, overflow: "hidden" }}>
+      {isMobile ? (
+        <div data-testid="verifications-mobile-cards" style={{ display: "flex", flexDirection: "column" }}>
+          {verifications.map((verification) => (
+            <div key={verification.id} data-testid={`verification-card-${verification.id}`} style={{ padding: "14px 16px", borderBottom: "1px solid var(--role-surface-sunken)", display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Link href={`/vendor/${verification.vendorId}`} style={{ ...linkButton, fontSize: 15, fontWeight: 600 }}>
+                  {verification.vendorName}
+                </Link>
+                <span style={{ fontSize: 12, color: "var(--role-text-muted)", marginLeft: "auto" }}>{formatRelativeTime(verification.requestDate)}</span>
+              </div>
+              <div style={{ fontSize: 12.5, color: "var(--role-text-muted)" }}>
+                {verification.submittedInfo}
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button onClick={() => onOpenDetail(verification.id)} style={{ ...actionButtonStyle, flex: 1, justifyContent: "center" }} title="Open case detail">
+                  Details
+                </button>
+                <button onClick={() => onAction("approve", verification.id)} style={{ ...actionButtonStyle, flex: 1, justifyContent: "center", color: "var(--role-success-text)" }}>
+                  <Check size={15} /> Approve
+                </button>
+                <button onClick={() => onAction("deny", verification.id)} style={{ ...actionButtonStyle, flex: 1, justifyContent: "center", color: "var(--role-danger)" }}>
+                  <X size={15} /> Deny
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ background: "var(--role-surface-sunken)", borderBottom: "1px solid var(--role-border)" }}>
@@ -536,6 +615,7 @@ function VerificationsTab({
           ))}
         </tbody>
       </table>
+      )}
     </div>
   );
 }
