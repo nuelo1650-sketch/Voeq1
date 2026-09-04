@@ -4,6 +4,7 @@ import {
   mockAuthRepo,
   mockVendorRepo,
   mockListingsRepo,
+  mockNotificationRepo,
   enforceVisibilityAfterMutation,
   logAudit,
   MAX_IMAGES_PER_LISTING,
@@ -82,9 +83,85 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   if (Object.keys(patch).length === 0) return NextResponse.json({ error: "nothing_to_update" }, { status: 400 });
 
+  // ================= LISTING INTEGRITY (2026-09-05, David-approved) =================
+  // Tier B fields (title/category/price-min) on an ENGAGED listing must stay
+  // "the same thing". Compute engagement + similarity, classify, audit, act.
+  // (Engagement queries live in @voeq/db so drizzle types line up.)
+  const TIER_B_KEYS = ["title", "categoryId", "priceMinMinor"] as const;
+  const tierBChanged = TIER_B_KEYS.filter((k) => k in patch);
+  const dbPkg = await import("@voeq/db");
+  const { getDb, listingEdits } = dbPkg;
+  const { engagementScore, similarityScore, classify, getEngagement, getSavers } = dbPkg;
+  const { randomUUID } = await import("crypto");
+
+  const engagement = await getEngagement(id);
+  const eScore = engagementScore(engagement);
+
+  const after = {
+    title: (patch.title as string) ?? listing.title,
+    categoryId: (patch.categoryId as string) ?? listing.categoryId,
+    priceMinMinor: (patch.priceMinMinor as number) ?? listing.priceMinMinor,
+    description: (patch.description as string | undefined) !== undefined ? (patch.description as string | null) : listing.description,
+  };
+
+  // TIER C: category is locked once the listing has ANY engagement.
+  if ("categoryId" in patch && patch.categoryId !== listing.categoryId && eScore > 0) {
+    await getDb().insert(listingEdits).values({
+      id: randomUUID(), listingId: id, vendorId: identity.vendorId, at: new Date().toISOString(),
+      fields: { categoryId: { from: listing.categoryId, to: patch.categoryId } },
+      similarity: 0, engagement, action: "blocked",
+    });
+    await logAudit("vendor.listing.edit_blocked", identity.id, { id, reason: "category_locked_engaged", engagement: eScore });
+    return NextResponse.json({
+      error: "category_locked",
+      message: "Category can't be changed once shoppers have engaged with this listing. Delete it and create a new listing instead.",
+    }, { status: 409 });
+  }
+
+  // similarity check fires only when Tier B identity fields actually change
+  let action: "applied" | "flagged" | "blocked" = "applied";
+  let similarity: number | null = null;
+  if (tierBChanged.length > 0 && eScore > 0) {
+    similarity = similarityScore({
+      before: { title: listing.title, categoryId: listing.categoryId, priceMinMinor: listing.priceMinMinor, description: listing.description },
+      after,
+    });
+    action = classify(similarity);
+    // audit EVERY tier-B attempt on engaged listings (applied/flagged/blocked)
+    await getDb().insert(listingEdits).values({
+      id: randomUUID(), listingId: id, vendorId: identity.vendorId, at: new Date().toISOString(),
+      fields: Object.fromEntries(tierBChanged.map((k) => [k, { from: (listing as unknown as Record<string, unknown>)[k], to: patch[k] }])),
+      similarity, engagement, action,
+    });
+    if (action === "blocked") {
+      await logAudit("vendor.listing.edit_blocked", identity.id, { id, reason: "different_product", similarity });
+      return NextResponse.json({
+        error: "different_product",
+        message: `This edit would make it a different product (integrity ${similarity}/100). Delete this listing and create a new one instead — it keeps the platform honest and takes under a minute.`,
+        similarity,
+      }, { status: 409 });
+    }
+  }
+
   const updated = await mockListingsRepo.update(id, patch as never);
-  await logAudit("vendor.listing.update", identity.id, { id, fields: Object.keys(patch) });
-  return NextResponse.json({ ok: true, listing: updated });
+  await logAudit("vendor.listing.update", identity.id, { id, fields: Object.keys(patch), similarity, action });
+
+  // flagged edits: savers get told what changed (consumer protection)
+  if (action === "flagged") {
+    const savers = await getSavers(id);
+    for (const row of savers) {
+      await mockNotificationRepo.create({
+        recipientId: row.shopperId,
+        type: "system",
+        title: "An item you saved changed",
+        body: `"${listing.title}" is now "${after.title}"${listing.priceMinMinor !== after.priceMinMinor ? ` — price ₦${Math.round(listing.priceMinMinor / 100).toLocaleString("en-NG")} → ₦${Math.round(after.priceMinMinor / 100).toLocaleString("en-NG")}` : ""}. Un-save it if that's not for you anymore.`,
+        refId: id,
+      });
+    }
+    await logAudit("vendor.listing.edit_flagged", identity.id, { id, similarity, saversNotified: savers.length });
+  }
+
+  return NextResponse.json({ ok: true, listing: updated, integrity: { similarity, action, engagement: eScore } });
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
