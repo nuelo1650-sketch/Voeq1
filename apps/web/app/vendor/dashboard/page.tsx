@@ -6,7 +6,6 @@ import {
   canVendorBePublic,
   mockReviewRepo,
   mockCampusRepo,
-  mockFollowRepo,
 } from "@voeq/data";
 import { VendorGoLiveButton } from "@/components/vendor/VendorGoLiveButton";
 import { GreetingText } from "@/components/vendor/GreetingText";
@@ -57,21 +56,40 @@ export default async function VendorDashboardPage() {
   // follows the visitor's LOCAl clock; server passes the vendor name only.
   const greetingValue = "Good day"; // client overrides immediately
 
-  // Vendor redesign (2026-09-04): real follower count for the hero.
-  const followers = await mockFollowRepo.listByVendor(vendor.id).catch(() => []);
-  const followersCount = followers.length;
+  // Status badge
+  const statusBadge = vendor.status === "suspended" 
+    ? { label: "Suspended", color: "var(--color-danger)" }
+    : live 
+    ? { label: "Live", color: "var(--color-status-live)" }
+    : { label: "Pending listings", color: "var(--color-status-pending)" };
 
   return (
     <AppShell role="vendor" userName={vendor.name} staffRole={staff?.staffRole ?? null}>
       <div data-testid="vendor-dashboard" style={{ minHeight: "100vh", background: "var(--color-glass-white)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
-      {/* Vendor redesign (2026-09-04, mock v2 GO): the storefront HERO replaces
-          the old greeting header — the vendor's identity IS their shop.
-          Greeting still lives in the shell context; the hero is the anchor. */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, margin: 0, color: "var(--color-forest)" }}>
-          <GreetingText name={vendor.name.split(" ")[0]} />
+      {/* K3b.1 Header */}
+      <header style={{ marginBottom: "var(--space-4)" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 36, margin: 0, marginBottom: 12, color: "var(--color-forest)" }}>
+          <GreetingText name={vendor.name} />
         </h1>
-      </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <span style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 12px",
+            background: statusBadge.color,
+            color: "var(--color-cream)",
+            borderRadius: 6,
+            fontSize: 14,
+            fontWeight: 600,
+          }}>
+            {statusBadge.label}
+          </span>
+          <span style={{ color: "var(--color-ink-muted)", fontSize: 14 }}>
+            On {campusName}
+          </span>
+        </div>
+      </header>
 
       {vendor.status === "suspended" && (
         <div data-testid="vendor-suspended-banner" role="alert" style={{ background: "var(--color-danger)", color: "var(--color-cream)", padding: "var(--space-3)", borderRadius: 8, marginBottom: "var(--space-3)" }}>
@@ -79,64 +97,31 @@ export default async function VendorDashboardPage() {
         </div>
       )}
 
-      {/* Open your store — warm progress (mock v2: amber current ring, forest
-          done steps, horizontal desktop / vertical mobile). Only for vendors
-          who haven't gone live yet; live vendors see the hero LIVE pill. */}
-      {!live && (
-        <section data-testid="phase-b-steps" style={{ background: "var(--color-cream)", border: "1px solid rgba(232,163,61,.45)", borderRadius: 14, padding: "18px 20px", marginBottom: "var(--space-4)" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 600, margin: 0, marginBottom: 4, color: "var(--color-forest)" }}>
-            Open your store
-          </h2>
-          <p style={{ color: "var(--color-ink-muted)", fontSize: 13, margin: 0, marginBottom: 14 }}>
-            Three steps and your storefront goes live on Explore.
-          </p>
-          <ol style={{ listStyle: "none", display: "flex", gap: 0, margin: 0, padding: 0 }} aria-label="Setup progress">
-            {[
-              { done: !!vendor.profilePhotoUrl, label: "Profile photo", n: "1" },
-              { done: listings.length > 0, label: "First listing", n: "2" },
-              { done: live, label: "Go live", n: "3" },
-            ].map((s, i, arr) => {
-              const current = !s.done && arr.slice(0, i).every((p) => p.done);
-              return (
-                <li key={s.label} data-testid={`step-${s.label.toLowerCase().replace(/\s+/g, "-")}`} style={{ flex: 1, textAlign: "center", position: "relative", padding: "0 6px" }}>
-                  {i < arr.length - 1 && (
-                    <span aria-hidden style={{ position: "absolute", top: 16, left: "calc(50% + 20px)", width: "calc(100% - 40px)", height: 2, background: arr[i].done ? "var(--color-forest)" : "var(--role-border)" }} />
-                  )}
-                  <span style={{
-                    width: 34, height: 34, borderRadius: "50%", display: "grid", placeItems: "center", margin: "0 auto 7px",
-                    fontSize: 13, fontWeight: 700,
-                    background: s.done ? "var(--color-forest)" : current ? "var(--color-amber)" : "var(--role-surface)",
-                    color: s.done ? "#f3f1ea" : current ? "var(--color-forest)" : "var(--role-text-muted)",
-                    border: s.done ? "1.5px solid var(--color-forest)" : current ? "1.5px solid var(--color-amber)" : "1.5px solid var(--role-border)",
-                    boxShadow: current ? "0 0 0 5px rgba(232,163,61,.18)" : "none",
-                  }}>
-                    {s.done ? "✓" : s.n}
-                  </span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: s.done || current ? "var(--color-ink)" : "var(--role-text-muted)" }}>
-                    {s.label}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-          <div data-testid="can-go-live" style={{ marginTop: 16, display: "flex", justifyContent: "center" }}>
-            <VendorGoLiveButton live={live} />
-          </div>
-        </section>
-      )}
+      {/* K3b.1 Attention queue indicators */}
+      <section style={{ background: "var(--color-cream)", border: "1px solid var(--color-ink-subtle)", borderRadius: 12, padding: "var(--space-4)", marginBottom: "var(--space-4)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0, marginBottom: "var(--space-3)", color: "var(--color-forest)" }}>
+          Needs your attention
+        </h2>
+        <ol className="wizard-steps" aria-label="Phase B progress" data-testid="phase-b-steps">
+          <li className={vendor.profilePhotoUrl ? "is-active" : ""} data-testid="step-photo">
+            1. Profile photo {vendor.profilePhotoUrl ? "✓" : ""}
+          </li>
+          <li className={listings.length > 0 ? "is-active" : ""} data-testid="step-listing">
+            2. First listing {listings.length > 0 ? `✓ (${listings.length})` : ""}
+          </li>
+          <li className={live ? "is-active" : ""} data-testid="step-live">
+            3. Go live {live ? "✓" : ""}
+          </li>
+        </ol>
+        <div data-testid="can-go-live" style={{ marginTop: "var(--space-2)" }}>
+          <VendorGoLiveButton live={live} />
+        </div>
+      </section>
 
       <hr style={{ border: 0, borderTop: "1px solid var(--role-border)", margin: "var(--space-4) 0" }} />
 
       <VendorDashboardClient
-        vendor={{
-          id: vendor.id,
-          name: vendor.name,
-          status: vendor.status,
-          verified: vendor.verified,
-          campus: campusName,
-          profilePhotoUrl: vendor.profilePhotoUrl ?? null,
-        }}
-        followersCount={followersCount}
+        vendor={{ id: vendor.id, name: vendor.name, status: vendor.status }}
         listings={listings}
       />
       </div>

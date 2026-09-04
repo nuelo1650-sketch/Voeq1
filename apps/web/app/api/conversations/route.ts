@@ -53,20 +53,12 @@ export async function GET() {
       const other = otherId ? await mockIdentityRepo.getById(otherId) : null;
       const msgs = await mockMessageRepo.listByConversation(c.id, null, 1);
       const last = msgs[msgs.length - 1];
-      // Vendor redesign (2026-09-04): REAL unread — messages not sent by me
-      // that arrived after my lastSeen for this conversation. Replaces the
-      // old `unread: 0` placeholder (which made every chat look read).
-      const seenAt = c.lastSeen?.[identity.id] ? new Date(c.lastSeen[identity.id]).getTime() : 0;
-      const all = await mockMessageRepo.listByConversation(c.id, null, 500);
-      const unread = all.filter(
-        (m) => m.senderId !== identity.id && new Date(m.createdAt).getTime() > seenAt,
-      ).length;
       return {
         id: c.id,
         name: other?.name ?? "Someone",
         lastMessagePreview: last?.body ?? "",
         lastMessageAt: c.lastMessageAt,
-        unread,
+        unread: 0, // unread count derived client-side from notifications; list shows 0 placeholder
       };
     }),
   );

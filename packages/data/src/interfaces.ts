@@ -429,12 +429,6 @@ export interface SavedListingRepo {
   /** Toggle: if saved, remove; else add. Returns the resulting saved state. */
   toggle(input: { shopperId: string; targetType: "listing" | "vendor"; targetId: string }): Promise<{ saved: boolean; item?: WishlistItem }>;
   list(shopperId: string): Promise<WishlistItem[]>;
-  /**
-   * Vendor redesign (2026-09-04): cross-shopper saves FOR a vendor's listings
-   * or the vendor itself — the vendor dashboard's "saves of my stuff" metric.
-   * list(shopperId) is viewer-scoped and cannot answer it.
-   */
-  listByVendor(vendorId: string): Promise<WishlistItem[]>;
 }
 
 export interface FollowRepo {
