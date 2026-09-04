@@ -13,69 +13,103 @@ import { SESSION_COOKIE } from "@/lib/session";
 
 /**
  * P-A round 66 — Vendor "This week" metrics (REAL DATA).
+ * Vendor redesign (2026-09-04): extended with per-listing metrics + a
+ * last-week comparison so the dashboard can show honest trends and
+ * a "Top" performer marker. Zero/missing signals return 0 — never fabricated.
  *
- * Counts for the dashboard's This-week row. Honest: a zero or missing signal
- * returns 0 (or null when never aggregated), never a fabricated number.
- * Scope: last 7 days. Owner-only (identity.vendorId).
+ * Scope: this week = last 7 days; last week = the 7 days before that.
  *
- * views     -> page_events (storefront_view + listing_view for this vendor's listings)
- * messages  -> conversations where this identity participates (new messages in 7d)
- * saves     -> wishlist_items for this vendor's listings/vendor (7d)
- * followers -> follows where vendorId = this vendor (7d)
+ * views     -> page_events (storefront_view + listing_view for this vendor)
+ * messages  -> new messages in the vendor's conversations
+ * saves     -> wishlist_items for this vendor's listings/vendor
+ * followers -> follows where vendorId = this vendor
+ * listings  -> per-listing {views, saves} this week (drives card metrics)
  */
 export async function GET() {
   const store = await cookies();
   const identity = await mockAuthRepo.currentIdentity(store.get(SESSION_COOKIE)?.value ?? null);
   if (!identity || !identity.vendorId) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
-  const vendor = await mockAuthRepo.currentIdentity(identity.id);
   const vendorId = identity.vendorId;
-  const WEEK_MS = 7 * 24 * 3600 * 1000;
-  const since = new Date(Date.now() - WEEK_MS).getTime();
-  const sinceIso = new Date(since).toISOString();
+  const DAY = 24 * 3600 * 1000;
+  const WEEK = 7 * DAY;
+  const now = Date.now();
+  const sinceThis = new Date(now - WEEK).getTime();
+  const sinceLast = new Date(now - 2 * WEEK).getTime();
 
-  // own listings (for listing_view refIds + saved listing refs)
+  // own listings
   const allListings = await mockListingsRepo.list({});
   const selfListings = allListings.filter((l) => l.vendorId === vendorId);
   const listingIds = new Set(selfListings.map((l) => l.id));
 
-  // page events 7d
-  const events = await mockPageEventStore.query({ since });
-  const views = events.filter(
-    (e) =>
-      (e.type === "storefront_view" && e.refId === vendorId) ||
-      (e.type === "listing_view" && e.refId && listingIds.has(e.refId)),
-  ).length;
+  // page events covering BOTH windows
+  const events = await mockPageEventStore.query({ since: sinceLast });
+  const isView = (e: { type: string; refId?: string | null }) =>
+    (e.type === "storefront_view" && e.refId === vendorId) ||
+    (e.type === "listing_view" && e.refId && listingIds.has(e.refId));
+  const at = (e: { at: string }) => new Date(e.at).getTime();
 
-  // individual distinct visitors for views vs raw count? keep raw count (honest label "views")
+  const thisWeekEvents = events.filter((e) => isView(e) && at(e) >= sinceThis);
+  const lastWeekEvents = events.filter((e) => isView(e) && at(e) >= sinceLast && at(e) < sinceThis);
+  const views = thisWeekEvents.length;
+  const prevViews = lastWeekEvents.length;
+
+  // per-listing views this week (listing_view only)
+  const perListingViews = new Map<string, number>();
+  for (const e of thisWeekEvents) {
+    if (e.type === "listing_view" && e.refId) {
+      perListingViews.set(e.refId, (perListingViews.get(e.refId) ?? 0) + 1);
+    }
+  }
+
   let messages7d = 0;
+  let messagesPrev = 0;
   try {
     const convs = await mockConversationRepo.listForIdentity(identity.id);
     const ids = convs.map((c) => c.id);
     const allMsgs = await mockMessageRepo.listAll();
-    messages7d = allMsgs.filter((m) => ids.includes(m.conversationId) && new Date(m.createdAt).getTime() >= since).length;
+    const mine = allMsgs.filter((m) => ids.includes(m.conversationId));
+    messages7d = mine.filter((m) => new Date(m.createdAt).getTime() >= sinceThis).length;
+    messagesPrev = mine.filter((m) => {
+      const t = new Date(m.createdAt).getTime();
+      return t >= sinceLast && t < sinceThis;
+    }).length;
   } catch {
-    messages7d = 0;
+    // honest 0
   }
 
   let saves7d = 0;
+  let savesPrev = 0;
+  const perListingSaves = new Map<string, number>();
   try {
-    const saved = await mockSavedListingRepo.list(identity.id);
-    saves7d = saved.filter(
-      (w) =>
-        new Date(w.createdAt).getTime() >= since &&
-        ((w.listingId && listingIds.has(w.listingId)) || w.vendorId === vendorId),
-    ).length;
+    // Cross-shopper: saves OF this vendor's listings/vendor by everyone
+    // (listByVendor — added with the vendor redesign; the viewer-scoped
+    // list() cannot answer "how many people saved my stuff").
+    const saved = await mockSavedListingRepo.listByVendor(vendorId);
+    for (const w of saved) {
+      const t = new Date(w.createdAt).getTime();
+      if (t >= sinceThis) {
+        saves7d++;
+        if (w.listingId) perListingSaves.set(w.listingId, (perListingSaves.get(w.listingId) ?? 0) + 1);
+      } else if (t >= sinceLast) {
+        savesPrev++;
+      }
+    }
   } catch {
-    saves7d = 0;
+    // honest 0
   }
 
   let followers7d = 0;
+  let followersPrev = 0;
   try {
     const followers = await mockFollowRepo.listByVendor(vendorId);
-    followers7d = followers.filter((f) => new Date(f.createdAt ?? "").getTime() >= since).length;
+    followers7d = followers.filter((f) => new Date(f.createdAt ?? "").getTime() >= sinceThis).length;
+    followersPrev = followers.filter((f) => {
+      const t = new Date(f.createdAt ?? "").getTime();
+      return t >= sinceLast && t < sinceThis;
+    }).length;
   } catch {
-    followers7d = 0;
+    // honest 0
   }
 
   return NextResponse.json({
@@ -85,7 +119,13 @@ export async function GET() {
       messages: messages7d,
       saves: saves7d,
       followers: followers7d,
-      reviews: 0, // no review repo query available here; keep 0-honest (VendorAnalytics handles reviews)
+      reviews: 0, // no review repo query here; VendorAnalytics handles reviews
     },
+    prev: { views: prevViews, messages: messagesPrev, saves: savesPrev, followers: followersPrev },
+    perListing: selfListings.map((l) => ({
+      id: l.id,
+      views: perListingViews.get(l.id) ?? 0,
+      saves: perListingSaves.get(l.id) ?? 0,
+    })),
   });
 }
