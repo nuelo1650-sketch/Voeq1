@@ -96,7 +96,16 @@ async function main() {
     const email = `${spec.slug}@demo.voeq.ng`;
     await db.insert(s.identities).values({
       id: identityId, email, name: spec.name, method: "email", role: "vendor", intent: "vendor",
-      accountStatus: "active", emailVerified: true, campus: spec.campus, consent: [],
+      // Semantic fix (2026-09-04, persona-link investigation): a demo identity is
+      // a full vendor persona — set vendorId here too. The old seed wrote the
+      // vendors.identity_id backlink but left identities.vendor_id NULL, so the
+      // owner could never reach /vendor/dashboard (role says vendor, vendorId
+      // null -> every route bounces them to onboarding). Both directions now.
+      vendorId,
+      accountStatus: "active", emailVerified: true, campus: spec.campus,
+      // Consent accepted at seed time (current terms) so demo identities never
+      // hit the consent wall on login.
+      consent: [{ termsVersion: "2026-08-01", privacyVersion: "2026-08-01", acceptedAt: NOW, method: "email" }],
       createdAt: NOW, updatedAt: NOW,
     });
     await db.insert(s.vendors).values({
