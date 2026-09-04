@@ -7,23 +7,31 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // Exclude app-only / private surfaces from indexing.
+      // Exclude app-only / private surfaces from indexing (SEO batch
+      // 2026-09-04): audited against the REAL route inventory — /dashboard
+      // never existed (real routes: /home, /vendor/dashboard), /home /saved
+      // /appeal /styleguide were uncovered.
       disallow: [
         "/api/",
-        "/dashboard",
+        "/home",
         "/messages",
         "/settings",
         "/notifications",
+        "/saved",
         "/onboarding",
         "/select-campus",
         "/consent",
+        "/appeal",
+        "/verify-otp",
+        "/account-state",
+        "/admin",
+        "/staff",
+        "/styleguide",
         "/vendor/dashboard",
         "/vendor/listings",
+        "/vendor/storefront",
         "/vendor/analytics",
         "/vendor/reviews",
-        "/staff",
-        "/account-state",
-        "/verify-otp",
       ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
