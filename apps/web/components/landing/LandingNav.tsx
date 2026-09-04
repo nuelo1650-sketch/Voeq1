@@ -193,13 +193,16 @@ export function LandingNav() {
             >
               Sign in
             </Link>
-            <button
-              onClick={handleGetStarted}
+            {/* B4 fix (2026-09-04 audit): real <a> for crawlability + a11y —
+                was router.push-only, invisible to bots and SR link lists. */}
+            <Link
+              href={isAuthed ? "/home" : "/signup"}
               data-testid="nav-get-started"
               className="landing-cta landing-cta--sm"
+              style={{ textDecoration: "none" }}
             >
               Get started
-            </button>
+            </Link>
           </>
         )}
       </div>
@@ -253,12 +256,14 @@ export function LandingNav() {
               <Link href="/login" onClick={() => setOpen(false)} className="landing-nav-overlay-signin">
                 Sign in
               </Link>
-              <button
-                onClick={() => { handleGetStarted(); setOpen(false); }}
+              <Link
+                href="/signup"
+                onClick={() => setOpen(false)}
                 className="landing-nav-overlay-getstarted"
+                style={{ textDecoration: "none" }}
               >
                 Get started
-              </button>
+              </Link>
               <Link href="/explore" onClick={() => setOpen(false)} className="landing-nav-overlay-explore">
                 Browse the marketplace
               </Link>

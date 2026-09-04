@@ -68,6 +68,15 @@ const mockSavedListingRepoImpl: SavedListingRepo = {
   async list(shopperId) {
     return [...savedItems.values()].filter((s) => s.shopperId === shopperId);
   },
+  async listByVendor(vendorId) {
+    // B2 re-ship: saves of the vendor itself + saves of any of their listings.
+    const vendorListingIds = new Set(
+      (await mockListingsRepo.list()).filter((l) => l.vendorId === vendorId).map((l) => l.id),
+    );
+    return [...savedItems.values()].filter(
+      (s) => s.vendorId === vendorId || (s.listingId != null && vendorListingIds.has(s.listingId)),
+    );
+  },
 };
 
 /** VS5.11: count saves attributable to a vendor (direct vendor saves + saves of their listings). */

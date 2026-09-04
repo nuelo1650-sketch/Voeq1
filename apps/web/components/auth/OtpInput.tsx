@@ -48,6 +48,7 @@ export function OtpInput({
   return (
     <input
       ref={inputRef}
+      id="code"
       className={`auth-otp-single${error ? " is-error" : ""}`}
       data-testid="otp-input"
       type="text"
@@ -60,6 +61,7 @@ export function OtpInput({
       disabled={disabled}
       aria-label="6-digit verification code"
       aria-invalid={Boolean(error)}
+      aria-describedby={error ? "code-error" : undefined}
       onChange={(e) => handleChange(e.target.value)}
       onPaste={handlePaste}
       onFocus={(e) => e.target.select()}

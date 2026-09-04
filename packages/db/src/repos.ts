@@ -934,6 +934,23 @@ export const realSavedListingRepo = {
   async list(shopperId: string): Promise<WishlistItem[]> {
     return getDb().select().from(s.wishlistItems).where(eq(s.wishlistItems.shopperId, shopperId));
   },
+  /** B2 re-ship: cross-shopper saves FOR a vendor (dashboard Saves metric). */
+  async listByVendor(vendorId: string): Promise<WishlistItem[]> {
+    const listings = await getDb().select({ id: s.listings.id }).from(s.listings).where(eq(s.listings.vendorId, vendorId));
+    const listingIds = listings.map((l) => l.id);
+    const byVendorRow = await getDb().select().from(s.wishlistItems).where(eq(s.wishlistItems.vendorId, vendorId));
+    const byListingRows = listingIds.length
+      ? await getDb().select().from(s.wishlistItems).where(inArray(s.wishlistItems.listingId, listingIds))
+      : [];
+    const seen = new Set<string>();
+    const out: WishlistItem[] = [];
+    for (const row of [...byVendorRow, ...byListingRows]) {
+      if (seen.has(row.id)) continue;
+      seen.add(row.id);
+      out.push(row);
+    }
+    return out;
+  },
 };
 
 export const realFollowRepo = {

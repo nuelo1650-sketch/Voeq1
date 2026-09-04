@@ -60,11 +60,13 @@ export async function GET() {
 
   let saves7d = 0;
   try {
-    const saved = await mockSavedListingRepo.list(identity.id);
+    // B2 fix (2026-09-04 audit): was viewer-scoped list(identity.id) — counted
+    // what THE VENDOR saved, not who saved the vendor's listings. listByVendor
+    // is the correct vendor-scoped query (saves of my listings + of my store).
+    const saved = await mockSavedListingRepo.listByVendor(vendorId);
     saves7d = saved.filter(
       (w) =>
-        new Date(w.createdAt).getTime() >= since &&
-        ((w.listingId && listingIds.has(w.listingId)) || w.vendorId === vendorId),
+        new Date(w.createdAt).getTime() >= since && ((w.listingId && listingIds.has(w.listingId)) || w.vendorId === vendorId),
     ).length;
   } catch {
     saves7d = 0;

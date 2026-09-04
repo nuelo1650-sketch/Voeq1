@@ -80,10 +80,20 @@ export default function SignupPage() {
 
     setSubmitting(true);
     try {
+      // B1 fix (2026-09-04 audit): turnstileToken state is `null` until the widget
+      // completes. zod's `.optional()` accepts `undefined` but rejects `null` — a
+      // widget that never loads (ad-blocker / blocked challenges.cloudflare.com)
+      // turned every signup into a bare `400 Invalid request.` with no hint.
+      // Normalize null -> undefined AND surface a targeted message when the
+      // widget was expected but never produced a token.
+      if (TURNSTILE_SITE_KEY && !turnstileToken) {
+        setFormError("Security check didn't load. Please disable ad-blockers for this page and reload, then try again.");
+        return;
+      }
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name, intent, consent: true, turnstileToken }),
+        body: JSON.stringify({ email, password, name, intent, consent: true, turnstileToken: turnstileToken ?? undefined }),
       });
       const data = await res.json();
       if (!res.ok) {

@@ -12,6 +12,8 @@ import {
   sendEmail,
   recordAuthEvent,
   clientIpFrom,
+  acceptConsent,
+  isConsentCurrent,
 } from "@voeq/data/server";
 import { z } from "zod";
 
@@ -91,6 +93,27 @@ export async function POST(req: NextRequest) {
     emailVerified: true,
   });
 
+  // B3 fix (2026-09-04 audit): signup ALREADY collected consent:true (hard
+  // zod-validated precondition, signup/route.ts:24-28) — but it was never
+  // recorded, so every fresh signup hit the /consent wall AGAIN after OTP:
+  // double acceptance on the most conversion-critical flow. Record it here —
+  // the identity is real NOW and this is the same acceptance event the wall
+  // would have collected. The redirect below still fires for anyone without
+  // current consent (Google signups, legacy accounts) — the wall stays, only
+  // the duplicate for email-signups goes.
+  let consentNowCurrent = false;
+  try {
+    consentNowCurrent = await isConsentCurrent(identity.id);
+    if (!consentNowCurrent) {
+      await acceptConsent(identity.id, "email");
+      await logAudit("consent.accepted_signup", identity.id, { source: "signup-checkbox" });
+      consentNowCurrent = true;
+    }
+  } catch {
+    // If the consent check fails, fall through to the /consent wall — the
+    // wall is the safe default, never skipped on error.
+  }
+
   const session = await mockSessionRepo.create(identity.id);
   const jar = await cookies();
   jar.set("sessionId", session.id, {
@@ -132,5 +155,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ ok: true, redirect: "/consent" });
+  // B3: consent recorded above (or was already current) — route to the app
+  // instead of the wall. Anyone still without consent gets the wall.
+  const redirectTo = consentNowCurrent ? "/home" : "/consent";
+  return NextResponse.json({ ok: true, redirect: redirectTo });
 }
