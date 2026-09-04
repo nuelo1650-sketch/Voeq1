@@ -5078,7 +5078,13 @@ header.AppShell,
     padding: 0 12px 20px !important;
   }
   .explore-page [data-testid="explore-grid"] {
-    grid-template-columns: 1fr 1fr !important;
+    /* Batch 2.1/B (412px FIX): '1fr 1fr' = minmax(AUTO,1fr) — the auto min
+       made each track at least the card's min-content width (image + nowrap
+       vendor span ~235px), so at 391-480px the grid rendered 481px wide and
+       the 2nd column clipped past the viewport (no document scroll to reach
+       it — matrix 'clipped interactive elements' on /explore pixel-412).
+       minmax(0,1fr) lets tracks shrink below content; text wraps instead. */
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
   }
   .explore-page [data-testid="explore-grid"] [data-testid="listing-card-link"] {
@@ -5106,7 +5112,8 @@ header.AppShell,
     /* P-A round 15 (FIX): this legacy rule forced grid-template-columns:1fr!
        at <=390px (the iPhone width) — beating the design system's 2-up rule
        and making cards ONE per row (the 'big cards' the user kept seeing).
-       Align to the approved 2-up compact layout like round 6. */
+       Align to the approved 2-up compact layout like round 6.
+       Batch 2.1/B: minmax(0,1fr) not 1fr — same auto-min fix as the 480 block. */
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
