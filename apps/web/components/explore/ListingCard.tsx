@@ -62,11 +62,18 @@ export function ListingCard({
 }) {
   const img = listing.image;
   const images = listing.images && listing.images.length > 0 ? listing.images : img ? [img] : [];
-  const [hovered, setHovered] = useState(false);
-  const displayImg = hovered && images[1] ? images[1] : images[0];
+  // P-A round 81 (F): the second image used to be hover-only — on a phone there
+  // is no hover, so extra photos were invisible unless you opened the listing.
+  // Now: horizontal scroll-snap track (native touch swipe) + dot indicators.
+  const [activeIndex, setActiveIndex] = useState(0);
+  const handleTrackScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (el.clientWidth === 0) return;
+    const idx = Math.max(0, Math.min(images.length - 1, Math.round(el.scrollLeft / el.clientWidth)));
+    setActiveIndex((prev) => (prev === idx ? prev : idx));
+  };
   // P-A round 65: delivery transforms (f_auto,q_auto,w=400) + lazy — the
   // raw full-size Cloudinary file was the "slow, page shrinks" culprit.
-  const displayImgCdn = cdnTransform(displayImg ?? "", 400);
   const categoryName = listing.categorySlug ? SLUG_TO_NAME[listing.categorySlug] ?? listing.categorySlug : null;
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
@@ -79,15 +86,43 @@ export function ListingCard({
     <article
       data-testid="listing-card"
       className="voeq-card"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
-      {/* Image frame (4:3); missing -> contour monogram; loading -> shimmer */}
+      {/* Image frame (4:3); missing -> contour monogram; loading -> shimmer.
+          P-A round 81 (F): multi-image listings render as a swipeable
+          scroll-snap track; single-image stays a plain <img>. */}
       <div data-testid="listing-image-frame" className="voeq-card-image">
         {loading ? (
           <div data-testid="listing-shimmer" style={shimmerStyle} />
+        ) : images.length > 1 ? (
+          <>
+            <div
+              className="voeq-card-track"
+              data-testid="listing-image-track"
+              onScroll={handleTrackScroll}
+            >
+              {images.map((src, i) => (
+                <img
+                  key={`${src}-${i}`}
+                  src={cdnTransform(src ?? "", 400)}
+                  alt={`${listing.title} — photo ${i + 1} of ${images.length}`}
+                  data-testid={i === 0 ? "listing-image" : undefined}
+                  loading="lazy"
+                  decoding="async"
+                  draggable={false}
+                />
+              ))}
+            </div>
+            <div className="voeq-card-dots" aria-hidden="true">
+              {images.map((_, i) => (
+                <span
+                  key={i}
+                  className={`voeq-card-dot${i === activeIndex ? " is-active" : ""}`}
+                />
+              ))}
+            </div>
+          </>
         ) : img ? (
-          <img src={displayImgCdn} alt={listing.title} data-testid="listing-image" loading="lazy" decoding="async" />
+          <img src={cdnTransform(img, 400)} alt={listing.title} data-testid="listing-image" loading="lazy" decoding="async" />
         ) : (
           <CampusFingerprint
             data-testid="listing-monogram"

@@ -5163,6 +5163,49 @@ header.AppShell,
   .voeq-card-cat { font-size: 10.5px; }
 }
 .voeq-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* P-A round 81 (F): swipeable image track for multi-photo listings.
+   Native horizontal scroll-snap — no click needed on touch, and the
+   dots show how many photos there are + which one you're on. */
+.voeq-card-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.voeq-card-track::-webkit-scrollbar { display: none; }
+.voeq-card-track img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  scroll-snap-align: center;
+}
+.voeq-card-dots {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+}
+.voeq-card-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(15, 42, 29, 0.25);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.voeq-card-dot.is-active {
+  background: #fff;
+  transform: scale(1.25);
+}
 .voeq-card-body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 5px; }
 .voeq-card-title {
   margin: 0; font-size: 13.5px; font-weight: 650; color: var(--color-forest);
