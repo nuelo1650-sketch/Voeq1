@@ -818,8 +818,15 @@ export const realMessageRepo = {
   },
   async listByConversation(conversationId: string, cursor?: string | null, limit = 50): Promise<Message[]> {
     const rows = await getDb().select().from(s.messages).where(eq(s.messages.conversationId, conversationId));
-    const sliced = cursor ? rows.filter((m) => m.createdAt > cursor) : rows;
-    return sliced.sort((a, b) => a.createdAt.localeCompare(b.createdAt)).slice(0, limit).map(mapMessage);
+    const filtered = cursor ? rows.filter((m) => m.createdAt > cursor) : rows;
+    // Newest `limit` messages, returned oldest-first for display.
+    // (Was slice(0, limit) on an ascending sort = OLDEST N — inbox previews
+    // showed the first message ever sent and unread counts missed new traffic.)
+    if (!(limit > 0)) return [];
+    return filtered
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      .slice(-limit)
+      .map(mapMessage);
   },
   async getById(mid: string): Promise<Message | null> {
     const row = await getDb().select().from(s.messages).where(eq(s.messages.id, mid)).limit(1);

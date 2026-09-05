@@ -119,10 +119,12 @@ const mockMessageRepoImpl = {
     const all = Array.from(messages.values())
       .filter((m) => m.conversationId === conversationId)
       .sort((x, y) => x.createdAt.localeCompare(y.createdAt));
-    const sliced = cursor
+    const filtered = cursor
       ? all.filter((m) => m.createdAt > cursor)
       : all;
-    return sliced.slice(0, limit);
+    // Newest `limit` messages, returned oldest-first for display (parity
+    // with the Drizzle repo — see packages/db/src/repos.ts).
+    return limit > 0 ? filtered.slice(-limit) : [];
   },
 
   async getById(msgId: string): Promise<Message | null> {
