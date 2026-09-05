@@ -6,7 +6,11 @@ import Image from 'next/image';
  * channel is used as a mask filled with --color-forest, so the word "voeq" reads
  * in brand green on any surface (cream, white, dark) without a colored box.
  *
- * width controls render size; height is derived from the 1200x796 source aspect.
+ * LCP batch (2026-09-05): source downscaled 1200x796 (122KB) -> 240x159
+ * (6KB, 95% smaller) — it renders at 94px max everywhere, was 13x oversized,
+ * and as a CSS mask it's fetched at full size on EVERY page (global nav).
+ * width controls render size; height derived from the 240x159 source aspect
+ * (maskSize 'contain' scales to fit regardless).
  */
 export function BrandLogo({
   width = 94,
