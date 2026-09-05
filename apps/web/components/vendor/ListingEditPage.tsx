@@ -19,6 +19,9 @@ interface PhotoDraft {
   url: string;
   alt: string;
   uploading: boolean;
+  // P-A round 81 (G): see ListingCreatePage — failed uploads must never reach
+  // the API as blob: URLs (server Cloudinary gate rejects the whole save).
+  failed?: boolean;
 }
 
 export function ListingEditPage({ listing }: { listing: Listing }) {
@@ -105,6 +108,10 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
       return;
     }
 
+    // P-A round 81 (G): counters for the async loop (stale-closure fix,
+    // same as ListingCreatePage).
+    const photosStart = photos.length;
+    let uploaded = 0;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (!file.type.startsWith("image/")) continue;
@@ -120,21 +127,22 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
         const prep = await prepareImageForUpload(file);
         if ("error" in prep) {
           setErrors((prev) => ({ ...prev, photos: prep.error }));
-          setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false } : p)));
+          setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false, failed: true } : p)));
           continue;
         }
         const uploadFile = prep.blob ? new File([prep.blob], file.name, { type: prep.mimeType || file.type }) : file;
-        const result = await uploadPhotoDirect(uploadFile, "listing_photo", { existingCount: photos.length });
+        const result = await uploadPhotoDirect(uploadFile, "listing_photo", { existingCount: photosStart + uploaded });
         if (!result.ok) {
           throw new Error(result.reason || "Upload failed");
         }
+        uploaded += 1;
         URL.revokeObjectURL(preview);
         setPhotos((prev) =>
           prev.map((p) => (p.id === id ? { ...p, url: result.url as string, uploading: false } : p)),
         );
       } catch (e) {
-        setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false } : p)));
-        setErrors({ ...errors, photos: e instanceof Error ? e.message : "Image upload failed" });
+        setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false, failed: true } : p)));
+        setErrors((prev) => ({ ...prev, photos: e instanceof Error ? e.message : "Image upload failed" }));
       }
     }
   };
@@ -163,6 +171,17 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
 
   const saveChanges = async () => {
     if (!validateAll()) {
+      return;
+    }
+
+    // P-A round 81 (G): same guard as ListingCreatePage — never PATCH with
+    // blob: URLs (failed or still-uploading photos) past the Cloudinary gate.
+    if (photos.some((p) => p.uploading)) {
+      setErrors({ submit: "Photo still uploading — give it a moment, then tap Save again." });
+      return;
+    }
+    if (photos.some((p) => p.failed || p.url.startsWith("blob:"))) {
+      setErrors({ submit: "One or more photos failed to upload. Remove the failed photo(s) or try again, then tap Save." });
       return;
     }
 
@@ -464,6 +483,13 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
                       >
                         <X size={20} />
                       </button>
+                      {photo.uploading && (
+                        <span style={{ fontSize: 12, color: "var(--color-ink-muted)" }}>Uploading...</span>
+                      )}
+                      {/* P-A round 81 (G): show which photo failed (see ListingCreatePage). */}
+                      {photo.failed && (
+                        <span style={{ fontSize: 12, color: "var(--color-danger)", fontWeight: 600 }}>Failed — remove or retry</span>
+                      )}
                     </div>
                   ))}
                 </div>

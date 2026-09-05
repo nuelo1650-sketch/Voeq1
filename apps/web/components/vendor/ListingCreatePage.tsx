@@ -20,6 +20,11 @@ interface PhotoDraft {
   url: string;
   alt: string;
   uploading: boolean;
+  // P-A round 81 (G): a failed upload kept its local blob: preview with
+  // uploading:false, so publish happily sent a blob: URL to the API and the
+  // server's Cloudinary gate rejected the whole listing ("only Cloudinary
+  // images allowed"). Failed photos are now marked and block publish.
+  failed?: boolean;
 }
 
 export function ListingCreatePage() {
@@ -137,6 +142,10 @@ export function ListingCreatePage() {
       return;
     }
 
+    // P-A round 81 (G): counters for the async loop — `photos.length` never
+    // updates mid-loop (stale closure), so track the batch locally.
+    const photosStart = photos.length;
+    let uploaded = 0;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (!file.type.startsWith("image/")) continue;
@@ -152,22 +161,27 @@ export function ListingCreatePage() {
         const prep = await prepareImageForUpload(file);
         if ("error" in prep) {
           setErrors((prev) => ({ ...prev, photos: prep.error }));
-          setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false } : p)));
+          setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false, failed: true } : p)));
           continue;
         }
         const uploadFile = prep.blob ? new File([prep.blob], file.name, { type: prep.mimeType || file.type }) : file;
-        const result = await uploadPhotoDirect(uploadFile, "listing_photo", { existingCount: photos.length });
+        // P-A round 81 (G): existingCount must advance as the loop uploads —
+        // `photos.length` is the stale state snapshot from when the handler
+        // was created, so a 2-photo batch sent existingCount twice, and the
+        // server's per-vendor storage cap check miscounted.
+        const result = await uploadPhotoDirect(uploadFile, "listing_photo", { existingCount: photosStart + uploaded });
         if (!result.ok) {
           throw new Error(result.reason || "Upload failed");
         }
+        uploaded += 1;
         URL.revokeObjectURL(preview);
         setPhotos((prev) =>
           prev.map((p) => (p.id === id ? { ...p, url: result.url as string, uploading: false } : p)),
         );
       } catch (e) {
         // Keep the local preview but mark failed so the user can retry/remove.
-        setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false } : p)));
-        setErrors({ ...errors, photos: e instanceof Error ? e.message : "Image upload failed" });
+        setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, uploading: false, failed: true } : p)));
+        setErrors((prev) => ({ ...prev, photos: e instanceof Error ? e.message : "Image upload failed" }));
       }
     }
   };
@@ -210,6 +224,13 @@ export function ListingCreatePage() {
     // changes ("image uploads but doesn't show"). Block + tell the vendor.
     if (photos.some((p) => p.uploading)) {
       setErrors({ ...errors, submit: "Photo still uploading — give it a moment, then tap Publish again." });
+      return;
+    }
+    // P-A round 81 (G): a FAILED upload still holds a local blob: preview —
+    // sending it tripped the server's Cloudinary gate ("only Cloudinary
+    // images allowed") and killed the whole publish. Block with a clear ask.
+    if (photos.some((p) => p.failed || p.url.startsWith("blob:"))) {
+      setErrors({ ...errors, submit: "One or more photos failed to upload. Remove the failed photo(s) or try again, then tap Publish." });
       return;
     }
 
@@ -591,6 +612,12 @@ export function ListingCreatePage() {
                       </button>
                       {photo.uploading && (
                         <span style={{ fontSize: 12, color: "var(--color-ink-muted)" }}>Uploading...</span>
+                      )}
+                      {/* P-A round 81 (G): make the failed state visible on the
+                          tile itself, not just the banner, so the vendor knows
+                          WHICH photo to remove. */}
+                      {photo.failed && (
+                        <span style={{ fontSize: 12, color: "var(--color-danger)", fontWeight: 600 }}>Failed — remove or retry</span>
                       )}
                     </div>
                   ))}
