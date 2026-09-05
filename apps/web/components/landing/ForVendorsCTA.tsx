@@ -55,11 +55,19 @@ export function ForVendorsCTA() {
           </div>
 
           <div className="for-vendors-visual">
-            <div className="for-vendors-image-wrapper" aria-hidden="true">
-              <div className="for-vendors-monogram">
-                <span className="for-vendors-monogram-word">Voeq</span>
-                <span className="for-vendors-monogram-tag">Find. Connect. Grow.</span>
-              </div>
+            {/* P-A round 81 (H): the founder's own landing.jpg replaces the
+                gradient monogram — a real Voeq asset, richer than the word
+                panel (the old comment banned *stock* photos; this is ours). */}
+            <div className="for-vendors-image-wrapper">
+              <img
+                src="/landing.jpg"
+                alt="Voeq campus marketplace"
+                width={1280}
+                height={853}
+                loading="lazy"
+                decoding="async"
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+              />
             </div>
           </div>
         </div>
