@@ -71,6 +71,9 @@ export const CENTER_NAV: Record<AppRole, NavItem[]> = {
     { href: "/staff/audit", label: "Audit", icon: ScrollText },
     { href: "/staff/config", label: "Config", icon: SlidersHorizontal },
     { href: "/staff/analytics", label: "Analytics", icon: BarChart3 },
+    // P-A round 81: staff had no way back to their own vendor/shopper profile
+    // (logo → landing, no Home). /home smart-routes by persona (round 69).
+    { href: "/home", label: "My profile", icon: User },
   ],
 };
 
@@ -81,6 +84,8 @@ export const STAFF_SIDE_NAV: NavItem[] = [
   { href: "/staff/audit", label: "Audit Log", icon: ScrollText },
   { href: "/staff/config", label: "Config", icon: SlidersHorizontal },
   { href: "/staff/analytics", label: "Analytics", icon: BarChart3 },
+  // P-A round 81: exit back to the staff member's own vendor/shopper profile.
+  { href: "/home", label: "My profile", icon: User },
 ];
 
 export const roleToAppRole = (role: AppRole): AppRole => role;
