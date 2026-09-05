@@ -35,6 +35,8 @@ export default function robots(): MetadataRoute.Robots {
       ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
+    // No `Host:` directive: it is non-standard (Google ignores it, only
+    // legacy Yandex honored it) and Search Console's robots tester warns on
+    // it. The absolute sitemap URL + canonical domain already disambiguate.
   };
 }
