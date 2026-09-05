@@ -10,7 +10,7 @@ export default function TermsPage() {
   return (
     <InfoPageShell title="Terms of Service">
       <div className="info-page-content">
-        <p className="info-date">Last updated: August 21, 2026</p>
+        <p className="info-date">Last updated: September 5, 2026</p>
 
         <section className="info-section">
           <p>
@@ -23,8 +23,8 @@ export default function TermsPage() {
         <section className="info-section">
           <h2 className="info-heading">1. What Voeq Is</h2>
           <p>
-            Voeq is a campus marketplace directory that connects students with 
-            vendors operating on or near their campus. Voeq is a discovery and 
+            Voeq is a campus marketplace that connects students with vendors 
+            operating on or near their campus. Voeq is a discovery and 
             connection platform. We do not process payments, hold funds in escrow, 
             or act as a party to any transaction between a student and a vendor.
           </p>
@@ -46,15 +46,29 @@ export default function TermsPage() {
             identity, or the accuracy of their listing content. Users should 
             exercise their own judgment when engaging with any vendor.
           </p>
+          <p>
+            To keep listings trustworthy, we apply integrity rules to edits: a 
+            listing that has received engagement (saves, comments, likes, 
+            conversations) cannot be edited into a materially different product, 
+            and its category is locked while it has engagement. When an edit 
+            meaningfully changes a listing, the users who saved it are notified 
+            with the details of the change.
+          </p>
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">3. Connecting with Vendors</h2>
+          <h2 className="info-heading">3. Connecting and Messaging</h2>
           <p>
             Voeq facilitates connection between students and vendors through 
-            contact information displayed on vendor profiles. All arrangements — 
-            pricing, delivery, quality, disputes — are made directly between the 
-            student and the vendor.
+            vendor profiles and in-app messaging. All arrangements — pricing, 
+            delivery, quality, disputes — are made directly between the student 
+            and the vendor.
+          </p>
+          <p>
+            In-app messages must follow the conduct rules in Section 6. You can 
+            report any message, listing, review, or comment for staff review. 
+            As part of moderation, staff may review content that has been 
+            reported to us.
           </p>
           <p>
             Voeq is not responsible for the outcome of any interaction, exchange, 
@@ -64,7 +78,42 @@ export default function TermsPage() {
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">4. Prohibited Conduct</h2>
+          <h2 className="info-heading">4. User-Generated Content</h2>
+          <p>
+            You retain ownership of content you contribute to Voeq — profile 
+            photos, listing photos, reviews, comments, and messages. By 
+            uploading or posting content, you grant Voeq a non-exclusive, 
+            worldwide, royalty-free license to host, cache, display, and 
+            distribute that content within the platform's features (for 
+            example, displaying your listing photos on your storefront, on 
+            Explore, and in search).
+          </p>
+          <p>
+            You confirm that you have the rights to any images you upload and 
+            that photos you post of other people are posted with their 
+            understanding. Content that violates these Terms or our content 
+            rules may be removed without notice.
+          </p>
+        </section>
+
+        <section className="info-section">
+          <h2 className="info-heading">5. Content Moderation</h2>
+          <p>
+            Every image uploaded to Voeq (profile and listing photos) is 
+            automatically screened for nudity and prohibited content before it 
+            can appear on the platform. Screening happens through a third-party 
+            moderation service. If the screening service is unavailable, the 
+            image is not published — nothing unscreened goes live.
+          </p>
+          <p>
+            Automated screening is not perfect. If content that breaks our rules 
+            slips through, report it — staff review reports and can remove 
+            content, restrict accounts, and escalate enforcement.
+          </p>
+        </section>
+
+        <section className="info-section">
+          <h2 className="info-heading">6. Prohibited Conduct</h2>
           <p>Users may not:</p>
           <ul className="info-list">
             <li>List fraudulent or fictitious vendors</li>
@@ -73,15 +122,20 @@ export default function TermsPage() {
             <li>List prohibited goods or services (as defined by Nigerian law)</li>
             <li>Scrape, copy, or misuse platform data without permission</li>
             <li>Impersonate another user or vendor</li>
+            <li>Use messaging to spam, harass, or defraud other users</li>
+            <li>Manipulate reviews, ratings, or engagement (fake reviews, 
+            review swapping, engagement farming)</li>
+            <li>Create new accounts to evade an enforcement action on a 
+            previous account</li>
           </ul>
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">5. No Transactions on Platform</h2>
+          <h2 className="info-heading">7. No Payments on Platform</h2>
           <p>
-            As of this version, Voeq does not process payments. Any financial 
-            exchange between a student and vendor happens entirely outside the 
-            platform, at the parties' own risk.
+            Voeq does not process payments. Any financial exchange between a 
+            student and vendor happens entirely outside the platform, at the 
+            parties' own risk.
           </p>
           <p>
             Should Voeq introduce payment processing in the future, separate 
@@ -90,17 +144,25 @@ export default function TermsPage() {
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">6. Account Suspension and Removal</h2>
+          <h2 className="info-heading">8. Enforcement and Appeals</h2>
           <p>
-            Voeq may suspend or remove any listing or account that violates these 
-            terms, misrepresents vendor presence, or is reported as fraudulent. 
-            We reserve the right to investigate reports and take action without 
-            prior notice.
+            Voeq may enforce these Terms through a graduated ladder: a warning, 
+            a temporary suspension, or a permanent ban, depending on severity 
+            and history. We may suspend or remove any listing or account that 
+            violates these terms, misrepresents vendor presence, or is reported 
+            as fraudulent. We reserve the right to investigate reports and take 
+            action without prior notice.
+          </p>
+          <p>
+            You can appeal any enforcement action through the appeal link 
+            included in your enforcement notification email, or at voeq.ng/appeal. 
+            Accounts removed for serious violations may be blocked from 
+            registering again.
           </p>
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">7. Limitation of Liability</h2>
+          <h2 className="info-heading">9. Limitation of Liability</h2>
           <p>
             Voeq provides the platform "as is." We are not liable for any loss, 
             damage, or dispute arising from interactions between users, including 
@@ -116,7 +178,7 @@ export default function TermsPage() {
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">8. Indemnification</h2>
+          <h2 className="info-heading">10. Indemnification</h2>
           <p>
             You agree to indemnify and hold harmless Voeq, its officers, directors, 
             employees, and agents from any claims, damages, losses, liabilities, 
@@ -126,20 +188,23 @@ export default function TermsPage() {
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">9. Changes to These Terms</h2>
+          <h2 className="info-heading">11. Changes to These Terms</h2>
           <p>
-            We may update these Terms as Voeq's features evolve, including if and 
-            when in-platform payments are introduced. Continued use of Voeq after 
-            changes constitutes acceptance of the updated terms.
+            These Terms are versioned. When we make changes — including material 
+            ones — we publish a new version and update the "Last updated" date 
+            above. At your next login after a new version is published, you will 
+            be asked to review and accept the updated Terms before continuing to 
+            use Voeq. The version you accepted, and when, is stored on your 
+            account.
           </p>
           <p>
-            Material changes will be communicated through the platform or via email 
-            if you have an account.
+            Material changes will also be communicated through the platform or 
+            via email if you have an account.
           </p>
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">10. Governing Law</h2>
+          <h2 className="info-heading">12. Governing Law</h2>
           <p>
             These Terms are governed by the laws of the Federal Republic of Nigeria. 
             Any disputes arising from these terms or your use of Voeq shall be 
@@ -148,7 +213,7 @@ export default function TermsPage() {
         </section>
 
         <section className="info-section">
-          <h2 className="info-heading">11. Contact</h2>
+          <h2 className="info-heading">13. Contact</h2>
           <p>
             Questions about these Terms:{' '}
             <a href="mailto:legal@voeq.ng" className="info-link">legal@voeq.ng</a>
