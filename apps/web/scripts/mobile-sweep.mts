@@ -1,5 +1,5 @@
 /**
- * POST-FIX RE-SWEEP v2 — the escape function is passed as a STRING-templated
+ * MOBILE SWEEP — 30 routes at 390px vs test DB. The measure fn is passed as a STRING-templated
  * evaluate (no closure over outer scope) to dodge the esbuild __name issue.
  */
 import { neon } from "@neondatabase/serverless";
