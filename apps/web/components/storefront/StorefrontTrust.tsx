@@ -80,7 +80,7 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
         </button>
       )}
 
-      <div style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-2)" }}>
+      <div style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-2)", flexWrap: "wrap" }}>
         <FollowButton vendorId={vendor.id} className="storefront-follow-btn" />
         <LikeButton targetType="vendor" targetId={vendor.id} className="storefront-like-btn" />
         <button

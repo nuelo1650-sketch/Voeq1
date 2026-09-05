@@ -45,11 +45,12 @@ export function StorefrontRecommendations({ otherListings, relatedVendors, vendo
           }}>
             Explore more listings
           </h2>
-          <div style={{ 
-            display: "flex", 
-            gap: "var(--space-3)", 
+          <div style={{
+            display: "flex",
+            gap: "var(--space-3)",
             overflowX: "auto",
             paddingBottom: "var(--space-2)",
+            minWidth: 0,
           }}>
             {otherListings.map((item) => (
               <RecommendationCard key={item.id} listing={item} />
@@ -69,11 +70,12 @@ export function StorefrontRecommendations({ otherListings, relatedVendors, vendo
           }}>
             Similar vendors you might like
           </h2>
-          <div style={{ 
-            display: "flex", 
-            gap: "var(--space-3)", 
+          <div style={{
+            display: "flex",
+            gap: "var(--space-3)",
             overflowX: "auto",
             paddingBottom: "var(--space-2)",
+            minWidth: 0,
           }}>
             {relatedVendors.map((item) => (
               <RecommendationCard key={item.id} listing={item} />

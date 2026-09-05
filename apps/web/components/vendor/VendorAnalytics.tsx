@@ -79,8 +79,9 @@ export function VendorAnalytics({ vendor }: Props) {
         </p>
       ) : (
         <>
-          {/* stat row: hero + compact */}
-          <div data-testid="analytics-stats" style={{ display: "grid", gridTemplateColumns: "1.7fr 1fr 1fr 1fr", gap: 11, marginBottom: 13 }}>
+          {/* stat row: hero + compact — CSS grid collapses 4-col -> 2x2 under 720px
+              (mobile fix 2026-09-05: the fixed 4-col grid forced 469px page width) */}
+          <div data-testid="analytics-stats" className="van-stats" style={{ display: "grid", gridTemplateColumns: "1.7fr 1fr 1fr 1fr", gap: 11, marginBottom: 13 }}>
             <div data-testid="stat-views-hero" style={{ background: "var(--color-forest)", borderRadius: 14, padding: "16px 18px", boxShadow: "0 4px 14px rgba(15,42,29,.16)", display: "flex", flexDirection: "column", gap: 3 }}>
               <span style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(243,241,234,.72)", display: "flex", alignItems: "center", gap: 6 }}>
                 <Eye size={13} /> Storefront views
@@ -127,7 +128,7 @@ export function VendorAnalytics({ vendor }: Props) {
           </section>
 
           {/* top listings + traffic sources */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 12 }}>
+          <div className="van-two-col" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 12 }}>
             <section data-testid="analytics-top-listings" style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 16, padding: "16px 18px", boxShadow: "0 1px 4px rgba(15,42,29,.05)" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16.5, fontWeight: 600, margin: "0 0 10px", color: "var(--color-forest)" }}>Top listings</h3>
               {topListings.length === 0 || topListings.every((t) => t.views === 0 && t.saves === 0) ? (

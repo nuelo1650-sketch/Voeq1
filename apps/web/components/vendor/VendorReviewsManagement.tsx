@@ -162,6 +162,7 @@ export function VendorReviewsManagement({ vendor, disabled, initialReviews = [] 
                 background: "var(--color-cream)",
                 border: "1px solid var(--color-ink-subtle)",
                 borderRadius: 12,
+                minWidth: 0,
               }}
             >
               <div style={{ textAlign: "center" }}>
@@ -243,7 +244,7 @@ export function VendorReviewsManagement({ vendor, disabled, initialReviews = [] 
                   </div>
 
                   {/* Review body */}
-                  <p style={{ margin: 0, fontSize: 14, color: "var(--color-ink)", lineHeight: 1.6 }}>
+                  <p style={{ margin: 0, fontSize: 14, color: "var(--color-ink)", lineHeight: 1.6, overflowWrap: "anywhere", minWidth: 0 }}>
                     {review.body}
                   </p>
 
@@ -256,10 +257,11 @@ export function VendorReviewsManagement({ vendor, disabled, initialReviews = [] 
                         background: "var(--color-glass-white)",
                         borderRadius: 8,
                         border: "1px solid var(--color-ink-subtle)",
+                        minWidth: 0,
                       }}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, gap: 8, flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                           <MessageCircle size={16} style={{ color: "var(--color-forest-mid)" }} />
                           <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-forest)" }}>Your response</span>
                           {!canEdit && (
@@ -297,10 +299,10 @@ export function VendorReviewsManagement({ vendor, disabled, initialReviews = [] 
                           </div>
                         )}
                       </div>
-                      <p style={{ margin: 0, fontSize: 14, color: "var(--color-ink)", lineHeight: 1.6 }}>
+                      <p style={{ margin: 0, fontSize: 14, color: "var(--color-ink)", lineHeight: 1.6, overflowWrap: "anywhere", minWidth: 0 }}>
                         {review.response.body}
                       </p>
-                      <p style={{ margin: 0, fontSize: 12, color: "var(--color-ink-muted)", marginTop: 8 }}>
+                      <p style={{ margin: 0, fontSize: 12, color: "var(--color-ink-muted)", marginTop: 8, overflowWrap: "anywhere" }}>
                         {formatDate(review.response.createdAt)}
                         {canEdit && " • You can edit this response for 24 hours"}
                       </p>

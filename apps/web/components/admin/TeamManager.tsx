@@ -146,8 +146,8 @@ export function TeamManager({ rows, roleLabel, canGrantSuperAdmin }: {
 }
 
 const btnStyle: React.CSSProperties = {
-  padding: "5px 10px",
-  fontSize: 12,
+  padding: "9px 14px",
+  fontSize: 12.5,
   fontWeight: 600,
   fontFamily: "var(--role-font-ui)",
   borderRadius: 999,
@@ -155,4 +155,5 @@ const btnStyle: React.CSSProperties = {
   color: "var(--role-accent)",
   border: "1px solid color-mix(in srgb, var(--role-accent) 40%, transparent)",
   cursor: "pointer",
+  minHeight: 36,
 };

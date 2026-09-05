@@ -163,6 +163,11 @@ export function LandingFooter() {
         {/* Bottom bar */}
         <div className="footer-bottom">
           <div className="footer-bottom-left">
+            {/* Support channel (2026-09-05): every public page shows where to
+                lay complaints — support@voeq.ng (canonical, matches Help page). */}
+            <a href="mailto:support@voeq.ng" className="footer-support-mail" style={{ color: "inherit", textDecoration: "none", fontWeight: 600 }}>
+              ✉ support@voeq.ng
+            </a>
             <span className="footer-copyright">© 2026 Voeq. All rights reserved. · Powered by Legacy LM</span>
           </div>
           <div className="footer-bottom-right">

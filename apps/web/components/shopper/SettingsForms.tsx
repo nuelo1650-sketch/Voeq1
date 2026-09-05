@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, Bell, MapPin, Shield, AlertTriangle } from "lucide-react";
 
@@ -58,13 +58,15 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
   const [toast, setToast] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
-  // Detect mobile
-  useState(() => {
+  // Detect mobile (2026-09-05 fix: this was `useState(() => {...})` — the
+  // listener NEVER attached and isMobile stayed false forever, so phones got
+  // the desktop sidebar and the Account tab sat at x=498, off-screen.)
+  useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  });
+  }, []);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -173,6 +175,8 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
             gap: 8,
             borderBottom: "1px solid var(--color-ink-subtle)",
             overflowX: "auto",
+            minWidth: 0,
+            scrollbarWidth: "none",
           }}
         >
           <TabButton icon={<User size={16} />} label="Profile" active={activeSection === "profile"} onClick={() => setActiveSection("profile")} />
@@ -745,6 +749,7 @@ function TabButton({
         borderBottom: active ? "2px solid var(--color-forest)" : "2px solid transparent",
         cursor: "pointer",
         whiteSpace: "nowrap",
+        flexShrink: 0,
       }}
     >
       {icon}

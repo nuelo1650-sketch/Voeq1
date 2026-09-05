@@ -292,8 +292,12 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
           </p>
         </header>
 
-        {/* Tabs */}
-        <div style={{ marginBottom: "var(--space-3)", borderBottom: "2px solid var(--role-border)", display: "flex", gap: 24 }}>
+        {/* Tabs — scrollable strip on mobile (2026-09-05 fix: fixed flex row
+            pushed Users/Appeals to x=454/560, off-screen on 390px phones) */}
+        <div
+          data-testid="moderation-tabs"
+          style={{ marginBottom: "var(--space-3)", borderBottom: "2px solid var(--role-border)", display: "flex", gap: 24, overflowX: "auto", minWidth: 0, WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
+        >
           <TabButton active={activeTab === "reports"} onClick={() => setActiveTab("reports")} icon={<Flag size={16} />}>
             Reports
           </TabButton>
@@ -648,6 +652,8 @@ function TabButton({
         fontSize: 15,
         fontWeight: active ? 600 : 400,
         transition: "all 120ms ease",
+        flexShrink: 0,
+        minHeight: 44,
       }}
     >
       {icon}
