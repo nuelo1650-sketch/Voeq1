@@ -54,7 +54,8 @@ const mockCategoryRepoImpl: CategoryRepo = {
   async setActive(slug, isActive) {
     const c = categories.find((x) => x.slug === slug);
     if (!c) return null;
-    (c as Category & { isActive?: boolean }).isActive = isActive;
+    // P0: isActive is a first-class optional field on Category now.
+    c.isActive = isActive;
     return c;
   },
 };
@@ -142,13 +143,18 @@ const mockAgreementRepoImpl: AgreementRepo = {
   async setCurrent(id) {
     const target = agreements.find((a) => a.id === id);
     if (!target) return null;
-    for (const a of agreements) a.isCurrent = a.id === id;
+    // P0: kind-scoped, matching realAgreementRepo — see repos.ts note.
+    for (const a of agreements) if (a.kind === target.kind) a.isCurrent = a.id === id;
     return target;
   },
 };
 
 // D.2/D.3 — Factory (EOF): real Neon-backed repos when DATABASE_URL is set.
+// P0 (config console): the `as unknown as` casts are GONE — realCategoryRepo
+// was missing create/setActive and tsc couldn't see it (prod POST/PATCH would
+// have 500'd). Every real repo is now directly typed against its interface;
+// if a method is missing, typecheck fails at build time, not at runtime.
 const USE_REAL = !!process.env.DATABASE_URL;
-export const mockCategoryRepo = USE_REAL ? (realCategoryRepo as unknown as CategoryRepo) : mockCategoryRepoImpl;
-export const mockCampusRepo = USE_REAL ? (realCampusRepo as unknown as CampusRepo) : mockCampusRepoImpl;
-export const mockAgreementRepo = USE_REAL ? (realAgreementRepo as unknown as AgreementRepo) : mockAgreementRepoImpl;
+export const mockCategoryRepo: CategoryRepo = USE_REAL ? realCategoryRepo : mockCategoryRepoImpl;
+export const mockCampusRepo: CampusRepo = USE_REAL ? realCampusRepo : mockCampusRepoImpl;
+export const mockAgreementRepo: AgreementRepo = USE_REAL ? realAgreementRepo : mockAgreementRepoImpl;

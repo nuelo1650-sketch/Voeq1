@@ -42,9 +42,36 @@ import type {
   FeatureFlag,
   Campus,
   CampusRepo,
+  Category,
+  CategoryRepo,
 } from "@voeq/data";
 
 const now = () => new Date().toISOString();
+
+// Presentation metadata for category rows (color/icon live in the static seed
+// array in @voeq/data/explore-view, not in the DB). New categories created via
+// staff config get neutral defaults; seeded ones keep their brand color.
+const CATEGORY_SEED_META: Record<string, { color: string; icon: string }> = {
+  "food-drinks": { color: "#E8A33D", icon: "utensils" },
+  fashion: { color: "#E8919D", icon: "shirt" },
+  "tech-repairs": { color: "#5BA8A0", icon: "wrench" },
+  "beauty-care": { color: "#C97B9E", icon: "sparkles" },
+  "academic-services": { color: "#2D5A3D", icon: "book" },
+  books: { color: "#5B7FB8", icon: "book" },
+  printing: { color: "#5B7FB8", icon: "printer" },
+  photography: { color: "#8B6FB8", icon: "camera" },
+  tailoring: { color: "#C9A24B", icon: "scissors" },
+  logistics: { color: "#3B5A7B", icon: "truck" },
+  "home-essentials": { color: "#7A9E7E", icon: "home" },
+  "health-wellness": { color: "#5BA8A0", icon: "heart" },
+  groceries: { color: "#7AB55A", icon: "shopping basket" },
+  tutorials: { color: "#2D5A3D", icon: "graduation" },
+  rentals: { color: "#3B5A7B", icon: "key" },
+  events: { color: "#C97B9E", icon: "party" },
+  "travel-transport": { color: "#5B7FB8", icon: "car" },
+  "student-support": { color: "#C9A24B", icon: "users" },
+  other: { color: "#7A7A7A", icon: "grid" },
+};
 const id = () => randomUUID();
 
 function mapIdentity(r: typeof s.identities.$inferSelect): Identity {
@@ -1116,10 +1143,16 @@ export const realAgreementRepo = {
     return rec;
   },
   async setCurrent(aid: string): Promise<Agreement | null> {
-    await getDb().update(s.agreements).set({ isCurrent: false });
+    // P0 (config console): scope the reset to the SAME kind only — the old
+    // table-wide `set({isCurrent:false})` un-currented every agreement
+    // across all kinds, so publishing "privacy v2" would silently revoke
+    // "terms v1". Same fix applied to the mock for parity.
+    const target = await getDb().select().from(s.agreements).where(eq(s.agreements.id, aid)).limit(1);
+    const row = target[0];
+    if (!row) return null;
+    await getDb().update(s.agreements).set({ isCurrent: false }).where(eq(s.agreements.kind, row.kind));
     await getDb().update(s.agreements).set({ isCurrent: true }).where(eq(s.agreements.id, aid));
-    const row = await getDb().select().from(s.agreements).where(eq(s.agreements.id, aid)).limit(1);
-    return row[0] ? mapAgreement(row[0]) : null;
+    return mapAgreement(row);
   },
 };
 
@@ -1247,12 +1280,39 @@ export async function acquireNominatimSlot(
   return false;
 }
 
-export const realCategoryRepo = {
-  async list(): Promise<{ id: string; name: string; slug: string }[]> {
-    return getDb().select().from(s.categories);
+export const realCategoryRepo: CategoryRepo = {
+  async list(): Promise<Category[]> {
+    const rows = await getDb().select().from(s.categories);
+    // Display shape: DB stores id/name/slug (+is_active) — color/icon/vendorCount
+    // are presentation concerns derived from the static seed map (honest zeros).
+    return rows.map((row) => ({
+      id: row.id,
+      slug: row.slug,
+      name: row.name,
+      color: CATEGORY_SEED_META[row.slug]?.color ?? "#888888",
+      icon: CATEGORY_SEED_META[row.slug]?.icon ?? "tag",
+      vendorCount: 0,
+      ...(row.isActive === false ? { isActive: false } : {}),
+    }));
   },
-  async getBySlug(slug: string) {
-    const row = await getDb().select().from(s.categories).where(eq(s.categories.slug, slug)).limit(1);
-    return row[0] ?? null;
+  // (getBySlug intentionally not in the interface: no consumers; the config
+  // console needs list/create/setActive only. Kept out rather than widening.)
+  async create(input: { slug: string; name: string }): Promise<Category> {
+    const slug = input.slug.trim().toLowerCase();
+    if (!slug) throw new Error("invalid_category_slug");
+    // Parity with mock + campus contract: slug collision returns the existing row.
+    const existingRows = await getDb().select().from(s.categories).where(eq(s.categories.slug, slug)).limit(1);
+    if (existingRows.length > 0) {
+      return { ...existingRows[0], color: "#888888", icon: "tag", vendorCount: 0 };
+    }
+    const rec = { id: `cat-${Date.now()}`, slug, name: input.name.trim(), isActive: true };
+    await getDb().insert(s.categories).values(rec);
+    return { ...rec, color: "#888888", icon: "tag", vendorCount: 0 };
+  },
+  async setActive(slug: string, isActive: boolean): Promise<Category | null> {
+    const existing = await getDb().select().from(s.categories).where(eq(s.categories.slug, slug)).limit(1);
+    if (existing.length === 0) return null;
+    await getDb().update(s.categories).set({ isActive }).where(eq(s.categories.slug, slug));
+    return { ...existing[0], isActive } as Category;
   },
 };

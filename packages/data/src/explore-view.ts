@@ -48,6 +48,9 @@ export interface Category {
   icon: string;
   /** Honest: 0 until real backend supplies a count (no invented numbers). */
   vendorCount: number;
+  /** P0 (config console): false when a staff member deactivated this category.
+   *  Absent = active (seeded categories have no DB row state). */
+  isActive?: boolean;
 }
 
 export interface Campus {

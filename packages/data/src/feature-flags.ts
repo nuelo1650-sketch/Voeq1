@@ -25,6 +25,9 @@ const mockFeatureFlagRepoImpl = {
 };
 
 const USE_REAL = !!process.env.DATABASE_URL;
-export const mockFeatureFlagRepo = USE_REAL
-  ? (realFeatureFlagRepo as unknown as typeof mockFeatureFlagRepoImpl)
+// P0 (config console): cast removed — realFeatureFlagRepo must satisfy the
+// interface structurally. set(key, value, description?) is assignable to
+// set(key, value) (extra optional param is fine). tsc enforces parity now.
+export const mockFeatureFlagRepo: typeof mockFeatureFlagRepoImpl = USE_REAL
+  ? realFeatureFlagRepo
   : mockFeatureFlagRepoImpl;

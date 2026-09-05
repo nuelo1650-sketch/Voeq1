@@ -371,4 +371,7 @@ export const categories = pgTable("categories", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull(),
+  /** P0 (config console): staff can deactivate a category; list() must be
+   *  able to distinguish active from inactive. Additive, default active. */
+  isActive: boolean("is_active").notNull().default(true),
 });
