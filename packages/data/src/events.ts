@@ -73,4 +73,4 @@ const memoryStore: PageEventStore = {
   },
 };
 
-export const mockPageEventStore: PageEventStore = USE_REAL ? (realPageEventStore as unknown as PageEventStore) : memoryStore;
+export const mockPageEventStore: PageEventStore = USE_REAL ? realPageEventStore : memoryStore;

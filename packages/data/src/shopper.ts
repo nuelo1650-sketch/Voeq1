@@ -315,10 +315,10 @@ export function resetShopperState(): void {
 
 // D.2/D.3 — Factory (EOF): real Neon-backed repos when DATABASE_URL is set.
 const USE_REAL = !!process.env.DATABASE_URL;
-export const mockSavedListingRepo = USE_REAL ? (realSavedListingRepo as unknown as SavedListingRepo) : mockSavedListingRepoImpl;
-export const mockFollowRepo = USE_REAL ? (realFollowRepo as unknown as FollowRepo) : mockFollowRepoImpl;
-export const mockLikeRepo = USE_REAL ? (realLikeRepo as unknown as LikeRepo) : mockLikeRepoImpl;
-export const mockReviewRepo = USE_REAL ? (realReviewRepo as unknown as ReviewRepo) : mockReviewRepoImpl;
-export const mockCommentRepo = USE_REAL ? (realCommentRepo as unknown as CommentRepo) : mockCommentRepoImpl;
-export const mockReportRepo = USE_REAL ? (realReportRepo as unknown as IReportRepo) : mockReportRepoImpl;
-export const mockNotificationRepo = USE_REAL ? (realNotificationRepo as unknown as INotificationRepo) : mockNotificationRepoImpl;
+export const mockSavedListingRepo: SavedListingRepo = USE_REAL ? realSavedListingRepo : mockSavedListingRepoImpl;
+export const mockFollowRepo: FollowRepo = USE_REAL ? realFollowRepo : mockFollowRepoImpl;
+export const mockLikeRepo: LikeRepo = USE_REAL ? realLikeRepo : mockLikeRepoImpl;
+export const mockReviewRepo: ReviewRepo = USE_REAL ? realReviewRepo : mockReviewRepoImpl;
+export const mockCommentRepo: CommentRepo = USE_REAL ? realCommentRepo : mockCommentRepoImpl;
+export const mockReportRepo: IReportRepo = USE_REAL ? realReportRepo : mockReportRepoImpl;
+export const mockNotificationRepo: INotificationRepo = USE_REAL ? realNotificationRepo : mockNotificationRepoImpl;

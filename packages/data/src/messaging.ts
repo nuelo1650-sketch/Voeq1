@@ -171,5 +171,5 @@ export function resetMessagingState(): void {
 
 // D.2/D.3 — Factory (EOF): real Neon-backed repos when DATABASE_URL is set.
 const USE_REAL = !!process.env.DATABASE_URL;
-export const mockConversationRepo = USE_REAL ? (realConversationRepo as unknown as typeof mockConversationRepoImpl) : mockConversationRepoImpl;
-export const mockMessageRepo = USE_REAL ? (realMessageRepo as unknown as typeof mockMessageRepoImpl) : mockMessageRepoImpl;
+export const mockConversationRepo: typeof mockConversationRepoImpl = USE_REAL ? realConversationRepo : mockConversationRepoImpl;
+export const mockMessageRepo: typeof mockMessageRepoImpl = USE_REAL ? realMessageRepo : mockMessageRepoImpl;

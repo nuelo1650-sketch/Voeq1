@@ -552,10 +552,14 @@ export function pruneExpiredCredentials(now: number = Date.now()): number {
 // When DATABASE_URL is set, the `mock*` names transparently resolve to the real
 // Neon-backed repos. No route imports change.
 const USE_REAL = !!process.env.DATABASE_URL;
-export const mockIdentityRepo = USE_REAL ? (realIdentityRepo as unknown as IdentityRepo) : mockIdentityRepoImpl;
-export const mockSessionRepo = USE_REAL ? (realSessionRepo as unknown as SessionRepo) : mockSessionRepoImpl;
-export const mockOtpRepo = USE_REAL ? (realOtpRepo as unknown as OtpRepo) : mockOtpRepoImpl;
-export const mockMagicLinkRepo = USE_REAL ? (realMagicLinkRepo as unknown as MagicLinkRepo) : mockMagicLinkRepoImpl;
-export const mockConsentRepo = USE_REAL ? (realConsentRepo as unknown as ConsentRepo) : mockConsentRepoImpl;
-export const mockAuthRepo = USE_REAL ? (realAuthRepo as unknown as AuthRepo) : mockAuthRepoImpl;
-export const mockUserPrefRepo = USE_REAL ? (realUserPreferenceRepo as unknown as UserPreferenceRepo) : mockUserPrefRepoImpl;
+// CAST SWEEP (2026-09-05): the `as unknown as` casts are gone from every
+// factory in this package — same fix as the config console P0, where a cast
+// hid realCategoryRepo missing create/setActive (prod 500s). tsc is now the
+// parity guard: a missing/incompatible repo method fails the build, not prod.
+export const mockIdentityRepo: IdentityRepo = USE_REAL ? realIdentityRepo : mockIdentityRepoImpl;
+export const mockSessionRepo: SessionRepo = USE_REAL ? realSessionRepo : mockSessionRepoImpl;
+export const mockOtpRepo: OtpRepo = USE_REAL ? realOtpRepo : mockOtpRepoImpl;
+export const mockMagicLinkRepo: MagicLinkRepo = USE_REAL ? realMagicLinkRepo : mockMagicLinkRepoImpl;
+export const mockConsentRepo: ConsentRepo = USE_REAL ? realConsentRepo : mockConsentRepoImpl;
+export const mockAuthRepo: AuthRepo = USE_REAL ? realAuthRepo : mockAuthRepoImpl;
+export const mockUserPrefRepo: UserPreferenceRepo = USE_REAL ? realUserPreferenceRepo : mockUserPrefRepoImpl;

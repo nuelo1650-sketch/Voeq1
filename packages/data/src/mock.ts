@@ -279,8 +279,8 @@ export { vendorName };
 
 // D.2/D.3 — Factory (EOF): real Neon-backed repos when DATABASE_URL is set.
 const USE_REAL = !!process.env.DATABASE_URL;
-export const mockListingsRepo = USE_REAL ? (realListingsRepo as unknown as ListingsRepo) : mockListingsRepoImpl;
-export const mockVendorRepo = USE_REAL ? (realVendorRepo as unknown as VendorRepo) : mockVendorRepoImpl;
-export const mockActivityRepo = USE_REAL ? (realActivityRepo as unknown as ActivityRepo) : mockActivityRepoImpl;
-export const mockMessagesRepo = USE_REAL ? (realMessageRepo as unknown as MessagesRepo) : mockMessagesRepoImpl;
-export const mockStaffRepo = USE_REAL ? (realStaffRepo as unknown as StaffRepo) : mockStaffRepoImpl;
+export const mockListingsRepo: ListingsRepo = USE_REAL ? realListingsRepo : mockListingsRepoImpl;
+export const mockVendorRepo: VendorRepo = USE_REAL ? realVendorRepo : mockVendorRepoImpl;
+export const mockActivityRepo: ActivityRepo = USE_REAL ? realActivityRepo : mockActivityRepoImpl;
+export const mockMessagesRepo: MessagesRepo = USE_REAL ? realMessageRepo : mockMessagesRepoImpl;
+export const mockStaffRepo: StaffRepo = USE_REAL ? realStaffRepo : mockStaffRepoImpl;

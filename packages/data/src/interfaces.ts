@@ -159,10 +159,13 @@ export interface ActivityRepo {
   recent(campusZone: string, limit?: number): Promise<ActivityEvent[]>;
 }
 
-export interface AuthRepo {
-  currentIdentity(): Promise<{ id: string; capabilities: string[] } | null>;
-}
-
+// CAST SWEEP (2026-09-05): a DEAD duplicate `AuthRepo` draft lived here
+// ({ currentIdentity(): Promise<{ id, capabilities } | null> }) — an older
+// VS7 shape superseded by the session-style AuthRepo further down (see the
+// "Expanded (was: ...)" comment there). Declaring it twice made TS merge the
+// interfaces into one nothing could satisfy; the factory casts hid that.
+// Removed the stub — the real AuthRepo (currentIdentity(sessionId) →
+// Identity | null, getIdentityById) is the only contract.
 export interface MessagesRepo {
   listConversations(identityId: string): Promise<Conversation[]>;
   /** VS7.12: list all messages (analytics). */

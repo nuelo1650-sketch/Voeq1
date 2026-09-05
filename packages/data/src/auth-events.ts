@@ -84,7 +84,7 @@ const memoryStore: AuthEventStore = {
 };
 
 export const mockAuthEventStore: AuthEventStore = USE_REAL
-  ? (realAuthEventStore as unknown as AuthEventStore)
+  ? realAuthEventStore
   : memoryStore;
 
 /**
