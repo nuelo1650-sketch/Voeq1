@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { categories } from "@voeq/data";
+// BUNDLE FIX (2026-09-05): barrel import — root ships drizzle+neon to browser.
+import { categories } from "@voeq/data/client";
 
 interface ListingRow {
   id: string;

@@ -3,8 +3,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Building2, MapPin, FileText, Check } from "lucide-react";
-import { categories, type Campus, type Category } from "@voeq/data";
-import { VENDOR_AGREEMENT_TEXT, CURRENT_VENDOR_AGREEMENT_VERSION } from "@voeq/data";
+// BUNDLE FIX (2026-09-05): runtime values from the client-safe barrel — the
+// root package ships drizzle + neon crypto to the browser (see explore/Filters).
+import { categories, CURRENT_VENDOR_AGREEMENT_VERSION, VENDOR_AGREEMENT_TEXT } from "@voeq/data/client";
+import type { Campus, Category } from "@voeq/data";
 import { prepareImageForUpload } from "@/lib/image-prep";
 import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
 

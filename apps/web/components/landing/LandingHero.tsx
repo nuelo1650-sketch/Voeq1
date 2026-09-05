@@ -11,7 +11,10 @@ import {
   BookOpen,
   ArrowRight,
 } from "lucide-react";
-import { categories } from "@voeq/data";
+// BUNDLE FIX (2026-09-05): seed taxonomy from the pure-data submodule —
+// see components/explore/Filters.tsx for the full note. Root import would
+// ship drizzle + neon crypto to the browser.
+import { categories } from "@voeq/data/explore-view";
 
 const CAT_ICONS: Record<string, React.ReactNode> = {
   "food-drinks": <UtensilsCrossed size={16} />,

@@ -6,8 +6,10 @@ import Link from "next/link";
 import { prepareImageForUpload } from "@/lib/image-prep";
 import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
 import { X, Upload, GripVertical, AlertCircle, Trash2 } from "lucide-react";
-import { categories, type Category } from "@voeq/data";
-import type { Listing } from "@voeq/data";
+// BUNDLE FIX (2026-09-05): seed taxonomy from the pure-data submodule
+// (root import ships drizzle + neon to the browser — see explore/Filters.tsx).
+import { categories } from "@voeq/data/explore-view";
+import type { Category, Listing } from "@voeq/data";
 
 /**
  * K3b.3 — Listing edit page with delete functionality.

@@ -3,7 +3,12 @@
 import { useMemo } from "react";
 import type { ExploreFilters, ExploreListing } from "@voeq/data";
 
-import { categories } from "@voeq/data";
+// BUNDLE FIX (2026-09-05): import the seed taxonomy from the pure-data
+// submodule, NOT the package root. The root index statically re-exports
+// config.ts → @voeq/db → drizzle + neon (ASN.1/crypto), which dragged
+// ~640KB of server-only code into the browser bundle (chunks 178-* and
+// 891cff7f-*). explore-view.ts has ZERO imports — client-safe.
+import { categories } from "@voeq/data/explore-view";
 
 /** P3 (2026-08-29): Explore category keys derive from the canonical categories
  * taxonomy (@voeq/data) so the filter slug matches a real listing's categorySlug.

@@ -14,7 +14,9 @@ import {
   Truck,
   Grid3x3,
 } from "lucide-react";
-import { categories } from "@voeq/data";
+// BUNDLE FIX (2026-09-05): seed taxonomy from the pure-data submodule —
+// root import ships drizzle + neon to the browser (see explore/Filters.tsx).
+import { categories } from "@voeq/data/explore-view";
 import type { VendorSummary } from "@voeq/data";
 
 const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {

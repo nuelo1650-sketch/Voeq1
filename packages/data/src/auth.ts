@@ -40,15 +40,11 @@ import { mockAgreementRepo } from "./config";
 // ---- Tunable constants (Phase 9: env-configurable) ---------------------------
 export const CURRENT_TERMS_VERSION = "2026-08-01";
 export const CURRENT_PRIVACY_VERSION = "2026-08-01";
-export const CURRENT_VENDOR_AGREEMENT_VERSION = "2026-08-01";
-export const VENDOR_AGREEMENT_TEXT = `Voeq Vendor Agreement (v${CURRENT_VENDOR_AGREEMENT_VERSION})
-
-1. You are responsible for the accuracy of your business information, listings, and pricing.
-2. All transactions are between you and the buyer; Voeq is a discovery and communication platform.
-3. You will not use Voeq to list prohibited, fraudulent, or misleading goods or services.
-4. You agree to respond to messages from shoppers in good faith and within a reasonable time.
-5. Voeq may suspend or remove your storefront for violations of this agreement or community standards.
-6. You retain ownership of your content; you grant Voeq a license to display it on the platform.`;
+// BUNDLE FIX (2026-09-05): vendor-agreement constants are DEFINED in ./client.ts
+// (the client-safe barrel) and re-exported here — single source. OnboardingWizard
+// (a client component) imports them from @voeq/data/client so the root package's
+// server imports (this file → @voeq/db → drizzle+neon) never enter the browser.
+export { CURRENT_VENDOR_AGREEMENT_VERSION, VENDOR_AGREEMENT_TEXT } from "./client";
 export const OTP_TTL_MS = 10 * 60 * 1000; // 10 min
 export const OTP_MAX_ACTIVE = 3; // max concurrent active codes per (email,purpose)
 export const OTP_MAX_ATTEMPTS = 5; // wrong tries before revoke+resend

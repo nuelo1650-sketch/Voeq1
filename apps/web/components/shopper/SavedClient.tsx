@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import type { Listing, Vendor } from "@voeq/data";
-import { CATEGORY_ID_TO_SLUG } from "@voeq/data";
+// BUNDLE FIX (2026-09-05): slug map from the pure-data submodule (root
+// import ships drizzle + neon to the browser — see explore/Filters.tsx).
+import { CATEGORY_ID_TO_SLUG } from "@voeq/data/explore-view";
 
 /**
  * SavedClient — P-A round 12 (S1): renders the shopper's saved listings and

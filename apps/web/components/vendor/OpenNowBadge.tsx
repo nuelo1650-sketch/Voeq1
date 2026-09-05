@@ -1,6 +1,7 @@
 "use client";
 
-import { isOpenNow } from "@voeq/data";
+// BUNDLE FIX (2026-09-05): barrel import — root ships drizzle+neon to browser.
+import { isOpenNow } from "@voeq/data/client";
 import type { Vendor } from "@voeq/data";
 
 /**

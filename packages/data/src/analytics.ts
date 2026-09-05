@@ -3,6 +3,12 @@ import { mockVendorRepo, mockListingsRepo, mockStaffRepo } from "./mock";
 import { mockReviewRepo, mockFollowRepo, countSavesByVendor } from "./shopper";
 import { mockIdentityRepo } from "./auth";
 import { mockMessageRepo } from "./messaging";
+// BUNDLE FIX (2026-09-05): isOpenNow is pure hours math — it moved to
+// ./client.ts (the client-safe barrel) so client imports of it don't drag
+// this file's server imports into the browser. Single source; re-export only.
+import { isOpenNow } from "./client";
+
+export { isOpenNow };
 
 /**
  * VS5.11 — Derived vendor analytics. Counts come from real relationship records;
@@ -14,21 +20,6 @@ import { mockMessageRepo } from "./messaging";
  * time (mock has no real timezone plumbing). Midnight-wrap (e.g. 22:00–02:00) is
  * NOT supported in Phase 1 and treated as closed across the boundary.
  */
-export function isOpenNow(hours: Vendor["hours"]): boolean | null {
-  if (!hours || !hours.days || hours.days.length === 0) return null;
-  const now = new Date();
-  const dayNames = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
-  const today = dayNames[now.getDay()];
-  if (!hours.days.includes(today)) return false;
-  const cur = now.getHours() * 60 + now.getMinutes();
-  const [oh, om] = hours.open.split(":").map(Number);
-  const [ch, cm] = hours.close.split(":").map(Number);
-  const openMin = oh * 60 + om;
-  const closeMin = ch * 60 + cm;
-  if (closeMin <= openMin) return false; // midnight-wrap unsupported → closed
-  return cur >= openMin && cur < closeMin;
-}
-
 export async function computeVendorAnalytics(vendorId: string): Promise<VendorAnalytics> {
   const [listings, reviews, follows] = await Promise.all([
     mockListingsRepo.list(),

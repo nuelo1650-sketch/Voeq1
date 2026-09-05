@@ -6,7 +6,10 @@ import { prepareImageForUpload } from "@/lib/image-prep";
 import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
 import Link from "next/link";
 import { X, Upload, GripVertical, AlertCircle } from "lucide-react";
-import { categories, type Category } from "@voeq/data";
+// BUNDLE FIX (2026-09-05): seed taxonomy from the pure-data submodule
+// (root import ships drizzle + neon to the browser — see explore/Filters.tsx).
+import { categories } from "@voeq/data/explore-view";
+import type { Category } from "@voeq/data";
 
 /**
  * K3b.2 — Full listing create form with photo upload, validation, draft persistence.
