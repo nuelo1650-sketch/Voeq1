@@ -35,6 +35,7 @@ import type {
   UserPreferenceRepo,
 } from "./interfaces";
 import { logAudit } from "./audit";
+import { mockAgreementRepo } from "./config";
 
 // ---- Tunable constants (Phase 9: env-configurable) ---------------------------
 export const CURRENT_TERMS_VERSION = "2026-08-01";
@@ -215,9 +216,10 @@ const mockConsentRepoImpl: ConsentRepo = {
   async accept(identityId, method) {
     const id = identities.get(identityId);
     if (!id) return;
+    const versions = await resolveCurrentAgreementVersions();
     const acc: ConsentAcceptance = {
-      termsVersion: CURRENT_TERMS_VERSION,
-      privacyVersion: CURRENT_PRIVACY_VERSION,
+      termsVersion: versions.terms,
+      privacyVersion: versions.privacy,
       acceptedAt: nowIso(),
       method,
     };
@@ -237,12 +239,33 @@ const mockConsentRepoImpl: ConsentRepo = {
   async isCurrent(identityId) {
     const l = await mockConsentRepo.latest(identityId);
     if (!l) return false;
+    const versions = await resolveCurrentAgreementVersions();
     return (
-      l.termsVersion === CURRENT_TERMS_VERSION &&
-      l.privacyVersion === CURRENT_PRIVACY_VERSION
+      l.termsVersion === versions.terms &&
+      l.privacyVersion === versions.privacy
     );
   },
 };
+/**
+ * P1 (config console): resolves the CURRENT terms/privacy versions from the
+ * agreements repo when DATABASE_URL is set (real table = source of truth),
+ * else from the in-memory seed. Same fallback contract as the real repo:
+ * never throws; falls back to the legacy constants when no current row.
+ */
+export async function resolveCurrentAgreementVersions(): Promise<{ terms: string; privacy: string }> {
+  const fallback = { terms: CURRENT_TERMS_VERSION, privacy: CURRENT_PRIVACY_VERSION };
+  try {
+    const rows = await mockAgreementRepo.list();
+    const terms = rows.find((a) => a.kind === "terms" && a.isCurrent);
+    const privacy = rows.find((a) => a.kind === "privacy" && a.isCurrent);
+    return {
+      terms: terms?.version ?? fallback.terms,
+      privacy: privacy?.version ?? fallback.privacy,
+    };
+  } catch {
+    return fallback;
+  }
+}
 export async function acceptConsent(identityId: string, method: "email" | "google") {
   return mockConsentRepo.accept(identityId, method);
 }

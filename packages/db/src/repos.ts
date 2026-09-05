@@ -300,14 +300,43 @@ export const realMagicLinkRepo = {
 };
 
 // ---- ConsentRepo (reads/writes identities.consent JSONB) --------------------
+
+/**
+ * Resolve the CURRENT terms/privacy agreement versions from the agreements
+ * table (config console source of truth). Falls back to the legacy constants
+ * when the table has no current row for a kind — so an empty/unseeded table
+ * can never break login or consent checks. Any error also falls back (safe
+ * default: consent currency compares against the constants, never throws).
+ *
+ * P1 (config console): this is the seam that connects the agreements repo to
+ * consent. Previously accept/isCurrent hardcoded "2026-08-01" — publishing
+ * privacy v2 via the console changed nothing for users.
+ */
+export async function resolveCurrentAgreementVersions(): Promise<{ terms: string; privacy: string }> {
+  const fallback = { terms: "2026-08-01", privacy: "2026-08-01" };
+  try {
+    const rows = await getDb().select().from(s.agreements);
+    const terms = rows.find((a) => a.kind === "terms" && a.isCurrent);
+    const privacy = rows.find((a) => a.kind === "privacy" && a.isCurrent);
+    return {
+      terms: terms?.version ?? fallback.terms,
+      privacy: privacy?.version ?? fallback.privacy,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
 export const realConsentRepo = {
   async accept(identityId: string, method: AuthMethod): Promise<void> {
     const idRow = await getDb().select().from(s.identities).where(eq(s.identities.id, identityId)).limit(1);
     if (!idRow[0]) return;
     const consent: ConsentAcceptance[] = idRow[0].consent ?? [];
+    // P1: stamp the RESOLVED current versions, not constants.
+    const versions = await resolveCurrentAgreementVersions();
     consent.push({
-      termsVersion: "2026-08-01",
-      privacyVersion: "2026-08-01",
+      termsVersion: versions.terms,
+      privacyVersion: versions.privacy,
       acceptedAt: now(),
       method,
     });
@@ -319,8 +348,11 @@ export const realConsentRepo = {
     return c.length ? c[c.length - 1] : null;
   },
   async isCurrent(identityId: string): Promise<boolean> {
+    // P1: compare against the RESOLVED current versions, not constants.
     const latest = await this.latest(identityId);
-    return !!latest && latest.termsVersion === "2026-08-01" && latest.privacyVersion === "2026-08-01";
+    if (!latest) return false;
+    const versions = await resolveCurrentAgreementVersions();
+    return latest.termsVersion === versions.terms && latest.privacyVersion === versions.privacy;
   },
 };
 
