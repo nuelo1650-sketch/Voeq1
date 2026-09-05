@@ -5615,3 +5615,22 @@ header.AppShell,
   .footer-bottom { flex-wrap: wrap; gap: 10px; }
   .footer-bottom-left { flex-wrap: wrap; gap: 10px; }
 }
+
+/* P-A round 81: notification dropdown overflowed the left screen edge on
+   phones (anchored right:0 to the bell, which sits left of the avatar
+   cluster — measured left:-28 at 390px). Below 640px it becomes a fixed
+   full-width sheet just under the 56px topbar. !important beats the inline
+   position/width on the element. */
+@media (max-width: 640px) {
+  .notification-dropdown {
+    position: fixed !important;
+    top: 60px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  .notification-dropdown [data-notif-scroll] {
+    max-height: calc(100vh - 200px) !important;
+  }
+}

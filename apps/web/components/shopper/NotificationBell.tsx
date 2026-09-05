@@ -194,7 +194,13 @@ export function NotificationBell({ viewerRole = "shopper" }: { viewerRole?: Noti
           cursor: "pointer",
           color: "var(--color-forest)",
           position: "relative",
-          padding: 4,
+          // P-A round 81: was padding:4 → 28×28 tap target (below the 40px
+          // mobile floor; the sweep flagged it on every shell page).
+          width: 40,
+          height: 40,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
         data-testid="notification-bell-button"
       >
@@ -227,6 +233,7 @@ export function NotificationBell({ viewerRole = "shopper" }: { viewerRole?: Noti
       {open && (
         <div
           data-testid="notification-dropdown"
+          className="notification-dropdown"
           style={{
             position: "absolute",
             right: 0,
@@ -287,7 +294,7 @@ export function NotificationBell({ viewerRole = "shopper" }: { viewerRole?: Noti
           </div>
 
           {/* Notifications list */}
-          <div style={{ maxHeight: 400, overflowY: "auto" }}>
+          <div data-notif-scroll style={{ maxHeight: 400, overflowY: "auto" }}>
             {items.length === 0 ? (
               <div
                 style={{
