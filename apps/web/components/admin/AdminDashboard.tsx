@@ -306,14 +306,16 @@ function RecentActivity() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  gap: 8,
+                  flexWrap: "wrap",
                   paddingBottom: 12,
                   borderBottom: "1px solid var(--role-border, #e6e1d6)",
                 }}
               >
-                <p style={{ margin: 0, fontSize: 14, color: "var(--color-forest, #0F2A1D)" }}>
+                <p style={{ margin: 0, fontSize: 14, color: "var(--color-forest, #0F2A1D)", minWidth: 0, flex: "1 1 auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   <span style={{ fontWeight: 600 }}>{e.type}</span>
                 </p>
-                <span style={{ fontSize: 12, color: "var(--role-text-muted, #5b6b60)", whiteSpace: "nowrap" }}>
+                <span style={{ fontSize: 12, color: "var(--role-text-muted, #5b6b60)", whiteSpace: "nowrap", flexShrink: 0 }}>
                   {new Date(e.at).toLocaleString()}
                 </span>
               </div>

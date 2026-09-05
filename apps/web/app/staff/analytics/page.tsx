@@ -206,7 +206,7 @@ export default async function AnalyticsPage({
 
   return (
     <AppShell role="staff" userName={staff.email}>
-      <div style={{ minHeight: "100vh", background: "var(--role-surface-sunken)", padding: "var(--space-4)" }}>
+      <div className="staff-page" style={{ minHeight: "100vh", background: "var(--role-surface-sunken)", padding: "var(--space-4)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <Link href="/staff" style={{ fontSize: 14, color: "var(--role-accent)", textDecoration: "none", marginBottom: 12, display: "inline-block" }}>
             ← Back to dashboard
@@ -230,7 +230,10 @@ export default async function AnalyticsPage({
                     href={`/staff/analytics?range=${k}`}
                     data-testid={`analytics-range-${k}`}
                     style={{
-                      padding: "6px 14px",
+                      padding: "10px 14px",
+                      minHeight: 40,
+                      display: "inline-flex",
+                      alignItems: "center",
                       borderRadius: 999,
                       fontSize: 13,
                       fontWeight: 600,
@@ -291,6 +294,7 @@ export default async function AnalyticsPage({
                 {topListings.length === 0 ? (
                   <p style={{ fontSize: 13, color: "var(--role-text-muted)" }}>No listing views recorded yet.</p>
                 ) : (
+                  <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <tbody>
                       {topListings.map((l) => (
@@ -301,6 +305,7 @@ export default async function AnalyticsPage({
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
                 <h3 style={{ fontSize: 14, fontWeight: 600, margin: "14px 0 6px", color: "var(--role-text)" }}>Platforms</h3>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -327,10 +332,11 @@ export default async function AnalyticsPage({
           </section>
 
           {/* Distribution */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 24, marginBottom: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(340px, 100%), 1fr))", gap: 24, marginBottom: 24 }}>
             {/* Campus */}
             <section style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 24 }}>
               <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 16px", color: "var(--role-text)" }}>Campus Distribution</h2>
+              <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid var(--role-border)" }}>
@@ -352,6 +358,7 @@ export default async function AnalyticsPage({
                   )}
                 </tbody>
               </table>
+              </div>
             </section>
 
             {/* Categories */}
@@ -380,9 +387,10 @@ export default async function AnalyticsPage({
           </div>
 
           {/* Vendor leaderboard + activity */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 24, marginBottom: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(340px, 100%), 1fr))", gap: 24, marginBottom: 24 }}>
             <section style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 24 }}>
               <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 16px", color: "var(--role-text)" }}>Vendor Leaderboard</h2>
+              <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid var(--role-border)" }}>
@@ -404,6 +412,7 @@ export default async function AnalyticsPage({
                   )}
                 </tbody>
               </table>
+              </div>
             </section>
 
             <section style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 24 }}>
@@ -411,9 +420,9 @@ export default async function AnalyticsPage({
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {recentActivity.length === 0 && <p style={{ color: "var(--role-text-muted)", fontSize: 14 }}>No events yet.</p>}
                 {recentActivity.map((a, i) => (
-                  <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "var(--role-text)", borderBottom: "1px dashed var(--role-border)", paddingBottom: 6 }}>
-                    <span style={{ fontFamily: "var(--role-font-ui)" }}>{a.type}</span>
-                    <span style={{ color: "var(--role-text-muted)" }}>{a.at}</span>
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13, color: "var(--role-text)", borderBottom: "1px dashed var(--role-border)", paddingBottom: 6 }}>
+                    <span style={{ fontFamily: "var(--role-font-ui)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.type}</span>
+                    <span style={{ color: "var(--role-text-muted)", flexShrink: 0 }}>{a.at}</span>
                   </div>
                 ))}
               </div>

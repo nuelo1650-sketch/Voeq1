@@ -24,7 +24,7 @@ export default async function ConfigPage() {
 
   return (
     <AppShell role="staff" userName={staff.email}>
-      <div style={{ minHeight: "100vh", background: "var(--role-surface-sunken)", padding: "var(--space-4)" }}>
+      <div className="staff-page" style={{ minHeight: "100vh", background: "var(--role-surface-sunken)", padding: "var(--space-4)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <Link href="/staff" style={{ fontSize: 14, color: "var(--role-accent)", textDecoration: "none", marginBottom: 12, display: "inline-block" }}>
             ← Back to dashboard
@@ -46,7 +46,7 @@ export default async function ConfigPage() {
                   <div style={{ fontSize: 14, fontWeight: 500, color: "var(--role-text)" }}>{cat.name}</div>
                   <div style={{ fontSize: 12, color: "var(--role-text-muted)" }}>{cat.id}</div>
                 </div>
-                <button style={{ padding: "6px 12px", fontSize: 13, border: "1px solid var(--role-border)", borderRadius: 6, background: "var(--role-surface)", cursor: "pointer" }}>
+                <button style={{ padding: "10px 16px", minHeight: 40, fontSize: 14, border: "1px solid var(--role-border)", borderRadius: 6, background: "var(--role-surface)", cursor: "pointer" }}>
                   Edit
                 </button>
               </div>
@@ -55,7 +55,7 @@ export default async function ConfigPage() {
         </section>
 
         {/* Campuses */}
-        <section style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 24 }}>
+        <section style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 24, marginBottom: 0 }}>
           <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 16px", color: "var(--role-text)" }}>Campuses ({campuses.length})</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {campuses.map((campus) => (
@@ -64,7 +64,7 @@ export default async function ConfigPage() {
                   <div style={{ fontSize: 14, fontWeight: 500, color: "var(--role-text)" }}>{campus.name}</div>
                   <div style={{ fontSize: 12, color: "var(--role-text-muted)" }}>{campus.id}</div>
                 </div>
-                <button style={{ padding: "6px 12px", fontSize: 13, border: "1px solid var(--role-border)", borderRadius: 6, background: "var(--role-surface)", cursor: "pointer" }}>
+                <button style={{ padding: "10px 16px", minHeight: 40, fontSize: 14, border: "1px solid var(--role-border)", borderRadius: 6, background: "var(--role-surface)", cursor: "pointer" }}>
                   Edit
                 </button>
               </div>

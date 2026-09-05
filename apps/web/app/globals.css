@@ -5634,3 +5634,11 @@ header.AppShell,
     max-height: calc(100vh - 200px) !important;
   }
 }
+
+/* P-A round 81: staff pages (config/analytics/overview) carried desktop
+   spacing into phones — 32px display headings and 24px card padding squeeze
+   a 390px viewport. Scoped to .staff-page wrappers only. */
+@media (max-width: 640px) {
+  .staff-page h1 { font-size: 26px !important; }
+  .staff-page section { padding: 16px !important; }
+}
