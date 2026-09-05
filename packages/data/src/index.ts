@@ -1,4 +1,5 @@
 export * from "./interfaces";
+export * from "./categories-resolver";
 export * from "./mock";
 export * from "./auth";
 export * from "./auth-events";

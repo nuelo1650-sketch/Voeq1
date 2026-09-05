@@ -55,12 +55,17 @@ export function Explore({
   campus: initialCampus = DEFAULT_CAMPUS,
   initialQuery,
   viewerIdentityId,
+  categoryOptions,
 }: { 
   categoryPreset?: string; 
   campus?: string;
   initialQuery?: string;
   viewerIdentityId?: string;
+  /** CHIPS SEAM: resolved taxonomy from the server (seed ∪ config-console
+   *  DB rows, deactivated excluded). Falls back to static CATEGORIES. */
+  categoryOptions?: { slug: string; label: string }[];
 }) {
+  const cats = categoryOptions ?? CATEGORIES;
   const [filters, setFilters] = useState<ExploreFilters>({});
   const [query, setQuery] = useState(initialQuery || "");
   const [campus, setCampus] = useState(initialCampus);
@@ -241,7 +246,7 @@ export function Explore({
         </Link>
 
         <div className="voeq-topbar-search" style={{ order: 1 }}>
-          <SearchBar initial={query} onSearch={setQuery} listings={data} />
+          <SearchBar initial={query} onSearch={setQuery} listings={data} categoryOptions={cats} />
         </div>
       </header>
 
@@ -286,7 +291,7 @@ export function Explore({
               >
                 All
               </button>
-              {CATEGORIES.map((cat) => (
+              {cats.map((cat) => (
                 <button
                   key={cat.slug}
                   onClick={() => setFilters((prev) => ({ ...prev, category: cat.slug }))}
@@ -306,7 +311,7 @@ export function Explore({
               Active filters:
             </span>
             {filters.category && (
-              <FilterChip label={`Category: ${CATEGORIES.find(c => c.slug === filters.category)?.label}`} onRemove={() => removeFilter('category')} />
+              <FilterChip label={`Category: ${cats.find(c => c.slug === filters.category)?.label}`} onRemove={() => removeFilter('category')} />
             )}
             {filters.minPrice && (
               <FilterChip label={`Min: ${formatNaira(filters.minPrice)}`} onRemove={() => removeFilter('minPrice')} />
@@ -358,7 +363,7 @@ export function Explore({
               overflowY: "auto",
             }}
           >
-            <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} campus={campus} campusOptions={campusOptions} onCampusChange={setCampus} />
+            <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} campus={campus} campusOptions={campusOptions} onCampusChange={setCampus} categoryOptions={cats} />
           </aside>
 
           <div>
@@ -523,7 +528,7 @@ export function Explore({
               Done
             </button>
           </div>
-          <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} campus={campus} campusOptions={campusOptions} onCampusChange={setCampus} />
+          <Filters value={filters} onChange={setFilters} presetCategory={categoryPreset} listings={data} campus={campus} campusOptions={campusOptions} onCampusChange={setCampus} categoryOptions={cats} />
         </div>
       )}
     </div>

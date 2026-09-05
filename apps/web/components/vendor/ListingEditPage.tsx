@@ -6,7 +6,7 @@ import Link from "next/link";
 import { prepareImageForUpload } from "@/lib/image-prep";
 import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
 import { X, Upload, GripVertical, AlertCircle, Trash2 } from "lucide-react";
-import { categories } from "@voeq/data";
+import { categories, type Category } from "@voeq/data";
 import type { Listing } from "@voeq/data";
 
 /**
@@ -24,7 +24,8 @@ interface PhotoDraft {
   failed?: boolean;
 }
 
-export function ListingEditPage({ listing }: { listing: Listing }) {
+export function ListingEditPage({ listing, categories: categoryRows }: { listing: Listing; categories?: Category[] }) {
+  const cats = categoryRows ?? categories;
   const router = useRouter();
 
   // Form fields - initialize with existing listing data
@@ -338,11 +339,21 @@ export function ListingEditPage({ listing }: { listing: Listing }) {
                 required
               >
                 <option value="">Select a category...</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
+                {/* CHIPS SEAM edge: if the listing's current category was
+                    deactivated on the console, it's absent from the resolved
+                    taxonomy — but Tier C locks category while the listing has
+                    engagement, so the CURRENT value must stay selectable.
+                    Union it back in (marked) so the select never loses its
+                    value silently. */}
+                {(() => {
+                  const current = cats.find((c) => c.id === categoryId);
+                  const options = current ? cats : (categoryId ? [{ id: categoryId, slug: categoryId, name: `${categoryId} (deactivated)`, color: "#888888", icon: "tag", vendorCount: 0, isActive: true, source: "db" as const }, ...cats] : cats);
+                  return options.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ));
+                })()}
               </select>
             </Field>
 

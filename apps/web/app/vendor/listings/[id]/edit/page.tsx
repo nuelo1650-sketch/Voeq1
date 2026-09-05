@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
-import { mockListingsRepo } from "@voeq/data";
+import { mockListingsRepo, resolvePublicCategories } from "@voeq/data";
 import { ListingEditPage } from "@/components/vendor/ListingEditPage";
 import { AppShell } from "@/components/shell/AppShell";
 
@@ -22,9 +22,13 @@ export default async function EditListingRoute({ params }: { params: Promise<{ i
     redirect("/vendor/dashboard");
   }
 
+  // CHIPS SEAM: console-managed taxonomy for the category picker. The current
+  // category stays selectable even if deactivated (Tier C lock beats removal).
+  const cats = await resolvePublicCategories();
+
   return (
     <AppShell role="vendor" userName={identity.name}>
-      <ListingEditPage listing={listing} />
+      <ListingEditPage listing={listing} categories={cats} />
     </AppShell>
   );
 }

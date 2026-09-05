@@ -2,6 +2,7 @@ import type { Listing, Vendor } from "./interfaces";
 import { mockListingsRepo, mockVendorRepo, mockListingsRepoThatFails, vendorName } from "./mock";
 import { mockReviewRepo, countSavesByVendor, mockFollowRepo } from "./shopper";
 import { CATEGORY_ID_TO_SLUG, CATEGORY_SLUG_TO_ID } from "./explore-view";
+import { resolveCategoryMaps } from "./categories-resolver";
 
 /**
  * Explore data boundary (Doc 04 PG-PUB-002/003, Doc 07 §7.7).
@@ -68,7 +69,7 @@ export interface ExploreResult {
   cached?: ExploreListing[];
 }
 
-function toExploreListing(l: Listing, vendors: Vendor[], vendorRatings?: Map<string, { avg: number; count: number }>): ExploreListing {
+function toExploreListing(l: Listing, vendors: Vendor[], vendorRatings?: Map<string, { avg: number; count: number }>, maps?: { slugToId: Record<string, string>; idToSlug: Record<string, string> }): ExploreListing {
   const v = vendors.find((x) => x.id === l.vendorId);
   // Mock-only extras are attached by the mock repo objects; cast to read them.
   const extra = l as Listing & {
@@ -80,7 +81,9 @@ function toExploreListing(l: Listing, vendors: Vendor[], vendorRatings?: Map<str
   // P3 (2026-08-29): real Neon listings carry a categoryId but no categorySlug
   // column, so a mock-only read left categorySlug undefined and EVERY category
   // filter silently returned nothing. Derive it from the canonical id->slug map.
-  const categorySlug = extra.categorySlug ?? CATEGORY_ID_TO_SLUG[l.categoryId];
+  // CHIPS SEAM: prefer the RESOLVED maps (console-managed taxonomy) when the
+  // caller has them; the static map remains the fallback (mock/dev mode).
+  const categorySlug = extra.categorySlug ?? maps?.idToSlug[l.categoryId] ?? CATEGORY_ID_TO_SLUG[l.categoryId];
   // P-A round 2 (2026-08-31): honest quick-filter fields. `verified`, `featured`,
   // `hours` and status come from the REAL vendor/listing rows (mock `extra`
   // fields would be undefined for Neon data and make verifiedOnly/openNow
@@ -242,9 +245,15 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
   // applyFilters then matched categorySlug against the ID => silent 0 results
   // (e.g. ?category=beauty -> empty, ?category=beauty-care -> 4). Normalize an
   // ID to its canonical slug FIRST so both forms behave identically.
+  // CHIPS SEAM (2026-09-05): the slug↔id maps are now resolved from the
+  // console-managed taxonomy (seed ∪ DB), not the static seed — console-created
+  // categories filter correctly, deactivated ones stop resolving (fall through
+  // as raw strings → repo filters on an unknown id → 0 results, same as before
+  // for unknown slugs).
   const rawSlug = params.categoryPreset ?? params.category;
-  const categorySlug = rawSlug ? (CATEGORY_ID_TO_SLUG[rawSlug] ?? rawSlug) : undefined;
-  const categoryId = categorySlug ? CATEGORY_SLUG_TO_ID[categorySlug] ?? categorySlug : undefined;
+  const maps = await resolveCategoryMaps();
+  const categorySlug = rawSlug ? (maps.idToSlug[rawSlug] ?? rawSlug) : undefined;
+  const categoryId = categorySlug ? maps.slugToId[categorySlug] ?? categorySlug : undefined;
   const categoryForRepo = categoryId;
   const listingsRepo = params.forceError ? mockListingsRepoThatFails : mockListingsRepo;
   try {
@@ -275,7 +284,7 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
     );
 
     let mapped: ExploreListing[] = listings.map((l) => {
-      const base = toExploreListing(l, vendors, vendorRatings);
+      const base = toExploreListing(l, vendors, vendorRatings, maps);
       const eng = vendorEngagement.get(l.vendorId);
       return { ...base, saveCount: eng?.saves ?? 0, followerCount: eng?.follows ?? 0 };
     });
@@ -323,5 +332,6 @@ export async function loadListing(id: string): Promise<ExploreListing | null> {
   ]);
   if (!listing) return null;
   const vendorRatings = await computeVendorRatings(vendors.map((v) => v.id));
-  return toExploreListing(listing, vendors, vendorRatings);
+  const maps = await resolveCategoryMaps();
+  return toExploreListing(listing, vendors, vendorRatings, maps);
 }

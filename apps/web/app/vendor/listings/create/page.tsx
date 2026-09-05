@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentIdentity } from "@/lib/session";
+import { resolvePublicCategories } from "@voeq/data";
 import { ListingCreatePage } from "@/components/vendor/ListingCreatePage";
 import { AppShell } from "@/components/shell/AppShell";
 
@@ -12,9 +13,13 @@ export default async function CreateListingRoute() {
   if (!identity) redirect("/login?next=/vendor/listings/create");
   if (!identity.vendorId) redirect("/onboarding/vendor");
 
+  // CHIPS SEAM: console-managed taxonomy (renames reflected, deactivated
+  // excluded) for the category picker.
+  const cats = await resolvePublicCategories();
+
   return (
     <AppShell role="vendor" userName={identity.name}>
-      <ListingCreatePage />
+      <ListingCreatePage categories={cats} />
     </AppShell>
   );
 }

@@ -1,6 +1,6 @@
 import { Explore } from "@/components/explore/Explore";
 import { getCurrentIdentity } from "@/lib/session";
-import { mockCampusRepo } from "@voeq/data";
+import { mockCampusRepo, resolvePublicCategories } from "@voeq/data";
 
 /**
  * /explore — the SINGLE discover surface (PG-PUB-002, Doc 04).
@@ -19,6 +19,10 @@ export default async function ExplorePage({
   const verified = await mockCampusRepo.list(identity?.id);
   const campus = identity?.campus ?? verified[0]?.id ?? "nmu-okerenkoko";
   const params = await searchParams;
+  // CHIPS SEAM: live taxonomy (seed ∪ config-console DB rows, deactivated
+  // excluded) for chips, filter dropdown, and search suggestions.
+  const cats = await resolvePublicCategories();
+  const categoryOptions = cats.map((c) => ({ slug: c.slug, label: c.name }));
 
   return (
     <div className="explore-page">
@@ -27,6 +31,7 @@ export default async function ExplorePage({
         initialQuery={params.q}
         categoryPreset={params.category}
         viewerIdentityId={identity?.id}
+        categoryOptions={categoryOptions}
       />
     </div>
   );

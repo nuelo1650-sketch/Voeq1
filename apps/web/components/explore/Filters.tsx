@@ -9,8 +9,15 @@ import { categories } from "@voeq/data";
  * taxonomy (@voeq/data) so the filter slug matches a real listing's categorySlug.
  * Previously this was a hardcoded list with slugs ("food","tech") that DON'T match
  * the canonical slugs ("food-drinks","tech-repairs") — so the category filter
- * silently returned nothing on real data. */
+ * silently returned nothing on real data.
+ *
+ * CHIPS SEAM (2026-09-05): this static export is now the FALLBACK. The live
+ * taxonomy (seed ∪ config-console DB rows, deactivated excluded) is resolved
+ * server-side and passed down as the `categoryOptions` prop by Explore. New
+ * default keeps old imports working while the props win when provided. */
 export const CATEGORIES = categories.map((c) => ({ slug: c.slug, label: c.name }));
+
+export type CategoryOption = { slug: string; label: string };
 
 const SORTS = [
   { value: "relevance", label: "Most popular" },
@@ -34,6 +41,7 @@ export function Filters({
   campus,
   campusOptions = [],
   onCampusChange,
+  categoryOptions,
 }: {
   value: ExploreFilters;
   onChange: (next: ExploreFilters) => void;
@@ -42,7 +50,11 @@ export function Filters({
   campus?: string;
   campusOptions?: { id: string; name: string }[];
   onCampusChange?: (campus: string) => void;
+  /** CHIPS SEAM: resolved server-side (seed ∪ console DB); falls back to
+   *  the static CATEGORIES export when not provided. */
+  categoryOptions?: CategoryOption[];
 }) {
+  const cats = categoryOptions ?? CATEGORIES;
   const set = (patch: Partial<ExploreFilters>) => onChange({ ...value, ...patch });
 
   // Compute price histogram from unfiltered data
@@ -97,7 +109,7 @@ export function Filters({
           style={modernSelectStyle}
         >
           <option value="">All categories</option>
-          {CATEGORIES.map((c) => (
+          {cats.map((c) => (
             <option key={c.slug} value={c.slug}>{c.label}</option>
           ))}
         </select>

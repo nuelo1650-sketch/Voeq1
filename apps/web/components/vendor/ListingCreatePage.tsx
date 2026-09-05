@@ -6,7 +6,7 @@ import { prepareImageForUpload } from "@/lib/image-prep";
 import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
 import Link from "next/link";
 import { X, Upload, GripVertical, AlertCircle } from "lucide-react";
-import { categories } from "@voeq/data";
+import { categories, type Category } from "@voeq/data";
 
 /**
  * K3b.2 — Full listing create form with photo upload, validation, draft persistence.
@@ -27,7 +27,8 @@ interface PhotoDraft {
   failed?: boolean;
 }
 
-export function ListingCreatePage() {
+export function ListingCreatePage({ categories: categoryRows }: { categories?: Category[] } = {}) {
+  const cats = categoryRows ?? categories;
   const router = useRouter();
 
   // Form fields
@@ -461,7 +462,7 @@ export function ListingCreatePage() {
                 required
               >
                 <option value="">Select a category...</option>
-                {categories.map((c) => (
+                {cats.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>

@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Building2, MapPin, FileText, Check } from "lucide-react";
-import { categories, type Campus } from "@voeq/data";
+import { categories, type Campus, type Category } from "@voeq/data";
 import { VENDOR_AGREEMENT_TEXT, CURRENT_VENDOR_AGREEMENT_VERSION } from "@voeq/data";
 import { prepareImageForUpload } from "@/lib/image-prep";
 import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
@@ -25,7 +25,8 @@ interface Initial {
   campusId: string | null;
 }
 
-export function OnboardingWizard({ initialStep, initial }: { initialStep: number; initial: Initial }) {
+export function OnboardingWizard({ initialStep, initial, categories: categoryRows }: { initialStep: number; initial: Initial; categories?: Category[] }) {
+  const cats = categoryRows ?? categories;
   const router = useRouter();
   const [step, setStep] = useState<Step>((initialStep as Step) || 1);
   const [error, setError] = useState<string | null>(null);
@@ -381,7 +382,7 @@ export function OnboardingWizard({ initialStep, initial }: { initialStep: number
               <Field label="Primary category" required>
                 <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={inputStyle} required data-testid="vendor-category">
                   <option value="">Select a category…</option>
-                  {categories.map((c) => (
+                  {cats.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>

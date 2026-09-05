@@ -40,11 +40,16 @@ export function SearchBar({
   initial = "",
   onSearch,
   listings,
+  categoryOptions,
 }: {
   initial?: string;
   onSearch: (q: string) => void;
   listings?: ExploreListing[];
+  /** CHIPS SEAM: resolved taxonomy (seed ∪ console DB); falls back to
+   *  the static CATEGORIES export. */
+  categoryOptions?: { slug: string; label: string }[];
 }) {
+  const cats = categoryOptions ?? CATEGORIES;
   const [value, setValue] = useState(initial);
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -130,7 +135,7 @@ export function SearchBar({
       });
 
       // Category suggestions (real data)
-      CATEGORIES.forEach((cat) => {
+      cats.forEach((cat) => {
         if (cat.label.toLowerCase().includes(query)) {
           results.push({
             type: "category",

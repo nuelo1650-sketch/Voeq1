@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { requireConsent } from "@/lib/session";
-import { mockVendorRepo } from "@voeq/data";
+import { mockVendorRepo, resolvePublicCategories } from "@voeq/data";
 import { OnboardingWizard } from "./OnboardingWizard";
 
 /**
@@ -34,5 +34,8 @@ export default async function VendorOnboardingPage() {
 
   if (initialStep === 4) redirect("/vendor/dashboard");
 
-  return <OnboardingWizard initialStep={initialStep} initial={initial} />;
+  // CHIPS SEAM: console-managed taxonomy for the primary-category picker.
+  const cats = await resolvePublicCategories();
+
+  return <OnboardingWizard initialStep={initialStep} initial={initial} categories={cats} />;
 }
