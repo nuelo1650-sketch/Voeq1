@@ -5685,3 +5685,24 @@ header.AppShell,
   .staff-page h1 { font-size: 26px !important; }
   .staff-page section { padding: 16px !important; }
 }
+
+/* ==========================================================================
+   LCP batch (2026-09-05): skip rendering offscreen landing sections.
+   Root cause (Lighthouse trace vs prod): LCP = p.hero-subhead TEXT, held back
+   by main-thread backlog on throttled mobile CPU — Script Eval 631ms +
+   Style & Layout 540ms. The 7 below-fold landing sections pay style/layout
+   at load and compete with the hero paint. content-visibility:auto lets the
+   browser skip their layout/paint until scrolled near; contain-intrinsic-size
+   reserves approximate space so the scrollbar doesn't jump. Pure CSS,
+   additive, reversible. Hero/nav/first-fold are deliberately NOT listed.
+   https://web.dev/content-visibility / CSS Containment spec.
+   ========================================================================== */
+.trending-rail-section,
+.category-grid-section,
+.how-it-works-section,
+.trust-pillars-section,
+.for-vendors-section,
+.landing-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
