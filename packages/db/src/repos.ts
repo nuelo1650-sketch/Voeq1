@@ -1197,7 +1197,12 @@ export const realFeatureFlagRepo = {
     return row[0] ?? null;
   },
   async set(key: string, value: boolean, description = ""): Promise<FeatureFlag> {
-    const rec = { key, value, description };
+    // P2: empty description on an existing flag = keep the original
+    // (toggles from the console send description:""; only a deliberate
+    // re-description should overwrite — matches the mock contract).
+    const existing = await this.get(key);
+    const desc = description || existing?.description || "";
+    const rec = { key, value, description: desc };
     await getDb().insert(s.featureFlags).values(rec).onConflictDoUpdate({ target: s.featureFlags.key, set: rec });
     const row = await getDb().select().from(s.featureFlags).where(eq(s.featureFlags.key, key)).limit(1);
     return row[0]!;
@@ -1346,5 +1351,12 @@ export const realCategoryRepo: CategoryRepo = {
     if (existing.length === 0) return null;
     await getDb().update(s.categories).set({ isActive }).where(eq(s.categories.slug, slug));
     return { ...existing[0], isActive } as Category;
+  },
+  /** P2 (config console): display-name rename; slug (the stable key) is unchanged. */
+  async rename(slug: string, name: string): Promise<Category | null> {
+    const existing = await getDb().select().from(s.categories).where(eq(s.categories.slug, slug)).limit(1);
+    if (existing.length === 0) return null;
+    await getDb().update(s.categories).set({ name: name.trim() }).where(eq(s.categories.slug, slug));
+    return { ...existing[0], name: name.trim() } as Category;
   },
 };

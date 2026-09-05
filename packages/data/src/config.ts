@@ -12,6 +12,8 @@ import { campuses, categories } from "./explore-view";
 export interface CategoryRepo {
   list(): Promise<Category[]>;
   create(input: { slug: string; name: string }): Promise<Category>;
+  /** P2 (config console): rename display name; slug is the stable key. */
+  rename(slug: string, name: string): Promise<Category | null>;
   setActive(slug: string, isActive: boolean): Promise<Category | null>;
 }
 
@@ -56,6 +58,12 @@ const mockCategoryRepoImpl: CategoryRepo = {
     if (!c) return null;
     // P0: isActive is a first-class optional field on Category now.
     c.isActive = isActive;
+    return c;
+  },
+  async rename(slug, name) {
+    const c = categories.find((x) => x.slug === slug);
+    if (!c) return null;
+    c.name = name.trim();
     return c;
   },
 };

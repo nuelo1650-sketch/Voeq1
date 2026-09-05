@@ -1,14 +1,18 @@
 import { redirect } from "next/navigation";
 import { getStaffIdentity } from "@/lib/session";
-import { mockCategoryRepo, mockCampusRepo, ROLE_CAPABILITIES, type StaffRole } from "@voeq/data";
+import { mockCategoryRepo, mockCampusRepo, mockAgreementRepo, mockFeatureFlagRepo, ROLE_CAPABILITIES, type StaffRole } from "@voeq/data";
 import Link from "next/link";
 import { AppShell } from "@/components/shell/AppShell";
+import { ConfigConsole } from "@/components/admin/ConfigConsole";
 
 export const dynamic = "force-dynamic";
 
 /**
- * K3c.7 — Config management page (simplified).
- * Categories and campuses CRUD.
+ * K3c.7 → Config Console (P2, 2026-09-05): the page WAS a stub — two dead
+ * Edit buttons over a read-only list. It is now the profound control plane:
+ * Categories / Campuses / Agreements / Feature Flags, each wired to its
+ * real (config.write-gated) API. Server-fetched rows; all mutations go
+ * through the client panels in ConfigConsole.
  */
 export default async function ConfigPage() {
   const staff = await getStaffIdentity();
@@ -17,9 +21,11 @@ export default async function ConfigPage() {
   const caps = ROLE_CAPABILITIES[staff.staffRole as StaffRole];
   if (!caps.includes("config.write")) redirect("/staff");
 
-  const [categories, campuses] = await Promise.all([
+  const [categories, campuses, agreements, flags] = await Promise.all([
     mockCategoryRepo.list(),
     mockCampusRepo.list(),
+    mockAgreementRepo.list(),
+    mockFeatureFlagRepo.list(),
   ]);
 
   return (
@@ -32,47 +38,17 @@ export default async function ConfigPage() {
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, margin: 0, color: "var(--role-text)", fontWeight: 700 }}>
             Configuration
           </h1>
-        <p style={{ margin: "4px 0 24px", fontSize: 14, color: "var(--role-text-muted)" }}>
-          Manage platform configuration
-        </p>
-
-        {/* Categories */}
-        <section style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 24, marginBottom: 24 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 16px", color: "var(--role-text)" }}>Categories ({categories.length})</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {categories.map((cat) => (
-              <div key={cat.id} style={{ display: "flex", justifyContent: "space-between", padding: 12, border: "1px solid var(--role-border)", borderRadius: 6 }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: "var(--role-text)" }}>{cat.name}</div>
-                  <div style={{ fontSize: 12, color: "var(--role-text-muted)" }}>{cat.id}</div>
-                </div>
-                <button style={{ padding: "10px 16px", minHeight: 40, fontSize: 14, border: "1px solid var(--role-border)", borderRadius: 6, background: "var(--role-surface)", cursor: "pointer" }}>
-                  Edit
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Campuses */}
-        <section style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, padding: 24, marginBottom: 0 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 16px", color: "var(--role-text)" }}>Campuses ({campuses.length})</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {campuses.map((campus) => (
-              <div key={campus.id} style={{ display: "flex", justifyContent: "space-between", padding: 12, border: "1px solid var(--role-border)", borderRadius: 6 }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: "var(--role-text)" }}>{campus.name}</div>
-                  <div style={{ fontSize: 12, color: "var(--role-text-muted)" }}>{campus.id}</div>
-                </div>
-                <button style={{ padding: "10px 16px", minHeight: 40, fontSize: 14, border: "1px solid var(--role-border)", borderRadius: 6, background: "var(--role-surface)", cursor: "pointer" }}>
-                  Edit
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
+          <p style={{ margin: "4px 0 24px", fontSize: 14, color: "var(--role-text-muted)" }}>
+            Platform configuration — categories, campuses, legal agreements, feature flags. Every action is recorded in the audit log.
+          </p>
+          <ConfigConsole
+            initialCategories={JSON.parse(JSON.stringify(categories))}
+            initialCampuses={JSON.parse(JSON.stringify(campuses.map((c) => ({ id: c.id, slug: c.slug, name: c.name, city: c.city, state: c.state, status: c.status }))))}
+            initialAgreements={JSON.parse(JSON.stringify(agreements.map((a) => ({ id: a.id, kind: a.kind, version: a.version, body: a.body, effectiveAt: a.effectiveAt, isCurrent: a.isCurrent }))))}
+            initialFlags={JSON.parse(JSON.stringify(flags))}
+          />
+        </div>
       </div>
-    </div>
     </AppShell>
   );
 }

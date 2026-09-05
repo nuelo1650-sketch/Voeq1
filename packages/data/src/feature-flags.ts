@@ -16,10 +16,14 @@ const mockFeatureFlagRepoImpl = {
   async list(): Promise<FeatureFlag[]> {
     return Object.values(flags);
   },
-  async set(key: string, value: boolean): Promise<FeatureFlag | null> {
-    const f = flags[key];
-    if (!f) return null;
-    f.value = value;
+  async set(key: string, value: boolean, description = ""): Promise<FeatureFlag | null> {
+    // P2 (config console): upsert, matching realFeatureFlagRepo.set — the
+    // flags POST route relies on create-via-set for new keys.
+    const existing = flags[key];
+    const f: FeatureFlag = existing
+      ? { ...existing, value, description: description || existing.description }
+      : { key, value, description };
+    flags[key] = f;
     return f;
   },
 };
