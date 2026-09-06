@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { prepareImageForUpload } from "@/lib/image-prep";
 import { uploadPhoto as uploadPhotoDirect } from "@/lib/image-upload";
@@ -45,6 +45,8 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
 
   // UI state
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // BUG-5: draft-save success state (shown briefly before navigating).
+  const [draftSaved, setDraftSaved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   // P-A round 55 (W2-1): success state after publish.
   const [published, setPublished] = useState<{ id: string; title: string } | null>(null);
@@ -212,9 +214,26 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
     setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, alt } : p)));
   };
 
+  // BUG-2: keeps the LATEST photos array readable inside the publish wait
+  // loop (the closure captures the render-time array, which never updates).
+  const photosRef = useRef<PhotoDraft[]>(photos);
+  photosRef.current = photos;
+
   const saveDraft = async () => {
-    // Already auto-saved to localStorage
-    alert("Draft saved!");
+    // BUG-5 FIX (2026-09-05): the old handler was a bare alert("Draft saved!")
+    // with no navigation — vendors saved, stayed on the same page, and had no
+    // idea whether anything happened. Now: explicit success state + navigate
+    // to the listings manager where the draft is visible.
+    try {
+      // localStorage already holds the auto-saved draft (DRAFT_KEY).
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) throw new Error("empty");
+      setDraftSaved(true);
+      await new Promise((r) => setTimeout(r, 700));
+      router.push("/vendor/listings");
+    } catch {
+      setErrors((prev) => ({ ...prev, submit: "Could not save draft — check your connection and try again." }));
+    }
   };
 
   const publish = async () => {
@@ -222,19 +241,37 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
       return;
     }
 
-    // P-A round 34 (FIX): never publish while photos are still uploading. The
-    // old code sent photos.map(p => p.url) — if the Cloudinary upload hadn't
-    // resolved, that was a LOCAL blob: URL that breaks the instant the page
-    // changes ("image uploads but doesn't show"). Block + tell the vendor.
+    // BUG-2 FIX (2026-09-05): photos whose upload is still in-flight no longer
+    // bounce Publish with "still uploading" — the vendor taps Publish once and
+    // this WAITS for them (bounded), showing "Publishing…" the whole time.
+    // Only genuinely FAILED photos still block.
     if (photos.some((p) => p.uploading)) {
-      setErrors({ ...errors, submit: "Photo still uploading — give it a moment, then tap Publish again." });
-      return;
+      setErrors((prev) => ({ ...prev, submit: "" }));
+      setSubmitting(true);
+      const waited = await new Promise<boolean>((resolve) => {
+        const t0 = Date.now();
+        const poll = () => {
+          const live = photosRef.current;
+          const anyUploading = live.some((p) => p.uploading);
+          if (!anyUploading) return resolve(true);
+          if (Date.now() - t0 > 45_000) return resolve(false);
+          setTimeout(poll, 500);
+        };
+        setTimeout(poll, 500);
+      });
+      setSubmitting(false);
+      if (!waited) {
+        setErrors((prev) => ({ ...prev, submit: "Photos took too long to upload. Please try again in a moment." }));
+        return;
+      }
     }
     // P-A round 81 (G): a FAILED upload still holds a local blob: preview —
     // sending it tripped the server's Cloudinary gate ("only Cloudinary
     // images allowed") and killed the whole publish. Block with a clear ask.
-    if (photos.some((p) => p.failed || p.url.startsWith("blob:"))) {
-      setErrors({ ...errors, submit: "One or more photos failed to upload. Remove the failed photo(s) or try again, then tap Publish." });
+    // P-A round 81 (G) + BUG-2: check the LIVE array (a photo can fail during
+    // the auto-wait above) — a FAILED upload still holds a local blob: preview.
+    if (photosRef.current.some((p) => p.failed || p.url.startsWith("blob:"))) {
+      setErrors((prev) => ({ ...prev, submit: "One or more photos failed to upload. Remove the failed photo(s) or try again, then tap Publish." }));
       return;
     }
 
@@ -250,7 +287,7 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
           categoryId,
           priceMinMinor: Math.round(Number(minPrice) * 100),
           priceMaxMinor: maxPrice ? Math.round(Number(maxPrice) * 100) : null,
-          images: photos.map((p) => p.url),
+          images: photosRef.current.map((p) => p.url),
         }),
       });
 
@@ -629,48 +666,33 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
               )}
             </Field>
 
-            {/* Submit error */}
-            {errors.submit && (
-              <div
-                role="alert"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: 12,
-                  background: "#FEE2E2",
-                  color: "#991B1B",
-                  borderRadius: 8,
-                  fontSize: 14,
-                }}
-              >
-                <AlertCircle size={20} />
-                {errors.submit}
-              </div>
-            )}
+            {/* Submit error — rendered once in the action footer (BUG-4 FIX);
+                this older copy above the fields is retired. */}
           </div>
 
-          {/* Footer */}
+          {/* BUG-4 FIX (2026-09-05): the action footer floated loose at the
+              form's bottom edge with no containment, and the error alert
+              squeezed BETWEEN the two buttons (space-between), crushing both
+              on 390px. Footer is now its own bordered section inside the
+              form card; the alert stacks full-width ABOVE the buttons;
+              buttons stretch to equal height on one row. */}
           <div
+            role="group"
+            aria-label="Listing actions"
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 12,
               marginTop: "var(--space-4)",
               paddingTop: "var(--space-3)",
-              borderTop: "1px solid var(--color-ink-subtle)",
+              borderTop: "2px solid var(--color-ink-subtle)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--space-3)",
             }}
           >
-            {/* P-A round 34 (FIX): the submit error was NEVER RENDERED — vendors
-                clicked Publish, got a 409/400 silently, and saw nothing ("it
-                doesn't create, don't know the next process"). Always show it. */}
             {errors.submit && (
               <p
                 role="alert"
                 data-testid="listing-submit-error"
                 style={{
-                  flex: 1,
                   margin: 0,
                   fontSize: 13.5,
                   color: "var(--role-danger, #B3261E)",
@@ -678,6 +700,7 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
                   background: "rgba(179,38,30,.08)",
                   borderRadius: 10,
                   padding: "10px 12px",
+                  width: "100%",
                 }}
               >
                 {errors.submit === "nmu_migration_required"
@@ -685,11 +708,12 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
                   : errors.submit}
               </p>
             )}
+            <div style={{ display: "flex", gap: 12, alignItems: "stretch", flexWrap: "wrap" }}>
             <button
               type="button"
               onClick={saveDraft}
               style={{
-                padding: "10px 20px",
+                padding: "12px 20px",
                 fontSize: 14,
                 fontWeight: 500,
                 background: "transparent",
@@ -699,7 +723,7 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
                 cursor: "pointer",
               }}
             >
-              Save as draft
+              {draftSaved ? "Saved ✓ — opening listings…" : "Save as draft"}
             </button>
             <button
               type="submit"
@@ -718,6 +742,7 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
             >
               {submitting ? "Publishing..." : "Publish"}
             </button>
+            </div>
           </div>
         </form>
         </>
