@@ -54,11 +54,15 @@ export function ListingCard({
   loading,
   isBookmarked,
   onToggleBookmark,
+  onVendor = true,
 }: {
   listing: ExploreListing;
   loading?: boolean;
   isBookmarked?: boolean;
   onToggleBookmark?: (listingId: string) => void;
+  /** C1 (2026-09-06): storefront grids pass false — a store's own grid
+   *  shouldn't repeat its own name on every card. */
+  onVendor?: boolean;
 }) {
   const img = listing.image;
   const images = listing.images && listing.images.length > 0 ? listing.images : img ? [img] : [];
@@ -131,6 +135,20 @@ export function ListingCard({
           />
         )}
 
+        {/* C1: status pills ride the image (top-left) — Featured (amber) +
+            availability (Open-now family) moved off the body to keep the card
+            calm; verified vendors already get the footer treatment. */}
+        {!loading && (listing.featured || listing.availability) && (
+          <div className="voeq-card-imgpills">
+            {listing.featured && (
+              <span data-testid="listing-featured" className="voeq-imgpill voeq-imgpill--featured">Featured</span>
+            )}
+            {listing.availability && (
+              <span data-testid="listing-availability" className="voeq-imgpill">· {AVAIL_LABEL[listing.availability]}</span>
+            )}
+          </div>
+        )}
+
         {/* Bookmark heart (top-right) */}
         {!loading && onToggleBookmark && (
           <button
@@ -149,56 +167,45 @@ export function ListingCard({
         )}
       </div>
 
-      {/* Meta strip */}
+      {/* C1 CARD (2026-09-06, founder-picked from mock2): eyebrow → serif
+          display title → verified vendor row → price+rating footer. */}
       <div className="voeq-card-body">
+        <div data-testid="listing-catline" className="voeq-card-catline">
+          <span className="voeq-card-catname">{categoryName ?? "Listing"}</span>
+          <span aria-hidden className="voeq-card-catrule" />
+        </div>
         <h3 data-testid="listing-title" className="voeq-card-title">
           {listing.title}
         </h3>
+        {onVendor !== false && (
+          <div className="voeq-card-vendor">
+            {listing.verified && (
+              <span data-testid="listing-vbadge" className="voeq-vbadge" aria-label="Verified vendor">✓</span>
+            )}
+            <span data-testid="listing-vendor-name">{listing.vendorName}</span>
+          </div>
+        )}
 
-        <div className="voeq-card-meta">
+        <div className="voeq-card-foot">
           <span data-testid="listing-price" className="voeq-card-price">
             {formatPrice(listing.priceMinor)}
+            {typeof listing.priceMaxMinor === "number" && listing.priceMaxMinor > listing.priceMinor ? (
+              <small className="voeq-card-pricequal"> – {formatPrice(listing.priceMaxMinor)}</small>
+            ) : null}
           </span>
-          {listing.availability && (
-            <span
-              data-testid="listing-availability"
-              className={AVAIL_CLASS[listing.availability] ?? "voeq-chip-avail"}
-            >
-              {AVAIL_LABEL[listing.availability]}
-            </span>
-          )}
-        </div>
-
-        {/* Trust row */}
-        <div data-testid="listing-trust" className="voeq-card-rating">
           {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
-            <span data-testid="listing-card-rating">
+            <span data-testid="listing-card-rating" className="voeq-card-stars">
               <span className="star">★</span> {listing.vendorRatingAvg.toFixed(1)}{" "}
-              <span>({listing.vendorRatingCount})</span>
+              <span className="voeq-card-stars-n">({listing.vendorRatingCount})</span>
             </span>
           ) : (
-            <span data-testid="listing-card-rating-empty">New</span>
-          )}
-          {listing.featured && (
-            <span data-testid="listing-featured" className="voeq-badge voeq-badge--featured">
-              Featured
-            </span>
-          )}
-        </div>
-
-        {/* Vendor + friendly category (was raw slug — fixed) */}
-        <div className="voeq-card-vendor">
-          <span data-testid="listing-vendor-name">{listing.vendorName}</span>
-          {categoryName && (
-            <span data-testid="listing-category" className="voeq-card-cat">
-              {categoryName}
-            </span>
+            <span data-testid="listing-card-rating-empty" className="voeq-card-newpill">New</span>
           )}
         </div>
       </div>
-    </article>
-  );
-}
+      </article>
+      );
+      }
 
 const shimmerStyle: React.CSSProperties = {
   position: "absolute",
