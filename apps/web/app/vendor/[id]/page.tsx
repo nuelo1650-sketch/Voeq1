@@ -24,11 +24,10 @@ interface StorefrontPageProps {
 export async function generateMetadata({ params }: StorefrontPageProps): Promise<Metadata> {
   const { id } = await params;
   const vendor = await loadVendorStorefront(id);
-  // SOFT-200 FIX (2026-09-05): call notFound() HERE, not only in the page
-  // body. Returning a soft "not found" title commits a 200 status + streams
-  // before the page's notFound() fires — /vendor/<bad-id> answered HTTP 200
-  // on prod (verified) which is a soft-404 SEO hole. notFound() inside
-  // generateMetadata aborts before headers commit and the route answers 404.
+  // SOFT-200 FIX (2026-09-05): unknown/non-public vendor answered HTTP 200 on
+  // prod (verified). Root cause: the ROOT app/loading.tsx Suspense boundary
+  // flushed a 200 shell before notFound() could abort (same disease as round
+  // 57 A1, documented in middleware.ts). Boundary removed → real 404.
   if (!vendor || !canVendorBePublic(vendor)) {
     notFound();
   }
@@ -64,6 +63,7 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
   const { id } = await params;
   const vendor = await loadVendorStorefront(id);
   // Only render storefronts that pass the derived visibility precondition.
+  // SOFT-200 FIX: see generateMetadata above.
   if (!vendor || !canVendorBePublic(vendor)) notFound();
 
   // Load recommendations (K2.5 #2, #3)

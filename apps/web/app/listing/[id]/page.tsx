@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { loadListing } from "@voeq/data";
 import { ListingDetail } from "@/components/listing/ListingDetail";
 
@@ -56,5 +57,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
   // loadListing is proven working (this is the renderer that produces the
   // correct <title>); the client gets the data ready-made instead of refetching.
   const listing = await loadListing(id);
+  // SOFT-200 FIX (2026-09-05): a null listing rendered the client's "loading"
+  // state at HTTP 200 forever (verified on prod). Root cause: the ROOT
+  // app/loading.tsx Suspense boundary flushed a 200 shell before the page's
+  // notFound() could abort (same disease as round 57 A1, documented in
+  // middleware.ts). Boundary removed; notFound() now sets a real 404.
+  if (!listing) notFound();
   return <ListingDetail id={id} initialListing={listing} />;
 }
