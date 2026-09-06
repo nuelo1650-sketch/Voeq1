@@ -50,9 +50,36 @@ export function SavedClient({
             {listings.map((l) => (
               <Link key={l.id} href={`/listing/${l.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                 <div className="voeq-card">
-                  {l.images?.[0] && (
-                    <div className="voeq-card-image">
-                      <img src={l.images[0]} alt={l.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" />
+                  {/* BUG-C (2026-09-06): saved cards show ALL photos via the
+                      same swipe track (was first-photo-only). */}
+                  {l.images && l.images.length > 0 && (
+                    <div className="voeq-card-image" style={{ position: "relative" }}>
+                      <div
+                        data-testid="saved-card-track"
+                        className="voeq-card-track"
+                        onScroll={(e) => {
+                          const el = e.currentTarget;
+                          if (el.clientWidth === 0) return;
+                          const i = Math.max(0, Math.min((l.images?.length ?? 1) - 1, Math.round(el.scrollLeft / el.clientWidth)));
+                          const dots = el.parentElement?.querySelectorAll("[data-saved-dot]");
+                          dots?.forEach((d, di) => {
+                            (d as HTMLElement).style.background = di === i ? "var(--color-cream)" : "rgba(246,241,230,.45)";
+                          });
+                        }}
+                        style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", width: "100%", height: "100%", scrollbarWidth: "none" }}
+                      >
+                        {l.images.map((src, i) => (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img key={i} src={src} alt={`${l.title} — photo ${i + 1}`} style={{ minWidth: "100%", width: "100%", height: "100%", objectFit: "cover", display: "block", scrollSnapAlign: "start" }} loading="lazy" />
+                        ))}
+                      </div>
+                      {(l.images?.length ?? 0) > 1 && (
+                        <div style={{ position: "absolute", bottom: 6, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5, pointerEvents: "none" }}>
+                          {l.images.map((_, i) => (
+                            <span key={i} data-saved-dot style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "var(--color-cream)" : "rgba(246,241,230,.45)", boxShadow: "0 0 2px rgba(15,42,29,.5)" }} />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                   <div className="voeq-card-body">

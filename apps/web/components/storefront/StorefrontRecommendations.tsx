@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { ExploreListing } from "@voeq/data";
 import { CampusFingerprint } from "@voeq/contour";
@@ -89,6 +90,11 @@ export function StorefrontRecommendations({ otherListings, relatedVendors, vendo
 
 /** Recommendation card matching K2.3 ListingCard design */
 function RecommendationCard({ listing }: { listing: ExploreListing }) {
+  // BUG-C (2026-09-06): recommendation cards show ALL photos (was single image).
+  const imgs = Array.isArray(listing.images) && listing.images.length > 0
+    ? listing.images
+    : listing.image ? [listing.image] : [];
+  const [idx, setIdx] = useState(0);
   return (
     <Link
       href={`/listing/${listing.id}`}
@@ -118,9 +124,35 @@ function RecommendationCard({ listing }: { listing: ExploreListing }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        position: "relative",
+        overflow: "hidden",
       }}>
-        {listing.image ? (
-          <img src={listing.image} alt={listing.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        {imgs.length > 0 ? (
+          <>
+            <div
+              data-testid="recommend-card-track"
+              className="voeq-card-track"
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                if (el.clientWidth === 0) return;
+                const i = Math.max(0, Math.min(imgs.length - 1, Math.round(el.scrollLeft / el.clientWidth)));
+                setIdx((prev) => (prev === i ? prev : i));
+              }}
+              style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", width: "100%", height: "100%", scrollbarWidth: "none" }}
+            >
+              {imgs.map((src, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={src} alt={`${listing.title} — photo ${i + 1}`} loading="lazy" style={{ minWidth: "100%", width: "100%", height: "100%", objectFit: "cover", display: "block", scrollSnapAlign: "start" }} />
+              ))}
+            </div>
+            {imgs.length > 1 && (
+              <div style={{ position: "absolute", bottom: 6, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5, pointerEvents: "none" }}>
+                {imgs.map((_, i) => (
+                  <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === idx ? "var(--color-cream)" : "rgba(246,241,230,.45)", boxShadow: "0 0 2px rgba(15,42,29,.5)" }} />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <CampusFingerprint activity={[0.5, 0.5, 0.5]} style={{ width: 48, height: 48 }} />
         )}

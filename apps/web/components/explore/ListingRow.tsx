@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import type { ExploreListing } from "@voeq/data";
 import { CampusFingerprint } from "@voeq/contour";
@@ -21,7 +24,12 @@ export function ListingRow({
   listing: ExploreListing;
   onNavigate?: (id: string) => void;
 }) {
-  const img = listing.image;
+  // BUG-C (2026-09-06): row thumbnail is now a mini swipe track — every
+  // listing surface shows ALL photos, not just the first.
+  const imgs = Array.isArray(listing.images) && listing.images.length > 0
+    ? listing.images
+    : listing.image ? [listing.image] : [];
+  const [idx, setIdx] = useState(0);
   return (
     <Link
       href={`/listing/${listing.id}`}
@@ -59,15 +67,41 @@ export function ListingRow({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          position: "relative",
         }}
       >
-        {img ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={img}
-            alt={listing.title}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
+        {imgs.length > 0 ? (
+          <>
+            <div
+              data-testid="explore-row-track"
+              className="voeq-card-track"
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                if (el.clientWidth === 0) return;
+                const i = Math.max(0, Math.min(imgs.length - 1, Math.round(el.scrollLeft / el.clientWidth)));
+                setIdx((prev) => (prev === i ? prev : i));
+              }}
+              style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", width: "100%", height: "100%", scrollbarWidth: "none" }}
+            >
+              {imgs.map((src, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={src}
+                  alt={`${listing.title} — photo ${i + 1}`}
+                  loading="lazy"
+                  style={{ minWidth: "100%", width: "100%", height: "100%", objectFit: "cover", display: "block", scrollSnapAlign: "start" }}
+                />
+              ))}
+            </div>
+            {imgs.length > 1 && (
+              <div style={{ position: "absolute", bottom: 4, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 4, pointerEvents: "none" }}>
+                {imgs.map((_, i) => (
+                  <span key={i} style={{ width: 5, height: 5, borderRadius: "50%", background: i === idx ? "var(--color-cream)" : "rgba(246,241,230,.45)" }} />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <CampusFingerprint activity={[0.6, 0.3, 0.8]} style={{ width: 40, height: 40 }} />
         )}

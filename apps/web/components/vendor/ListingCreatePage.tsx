@@ -297,8 +297,12 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
         // P-A round 55 (W2-1): show a success state instead of a silent jump —
         // "published ✓" + View listing / Add another. Kills the 'I don't know
         // the next process' dead-end.
+        // BUG-A FIX (2026-09-06): the API returns { ok, listing } — this read
+        // data.id (undefined!) so View-listing linked /listing/undefined → 404
+        // (before the hard-404 fix it was an infinite soft-200 spinner nobody
+        // noticed). Read the nested id. Same class as /messages/undefined (r69).
         setPublished({
-          id: data.id,
+          id: data.listing?.id ?? data.id,
           title: title.trim(),
         });
         setSubmitting(false);
