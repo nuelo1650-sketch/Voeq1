@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { getViewerSignedIn } from "@/components/shopper/auth-watch";
 import { ThumbsUp } from "lucide-react";
 
 /**
@@ -29,16 +30,19 @@ export function LikeButton({
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    // Async-check real state (S1): if caller gave explicit initialLiked, trust it.
+    // 401-NOISE FIX (2026-09-05): skip for anonymous viewers (auth-watch).
     let active = true;
     if (initialLiked) return;
-    fetch(`/api/like?targetType=${targetType}&targetId=${encodeURIComponent(targetId)}`, { method: "GET" })
-      .then(async (res) => {
-        if (!res.ok) return; // 401 or error — leave at false, login wall handles clicks
-        const data = await res.json();
-        if (active && typeof data.liked === "boolean") setLiked(data.liked);
-      })
-      .catch(() => {});
+    getViewerSignedIn().then((signedIn) => {
+      if (!active || !signedIn) return;
+      fetch(`/api/like?targetType=${targetType}&targetId=${encodeURIComponent(targetId)}`, { method: "GET" })
+        .then(async (res) => {
+          if (!res.ok) return; // 401 or error — leave at false, login wall handles clicks
+          const data = await res.json();
+          if (active && typeof data.liked === "boolean") setLiked(data.liked);
+        })
+        .catch(() => {});
+    });
     return () => { active = false; };
   }, [targetType, targetId, initialLiked]);
 

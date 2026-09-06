@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { getViewerSignedIn } from "@/components/shopper/auth-watch";
 import { Heart } from "lucide-react";
 
 /**
@@ -28,15 +29,21 @@ export function SaveButton({
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    // 401-NOISE FIX (2026-09-05): skip the state fetch entirely for
+    // anonymous viewers — one deduped auth check per page (auth-watch),
+    // zero unauthorized GETs from signed-out sessions.
     let active = true;
     if (initialSaved) return;
-    fetch(`/api/saved?targetType=${targetType}&targetId=${encodeURIComponent(targetId)}`, { method: "GET" })
-      .then(async (res) => {
-        if (!res.ok) return;
-        const data = await res.json();
-        if (active && typeof data.saved === "boolean") setSaved(data.saved);
-      })
-      .catch(() => {});
+    getViewerSignedIn().then((signedIn) => {
+      if (!active || !signedIn) return;
+      fetch(`/api/saved?targetType=${targetType}&targetId=${encodeURIComponent(targetId)}`, { method: "GET" })
+        .then(async (res) => {
+          if (!res.ok) return;
+          const data = await res.json();
+          if (active && typeof data.saved === "boolean") setSaved(data.saved);
+        })
+        .catch(() => {});
+    });
     return () => { active = false; };
   }, [targetType, targetId, initialSaved]);
 

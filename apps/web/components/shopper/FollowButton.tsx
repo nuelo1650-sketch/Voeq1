@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { getViewerSignedIn } from "@/components/shopper/auth-watch";
 
 /**
  * FollowButton — persisted follow toggle for a vendor (VS4.3).
@@ -24,15 +25,19 @@ export function FollowButton({
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    // 401-NOISE FIX (2026-09-05): skip for anonymous viewers (auth-watch).
     let active = true;
     if (initialFollowing) return;
-    fetch(`/api/follow?vendorId=${encodeURIComponent(vendorId)}`, { method: "GET" })
-      .then(async (res) => {
-        if (!res.ok) return;
-        const data = await res.json();
-        if (active && typeof data.following === "boolean") setFollowing(data.following);
-      })
-      .catch(() => {});
+    getViewerSignedIn().then((signedIn) => {
+      if (!active || !signedIn) return;
+      fetch(`/api/follow?vendorId=${encodeURIComponent(vendorId)}`, { method: "GET" })
+        .then(async (res) => {
+          if (!res.ok) return;
+          const data = await res.json();
+          if (active && typeof data.following === "boolean") setFollowing(data.following);
+        })
+        .catch(() => {});
+    });
     return () => { active = false; };
   }, [vendorId, initialFollowing]);
 
