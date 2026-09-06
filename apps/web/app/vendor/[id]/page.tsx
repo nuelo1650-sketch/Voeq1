@@ -24,11 +24,13 @@ interface StorefrontPageProps {
 export async function generateMetadata({ params }: StorefrontPageProps): Promise<Metadata> {
   const { id } = await params;
   const vendor = await loadVendorStorefront(id);
+  // SOFT-200 FIX (2026-09-05): call notFound() HERE, not only in the page
+  // body. Returning a soft "not found" title commits a 200 status + streams
+  // before the page's notFound() fires — /vendor/<bad-id> answered HTTP 200
+  // on prod (verified) which is a soft-404 SEO hole. notFound() inside
+  // generateMetadata aborts before headers commit and the route answers 404.
   if (!vendor || !canVendorBePublic(vendor)) {
-    return {
-      title: "Storefront not found — Voeq",
-      description: "This vendor storefront could not be found.",
-    };
+    notFound();
   }
   
   const title = `${vendor.name} — Voeq Storefront`;
