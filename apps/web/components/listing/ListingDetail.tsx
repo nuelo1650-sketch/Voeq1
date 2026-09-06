@@ -397,28 +397,60 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
         <div data-testid="listing-detail-gallery" style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
           <div
             data-testid="listing-detail-image-frame"
-            onClick={() => galleryImages.length > 0 && setLightboxOpen(true)}
             style={{
               position: "relative",
               aspectRatio: "4 / 3",
               background: "var(--role-surface-sunken)",
               borderRadius: "var(--radius-lg)",
               overflow: "hidden",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: galleryImages.length > 0 ? "pointer" : "default",
+              cursor: galleryImages.length > 0 ? "zoom-in" : "default",
             }}
           >
             {galleryImages.length > 0 ? (
-              <img
-                src={cdnTransform(galleryImages[selectedImageIndex], 900)}
-                alt={listing.title}
-                data-testid="listing-detail-image"
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                loading="lazy"
-                decoding="async"
-              />
+              /* BUG-3 FIX (2026-09-05): the detail page showed ONE image plus a
+                 thumbnail strip — no swipe on phones, unlike the Explore card
+                 (r81-F). Same scroll-snap track + dots pattern everywhere:
+                 swipe through full-size images, tap the frame to zoom. */
+              <>
+                <div
+                  data-testid="listing-detail-track"
+                  className="voeq-card-track"
+                  onScroll={(e) => {
+                    const el = e.currentTarget;
+                    const idx = Math.round(el.scrollLeft / Math.max(1, el.scrollWidth / galleryImages.length));
+                    if (idx !== selectedImageIndex) setSelectedImageIndex(Math.min(galleryImages.length - 1, Math.max(0, idx)));
+                  }}
+                  style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", width: "100%", height: "100%", scrollbarWidth: "none" }}
+                >
+                  {galleryImages.map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={cdnTransform(img, 900)}
+                      alt={`${listing.title} — image ${idx + 1}`}
+                      data-testid="listing-detail-image"
+                      onClick={() => setLightboxOpen(true)}
+                      style={{ minWidth: "100%", width: "100%", height: "100%", objectFit: "cover", display: "block", scrollSnapAlign: "start", cursor: "zoom-in" }}
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                    />
+                  ))}
+                </div>
+                {galleryImages.length > 1 && (
+                  <div style={{ position: "absolute", bottom: 10, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 6, pointerEvents: "none" }}>
+                    {galleryImages.map((_, idx) => (
+                      <span
+                        key={idx}
+                        data-testid="listing-detail-dot"
+                        style={{
+                          width: 7, height: 7, borderRadius: "50%",
+                          background: idx === selectedImageIndex ? "var(--color-cream)" : "rgba(246,241,230,.45)",
+                          boxShadow: "0 0 2px rgba(15,42,29,.5)",
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             ) : (
               <CampusFingerprint
                 data-testid="listing-detail-monogram"
@@ -427,31 +459,6 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
               />
             )}
           </div>
-
-          {/* Thumbnail strip */}
-          {galleryImages.length > 1 && (
-            <div style={{ display: "flex", gap: "var(--space-1)", overflowX: "auto" }}>
-              {galleryImages.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImageIndex(idx)}
-                  style={{
-                    width: 80,
-                    height: 60,
-                    flexShrink: 0,
-                    border: idx === selectedImageIndex ? "2px solid var(--color-forest)" : "1px solid var(--role-border)",
-                    borderRadius: "var(--radius)",
-                    overflow: "hidden",
-                    background: "transparent",
-                    cursor: "pointer",
-                    padding: 0,
-                  }}
-                >
-                  <img src={cdnTransform(img, 160)} alt={`${listing.title} ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} loading="lazy" decoding="async" />
-                </button>
-              ))}
-            </div>
-          )}
 
           {/* Action buttons (K2.3 #3, K2.10 enhanced with social share) */}
           <div className="listing-detail-actions" style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-1)", position: "relative" }}>

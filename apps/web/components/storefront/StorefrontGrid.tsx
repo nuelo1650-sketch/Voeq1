@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { ExploreListing } from "@voeq/data";
 import { CampusFingerprint } from "@voeq/contour";
@@ -75,6 +76,11 @@ export function StorefrontGrid({ listings }: { listings: ExploreListing[] }) {
 
 /** Storefront listing card matching K2.3 ListingCard design */
 function StorefrontListingCard({ listing }: { listing: ExploreListing }) {
+  // BUG-3 FIX (2026-09-05): multi-image listings swipe everywhere — same
+  // scroll-snap track + dots pattern as the Explore card (r81-F). The old
+  // card showed only the first image.
+  const gallery = Array.isArray(listing.images) ? listing.images.filter(Boolean) : [];
+  const [active, setActive] = useState(0);
   return (
     <Link
       href={`/listing/${listing.id}`}
@@ -100,14 +106,39 @@ function StorefrontListingCard({ listing }: { listing: ExploreListing }) {
       <div style={{
         width: "100%",
         height: 200,
+        position: "relative",
         background: "var(--role-surface-sunken)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
         overflow: "hidden",
       }}>
-        {listing.image ? (
-          <img src={listing.image} alt={listing.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        {gallery.length > 0 ? (
+          <>
+            <div
+              className="voeq-card-track"
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                const idx = Math.round(el.scrollLeft / Math.max(1, el.scrollWidth / gallery.length));
+                if (idx !== active) setActive(Math.min(gallery.length - 1, Math.max(0, idx)));
+              }}
+              style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", width: "100%", height: "100%", scrollbarWidth: "none" }}
+            >
+              {gallery.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`${listing.title} — image ${idx + 1}`}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  style={{ minWidth: "100%", width: "100%", height: "100%", objectFit: "cover", display: "block", scrollSnapAlign: "start" }}
+                />
+              ))}
+            </div>
+            {gallery.length > 1 && (
+              <div style={{ position: "absolute", bottom: 8, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 6, pointerEvents: "none" }}>
+                {gallery.map((_, idx) => (
+                  <span key={idx} style={{ width: 6, height: 6, borderRadius: "50%", background: idx === active ? "var(--color-cream)" : "rgba(246,241,230,.45)", boxShadow: "0 0 2px rgba(15,42,29,.5)" }} />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <CampusFingerprint activity={[0.5, 0.5, 0.5]} style={{ width: 56, height: 56 }} />
         )}
