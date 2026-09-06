@@ -30,7 +30,7 @@ async function getParticipant(convId: string, cookie: string | undefined) {
 }
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: convId } = await params;
@@ -41,7 +41,13 @@ export async function GET(
   if (!conv) return NextResponse.json({ error: "not_found" }, { status: 404 });
   if (forbidden) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
-  const messages = await mockMessageRepo.listByConversation(convId, null, 50);
+  // LOAD-OLDER (2026-09-05): ?before=<createdAt of oldest loaded message> pages
+  // BACKWARD (older messages); absent = newest window. hasMore tells the client
+  // whether an older page still exists (oldest message returned < oldest in
+  // conversation would mean no more).
+  const url = new URL(req.url);
+  const before = url.searchParams.get("before");
+  const messages = await mockMessageRepo.listByConversation(convId, before, 50);
   // Mark delivered for the recipient (not the sender) on fetch.
   await mockMessageRepo.markDelivered(convId, identity.id);
   // T3 — reflect delivered transitions on the sender's stream (per message).
@@ -51,7 +57,14 @@ export async function GET(
     }
   }
   await mockConversationRepo.touchLastSeen(convId, identity.id);
-  return NextResponse.json({ ok: true, messages });
+  // hasMore: does an older page still exist? Ask for 1 message older than the
+  // oldest one we're returning (cursor = that message's createdAt).
+  let hasMore = false;
+  if (messages.length > 0) {
+    const older = await mockMessageRepo.listByConversation(convId, messages[0].createdAt, 1);
+    hasMore = older.length > 0;
+  }
+  return NextResponse.json({ ok: true, messages, hasMore });
 }
 
 export async function POST(

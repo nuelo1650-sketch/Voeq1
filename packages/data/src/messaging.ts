@@ -110,7 +110,9 @@ const mockMessageRepoImpl = {
     return msg;
   },
 
-  /** Messages for a conversation, oldest first (cursor = createdAt of last seen). */
+  /** Messages for a conversation, oldest first. Cursor = createdAt of the
+   *  OLDEST loaded message (backward pagination: messages OLDER than the
+   *  cursor — load-older). Null cursor = newest `limit` messages. */
   async listByConversation(
     conversationId: string,
     cursor?: string | null,
@@ -120,11 +122,10 @@ const mockMessageRepoImpl = {
       .filter((m) => m.conversationId === conversationId)
       .sort((x, y) => x.createdAt.localeCompare(y.createdAt));
     const filtered = cursor
-      ? all.filter((m) => m.createdAt > cursor)
+      ? all.filter((m) => m.createdAt < cursor)
       : all;
-    // Newest `limit` messages, returned oldest-first for display (parity
-    // with the Drizzle repo — see packages/db/src/repos.ts).
-    return limit > 0 ? filtered.slice(-limit) : [];
+    if (!(limit > 0)) return [];
+    return filtered.slice(-limit);
   },
 
   async getById(msgId: string): Promise<Message | null> {

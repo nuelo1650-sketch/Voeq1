@@ -877,11 +877,14 @@ export const realMessageRepo = {
   },
   async listByConversation(conversationId: string, cursor?: string | null, limit = 50): Promise<Message[]> {
     const rows = await getDb().select().from(s.messages).where(eq(s.messages.conversationId, conversationId));
-    const filtered = cursor ? rows.filter((m) => m.createdAt > cursor) : rows;
-    // Newest `limit` messages, returned oldest-first for display.
-    // (Was slice(0, limit) on an ascending sort = OLDEST N — inbox previews
-    // showed the first message ever sent and unread counts missed new traffic.)
+    // LOAD-OLDER FIX (2026-09-05): the cursor now means "give me messages
+    // OLDER than this createdAt" (backward pagination) — the old `>` filtered
+    // NEWER messages, which can only page forward and was never passed by any
+    // caller (grep: all call sites pass null). Oldest-first display order kept.
     if (!(limit > 0)) return [];
+    const filtered = cursor
+      ? rows.filter((m) => m.createdAt < cursor)
+      : rows;
     return filtered
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
       .slice(-limit)

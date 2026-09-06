@@ -56,6 +56,10 @@ export function ConversationView({
   const [_typing, _setTyping] = useState(false);
   const [optimistic, setOptimistic] = useState<Msg[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<"connected" | "connecting" | "disconnected">("connecting");
+  // LOAD-OLDER (2026-09-05): hasMore + loading-older state.
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const lastSeenIdRef = useRef<string | null>(null);
 
@@ -67,6 +71,7 @@ export function ConversationView({
       const data = await res.json();
       const msgs = data.messages ?? [];
       setMessages(msgs);
+      setHasMore(data.hasMore === true);
       if (msgs.length > 0) {
         lastSeenIdRef.current = msgs[msgs.length - 1].id;
       }
@@ -75,6 +80,43 @@ export function ConversationView({
       setError("Couldn't load messages");
     } finally {
       setLoading(false);
+    }
+  }
+
+  // LOAD-OLDER: fetch the next older page and PREPEND. Scroll anchored — the
+  // viewport stays on the same message (prepending shifts content up; without
+  // anchoring the user is yanked to a random position).
+  async function loadOlder() {
+    if (loadingOlder || messages.length === 0) return;
+    setLoadingOlder(true);
+    try {
+      const oldest = messages[0].createdAt;
+      const res = await fetch(`/api/conversations/${conversationId}/messages?before=${encodeURIComponent(oldest)}`);
+      if (!res.ok) throw new Error("load_older_failed");
+      const data = await res.json();
+      const olderMsgs: Msg[] = data.messages ?? [];
+      setHasMore(data.hasMore === true);
+      if (olderMsgs.length > 0) {
+        const container = scrollContainerRef.current;
+        const prevHeight = container?.scrollHeight ?? 0;
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.id));
+          const deduped = olderMsgs.filter((m) => !existingIds.has(m.id));
+          return [...deduped, ...prev];
+        });
+        // anchor: after prepend, scroll by the height delta so the same
+        // message stays under the user's thumb
+        requestAnimationFrame(() => {
+          if (container) {
+            const delta = container.scrollHeight - prevHeight;
+            if (delta > 0) container.scrollTop += delta;
+          }
+        });
+      }
+    } catch {
+      setError("Couldn't load older messages");
+    } finally {
+      setLoadingOlder(false);
     }
   }
 
@@ -322,7 +364,34 @@ export function ConversationView({
       )}
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: 16, background: "var(--role-surface-sunken)" }}>
+      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: "auto", padding: 16, background: "var(--role-surface-sunken)" }}>
+        {/* LOAD-OLDER (2026-09-05): the thread showed only the newest 50 with
+            no way back — long conversations were silently truncated at the
+            old end. hasMore comes from the GET; prepending is scroll-anchored. */}
+        {hasMore && (
+          <button
+            type="button"
+            data-testid="load-older"
+            onClick={loadOlder}
+            disabled={loadingOlder}
+            style={{
+              display: "block",
+              margin: "0 auto 12px",
+              padding: "8px 16px",
+              borderRadius: 999,
+              border: "1px solid var(--role-border)",
+              background: "var(--role-surface)",
+              color: "var(--role-accent-strong)",
+              fontFamily: "var(--role-font-ui)",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: loadingOlder ? "wait" : "pointer",
+              opacity: loadingOlder ? 0.6 : 1,
+            }}
+          >
+            {loadingOlder ? "Loading…" : "Load earlier messages"}
+          </button>
+        )}
         {all.length === 0 && !_typing && (
           <div data-testid="thread-empty" style={{ textAlign: "center", padding: "48px 20px" }}>
             <div style={{ fontSize: 34, marginBottom: 8 }}>💬</div>
