@@ -16,7 +16,11 @@ export async function GET(req: NextRequest) {
   if (!vendor) return NextResponse.json({ error: "vendor_not_found" }, { status: 404 });
 
   const base = new URL(req.nextUrl.origin);
-  const canonical = `${base.origin}/v/${vendor.slug}`;
+  // L1.1 (2026-09-06): canonical was /v/{slug} — a pre-design-system stub page
+  // ("weird under-made page"). Every share surface (copy link, WhatsApp, QR,
+  // Twitter/Facebook) funneled there. Canonical now points at the REAL branded
+  // storefront. /v/{slug} remains as a 301 for legacy shared links.
+  const canonical = `${base.origin}/vendor/${vendor.id}`;
   const text = encodeURIComponent(`Check out ${vendor.name} on Voeq`);
   const social = {
     twitter: `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(canonical)}`,

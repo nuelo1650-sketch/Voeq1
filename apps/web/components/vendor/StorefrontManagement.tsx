@@ -594,18 +594,17 @@ function VerificationSection({ vendor }: { vendor: Vendor }) {
     setSuccess(false);
 
     try {
-      // Create a staff case for verification request
-      const res = await fetch("/api/staff/cases", {
+      // L1.3 (2026-09-06): was POST /api/staff/cases — that route requires the
+      // STAFF capability case.review, so vendors always got 403 and the request
+      // never reached staff (dead button). New vendor-authed route creates the
+      // 'verifications' case + notifies staff + dedupes open requests.
+      const res = await fetch("/api/vendor/verification-request", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "verification_request",
-          vendorId: vendor.id,
-          description: "Vendor requesting verification badge",
-        }),
       });
 
       if (res.ok) {
+        // duplicate-open requests also return ok:true (alreadyOpen flag) —
+        // either way the vendor sees the honest submitted state.
         setSuccess(true);
       } else {
         setError("Failed to submit request");

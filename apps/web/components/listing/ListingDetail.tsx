@@ -11,6 +11,7 @@ import { CommentForm } from "@/components/shopper/CommentForm";
 import { cdnTransform } from "@/lib/image-upload";
 import type { AuthStatusResponse, CommentsResponse, CreateResponse } from "@/lib/apiTypes";
 import { CommentsList, type DisplayComment } from "@/components/shopper/CommentsList";
+import { ContextBack } from "@/components/shopper/ContextBack";
 import { ReportForm } from "@/components/shopper/ReportForm";
 import { usePendingIntent } from "@/lib/usePendingIntent";
 import { trackEvent } from "@/lib/track";
@@ -380,13 +381,15 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
       </div>
 
       <div style={{ marginBottom: "var(--space-2)" }}>
-        <Link
-          href="/explore"
-          data-testid="listing-detail-back"
+        {/* L3 (2026-09-06): was a hardcoded /explore link — the other half of
+            the explore<->storefront cycle. Goes BACK the way the visitor
+            came; /explore only as the direct-entry fallback. */}
+        <ContextBack
+          fallback="/explore"
+          label="← Back"
+          testid="listing-detail-back"
           style={{ color: "var(--role-text-muted)", textDecoration: "none", fontFamily: "var(--role-font-ui)", fontSize: "14px" }}
-        >
-          ← Explore
-        </Link>
+        />
       </div>
 
       <div

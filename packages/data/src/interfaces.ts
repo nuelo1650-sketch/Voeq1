@@ -28,8 +28,10 @@ export interface Vendor {
   profilePhotoUrl: string | null;
   /** VS5.3: operating hours. Null until set — "Open now" badge only renders when present (honest). */
   hours?: { open: string; close: string; days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] } | null;
-  /** VS5.3: contact socials (phone allowed; WhatsApp BANNED per Doc 13 §13.13). */
-  socials?: { phone?: string; instagram?: string; twitter?: string; tiktok?: string } | null;
+  /** VS5.3: contact socials. WhatsApp MESSAGING is banned (Doc 13 §13.13) —
+   *  a whatsappChannel LINK is a public profile like Instagram/TikTok (L4b,
+   *  2026-09-06; the landing already links the founder's channel). */
+  socials?: { phone?: string; instagram?: string; twitter?: string; tiktok?: string; whatsappChannel?: string } | null;
   /** VS3.2: Vendor Agreement version accepted (null until Phase A step 3). */
   agreementVersion: string | null;
   agreementAcceptedAt: string | null;

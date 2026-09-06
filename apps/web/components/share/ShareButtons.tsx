@@ -154,8 +154,11 @@ const btnWhatsApp: React.CSSProperties = {
 };
 
 const btnCopy: React.CSSProperties = {
-  background: "var(--forest-800)",
-  color: "#FFFFFF",
+  // L1.2 (2026-09-06): was var(--forest-800) — a token that doesn't exist
+  // anywhere in the palette → unresolved CSS var = invalid background →
+  // white text on transparent = the invisible "Copy link" button.
+  background: "var(--color-forest)",
+  color: "var(--color-cream)",
 };
 
 const btnTwitter: React.CSSProperties = {

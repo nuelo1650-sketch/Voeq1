@@ -7,6 +7,7 @@ import type { VendorStorefrontView } from "@voeq/data";
 import type { AuthStatusResponse } from "@/lib/authStatus";
 import { trackEvent } from "@/lib/track";
 import { OpenNowBadge } from "@/components/vendor/OpenNowBadge";
+import { ContextBack } from "@/components/shopper/ContextBack";
 import { usePendingIntent } from "@/lib/usePendingIntent";
 import { MessageCircle } from "lucide-react";
 
@@ -179,9 +180,13 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
               )}
               <span data-testid="storefront-campus" style={{ color: "var(--color-ink-muted, #6f6a5e)", fontSize: 13.5 }}>{vendor.campus}</span>
               <span aria-hidden style={{ color: "var(--color-ink-subtle, #d9d2c3)" }}>·</span>
-              <Link
-                href="/explore"
-                data-testid="storefront-back"
+              {/* L3 (2026-09-06): was a hardcoded /explore link — half of the
+                  explore<->storefront cycle. Now goes BACK the way the visitor
+                  came; /explore only as the direct-entry fallback. */}
+              <ContextBack
+                fallback="/explore"
+                label="← Back"
+                testid="storefront-back"
                 style={{
                   color: "var(--color-forest-mid, #2d5a3d)",
                   textDecoration: "none",
@@ -191,9 +196,7 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
                   alignItems: "center",
                   gap: 4,
                 }}
-              >
-                ← Explore
-              </Link>
+              />
             </div>
 
             {/* Category badges */}
@@ -223,10 +226,18 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
           </button>
 
           {/* Socials (existing) */}
-          {(vendor.socials?.phone || vendor.socials?.instagram || vendor.socials?.twitter || vendor.socials?.tiktok) && (
+          {(vendor.socials?.phone || vendor.socials?.instagram || vendor.socials?.twitter || vendor.socials?.tiktok || vendor.socials?.whatsappChannel) && (
             <div data-testid="storefront-socials" className="vs-socials">
               {vendor.socials.phone && (
                 <a href={`tel:${vendor.socials.phone}`} data-testid="storefront-social-phone" className="vs-social">📞 {vendor.socials.phone}</a>
+              )}
+              {/* L4b (2026-09-06): WhatsApp CHANNEL link — a public profile
+                  (same rule as Instagram/TikTok). The Doc 13 §13.13 ban covers
+                  vendor MESSAGING, not channel links. Full URL expected
+                  (https://www.whatsapp.com/channel/…) — mobile apps resolve to
+                  the channel, not WhatsApp Business. */}
+              {vendor.socials.whatsappChannel && (
+                <a href={vendor.socials.whatsappChannel} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-whatsapp" className="vs-social">WhatsApp channel</a>
               )}
               {vendor.socials.instagram && (
                 <a href={`https://instagram.com/${vendor.socials.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-instagram" className="vs-social">Instagram: {vendor.socials.instagram}</a>

@@ -4,15 +4,19 @@ import { mockAuthRepo, mockVendorRepo, logAudit } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
- * VS5.3 — Set contact socials. Owner-only. Phone allowed; WhatsApp BANNED per
- * Doc 13 §13.13. Only phone/instagram/twitter/tiktok keys are accepted; any
- * other key (incl. "whatsapp") is silently dropped.
+ * VS5.3 — Set contact socials. Owner-only. WhatsApp BANNED per Doc 13 §13.13
+ * (that ban covers vendor MESSAGING); a WhatsApp CHANNEL LINK is a public
+ * social profile like Instagram/TikTok (the landing page already links the
+ * founder's channel) — allowed as L4b (2026-09-06).
+ * Only phone/instagram/twitter/tiktok/whatsappChannel keys are accepted;
+ * any other key is silently dropped.
  */
 const ALLOWED: (keyof NonNullable<import("@voeq/data").Vendor["socials"]>)[] = [
   "phone",
   "instagram",
   "twitter",
   "tiktok",
+  "whatsappChannel",
 ];
 
 export async function PATCH(req: Request) {

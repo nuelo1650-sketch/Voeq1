@@ -44,6 +44,9 @@ export function VendorDashboardClient({ vendor, listings }: Props) {
   const quickActions = [
     { href: "/vendor/listings/create", label: "Create listing", icon: Plus, tone: "amber" },
     { href: "/vendor/storefront", label: "Edit storefront", icon: Store, tone: "outline" },
+    // L2 (2026-09-06): vendor preview mode — see the storefront exactly as
+    // shoppers see it (real public render + banner with edit shortcuts).
+    { href: "/vendor/preview", label: "Preview store", icon: Eye, tone: "outline" },
     { href: "/vendor/analytics", label: "Analytics", icon: BarChart3, tone: "outline" },
     { href: "/messages", label: "Messages", icon: MessageSquare, tone: "outline" },
   ];

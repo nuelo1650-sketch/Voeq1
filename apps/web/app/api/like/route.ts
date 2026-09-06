@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockLikeRepo, mockListingsRepo, mockVendorRepo } from "@voeq/data";
+import { mockAuthRepo, mockLikeRepo } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
@@ -9,7 +9,8 @@ import { SESSION_COOKIE } from "@/lib/session";
  * (like/follow/save used to start "false" → first click reversed a real like).
  * Anonymous returns { liked:false } (no state → no 401 noise; POST still gates).
  * POST /api/like — toggle a like on a listing or vendor (VS6 — engagement).
- * Auth required. Actor = session identity. Cannot like your own listing/vendor.
+ * Auth required. Actor = session identity. Self-likes ALLOWED (founder
+ * decision, L4a 2026-09-06: "a vendor can like their own page and heart too").
  */
 export async function GET(req: Request) {
   const cookieStore = await cookies();
@@ -53,24 +54,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid targetId" }, { status: 400 });
   }
 
-  // Self-like guard: a vendor cannot like their own listing/vendor.
-  if (targetType === "listing") {
-    const listing = await mockListingsRepo.getById(targetId);
-    if (!listing) return NextResponse.json({ error: "not_found" }, { status: 404 });
-    if (listing.vendorId) {
-      const vendor = await mockVendorRepo.getById(listing.vendorId);
-      if (vendor?.identityId && vendor.identityId === identity.id) {
-        return NextResponse.json({ error: "cannot_like_self" }, { status: 400 });
-      }
-    }
-  } else {
-    const vendor = await mockVendorRepo.getById(targetId);
-    if (!vendor) return NextResponse.json({ error: "not_found" }, { status: 404 });
-    if (vendor.identityId && vendor.identityId === identity.id) {
-      return NextResponse.json({ error: "cannot_like_self" }, { status: 400 });
-    }
-  }
-
+  // L4a (2026-09-06, founder decision): the self-like guard is REMOVED —
+  // vendors can like their own listing/storefront ("a vendor can like their
+  // own page and heart too"). The old guard 400'd with cannot_like_self on
+  // both target types.
   const result = await mockLikeRepo.toggle({ actorId: identity.id, targetId, targetType });
   return NextResponse.json({ ok: true, liked: result.liked });
 }

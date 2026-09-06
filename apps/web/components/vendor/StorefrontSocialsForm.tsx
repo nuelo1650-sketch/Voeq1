@@ -19,6 +19,9 @@ export function StorefrontSocialsForm({ vendor, disabled = false, onChange }: {
   const [instagram, setInstagram] = useState(s.instagram ?? "");
   const [twitter, setTwitter] = useState(s.twitter ?? "");
   const [tiktok, setTiktok] = useState(s.tiktok ?? "");
+  // L4b (2026-09-06): WhatsApp CHANNEL link (public profile — the Doc 13
+  // §13.13 ban is on vendor MESSAGING; a channel link is like Instagram).
+  const [whatsappChannel, setWhatsappChannel] = useState(s.whatsappChannel ?? "");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -29,11 +32,11 @@ export function StorefrontSocialsForm({ vendor, disabled = false, onChange }: {
     const res = await fetch("/api/vendor/socials", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, instagram, twitter, tiktok }),
+      body: JSON.stringify({ phone, instagram, twitter, tiktok, whatsappChannel }),
     });
     if (res.ok) {
       setStatus("saved");
-      onChange?.({ socials: { phone: phone || undefined, instagram: instagram || undefined, twitter: twitter || undefined, tiktok: tiktok || undefined } });
+      onChange?.({ socials: { phone: phone || undefined, instagram: instagram || undefined, twitter: twitter || undefined, tiktok: tiktok || undefined, whatsappChannel: whatsappChannel || undefined } });
       router.refresh();
     } else {
       const e = await res.json().catch(() => ({}));
@@ -45,10 +48,10 @@ export function StorefrontSocialsForm({ vendor, disabled = false, onChange }: {
   return (
     <section data-testid="socials-form" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--fs-h3)", margin: 0 }}>Contact & socials</h3>
-      {(["phone", "instagram", "twitter", "tiktok"] as const).map((key) => {
-        const val = key === "phone" ? phone : key === "instagram" ? instagram : key === "twitter" ? twitter : tiktok;
-        const set = key === "phone" ? setPhone : key === "instagram" ? setInstagram : key === "twitter" ? setTwitter : setTiktok;
-        const label = key === "phone" ? "Phone" : key === "instagram" ? "Instagram" : key === "twitter" ? "Twitter / X" : "TikTok";
+      {(["phone", "instagram", "twitter", "tiktok", "whatsappChannel"] as const).map((key) => {
+        const val = key === "phone" ? phone : key === "instagram" ? instagram : key === "twitter" ? twitter : key === "tiktok" ? tiktok : whatsappChannel;
+        const set = key === "phone" ? setPhone : key === "instagram" ? setInstagram : key === "twitter" ? setTwitter : key === "tiktok" ? setTiktok : setWhatsappChannel;
+        const label = key === "phone" ? "Phone" : key === "instagram" ? "Instagram" : key === "twitter" ? "Twitter / X" : key === "tiktok" ? "TikTok" : "WhatsApp channel link";
         return (
           <label key={key} style={{ fontSize: 14, color: "var(--role-text-muted)", display: "flex", flexDirection: "column", gap: 4 }}>
             {label}
@@ -57,7 +60,7 @@ export function StorefrontSocialsForm({ vendor, disabled = false, onChange }: {
               value={val}
               disabled={disabled}
               onChange={(e) => set(e.target.value)}
-              placeholder={key === "phone" ? "+234…" : `@handle`}
+              placeholder={key === "phone" ? "+234…" : key === "whatsappChannel" ? "https://www.whatsapp.com/channel/…" : `@handle`}
               style={inputStyle}
             />
           </label>
