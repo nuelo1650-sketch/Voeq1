@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockVendorRepo, mockConversationRepo, mockMessageRepo, mockIdentityRepo, logAudit } from "@voeq/data";
+import { mockAuthRepo, mockVendorRepo, mockConversationRepo, mockMessageRepo, mockIdentityRepo, logAudit, isFlagEnabled } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
@@ -9,6 +9,15 @@ import { SESSION_COOKIE } from "@/lib/session";
  * Auth required; the caller is the shopper (participantIds = [shopperId, vendor.identityId]).
  */
 export async function POST(req: NextRequest) {
+  // FLAG ENFORCEMENT (2026-09-05): messaging.enabled from the config console.
+  // Fail-open: flag errors resolve to true — a flag outage can never take
+  // messaging down; the console opts out explicitly.
+  if (!(await isFlagEnabled("messaging.enabled"))) {
+    return NextResponse.json(
+      { error: "messaging_disabled", message: "Messaging is temporarily unavailable." },
+      { status: 503 },
+    );
+  }
   const store = await cookies();
   const identity = await mockAuthRepo.currentIdentity(store.get(SESSION_COOKIE)?.value ?? null);
   if (!identity) return NextResponse.json({ error: "unauthorized" }, { status: 401 });

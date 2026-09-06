@@ -9,6 +9,7 @@ import {
   sendEmail,
   recordAuthEvent,
   clientIpFrom,
+  isFlagEnabled,
 } from "@voeq/data/server";
 import { z } from "zod";
 import { verifyTurnstile } from "@/lib/turnstile";
@@ -31,6 +32,15 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // FLAG ENFORCEMENT (2026-09-05): signups.enabled from the config console.
+  // Fail-open: flag errors resolve to true (signup can never be bricked by a
+  // flag outage); the console opts out explicitly.
+  if (!(await isFlagEnabled("signups.enabled"))) {
+    return NextResponse.json(
+      { error: "signups_disabled", message: "New signups are temporarily paused. Check back soon." },
+      { status: 503 },
+    );
+  }
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
 
   // D.6 — Bot check BEFORE any work. Fail closed; degrade only when secret unset (dev).

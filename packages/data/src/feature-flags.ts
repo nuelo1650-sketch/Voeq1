@@ -16,6 +16,9 @@ const mockFeatureFlagRepoImpl = {
   async list(): Promise<FeatureFlag[]> {
     return Object.values(flags);
   },
+  async get(key: string): Promise<FeatureFlag | null> {
+    return flags[key] ?? null;
+  },
   async set(key: string, value: boolean, description = ""): Promise<FeatureFlag | null> {
     // P2 (config console): upsert, matching realFeatureFlagRepo.set — the
     // flags POST route relies on create-via-set for new keys.
@@ -35,3 +38,30 @@ const USE_REAL = !!process.env.DATABASE_URL;
 export const mockFeatureFlagRepo: typeof mockFeatureFlagRepoImpl = USE_REAL
   ? realFeatureFlagRepo
   : mockFeatureFlagRepoImpl;
+
+/**
+ * FLAG ENFORCEMENT (2026-09-05): the config console's Flags section stores
+ * state but NOTHING read it at runtime — toggling messaging.enabled off did
+ * nothing. This is the enforcement primitive: a fail-open reader.
+ *
+ * Fail-open semantics: any error (DB down, table missing, whatever) resolves
+ * to the SEED DEFAULT (true for all four documented flags) — a flag outage
+ * can never take signup or messaging down. Absent flag rows also mean true:
+ * the seed defaults ARE the product's contract; the console opts OUT.
+ */
+export const FLAG_DEFAULTS: Record<string, boolean> = {
+  "messaging.enabled": true,
+  "reviews.enabled": true,
+  "impersonation.enabled": true,
+  "signups.enabled": true,
+};
+
+export async function isFlagEnabled(key: string): Promise<boolean> {
+  const fallback = FLAG_DEFAULTS[key] ?? true;
+  try {
+    const f = await mockFeatureFlagRepo.get(key);
+    return f ? f.value : fallback;
+  } catch {
+    return fallback;
+  }
+}
