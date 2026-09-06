@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye, MessageCircle, Heart, Star, Users, TrendingUp, Minus, Store } from "lucide-react";
+import { BarChart3, MessageCircle, Heart, Star, Users, TrendingUp, Minus, Store } from "lucide-react";
 import type { Vendor, Listing } from "@voeq/data";
 
 /**
@@ -84,7 +84,7 @@ export function VendorAnalytics({ vendor }: Props) {
           <div data-testid="analytics-stats" className="van-stats" style={{ display: "grid", gridTemplateColumns: "1.7fr 1fr 1fr 1fr", gap: 11, marginBottom: 13 }}>
             <div data-testid="stat-views-hero" style={{ background: "var(--color-forest)", borderRadius: 14, padding: "16px 18px", boxShadow: "0 4px 14px rgba(15,42,29,.16)", display: "flex", flexDirection: "column", gap: 3 }}>
               <span style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(243,241,234,.72)", display: "flex", alignItems: "center", gap: 6 }}>
-                <Eye size={13} /> Storefront views
+                <BarChart3 size={13} /> Storefront views
               </span>
               <span style={{ fontFamily: "var(--font-display)", fontSize: 36, fontWeight: 700, lineHeight: 1, marginTop: 5, color: "var(--color-amber)" }}>
                 {data ? data.week.views : "…"}
@@ -165,6 +165,125 @@ export function VendorAnalytics({ vendor }: Props) {
               )}
             </section>
           </div>
+
+          {/* ANALYTICS-V2 (2026-09-06): INSIGHTS — auto-generated from the SAME
+              real weekly data; each carries an action link (analytics that
+              actually help, not just describe). Honest-data rules apply:
+              insights render only when the underlying data supports them. */}
+          {data && (() => {
+            const insights: Array<{ icon: React.ReactNode; title: string; body: string; action?: { href: string; label: string } }> = [];
+
+            // Best-day insight (needs >1 day with traffic + a clear max)
+            const bestDay = [...data.daily].sort((a, b) => b.views - a.views)[0];
+            const daysWithTraffic = data.daily.filter((d) => d.views > 0).length;
+            if (bestDay && bestDay.views > 0 && daysWithTraffic >= 2) {
+              insights.push({
+                icon: <TrendingUp size={16} />,
+                title: `${bestDay.day} is your best day`,
+                body: `${bestDay.views} of this week's ${data.week.views} views came on ${bestDay.day}. Post or share around then.`,
+              });
+            }
+
+            // Top-listing insight (needs a clear leader)
+            const leader = topListings[0];
+            const totalListingViews = data.perListing.reduce((s, l) => s + l.views, 0);
+            if (leader && leader.views > 0 && totalListingViews > 0) {
+              const sharePct = Math.round((leader.views / totalListingViews) * 100);
+              if (sharePct >= 40) {
+                insights.push({
+                  icon: <Star size={16} />,
+                  title: `"${leader.title}" is carrying your traffic`,
+                  body: `${sharePct}% of your listing views this week. Give your other listings the same care — or create a follow-up.`,
+                  action: { href: `/vendor/listings/${leader.id}/edit`, label: "Edit this listing" },
+                });
+              }
+            }
+
+            // Dead-listing insight (0 views in a week with traffic elsewhere)
+            const dead = data.perListing.filter((l) => l.views === 0 && l.saves === 0);
+            if (dead.length > 0 && data.week.views > 0) {
+              insights.push({
+                icon: <Store size={16} />,
+                title: `${dead.length} listing${dead.length === 1 ? "" : "s"} got zero attention`,
+                body: `No views or saves this week. Fresh photos or a sharper price usually fixes it.`,
+                action: { href: dead.length === 1 ? `/vendor/listings/${dead[0].id}/edit` : "/vendor/listings", label: dead.length === 1 ? "Edit it" : "Review listings" },
+              });
+            }
+
+            // Follower momentum
+            if ((data.prev?.followers ?? 0) > 0 && data.week.followers > data.prev!.followers) {
+              insights.push({
+                icon: <Users size={16} />,
+                title: `+${data.week.followers - data.prev!.followers} new followers`,
+                body: `Followers see your new listings first — keep the momentum with a fresh post.`,
+                action: { href: "/vendor/listings/create", label: "Create a listing" },
+              });
+            }
+
+            // Views grew but no saves — conversion hint
+            if (data.week.views >= 10 && data.week.saves === 0) {
+              insights.push({
+                icon: <Heart size={16} />,
+                title: "Views but no saves",
+                body: `${data.week.views} students looked, none saved. Compare your price with similar listings on Explore.`,
+                action: { href: "/explore", label: "Compare on Explore" },
+              });
+            }
+
+            if (insights.length === 0) return null;
+            return (
+              <section data-testid="analytics-insights" style={{ marginBottom: 13, display: "grid", gap: 9, gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+                {insights.slice(0, 4).map((ins, i) => (
+                  <div key={i} style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 14, padding: "13px 15px", display: "flex", gap: 10, alignItems: "flex-start", boxShadow: "0 1px 4px rgba(15,42,29,.05)" }}>
+                    <span style={{ color: "var(--color-amber)", flexShrink: 0, marginTop: 1 }}>{ins.icon}</span>
+                    <span style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                      <strong style={{ fontSize: 13, color: "var(--color-forest)" }}>{ins.title}</strong>
+                      <span style={{ fontSize: 12, color: "var(--role-text-muted)", lineHeight: 1.45 }}>{ins.body}</span>
+                      {ins.action && (
+                        <Link href={ins.action.href} style={{ fontSize: 12, fontWeight: 650, color: "var(--role-accent-strong)", textDecoration: "underline", marginTop: 2 }}>
+                          {ins.action.label} →
+                        </Link>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </section>
+            );
+          })()}
+
+          {/* ANALYTICS-V2: LISTING HEALTH — every listing with views, saves,
+              save-rate and a needs-attention flag; sorted worst-to-best so the
+              work is at the top. */}
+          {data && data.perListing.length > 0 && (() => {
+            const health = [...data.perListing].sort((a, b) => (a.views + a.saves) - (b.views + b.saves));
+            return (
+              <section data-testid="analytics-listing-health" style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 16, padding: "16px 18px", boxShadow: "0 1px 4px rgba(15,42,29,.05)", marginBottom: 13, overflowX: "auto" }}>
+                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16.5, fontWeight: 600, margin: "0 0 3px", color: "var(--color-forest)" }}>Listing health</h3>
+                <p style={{ fontSize: 11.5, color: "var(--role-text-muted)", margin: "0 0 12px" }}>Sorted weakest first — fix the top of this list</p>
+                {health.map((l) => {
+                  const saveRate = l.views > 0 ? Math.round((l.saves / l.views) * 100) : null;
+                  const needsAttention = l.views === 0 || (l.views >= 5 && saveRate !== null && saveRate < 5);
+                  return (
+                    <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 0", borderBottom: "1px dashed var(--role-border)", flexWrap: "wrap" }}>
+                      <span style={{ flex: 1, minWidth: 140, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{l.title}</span>
+                      <span style={{ fontSize: 12, color: "var(--role-text-muted)", width: 74 }}>{l.views} views</span>
+                      <span style={{ fontSize: 12, color: "var(--role-text-muted)", width: 66 }}>{l.saves} saves</span>
+                      <span style={{ fontSize: 12, color: "var(--role-text-muted)", width: 86 }}>
+                        {saveRate === null ? "—" : `${saveRate}% save`}
+                      </span>
+                      {needsAttention ? (
+                        <Link href={`/vendor/listings/${l.id}/edit`} style={{ fontSize: 11, fontWeight: 650, padding: "3px 10px", borderRadius: 999, background: "rgba(232,163,61,.16)", color: "var(--color-amber)", textDecoration: "none", flexShrink: 0 }}>
+                          Needs attention
+                        </Link>
+                      ) : (
+                        <span style={{ fontSize: 11, color: "var(--color-forest-mid, #2d5a3d)", opacity: 0.75, flexShrink: 0 }}>Healthy</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </section>
+            );
+          })()}
 
           {/* review insight (kept from the old honest insights) */}
           <section style={{ marginTop: 13, background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 16, padding: "15px 18px", display: "flex", gap: 11, alignItems: "flex-start" }}>

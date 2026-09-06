@@ -145,6 +145,13 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
 
   // Category display
   const categories = Array.isArray(vendor.categoryIds) ? vendor.categoryIds : [];
+
+  // LAYOUT PASS (2026-09-06): short lede for the hero (full text lives in the
+  // About card — no more back-to-back duplication).
+  const lede = (text: string) => {
+    const firstSentence = text.split(/(?<=[.!?])\s/)[0] ?? text;
+    return firstSentence.length > 140 ? firstSentence.slice(0, 137).trimEnd() + "…" : firstSentence;
+  };
   
   return (
     <div className="vs-hero">
@@ -208,9 +215,12 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
               </div>
             )}
 
-            {/* Description */}
+            {/* LAYOUT PASS (2026-09-06): the hero used to render the description
+                here AND again in the About card below — the same text twice,
+                back to back. The hero now carries a SHORT lede (first sentence,
+                140 chars) and the About card holds the full text + location. */}
             {vendor.description && (
-              <p className="vs-desc">{vendor.description}</p>
+              <p className="vs-desc">{lede(vendor.description)}</p>
             )}
           </div>
 
@@ -267,10 +277,11 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
           </div>
         )}
 
-        <div className="vs-stat">
-          <div className="vs-stat-value">{vendor.verifiedCount}</div>
-          <div className="vs-stat-label">Verified {vendor.verifiedCount === 1 ? 'listing' : 'listings'}</div>
-        </div>
+        {/* LAYOUT PASS (2026-09-06): "Verified listings" dropped — the ✓
+            badge in the trust row already communicates verification, and the
+            number confused shoppers next to the listing count. Two honest
+            stats (listings + rating) read cleaner than three with one
+            puzzling. */}
       </div>
 
       {/* About section */}

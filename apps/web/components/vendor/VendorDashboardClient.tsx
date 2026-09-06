@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Eye, Stars, MessageSquare, BarChart3, Store, ArrowUpRight } from "lucide-react";
+import { Plus, TrendingUp, Stars, MessageSquare, BarChart3, Store, ArrowUpRight } from "lucide-react";
 import { VendorWeeklyStats } from "@/components/vendor/VendorWeeklyStats";
 import type { ExploreListing } from "@voeq/data";
 
@@ -46,7 +46,7 @@ export function VendorDashboardClient({ vendor, listings }: Props) {
     { href: "/vendor/storefront", label: "Edit storefront", icon: Store, tone: "outline" },
     // L2 (2026-09-06): vendor preview mode — see the storefront exactly as
     // shoppers see it (real public render + banner with edit shortcuts).
-    { href: "/vendor/preview", label: "Preview store", icon: Eye, tone: "outline" },
+    { href: "/vendor/preview", label: "Preview store", icon: Store, tone: "outline" },
     { href: "/vendor/analytics", label: "Analytics", icon: BarChart3, tone: "outline" },
     { href: "/messages", label: "Messages", icon: MessageSquare, tone: "outline" },
   ];
@@ -61,7 +61,7 @@ export function VendorDashboardClient({ vendor, listings }: Props) {
         <SectionTitle
           left={
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Eye size={17} color="var(--role-accent)" /> This week
+              <TrendingUp size={17} color="var(--role-accent)" /> This week
             </span>
           }
         />

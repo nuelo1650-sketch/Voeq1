@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { Store } from "lucide-react";
 import { getCurrentIdentity } from "@/lib/session";
 import { loadVendorStorefront, canVendorBePublic, loadExplore } from "@voeq/data";
 import { StorefrontHero } from "@/components/storefront/StorefrontHero";
@@ -52,8 +53,9 @@ export default async function VendorPreviewPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--role-bg)" }}>
-      {/* PREVIEW BANNER — the ONLY added chrome; everything below is the
-          genuine public render. */}
+      {/* PREVIEW BANNER v2 (2026-09-06) — the ONLY added chrome; everything
+          below is the genuine public render. Redesigned: clean forest bar,
+          Store icon (no Eye emoji), two-row layout on phones. */}
       <div
         data-testid="preview-banner"
         style={{
@@ -65,29 +67,34 @@ export default async function VendorPreviewPage() {
           justifyContent: "space-between",
           gap: 12,
           flexWrap: "wrap",
-          padding: "10px var(--nav-inline-pad)",
+          padding: "12px var(--nav-inline-pad)",
           background: "var(--color-forest)",
           color: "var(--color-cream)",
           fontFamily: "var(--role-font-ui)",
           fontSize: 13.5,
+          borderBottom: "1px solid rgba(246,241,230,.12)",
         }}
       >
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 8, fontWeight: 600 }}>
-          👁 Preview — this is exactly how shoppers see your store
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 10, fontWeight: 650 }}>
+          <Store size={17} aria-hidden />
+          <span style={{ display: "inline-flex", flexDirection: "column", gap: 2 }}>
+            <span>Viewing as shopper</span>
+            <span style={{ fontSize: 11.5, fontWeight: 500, opacity: 0.75 }}>This is exactly how your store appears publicly</span>
+          </span>
           {!publicOk && (
             <span
               data-testid="preview-not-live-note"
-              style={{ background: "rgba(232,163,61,.25)", color: "var(--color-amber)", padding: "2px 8px", borderRadius: 999, fontSize: 11.5, fontWeight: 650 }}
+              style={{ background: "rgba(232,163,61,.25)", color: "var(--color-amber)", padding: "3px 10px", borderRadius: 999, fontSize: 11.5, fontWeight: 650 }}
             >
-              Not live yet — go-live pending
+              Not live yet
             </span>
           )}
         </span>
-        <span style={{ display: "inline-flex", gap: 10, flexWrap: "wrap" }}>
+        <span style={{ display: "inline-flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
           <Link
             href="/vendor/storefront"
             data-testid="preview-edit-storefront"
-            style={{ color: "var(--color-cream)", textDecoration: "underline", fontSize: 13 }}
+            style={{ color: "var(--color-cream)", opacity: 0.85, textDecoration: "underline", textDecorationColor: "rgba(246,241,230,.4)", fontSize: 13 }}
           >
             Edit storefront
           </Link>

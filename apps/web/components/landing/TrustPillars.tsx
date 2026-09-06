@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
-import { Shield, Eye, Users, Heart } from 'lucide-react';
+import { Shield, Tag, Users, Heart } from 'lucide-react';
 
 const pillars = [
   {
@@ -8,7 +8,7 @@ const pillars = [
     description: 'Every vendor is manually reviewed before listing. No fake accounts, no scams.',
   },
   {
-    icon: Eye,
+    icon: Tag, // EYE-SWEEP (2026-09-06): Tag reads as pricing; Eye read as surveillance
     title: 'Transparent pricing',
     description: 'Real prices from real students. No hidden fees or surprise charges.',
   },
