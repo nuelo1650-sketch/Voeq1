@@ -34,7 +34,6 @@ const NOTIF_TYPES = [
 export function SettingsForms({ identity, initialPrefs, campuses, sessions }: SettingsProps) {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<Section>("profile");
-  const [isMobile, setIsMobile] = useState(false);
 
   // Profile state
   const [name, setName] = useState(identity.name || "");
@@ -61,6 +60,14 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
   // Detect mobile (2026-09-05 fix: this was `useState(() => {...})` — the
   // listener NEVER attached and isMobile stayed false forever, so phones got
   // the desktop sidebar and the Account tab sat at x=498, off-screen.)
+  // OUT-OF-GRID FIX (2026-09-06): the useEffect works, but between SSR and
+  // hydration the DESKTOP sidebar still renders on phones (measured: Account
+  // at x=394-504 on a 390px screen for 8+ seconds on a cold route). JS-state
+  // layout can't fix a pre-hydration flash — so the LAYOUT is now CSS-only:
+  // the same DOM renders both, with media queries deciding (no flash, works
+  // before/during/after hydration). isMobile state remains for logic that
+  // genuinely needs it.
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -166,42 +173,44 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
   };
 
   return (
-    <div style={{ display: "flex", gap: "var(--space-4)", flexDirection: isMobile ? "column" : "row" }}>
-      {/* Sidebar / Tabs */}
-      {isMobile ? (
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            borderBottom: "1px solid var(--color-ink-subtle)",
-            overflowX: "auto",
-            minWidth: 0,
-            scrollbarWidth: "none",
-          }}
-        >
-          <TabButton icon={<User size={16} />} label="Profile" active={activeSection === "profile"} onClick={() => setActiveSection("profile")} />
-          <TabButton icon={<Bell size={16} />} label="Notifications" active={activeSection === "notifications"} onClick={() => setActiveSection("notifications")} />
-          <TabButton icon={<MapPin size={16} />} label="Campus" active={activeSection === "campus"} onClick={() => setActiveSection("campus")} />
-          <TabButton icon={<Shield size={16} />} label="Account" active={activeSection === "account"} onClick={() => setActiveSection("account")} />
-        </div>
-      ) : (
-        <nav
-          style={{
-            minWidth: 200,
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-          }}
-        >
-          <NavButton icon={<User size={18} />} label="Profile" active={activeSection === "profile"} onClick={() => setActiveSection("profile")} />
-          <NavButton icon={<Bell size={18} />} label="Notifications" active={activeSection === "notifications"} onClick={() => setActiveSection("notifications")} />
-          <NavButton icon={<MapPin size={18} />} label="Campus" active={activeSection === "campus"} onClick={() => setActiveSection("campus")} />
-          <NavButton icon={<Shield size={18} />} label="Account" active={activeSection === "account"} onClick={() => setActiveSection("account")} />
-        </nav>
-      )}
+    <div className="settings-layout" style={{ display: "flex", gap: "var(--space-4)", flexDirection: "row" }}>
+      {/* Sidebar / Tabs — OUT-OF-GRID FIX (2026-09-06): both variants render;
+          CSS media queries decide which is visible. No JS-state layout = no
+          pre-hydration desktop flash on phones (Account was x=394-504 on a
+          390px screen while hydration lagged). */}
+      <div
+        className="settings-tabs-mobile"
+        style={{
+          display: "none",
+          gap: 8,
+          borderBottom: "1px solid var(--color-ink-subtle)",
+          overflowX: "auto",
+          minWidth: 0,
+          scrollbarWidth: "none",
+        }}
+      >
+        <TabButton icon={<User size={16} />} label="Profile" active={activeSection === "profile"} onClick={() => setActiveSection("profile")} />
+        <TabButton icon={<Bell size={16} />} label="Notifications" active={activeSection === "notifications"} onClick={() => setActiveSection("notifications")} />
+        <TabButton icon={<MapPin size={16} />} label="Campus" active={activeSection === "campus"} onClick={() => setActiveSection("campus")} />
+        <TabButton icon={<Shield size={16} />} label="Account" active={activeSection === "account"} onClick={() => setActiveSection("account")} />
+      </div>
+      <nav
+        className="settings-nav-desktop"
+        style={{
+          minWidth: 200,
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+        }}
+      >
+        <NavButton icon={<User size={18} />} label="Profile" active={activeSection === "profile"} onClick={() => setActiveSection("profile")} />
+        <NavButton icon={<Bell size={18} />} label="Notifications" active={activeSection === "notifications"} onClick={() => setActiveSection("notifications")} />
+        <NavButton icon={<MapPin size={18} />} label="Campus" active={activeSection === "campus"} onClick={() => setActiveSection("campus")} />
+        <NavButton icon={<Shield size={18} />} label="Account" active={activeSection === "account"} onClick={() => setActiveSection("account")} />
+      </nav>
 
       {/* Content */}
-      <div style={{ flex: 1, maxWidth: 600 }}>
+      <div style={{ flex: 1, maxWidth: 600, minWidth: 0 }}>
         {/* Profile Section */}
         {activeSection === "profile" && (
           <section data-testid="settings-profile">

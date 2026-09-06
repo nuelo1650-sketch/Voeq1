@@ -5672,3 +5672,21 @@ header.AppShell,
   content-visibility: auto;
   contain-intrinsic-size: auto 500px;
 }
+
+/* ===== SETTINGS LAYOUT (OUT-OF-GRID FIX 2026-09-06) =====
+   SettingsForms renders BOTH the mobile tab strip and the desktop nav; these
+   media queries decide which shows. CSS-only = correct before/during/after
+   hydration (the old isMobile JS ternary flashed the desktop sidebar on
+   phones for the whole cold-hydration window — Account button sat at
+   x=394-504 on a 390px screen). */
+@media (max-width: 767px) {
+  .settings-layout { flex-direction: column !important; gap: 12px !important; }
+  .settings-tabs-mobile {
+    display: flex !important;
+  }
+  .settings-nav-desktop { display: none !important; }
+}
+@media (min-width: 768px) {
+  .settings-tabs-mobile { display: none !important; }
+  .settings-nav-desktop { display: flex !important; }
+}

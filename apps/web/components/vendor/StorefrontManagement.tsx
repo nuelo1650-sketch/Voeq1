@@ -267,18 +267,24 @@ function ProfilePhotoSection({ vendor, disabled }: { vendor: Vendor; disabled: b
   return (
     <Section title="Profile photo" icon={<Camera size={24} />} hint="Your photo appears on your storefront and in search results">
       {vendor.profilePhotoUrl ? (
-        <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "flex-start" }}>
+        <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "flex-start", flexWrap: "wrap" }}>
           <img
             src={vendor.profilePhotoUrl}
             alt={vendor.name}
             style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 12, border: "1px solid var(--color-ink-subtle)" }}
           />
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, marginBottom: 12, color: "var(--color-ink-muted)", fontSize: 14 }}>
               Current profile photo
             </p>
-            <div style={{ display: "flex", gap: 12 }}>
-              <label style={{ ...secondaryButtonStyle, cursor: disabled ? "not-allowed" : "pointer", display: "inline-flex" }}>
+            {/* OUT-OF-GRID FIX (2026-09-06): the Upload/Remove row overflowed
+                the card on phones (measured: Remove's right edge at 418px on a
+                390px screen — 72px past the card, 28px off-screen) because the
+                fixed 120px photo + two padded buttons don't fit 390px. The row
+                now wraps, buttons shrink to content, and the labels sit below
+                the photo on narrow screens. */}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <label style={{ ...secondaryButtonStyle, cursor: disabled ? "not-allowed" : "pointer", display: "inline-flex", whiteSpace: "nowrap" }}>
                 Upload new
                 <input
                   type="file"
@@ -291,7 +297,7 @@ function ProfilePhotoSection({ vendor, disabled }: { vendor: Vendor; disabled: b
               <button
                 onClick={() => setShowRemoveModal(true)}
                 disabled={disabled}
-                style={{ ...secondaryButtonStyle, color: "var(--color-danger)", borderColor: "var(--color-danger)" }}
+                style={{ ...secondaryButtonStyle, color: "var(--color-danger)", borderColor: "var(--color-danger)", whiteSpace: "nowrap" }}
               >
                 Remove
               </button>
