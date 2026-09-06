@@ -823,6 +823,17 @@ export const realReviewRepo = {
 // ---- ConversationRepo / MessageRepo -----------------------------------------
 export const realConversationRepo = {
   async create(input: { participantIds: string[]; listingId?: string | null }): Promise<Conversation> {
+    // RACE FIX (2026-09-05): this was a blind INSERT — a double-tap on
+    // "Message vendor" fired two concurrent POSTs and created TWO
+    // conversations for the same pair (the API route's 'idempotent' comment
+    // was not honored by the repo). Find-or-create: normalize the pair,
+    // reuse the existing conversation when one exists.
+    const pair = [...input.participantIds].sort();
+    const rows = await getDb().select().from(s.conversations);
+    const existing = rows.find(
+      (c) => c.listingId === (input.listingId ?? null) && [...(c.participantIds ?? [])].sort().join("\u0000") === pair.join("\u0000"),
+    );
+    if (existing) return existing;
     const t = now();
     const conv: Conversation = {
       id: id(),
@@ -850,10 +861,15 @@ export const realConversationRepo = {
     await getDb().update(s.conversations).set({ lastMessageAt: ts }).where(eq(s.conversations.id, cid));
   },
   async touchLastSeen(cid: string, identityId: string): Promise<void> {
-    const row = await getDb().select().from(s.conversations).where(eq(s.conversations.id, cid)).limit(1);
-    if (!row[0]) return;
-    const lastSeen = { ...(row[0].lastSeen ?? {}), [identityId]: now() };
-    await getDb().update(s.conversations).set({ lastSeen }).where(eq(s.conversations.id, cid));
+    // RACE FIX (2026-09-05): read-modify-write on the lastSeen jsonb meant two
+    // participants opening the thread concurrently clobbered each other's
+    // stamp (the second write overwrote the first's merge). Atomic jsonb
+    // merge via COALESCE — no read, no lost update.
+    await getDb().execute(sql`
+      UPDATE conversations
+      SET last_seen = COALESCE(last_seen, '{}'::jsonb) || ${JSON.stringify({ [identityId]: now() })}::jsonb
+      WHERE id = ${cid}
+    `);
   },
 };
 
