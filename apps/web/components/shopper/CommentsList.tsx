@@ -7,6 +7,10 @@ import type { Comment } from "@voeq/data";
 /** Enriched comment as returned by GET /api/listings/[id]/comments (authorName resolved). */
 export type DisplayComment = Omit<Comment, "listingId" | "authorId" | "status"> & { authorName?: string; isMine?: boolean };
 
+/** COMMENTS LAYOUT (2026-09-05, approved direction): initial window + load-more
+ *  reveal instead of a wall of every comment; warm cards below. */
+const COMMENTS_WINDOW = 5;
+
 /**
  * CommentsList — public-read, flat (no threading), newest first (VS4.5).
  * Honest empty state. Author display name resolved server-side (no raw identityId).
@@ -18,6 +22,7 @@ export function CommentsList({ comments, listingId }: { comments: DisplayComment
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(COMMENTS_WINDOW);
 
   async function saveEdit(id: string) {
     setBusy(true);
@@ -69,8 +74,9 @@ export function CommentsList({ comments, listingId }: { comments: DisplayComment
           No comments yet.
         </p>
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column" }}>
-          {comments.map((c) => (
+        <>
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+          {comments.slice(0, visibleCount).map((c) => (
             <li key={c.id} data-testid="comment-item" className="voeq-comment">
               <div className="voeq-comment-avatar" aria-hidden>
                 {(c.authorName ?? "S").slice(0, 1).toUpperCase()}
@@ -78,6 +84,23 @@ export function CommentsList({ comments, listingId }: { comments: DisplayComment
               <div className="voeq-comment-body">
                 <div className="voeq-comment-head">
                   <span className="voeq-comment-author">{c.authorName ?? "Shopper"}</span>
+                  {c.isMine && (
+                    <span
+                      data-testid="comment-author-chip"
+                      style={{
+                        fontSize: 10.5,
+                        fontWeight: 650,
+                        letterSpacing: 0.4,
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                        background: "rgba(232,163,61,.16)",
+                        color: "var(--color-amber)",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      You
+                    </span>
+                  )}
                   <span className="voeq-comment-time">{new Date(c.createdAt).toLocaleDateString()}</span>
                   {c.isMine && editingId !== c.id && (
                     <span className="voeq-comment-actions" style={{ marginLeft: 12, display: "inline-flex", gap: 8 }}>
@@ -136,6 +159,29 @@ export function CommentsList({ comments, listingId }: { comments: DisplayComment
             </li>
           ))}
         </ul>
+        {comments.length > visibleCount && (
+          <button
+            type="button"
+            data-testid="comments-load-more"
+            onClick={() => setVisibleCount((v) => v + COMMENTS_WINDOW)}
+            style={{
+              marginTop: 4,
+              alignSelf: "flex-start",
+              padding: "8px 16px",
+              borderRadius: 999,
+              border: "1px solid var(--role-border)",
+              background: "var(--role-surface)",
+              color: "var(--role-accent-strong)",
+              fontFamily: "var(--role-font-ui)",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Show more comments ({comments.length - visibleCount} remaining)
+          </button>
+        )}
+        </>
       )}
     </div>
   );

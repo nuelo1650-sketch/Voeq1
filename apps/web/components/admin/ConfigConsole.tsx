@@ -456,7 +456,7 @@ function FlagsPanel({ initial }: { initial: FlagRow[] }) {
   }
 
   return (
-    <SectionCard title="Feature flags" count={rows.length} note="signups.enabled + messaging.enabled are now ENFORCED at their API gates (fail-open: flag errors never block either flow; toggling off returns a friendly 503). reviews.enabled + impersonation.enabled store rollout intent — not yet wired.">
+    <SectionCard title="Feature flags" count={rows.length} note="All four flags are ENFORCED at their API gates (fail-open: flag errors never block a flow; toggling off returns a friendly 503): signups, messaging, reviews, impersonation.">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <span style={{ fontSize: 13, color: "var(--role-text-muted)" }}>Rollout switches</span>
         <button style={btn()} onClick={() => setShowCreate(!showCreate)}>

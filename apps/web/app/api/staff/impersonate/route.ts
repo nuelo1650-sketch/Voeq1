@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mockIdentityRepo, mockSessionRepo, logAudit } from "@voeq/data";
+import { mockIdentityRepo, mockSessionRepo, logAudit, isFlagEnabled } from "@voeq/data";
 import { requireCapability, SESSION_COOKIE } from "@/lib/session";
 
 /**
  * VS7.14 — Impersonation START. super_admin only. Time-boxed (<=24h), reason>=20.
  * Creates a session for the target identity, returns it as a cookie + JSON. Audited.
+ * FLAG ENFORCEMENT (2026-09-05): impersonation.enabled (fail-open) — belt-and-
+ * braces on top of the capability gate, lets the console kill the surface fast.
  */
 export async function POST(req: NextRequest) {
+  if (!(await isFlagEnabled("impersonation.enabled"))) {
+    return NextResponse.json(
+      { error: "impersonation_disabled", message: "Impersonation is currently disabled." },
+      { status: 503 },
+    );
+  }
   let actor;
   try {
     actor = await requireCapability("staff.impersonate");

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockReviewRepo, mockVendorRepo } from "@voeq/data";
+import { mockAuthRepo, mockReviewRepo, mockVendorRepo, isFlagEnabled } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
 // P-A round 39: safe first-name for notification copy (never full identity).
@@ -12,8 +12,15 @@ function usernameSafe(name: string): string {
 /**
  * POST /api/reviews — create/update a review for a vendor (Doc 09 §9.8: one per
  * shopper-vendor, upsert). Auth required. Cannot review your own vendor account.
+ * FLAG ENFORCEMENT (2026-09-05): reviews.enabled (fail-open).
  */
 export async function POST(req: Request) {
+  if (!(await isFlagEnabled("reviews.enabled"))) {
+    return NextResponse.json(
+      { error: "reviews_disabled", message: "Reviews are temporarily unavailable." },
+      { status: 503 },
+    );
+  }
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE)?.value;
   if (!sessionId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
