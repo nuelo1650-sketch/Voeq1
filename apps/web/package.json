@@ -23,7 +23,6 @@
     "@voeq/data": "file:../packages/data",
     "@voeq/design-tokens": "file:../packages/design-tokens",
     "@voeq/ui": "file:../packages/ui",
-    "framer-motion": "^13.1.1",
     "lucide-react": "^1.33.0",
     "next": "^15.1.0",
     "postcss": "^8.4.47",
