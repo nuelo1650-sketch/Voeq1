@@ -35,6 +35,12 @@ export default async function HomePage() {
 
   const prefs = await mockUserPrefRepo.get(identity.id);
   if (!prefs || !prefs.feedPrefsSetAt) redirect("/onboarding/shopper");
+  // BUG-1 FIX (2026-09-05): the B3 signup path (consent pre-recorded on the
+  // signup checkbox) routes straight here, skipping /select-campus — fresh
+  // accounts landed on /home with NO campus (never asked). /home gated only
+  // on feed prefs. Campus-less users now bounce to /select-campus, which
+  // writes identity.campus and routes back to the right flow.
+  if (!identity.campus) redirect("/select-campus");
 
   const campusList = await mockCampusRepo.list(identity.id);
   const campusLabel = identity.campus
