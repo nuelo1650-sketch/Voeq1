@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { mockAuthRepo, mockVendorRepo, mockListingsRepo, logAudit, MAX_IMAGES_PER_LISTING } from "@voeq/data/server";
+import { goLive } from "@voeq/data";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
@@ -46,6 +47,9 @@ export async function POST(req: NextRequest) {
 
   const priceMaxMinor = body.priceMaxMinor != null ? Number(body.priceMaxMinor) : null;
   const description = typeof body.description === "string" ? body.description : null;
+  // PUBLISH = GO-LIVE (2026-09-07): the vendor's current status decides whether
+  // the create should also run the go-live transition (below).
+  const vendor = await mockVendorRepo.getById(identity.vendorId);
   // P-A round 57 (C9): vendor one-liner was accepted, validated, and thrown
   // away — now persisted on create.
   const shortDescription = typeof body.shortDescription === "string" ? body.shortDescription : null;
@@ -76,6 +80,19 @@ export async function POST(req: NextRequest) {
     status: "active",
   });
 
-  await logAudit("vendor.listing.create", identity.id, { id: listing.id });
-  return NextResponse.json({ ok: true, listing });
+  // PUBLISH = GO-LIVE (2026-09-07, founder decision — "let publish listing be
+  // the go live verification so you don't have to click go live again to see
+  // listings in explore"): creating the first published listing satisfies the
+  // go-live preconditions (agreement + ≥1 listing; photo is a recommendation,
+  // not a wall). Auto-promote via the same goLive() transition the manual
+  // button used, so the identity role widens identically and Explore/public
+  // surfaces show the listing immediately. Idempotent: live vendors no-op.
+  let promoted = false;
+  if (vendor?.status !== "live") {
+    const result = await goLive(identity.id);
+    promoted = result?.ok ?? false;
+  }
+
+  await logAudit("vendor.listing.create", identity.id, { id: listing.id, autoGolive: promoted });
+  return NextResponse.json({ ok: true, listing, autoGolive: promoted });
 }

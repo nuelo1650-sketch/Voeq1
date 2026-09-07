@@ -250,6 +250,10 @@ export function SearchBar({
     onSearch(query);
     setIsOpen(false);
     setSelectedIndex(-1);
+    // KEYPAD FIX (2026-09-07, founder: "why do I click search and the keypad
+    // is still there"): on mobile the soft keyboard stays open because the
+    // input keeps focus. Blur it so the results are the whole screen.
+    inputRef.current?.blur();
   };
 
   const clearSearch = () => {

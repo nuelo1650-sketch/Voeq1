@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { loadVendorStorefront, canVendorBePublic, loadExplore, CATEGORY_ID_TO_SLUG } from "@voeq/data";
+import { getStaffIdentity } from "@/lib/session";
 import { StorefrontHero } from "@/components/storefront/StorefrontHero";
 import { StorefrontGrid } from "@/components/storefront/StorefrontGrid";
 import { StorefrontTrust } from "@/components/storefront/StorefrontTrust";
@@ -24,6 +26,14 @@ interface StorefrontPageProps {
 export async function generateMetadata({ params }: StorefrontPageProps): Promise<Metadata> {
   const { id } = await params;
   const vendor = await loadVendorStorefront(id);
+  // STAFF VIEW (2026-09-07): non-public storefronts are viewable by staff —
+  // but must NEVER be indexed (a pending vendor's page in Google would be a
+  // dead link for everyone else and leak moderation state). Request-scoped
+  // check — no module-level caching (sessions must never leak across requests).
+  const staff = await getStaffIdentity().catch(() => null);
+  if (vendor && !canVendorBePublic(vendor) && staff) {
+    return { title: `${vendor.name} — Staff preview`, robots: { index: false, follow: false } };
+  }
   // SOFT-200 FIX (2026-09-05): unknown/non-public vendor answered HTTP 200 on
   // prod (verified). Root cause: the ROOT app/loading.tsx Suspense boundary
   // flushed a 200 shell before notFound() could abort (same disease as round
@@ -62,9 +72,17 @@ export async function generateMetadata({ params }: StorefrontPageProps): Promise
 export default async function StorefrontPage({ params }: StorefrontPageProps) {
   const { id } = await params;
   const vendor = await loadVendorStorefront(id);
-  // Only render storefronts that pass the derived visibility precondition.
-  // SOFT-200 FIX: see generateMetadata above.
-  if (!vendor || !canVendorBePublic(vendor)) notFound();
+  // STAFF VIEW (2026-09-07, founder: "in the admin I should be able to click
+  // buttons that redirect me to their listings… view and go directly to where
+  // a listing is"): staff reviewing a verification/moderation case hit a 404
+  // here because canVendorBePublic() is status==='live' and queue vendors are
+  // usually pending. A signed-in STAFF identity may view any vendor's
+  // storefront, with a staff-only banner (noindex keeps it out of search).
+  const staff = await getStaffIdentity();
+  const staffView = Boolean(staff) && !vendor?.status?.includes("suspended");
+  // Only public storefronts OR staff views render; everyone else gets 404.
+  if (!vendor || (!canVendorBePublic(vendor) && !staffView)) notFound();
+  const isStaffView = !canVendorBePublic(vendor) && staffView;
 
   // Load recommendations (K2.5 #2, #3)
   const exploreRes = await loadExplore({ query: "", campus: vendor.campus });
@@ -86,6 +104,15 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
 
   return (
     <main data-env="cream" data-testid="storefront-page" style={{ minHeight: "100vh", background: "var(--role-bg)", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)" }}>
+      {/* STAFF-VIEW banner (staff only, never shown to the public): this
+          storefront is not live yet — staff see it for review with direct
+          links to the moderation case. */}
+      {isStaffView && (
+        <div data-testid="staff-view-banner" style={{ maxWidth: 1100, margin: "0 auto var(--space-3)", padding: "10px 14px", borderRadius: 12, border: "1px solid rgba(232,163,61,.4)", background: "rgba(232,163,61,.12)", fontFamily: "var(--role-font-ui)", fontSize: 13, color: "var(--color-forest)" }}>
+          <strong>Staff preview</strong> — this storefront is <strong>{vendor.status}</strong> (not public). Students cannot see this page yet.{" "}
+          <Link href={`/staff/moderation?tab=verifications`} style={{ color: "var(--color-forest-mid, #2d5a3d)", fontWeight: 650, textDecoration: "none" }}>Open verification queue →</Link>
+        </div>
+      )}
       <StorefrontHero vendor={vendor} />
       <StorefrontGrid listings={vendor.listings} />
       <StorefrontTrust vendor={vendor} />

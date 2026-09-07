@@ -157,6 +157,14 @@ export async function POST(req: NextRequest) {
 
   // B3: consent recorded above (or was already current) — route to the app
   // instead of the wall. Anyone still without consent gets the wall.
-  const redirectTo = consentNowCurrent ? "/home" : "/consent";
+  // BECOME-A-VENDOR FIX (2026-09-07, founder: "when you click become a vendor
+  // it redirects you to shopper dashboard first"): signup stores the user's
+  // intent, but this step sent EVERYONE to /home — which bounces users without
+  // a vendorId into SHOPPER onboarding. Vendor-intent users go straight to
+  // vendor onboarding (step 1 creates the vendor and links identity.vendorId).
+  let redirectTo = consentNowCurrent ? "/home" : "/consent";
+  if (consentNowCurrent && !identity.vendorId && identity.intent === "vendor") {
+    redirectTo = "/onboarding/vendor";
+  }
   return NextResponse.json({ ok: true, redirect: redirectTo });
 }

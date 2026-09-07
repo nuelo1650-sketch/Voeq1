@@ -46,6 +46,10 @@ export function LandingHero() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    // KEYPAD FIX (2026-09-07): blur the input so the mobile keyboard closes
+    // when search is tapped (same fix as Explore SearchBar).
+    const active = document.activeElement as HTMLElement | null;
+    if (active instanceof HTMLInputElement) active.blur();
     goExplore(query, selectedCategory);
   };
 
