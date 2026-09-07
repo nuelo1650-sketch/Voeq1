@@ -13,6 +13,14 @@ import {
   Scissors,
   Truck,
   Grid3x3,
+  Croissant,
+  Cookie,
+  Leaf,
+  Dumbbell,
+  Sprout,
+  Gamepad2,
+  Hammer,
+  Guitar,
 } from "lucide-react";
 // BUNDLE FIX (2026-09-05): seed taxonomy from the pure-data submodule —
 // root import ships drizzle + neon to the browser (see explore/Filters.tsx).
@@ -30,6 +38,15 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
   scissors: Scissors,
   truck: Truck,
   grid: Grid3x3,
+  // NICHE EXPANSION (2026-09-07): keys used by the new taxonomy entries.
+  croissant: Croissant,
+  cookie: Cookie,
+  leaf: Leaf,
+  dumbbell: Dumbbell,
+  sprout: Sprout,
+  gamepad: Gamepad2,
+  hammer: Hammer,
+  guitar: Guitar,
 };
 
 /**

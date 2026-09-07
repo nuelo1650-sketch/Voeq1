@@ -72,6 +72,15 @@ const CATEGORIES = [
   { id: "events", name: "Events & Parties", slug: "events" },
   { id: "travel", name: "Travel & Transport", slug: "travel-transport" },
   { id: "student-support", name: "Student Support", slug: "student-support" },
+  // NICHE EXPANSION (2026-09-07) — keep 1:1 with explore-view.ts categories.
+  { id: "pastries", name: "Pastries & Bakes", slug: "pastries" },
+  { id: "drinks", name: "Drinks & Smoothies", slug: "drinks" },
+  { id: "skincare", name: "Skincare", slug: "skincare" },
+  { id: "fitness", name: "Fitness & Gains", slug: "fitness" },
+  { id: "hair", name: "Hair Services", slug: "hair-services" },
+  { id: "gadgets", name: "Gadgets & Accessories", slug: "gadgets" },
+  { id: "crafts", name: "Crafts & handmade", slug: "crafts" },
+  { id: "music", name: "Music & DJ", slug: "music-services" },
   { id: "other", name: "Other", slug: "other" },
 ];
 

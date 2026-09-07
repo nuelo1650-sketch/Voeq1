@@ -206,6 +206,18 @@ export const categories: Category[] = [
   { id: "events", slug: "events", name: "Events & Parties", color: "#C97B9E", icon: "party", vendorCount: 0 },
   { id: "travel", slug: "travel-transport", name: "Travel & Transport", color: "#5B7FB8", icon: "car", vendorCount: 0 },
   { id: "student-support", slug: "student-support", name: "Student Support", color: "#C9A24B", icon: "users", vendorCount: 0 },
+  // NICHE EXPANSION (2026-09-07, founder: "categories are not really specific
+  // — no pastries, no…; some niches have to be specific"): campus-marketplace
+  // niches that were forced into "Food & Drinks" / "Other". ids/slugs follow
+  // the kebab convention; icons must exist in the CategoryGrid iconMap.
+  { id: "pastries", slug: "pastries", name: "Pastries & Bakes", color: "#D98E4A", icon: "croissant", vendorCount: 0 },
+  { id: "drinks", slug: "drinks", name: "Drinks & Smoothies", color: "#5BA8A0", icon: "cookie", vendorCount: 0 },
+  { id: "skincare", slug: "skincare", name: "Skincare", color: "#C97B9E", icon: "leaf", vendorCount: 0 },
+  { id: "fitness", slug: "fitness", name: "Fitness & Gains", color: "#C9A24B", icon: "dumbbell", vendorCount: 0 },
+  { id: "hair", slug: "hair-services", name: "Hair Services", color: "#8B6FB8", icon: "sprout", vendorCount: 0 },
+  { id: "gadgets", slug: "gadgets", name: "Gadgets & Accessories", color: "#5B7FB8", icon: "gamepad", vendorCount: 0 },
+  { id: "crafts", slug: "crafts", name: "Crafts & handmade", color: "#C9A24B", icon: "hammer", vendorCount: 0 },
+  { id: "music", slug: "music-services", name: "Music & DJ", color: "#7A5FB8", icon: "guitar", vendorCount: 0 },
   { id: "other", slug: "other", name: "Other", color: "#7A7A7A", icon: "grid", vendorCount: 0 },
 ];
 
