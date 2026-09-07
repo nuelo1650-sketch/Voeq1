@@ -5,6 +5,7 @@ import { CategoryGrid } from '@/components/landing/CategoryGrid';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import { TrustPillars } from '@/components/landing/TrustPillars';
 import { ForVendorsCTA } from '@/components/landing/ForVendorsCTA';
+import { LandingFAQ } from '@/components/landing/LandingFAQ';
 
 /**
  * Landing — GLASS-WHITE CANVAS REBUILD (2026-08-21)
@@ -33,6 +34,9 @@ export default function Landing() {
         <CategoryGrid />
         <HowItWorks />
         <TrustPillars />
+        {/* LANDING FAQ (2026-09-06): mounted before the final CTA — answer
+            objections, then ask for the signup. */}
+        <LandingFAQ />
         <ForVendorsCTA />
       </main>
     </>

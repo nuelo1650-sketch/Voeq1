@@ -862,14 +862,18 @@
 .landing-faq {
   border-top: 1px solid var(--role-border);
 }
-.faq-list {
+/* SCOPED (2026-09-06): the /help page defines .faq-item/.faq-question/.faq-
+   answer later in this file (button-accordion styles). Without the
+   .landing-faq prefix those rules win the cascade at equal specificity and
+   restyle the landing FAQ into boxes. Prefix raises specificity. */
+.landing-faq .faq-list {
   max-width: 720px;
   margin-inline: auto;
 }
-.faq-item {
+.landing-faq .faq-item {
   border-bottom: 1px solid var(--role-border);
 }
-.faq-question {
+.landing-faq .faq-question {
   font-family: var(--role-font-ui);
   font-size: 1.0625rem;
   font-weight: 600;
@@ -877,16 +881,20 @@
   padding: var(--space-3) 0;
   cursor: pointer;
   list-style: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
 }
-.faq-question::-webkit-details-marker { display: none; }
-.faq-question::after {
+.landing-faq .faq-question::-webkit-details-marker { display: none; }
+.landing-faq .faq-question::after {
   content: "+";
   float: right;
   color: var(--role-text-muted);
   font-weight: 400;
 }
-.faq-item[open] .faq-question::after { content: "\2212"; }
-.faq-answer {
+.landing-faq .faq-item[open] .faq-question::after { content: "\2212"; }
+.landing-faq .faq-answer {
   font-family: var(--role-font-ui);
   font-size: 0.9375rem;
   color: var(--role-text-muted);
@@ -5699,6 +5707,7 @@ header.AppShell,
 .category-grid-section,
 .how-it-works-section,
 .trust-pillars-section,
+.landing-faq,
 .for-vendors-section,
 .landing-footer {
   content-visibility: auto;
