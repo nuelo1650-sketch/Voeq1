@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ExploreListing } from "@voeq/data";
+// A2 (2026-09-06): client-safe category-name helper (pure data — no repo imports).
+import { categoryNameFromSlug } from "@voeq/data/explore-view";
 import { ContourEdge, CampusFingerprint } from "@voeq/contour";
 import { SaveButton } from "@/components/shopper/SaveButton";
 import { LikeButton } from "@/components/shopper/LikeButton";
@@ -665,147 +667,157 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
 
         {/* Meta: title, price, vendor card, message CTA */}
         <div data-testid="listing-detail-meta" style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+          {/* A2 "SOFT EDITORIAL" DETAIL (2026-09-06, founder-picked from
+              detail-a-refined mock): eyebrow → serif title → quiet vendor
+              byline → huge serif price. Calm rounded cards below; the Message
+              CTA floats alone (nothing competes with it); text-only micro
+              actions; facts in a 2x2 grid. Carries the C1 card's DNA. */}
           <div>
+            <div data-testid="listing-detail-catline" style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.1, textTransform: "uppercase", color: "#9a6d1f", fontFamily: "var(--role-font-ui)" }}>
+                {listing.categorySlug ? categoryNameFromSlug(listing.categorySlug) : "Listing"}
+              </span>
+              <span aria-hidden style={{ flex: 1, maxWidth: 60, height: 1, background: "var(--role-border)" }} />
+              {listing.featured && (
+                <span data-testid="listing-detail-featured" style={{ fontSize: 10, fontWeight: 700, letterSpacing: .5, textTransform: "uppercase", color: "#9a6d1f", fontFamily: "var(--role-font-ui)" }}>
+                  Featured
+                </span>
+              )}
+            </div>
             <h1
               data-testid="listing-detail-title"
               style={{
-                fontFamily: "var(--role-font-display)",
-                fontSize: "clamp(2rem, 4vw, 3rem)",
-                lineHeight: 1.05,
+                fontFamily: "var(--font-display, var(--role-font-display))",
+                fontSize: "clamp(1.35rem, 5.2vw, 1.75rem)",
+                lineHeight: 1.14,
                 margin: 0,
-                marginBottom: "var(--space-2)",
-                color: "var(--role-text)",
+                marginBottom: 4,
+                color: "var(--color-forest, var(--role-text))",
+                fontWeight: 600,
               }}
             >
               {listing.title}
             </h1>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", marginBottom: "var(--space-2)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)", marginBottom: 12 }}>
+              by
+              <Link href={`/vendor/${listing.vendorId}`} style={{ color: "var(--color-forest-mid, #2d5a3d)", fontWeight: 650, textDecoration: "none" }}>
+                {listing.vendorName}
+              </Link>
+              {listing.verified && <span data-testid="listing-detail-vbadge" aria-label="Verified vendor" style={{ width: 15, height: 15, borderRadius: 999, background: "var(--color-forest)", color: "var(--color-cream)", fontSize: 9.5, display: "grid", placeItems: "center", fontWeight: 700, flexShrink: 0 }}>✓</span>}
+              <span aria-hidden>·</span>
+              <span>{listing.categorySlug ? categoryNameFromSlug(listing.categorySlug) : "Listing"}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
               <span
                 data-testid="listing-detail-price"
                 style={{
-                  fontFamily: "var(--role-font-mono)",
+                  fontFamily: "var(--font-display, var(--role-font-display))",
                   fontVariantNumeric: "tabular-nums",
-                  fontSize: "1.5rem",
+                  fontSize: "clamp(1.5rem, 6.4vw, 1.9rem)",
                   fontWeight: 700,
-                  color: "var(--role-text)",
+                  color: "var(--color-forest, var(--role-text))",
+                  lineHeight: 1,
                 }}
               >
                 {formatPrice(listing.priceMinor)}
+                {typeof listing.priceMaxMinor === "number" && listing.priceMaxMinor > listing.priceMinor ? (
+                  <small style={{ fontFamily: "var(--role-font-ui)", fontSize: 12, fontWeight: 500, color: "var(--role-text-muted)" }}> – {formatPrice(listing.priceMaxMinor)}</small>
+                ) : null}
               </span>
+              {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
+                <span data-testid="listing-detail-rating" style={{ fontSize: 12.5, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
+                  <span style={{ color: "var(--color-amber)" }}>★</span> {listing.vendorRatingAvg.toFixed(1)} ({listing.vendorRatingCount})
+                </span>
+              ) : (
+                <span data-testid="listing-detail-rating-empty" style={{ fontSize: 10, fontWeight: 650, color: "#9a6d1f", background: "rgba(232,163,61,.14)", padding: "3px 10px", borderRadius: 999, fontFamily: "var(--role-font-ui)" }}>New</span>
+              )}
               {listing.availability && (
                 <span
                   data-testid="listing-detail-availability"
-                  style={{ fontSize: "12px", padding: "4px 10px", border: "1px solid var(--role-border)", borderRadius: 999, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}
+                  style={{ fontSize: "11px", fontWeight: 600, padding: "4px 10px", border: "1px solid var(--role-border)", borderRadius: 999, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}
                 >
                   {AVAIL_LABEL[listing.availability]}
                 </span>
               )}
             </div>
-
-            <div
-              data-testid="listing-detail-trust"
-              style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", fontSize: "13px", color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}
-            >
-              {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
-                <span data-testid="listing-detail-rating">★ {listing.vendorRatingAvg.toFixed(1)} <span style={{ color: "var(--role-text-muted)", fontSize: 14 }}>({listing.vendorRatingCount})</span></span>
-              ) : (
-                <span data-testid="listing-detail-rating-empty" style={{ color: "var(--role-text-muted)", fontSize: 14 }}>New</span>
-              )}
-              {listing.featured && (
-                <span data-testid="listing-detail-featured" style={{ color: "var(--role-gold)" }}>
-                  Featured
-                </span>
-              )}
-            </div>
-
-            {listing.description && (
-              <p style={{ 
-                marginTop: "var(--space-2)", 
-                fontSize: "15px", 
-                lineHeight: 1.6,
-                color: "var(--role-text)",
-                fontFamily: "var(--role-font-ui)",
-              }}>
-                {listing.description}
-              </p>
-            )}
           </div>
 
-          {/* Vendor mini-card (K2.3 #2) */}
-          <div 
-            data-testid="listing-detail-vendor-card"
-            style={{
-              border: "1px solid var(--role-border)",
-              borderRadius: "var(--radius-lg)",
-              padding: "var(--space-3)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-2)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-              <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                background: "var(--color-forest)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontFamily: "var(--role-font-ui)",
-                fontWeight: 600,
-                fontSize: "18px",
-              }}>
-                {listing.vendorName.charAt(0).toUpperCase()}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: "16px", fontWeight: 600, color: "var(--role-text)", fontFamily: "var(--role-font-ui)" }}>
-                  {listing.vendorName}
-                </div>
-              </div>
-            </div>
-            <Link
-              href={`/vendor/${listing.vendorId}`}
-              style={{
-                fontSize: "14px",
-                fontWeight: 500,
-                color: "var(--color-forest)",
-                textDecoration: "none",
-                fontFamily: "var(--role-font-ui)",
-              }}
-            >
-              View storefront →
-            </Link>
-          </div>
+          {/* A2: the vendor card is retired — the byline in the head carries
+              the vendor (name + verified + campus, linked to the storefront).
+              One calm surface instead of a box inside a box. */}
 
-          {/* Message CTA - primary forest green (K2.3 #3, #6) */}
+          {/* Message CTA — floats ALONE (A2): nothing competes with it. */}
           <button 
             data-testid="listing-detail-message-cta" 
             onClick={handleMessageVendor}
             disabled={authLoading}
             style={{
               width: "100%",
-              padding: "16px 28px",
-              fontSize: "16px",
-              fontWeight: 600,
+              padding: "15px 28px",
+              fontSize: "15px",
+              fontWeight: 650,
               fontFamily: "var(--role-font-ui)",
               background: "var(--color-forest)",
-              color: "white",
+              color: "var(--color-cream)",
               border: "none",
-              borderRadius: "var(--radius)",
+              borderRadius: 999,
               cursor: authLoading ? "wait" : "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 10,
+              gap: 9,
               opacity: authLoading ? 0.6 : 1,
+              boxShadow: "0 6px 18px rgba(15,42,29,.22)",
             }}
           >
-            <MessageCircle size={20} />
+            <MessageCircle size={19} />
             Message {listing.vendorName}
           </button>
+
+          {/* A2: micro-actions — the existing Share/Save/Like/Report row (kept
+              in the gallery column below) IS the quiet action row; the
+              buttons get their text-less pill treatment via
+              .listing-detail-actions styles in globals.css. Nothing else
+              needed here. */}
+
+          {/* A2: About this listing — calm rounded card. */}
+          {listing.description && (
+            <div data-testid="listing-detail-about" style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 15, padding: "13px 15px" }}>
+              <h5 style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#9a6d1f", margin: "0 0 7px", fontFamily: "var(--role-font-ui)" }}>
+                About this listing
+              </h5>
+              <p style={{ fontSize: 13.5, lineHeight: 1.62, color: "var(--role-text)", fontFamily: "var(--role-font-ui)", margin: 0 }}>
+                {listing.description}
+              </p>
+            </div>
+          )}
+
+          {/* A2: facts — neat 2x2 grid (campus / hours / pickup / vendor). */}
+          <div data-testid="listing-detail-facts" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7 }}>
+            <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 12, padding: "9px 12px" }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: .8, textTransform: "uppercase", color: "#9a6d1f", fontFamily: "var(--role-font-ui)", marginBottom: 2 }}>CATEGORY</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--color-forest)", fontFamily: "var(--role-font-ui)" }}>{listing.categorySlug ? categoryNameFromSlug(listing.categorySlug) : "—"}</div>
+            </div>
+            <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 12, padding: "9px 12px" }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: .8, textTransform: "uppercase", color: "#9a6d1f", fontFamily: "var(--role-font-ui)", marginBottom: 2 }}>VENDOR</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--color-forest)", fontFamily: "var(--role-font-ui)", display: "flex", alignItems: "center", gap: 5 }}>
+                {listing.vendorName}
+                {listing.verified && <span aria-label="Verified" style={{ width: 13, height: 13, borderRadius: 999, background: "var(--color-forest)", color: "var(--color-cream)", fontSize: 8.5, display: "grid", placeItems: "center", fontWeight: 700 }}>✓</span>}
+              </div>
+            </div>
+            <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 12, padding: "9px 12px" }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: .8, textTransform: "uppercase", color: "#9a6d1f", fontFamily: "var(--role-font-ui)", marginBottom: 2 }}>HOURS</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--color-forest)", fontFamily: "var(--role-font-ui)" }}>
+                {listing.vendorHours ? `${listing.vendorHours.open}–${listing.vendorHours.close}` : "Ask vendor"}
+              </div>
+            </div>
+            <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 12, padding: "9px 12px" }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: .8, textTransform: "uppercase", color: "#9a6d1f", fontFamily: "var(--role-font-ui)", marginBottom: 2 }}>CONTACT</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--color-forest)", fontFamily: "var(--role-font-ui)" }}>
+                {listing.availability ? AVAIL_LABEL[listing.availability] : "In-app messages"}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -929,8 +941,12 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
               prev/next row (the first v2 cut let the footer cover the last
               ~250px of a tall photo). */}
           <div style={{ margin: "0 auto", width: "100%", maxWidth: 900, padding: "0 8px 170px" }}>
+            {/* SPEED (2026-09-06, founder: lightbox 'a bit slow'): the track
+                loads w_900 and the lightbox capped at 900px wide — requesting
+                w_1200 here was a DIFFERENT URL = a fresh multi-MB download on
+                every open. Same URL as the track = opens from cache. */}
             <img
-              src={cdnTransform(galleryImages[selectedImageIndex], 1200)}
+              src={cdnTransform(galleryImages[selectedImageIndex], 900)}
               alt={`${listing.title} — photo ${selectedImageIndex + 1}`}
               onClick={(e) => e.stopPropagation()}
               style={{

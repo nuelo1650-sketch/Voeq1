@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq — Listing detail A-refinements</title>
+<style>
+  :root {
+    --forest: #0F2A1D;
+    --forest-mid: #2d5a3d;
+    --amber: #E8A33D;
+    --amber-soft: rgba(232,163,61,.14);
+    --cream: #f6f1e6;
+    --ink: #23201a;
+    --ink-muted: #6f6a5e;
+    --ink-subtle: #d9d2c3;
+    --surface: #fffef9;
+    --display: 'Fraunces', 'Playfair Display', Georgia, serif;
+    --ui: 'Inter', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #e5dfd2; font-family: var(--ui); padding: 28px 16px 90px; color: var(--ink); }
+  .wrap { max-width: 1240px; margin: 0 auto; }
+  h1 { font-family: var(--display); font-size: 26px; color: var(--forest); margin-bottom: 6px; }
+  .lede { color: var(--ink-muted); font-size: 14px; margin-bottom: 28px; max-width: 760px; }
+  .row-of-variants { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 26px; }
+  .variant h2 { font-family: var(--display); font-size: 18px; color: var(--forest); margin-bottom: 3px; }
+  .variant .why { font-size: 12.5px; color: var(--ink-muted); margin-bottom: 14px; line-height: 1.55; }
+  .phone { width: 340px; max-width: 100%; margin: 0 auto; background: var(--cream); border-radius: 26px; border: 10px solid #1c1c1c; overflow: hidden; box-shadow: 0 18px 44px rgba(15,42,29,.22); }
+  .screen { overflow-y: auto; max-height: 800px; }
+  .pics.food { background: linear-gradient(135deg, #a3653b 0%, #7d4a28 100%); }
+  .serif-title { font-family: var(--display); font-weight: 600; color: var(--forest); line-height: 1.14; }
+  .serif-price { font-family: var(--display); font-weight: 700; color: var(--forest); font-variant-numeric: tabular-nums; }
+  .catline { display: flex; align-items: center; gap: 7px; }
+  .catname { font-size: 10px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: #9a6d1f; }
+  .catrule { flex: 1; height: 1px; background: var(--ink-subtle); }
+  .vbadge { width: 15px; height: 15px; border-radius: 999px; background: var(--forest); color: var(--cream); font-size: 9.5px; display: grid; place-items: center; font-weight: 700; flex-shrink: 0; }
+  .imgpill { position: absolute; top: 10px; left: 10px; background: var(--amber); color: var(--forest); font-size: 9.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; }
+  .openpill { font-size: 10px; font-weight: 700; color: #2d5a3d; background: rgba(45,90,61,.1); padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+
+  /* ============ A1 — "Editorial Lux" ============ */
+  .a1 .back { display: block; padding: 12px 16px 8px; font-size: 13px; font-weight: 600; color: var(--forest-mid); text-decoration: none; }
+  .a1 .gallery { position: relative; aspect-ratio: 4/3.2; margin: 0 16px; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 28px rgba(15,42,29,.14); }
+  .a1 .gallery .ph { position: absolute; inset: 0; display: grid; place-items: center; font-size: 52px; }
+  .a1 .heart { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 999px; background: rgba(246,241,230,.95); display: grid; place-items: center; font-size: 16px; color: var(--forest); box-shadow: 0 2px 8px rgba(15,42,29,.18); }
+  .a1 .dots { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: center; gap: 5px; }
+  .a1 .dots span { width: 6px; height: 6px; border-radius: 999px; background: rgba(246,241,230,.5); }
+  .a1 .dots span.on { background: #fff; }
+  .a1 .head { padding: 16px 16px 0; }
+  .a1 .eyebrow-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .a1 .eyebrow-row .catrule { max-width: 60px; }
+  .a1 .title { font-size: 27px; margin-bottom: 10px; }
+  .a1 .statrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .a1 .rating { font-size: 13px; color: var(--ink-muted); }
+  .a1 .rating b { color: var(--amber); font-size: 15px; }
+  .a1 .sep { width: 1px; height: 14px; background: var(--ink-subtle); }
+  .a1 .saves { font-size: 12px; color: var(--ink-muted); }
+  .a1 .buybar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--surface); border: 1px solid rgba(30,59,47,.10); border-radius: 16px; padding: 13px 15px; margin: 0 16px 14px; box-shadow: 0 2px 8px rgba(15,42,29,.05); }
+  .a1 .buybar .price { font-size: 27px; }
+  .a1 .buybar .price small { display: block; font-family: var(--ui); font-size: 10.5px; color: var(--ink-muted); font-weight: 500; margin-top: 2px; }
+  .a1 .buybar .cta { background: var(--forest); color: var(--cream); border: none; border-radius: 999px; padding: 13px 26px; font-size: 14.5px; font-weight: 650; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .a1 .desc { padding: 0 16px 16px; font-size: 14px; line-height: 1.65; color: var(--ink); }
+  .a1 .facts { display: flex; gap: 8px; padding: 0 16px 16px; flex-wrap: wrap; }
+  .a1 .fact { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--forest-mid); background: var(--surface); border: 1px solid rgba(30,59,47,.09); padding: 6px 11px; border-radius: 999px; }
+  .a1 .vendor { margin: 0 16px 14px; background: var(--forest); border-radius: 16px; padding: 14px 15px; display: flex; align-items: center; gap: 12px; color: var(--cream); }
+  .a1 .vava { width: 48px; height: 48px; border-radius: 999px; background: linear-gradient(135deg, #a3653b, #7d4a28); display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 17px; flex-shrink: 0; border: 2px solid rgba(246,241,230,.35); }
+  .a1 .vmeta { flex: 1; min-width: 0; }
+  .a1 .vname { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 650; color: #fff; font-family: var(--display); }
+  .a1 .vcampus { font-size: 11.5px; color: rgba(246,241,230,.7); margin-top: 2px; }
+  .a1 .vlink { font-size: 12px; font-weight: 650; color: var(--amber); text-decoration: none; white-space: nowrap; }
+  .a1 .actions { display: flex; gap: 9px; padding: 0 16px 16px; }
+  .a1 .act { flex: 1; padding: 11px 0; border-radius: 999px; border: 1px solid var(--ink-subtle); background: transparent; font-size: 12.5px; font-weight: 600; color: var(--ink-muted); display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+  /* ============ A2 — "Soft editorial" ============ */
+  .a2 .back { display: block; padding: 12px 16px 6px; font-size: 13px; font-weight: 600; color: var(--forest-mid); text-decoration: none; }
+  .a2 .gallery { position: relative; aspect-ratio: 4/3; margin: 0 12px; border-radius: 20px; overflow: hidden; border: 1px solid rgba(30,59,47,.1); }
+  .a2 .gallery .ph { position: absolute; inset: 0; display: grid; place-items: center; font-size: 48px; }
+  .a2 .heart { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 999px; background: rgba(246,241,230,.95); display: grid; place-items: center; font-size: 15px; color: var(--forest); }
+  .a2 .dots { position: absolute; bottom: 9px; left: 0; right: 0; display: flex; justify-content: center; gap: 5px; }
+  .a2 .dots span { width: 6px; height: 6px; border-radius: 999px; background: rgba(246,241,230,.5); }
+  .a2 .dots span.on { background: #fff; }
+  .a2 .head { padding: 15px 16px 0; }
+  .a2 .title { font-size: 25px; margin-bottom: 3px; }
+  .a2 .vendorline { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-muted); margin-bottom: 12px; }
+  .a2 .vendorline a { color: var(--forest-mid); font-weight: 650; text-decoration: none; }
+  .a2 .pricerow { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+  .a2 .price { font-size: 28px; }
+  .a2 .price small { font-family: var(--ui); font-size: 11px; color: var(--ink-muted); font-weight: 500; }
+  .a2 .cta { margin: 0 16px 12px; width: calc(100% - 32px); background: var(--forest); color: var(--cream); border: none; border-radius: 999px; padding: 15px 28px; font-size: 15px; font-weight: 650; display: flex; align-items: center; justify-content: center; gap: 9px; }
+  .a2 .acts { display: flex; justify-content: center; gap: 14px; padding: 0 16px 16px; }
+  .a2 .act { background: none; border: none; font-size: 12px; font-weight: 600; color: var(--ink-muted); display: flex; align-items: center; gap: 5px; }
+  .a2 .card { margin: 0 16px 14px; background: var(--surface); border: 1px solid rgba(30,59,47,.09); border-radius: 15px; padding: 13px 15px; }
+  .a2 .card h5 { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #9a6d1f; margin-bottom: 7px; }
+  .a2 .desc { font-size: 13.5px; line-height: 1.62; color: var(--ink); }
+  .a2 .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 0 16px 16px; }
+  .a2 .fact { background: var(--surface); border: 1px solid rgba(30,59,47,.08); border-radius: 12px; padding: 9px 12px; }
+  .a2 .fact .k { font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #9a6d1f; margin-bottom: 2px; }
+  .a2 .fact .v { font-size: 12.5px; font-weight: 600; color: var(--forest); }
+
+  /* ============ A3 — "Magazine spread" ============ */
+  .a3 .topstrip { background: var(--forest); padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .a3 .topstrip .back { color: var(--cream); font-size: 13px; font-weight: 600; text-decoration: none; }
+  .a3 .topstrip .brand { color: rgba(246,241,230,.6); font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; }
+  .a3 .gallery { position: relative; aspect-ratio: 4/3; }
+  .a3 .gallery .ph { position: absolute; inset: 0; display: grid; place-items: center; font-size: 52px; }
+  .a3 .heart { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 999px; background: rgba(246,241,230,.95); display: grid; place-items: center; font-size: 16px; color: var(--forest); }
+  .a3 .imgpill { top: auto; bottom: 10px; left: 10px; }
+  .a3 .headwrap { position: relative; background: var(--cream); margin-top: -22px; border-radius: 22px 22px 0 0; padding: 20px 16px 14px; }
+  .a3 .headwrap .catline { margin-bottom: 8px; }
+  .a3 .title { font-size: 26px; margin-bottom: 6px; }
+  .a3 .statrow { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .a3 .rating { font-size: 12.5px; color: var(--ink-muted); }
+  .a3 .rating b { color: var(--amber); }
+  .a3 .sep { width: 1px; height: 12px; background: var(--ink-subtle); }
+  .a3 .pricerow { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface); border: 1px solid rgba(30,59,47,.1); border-radius: 16px; padding: 12px 14px; margin-bottom: 14px; }
+  .a3 .price { font-size: 26px; }
+  .a3 .price small { font-family: var(--ui); font-size: 10.5px; color: var(--ink-muted); display: block; font-weight: 500; }
+  .a3 .cta { background: var(--amber); color: var(--forest); border: none; border-radius: 999px; padding: 13px 24px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .a3 .desc { font-size: 13.5px; line-height: 1.65; color: var(--ink); margin-bottom: 14px; padding: 0 2px; }
+  .a3 .vendor { background: var(--surface); border: 1px solid rgba(30,59,47,.09); border-radius: 15px; padding: 12px 14px; display: flex; align-items: center; gap: 11px; margin-bottom: 14px; }
+  .a3 .vava { width: 44px; height: 44px; border-radius: 999px; background: linear-gradient(135deg, #a3653b, #7d4a28); display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+  .a3 .vname { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 650; color: var(--forest); }
+  .a3 .vcampus { font-size: 11px; color: var(--ink-muted); margin-top: 1px; }
+  .a3 .actions { display: flex; gap: 8px; padding-bottom: 16px; }
+  .a3 .act { flex: 1; padding: 10px 0; border-radius: 999px; border: 1px solid var(--ink-subtle); background: transparent; font-size: 12px; font-weight: 600; color: var(--ink-muted); display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+  .verdict { background: var(--forest); color: var(--cream); border-radius: 14px; padding: 17px 22px; font-size: 13.5px; line-height: 1.65; margin-top: 34px; }
+  .verdict b { color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>A, sharpened — three takes</h1>
+  <p class="lede">Same C1 DNA, richer execution. A1 deepens the commerce (buy bar + fact chips + dark vendor card). A2 softens it (everything in calm rounded cards, CTA floating alone, quiet text actions). A3 goes magazine (dark strip + overlap sheet + amber CTA). All keep the lightbox v2 + swipe dots + comments windowing already shipped.</p>
+
+  <div class="row-of-variants">
+
+    <!-- ============ A1 ============ -->
+    <section class="variant a1">
+      <h2>A1 — "Editorial Lux"</h2>
+      <p class="why">A + the C buy-bar, plus: rating/saves stat row under the title, fact chips (campus, hours, delivery), and a DARK forest vendor card — the strongest vendor block of any variant. Most premium, most information — three sections before the fold.</p>
+      <div class="phone"><div class="screen">
+        <a class="back">← Back</a>
+        <div class="gallery">
+          <div class="ph pics food">🍛</div>
+          <div class="imgpill">FEATURED</div>
+          <div class="heart">♥</div>
+          <div class="dots"><span class="on"></span><span></span><span></span></div>
+        </div>
+        <div class="head">
+          <div class="eyebrow-row"><span class="catname">FOOD & DRINKS</span><span class="catrule"></span><span class="openpill">● OPEN NOW</span></div>
+          <div class="title serif-title">Jollof rice party tray — serves 10</div>
+          <div class="statrow">
+            <span class="rating"><b>★</b> 4.8 <span>(23)</span></span>
+            <span class="sep"></span>
+            <span class="saves">♡ 18 saves this week</span>
+          </div>
+        </div>
+        <div class="buybar">
+          <span class="price serif-price">₦12,500 <small>per tray · NMU Okerenkoko</small></span>
+          <button class="cta">💬 Message vendor</button>
+        </div>
+        <p class="desc">Hot jollof rice served fresh every evening. Party packs and small chops available for birthdays and hostel events. Order 24h ahead.</p>
+        <div class="facts">
+          <span class="fact">📍 NMU Okerenkoko</span>
+          <span class="fact">🕐 Evenings · 4–10pm</span>
+          <span class="fact">🛵 Hostel pickup</span>
+          <span class="fact">✓ Verified vendor</span>
+        </div>
+        <div class="vendor">
+          <div class="vava">MT</div>
+          <div class="vmeta">
+            <div class="vname">Mama Tuli <span class="vbadge">✓</span></div>
+            <div class="vcampus">Campus favorite · 23 reviews</div>
+          </div>
+          <a class="vlink">Storefront →</a>
+        </div>
+        <div class="actions">
+          <button class="act">↗ Share</button>
+          <button class="act">♡ Save</button>
+          <button class="act">👍 Like</button>
+          <button class="act">⚑ Report</button>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ============ A2 ============ -->
+    <section class="variant a2">
+      <h2>A2 — "Soft editorial"</h2>
+      <p class="why">The calmest premium: serif title → quiet vendor line → huge price → the Message CTA floating ALONE (nothing competes with it) → tiny text-only actions. Facts live in a neat 2×2 grid. Fewer boxes = more breathing room; the most boutique feeling.</p>
+      <div class="phone"><div class="screen">
+        <a class="back">← Back</a>
+        <div class="gallery">
+          <div class="ph pics food">🍛</div>
+          <div class="imgpill">FEATURED</div>
+          <div class="heart">♥</div>
+          <div class="dots"><span class="on"></span><span></span><span></span></div>
+        </div>
+        <div class="head">
+          <div class="catline" style="margin-bottom:7px"><span class="catname">FOOD & DRINKS</span><span class="catrule"></span></div>
+          <div class="title serif-title">Jollof rice party tray — serves 10</div>
+          <div class="vendorline">by <a>Mama Tuli</a> <span class="vbadge">✓</span> · NMU Okerenkoko</div>
+          <div class="pricerow">
+            <span class="price serif-price">₦12,500 <small>per tray</small></span>
+            <span class="rating" style="font-size:12.5px;color:var(--ink-muted)"><b style="color:var(--amber)">★</b> 4.8 (23)</span>
+          </div>
+        </div>
+        <button class="cta">💬 Message Mama Tuli</button>
+        <div class="acts">
+          <button class="act">↗ Share</button>
+          <button class="act">♡ Save</button>
+          <button class="act">👍 Like</button>
+          <button class="act">⚑ Report</button>
+        </div>
+        <div class="card">
+          <h5>About this listing</h5>
+          <p class="desc">Hot jollof rice served fresh every evening. Party packs and small chops available for birthdays and hostel events. Order 24h ahead.</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><div class="k">CAMPUS</div><div class="v">NMU Okerenkoko</div></div>
+          <div class="fact"><div class="k">HOURS</div><div class="v">Evenings · 4–10pm</div></div>
+          <div class="fact"><div class="k">PICKUP</div><div class="v">Hostel delivery</div></div>
+          <div class="fact"><div class="k">VENDOR</div><div class="v">Mama Tuli ✓</div></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ============ A3 ============ -->
+    <section class="variant a3">
+      <h2>A3 — "Magazine spread"</h2>
+      <p class="why">The most designed: dark forest strip up top (back + VOEQ mark), full-bleed photo, then a rounded sheet that OVERLAPS the photo (-22px) carrying everything — with an AMBER Message CTA (the only place amber is a button). Editorial like a food-magazine spread. Biggest personality; most opinionated.</p>
+      <div class="phone"><div class="screen">
+        <div class="topstrip">
+          <a class="back">← Back</a>
+          <span class="brand">VOEQ · LISTING</span>
+        </div>
+        <div class="gallery">
+          <div class="ph pics food">🍛</div>
+          <div class="heart">♥</div>
+          <span class="imgpill">FEATURED</span>
+        </div>
+        <div class="headwrap">
+          <div class="catline"><span class="catname">FOOD & DRINKS</span><span class="catrule"></span></div>
+          <div class="title serif-title">Jollof rice party tray — serves 10</div>
+          <div class="statrow">
+            <span class="rating"><b>★</b> 4.8 (23)</span>
+            <span class="sep"></span>
+            <span class="saves" style="font-size:12px;color:var(--ink-muted)">♡ 18 saves</span>
+            <span class="sep"></span>
+            <span class="openpill">OPEN NOW</span>
+          </div>
+          <div class="pricerow">
+            <span class="price serif-price">₦12,500 <small>per tray · NMU Okerenkoko</small></span>
+            <button class="cta">💬 Message</button>
+          </div>
+          <p class="desc">Hot jollof rice served fresh every evening. Party packs and small chops available for birthdays and hostel events. Order 24h ahead.</p>
+          <div class="vendor">
+            <div class="vava">MT</div>
+            <div style="flex:1">
+              <div class="vname">Mama Tuli <span class="vbadge">✓</span></div>
+              <div class="vcampus">NMU Okerenkoko · 23 reviews</div>
+            </div>
+            <a class="vlink" style="font-size:12px;font-weight:650;color:var(--forest-mid);text-decoration:none">Storefront →</a>
+          </div>
+          <div class="actions">
+            <button class="act">↗ Share</button>
+            <button class="act">♡ Save</button>
+            <button class="act">👍 Like</button>
+            <button class="act">⚑ Report</button>
+          </div>
+        </div>
+      </div></div>
+    </section>
+  </div>
+
+  <div class="verdict">
+    <b>My ranking: A1 > A3 > A2.</b> A1 is the most complete product page — the dark vendor card grounds it, the buy bar converts, facts are scannable. A3 has the most personality (the overlap sheet is genuinely elegant) but the dark strip eats a little content space. A2 is beautiful but the quietest — it hides the vendor. If you want the $100k feel with real commerce power: <b>A1</b>. Say the word (or mix — A3's overlap on A1's body works).
+  </div>
+</div>
+</body>
+</html>
