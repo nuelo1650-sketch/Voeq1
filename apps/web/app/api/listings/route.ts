@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockVendorRepo, mockListingsRepo, logAudit, MAX_IMAGES_PER_LISTING } from "@voeq/data/server";
-import { goLive } from "@voeq/data";
+import { mockAuthRepo, mockVendorRepo, mockListingsRepo, logAudit, goLive, MAX_IMAGES_PER_LISTING } from "@voeq/data/server";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
@@ -87,8 +86,11 @@ export async function POST(req: NextRequest) {
   // not a wall). Auto-promote via the same goLive() transition the manual
   // button used, so the identity role widens identically and Explore/public
   // surfaces show the listing immediately. Idempotent: live vendors no-op.
+  // SAFETY: ONLY pending_listings promotes — a suspended vendor must NEVER be
+  // resurrected by posting (sessions are revoked on suspension, but the guard
+  // is exact anyway).
   let promoted = false;
-  if (vendor?.status !== "live") {
+  if (vendor?.status === "pending_listings") {
     const result = await goLive(identity.id);
     promoted = result?.ok ?? false;
   }
