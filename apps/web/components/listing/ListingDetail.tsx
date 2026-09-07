@@ -48,6 +48,20 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
+  // LIGHTBOX v2 (2026-09-06): lock the page behind the lightbox (the page used
+  // to keep scrolling under the modal) + Esc closes it.
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightboxOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [lightboxOpen]);
+
   // Share
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
   const [showShareButtons, setShowShareButtons] = useState(false);
@@ -849,98 +863,155 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
         <CommentForm listingId={listing.id} />
       </section>
 
-      {/* Lightbox modal */}
+      {/* LIGHTBOX v2 (2026-09-06, founder bug report): the old modal centered
+          the image with flex + maxWidth/maxHeight 90% — a tall photo overflowed
+          BOTH ends of the fixed container and was unscrollable (the flexbox
+          centering clip trap), and the nav buttons overlapped the image on
+          phones. Now: the image renders at full container width at its natural
+          aspect inside an overflow-y:auto sheet — tall photos SCROLL to see
+          the whole thing — with the buttons floating clear of the content. */}
       {lightboxOpen && galleryImages.length > 0 && (
         <div
+          data-testid="listing-lightbox"
           onClick={() => setLightboxOpen(false)}
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0, 0, 0, 0.95)",
+            background: "rgba(15, 20, 16, 0.97)",
             zIndex: 9999,
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "var(--space-4)",
+            flexDirection: "column",
           }}
         >
-          <button
-            onClick={() => setLightboxOpen(false)}
+          {/* Sticky header row: counter + close — stays reachable while the
+              image scrolls beneath it. */}
+          <div
             style={{
-              position: "absolute",
-              top: 20,
-              right: 20,
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "none",
-              color: "white",
-              cursor: "pointer",
-              padding: 12,
-              borderRadius: "50%",
+              position: "sticky",
+              top: 0,
+              zIndex: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "10px 14px",
+              background: "linear-gradient(180deg, rgba(15,20,16,.85), transparent)",
+            }}
+          >
+            <span style={{ color: "rgba(246,241,230,.75)", fontSize: 12.5, fontFamily: "var(--role-font-ui)" }}>
+              {galleryImages.length > 1 ? `Photo ${selectedImageIndex + 1} of ${galleryImages.length}` : "Photo"}
+            </span>
+            <button
+              onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }}
+              aria-label="Close"
+              style={{
+                background: "rgba(246,241,230,.12)",
+                border: "none",
+                color: "var(--color-cream)",
+                cursor: "pointer",
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <X size={22} />
+            </button>
+          </div>
+
+          {/* The image: full-width at natural aspect; the sheet scrolls when
+              the photo is taller than the screen. Bottom padding reserves the
+              footer's height so the photo's tail scrolls CLEAR of the sticky
+              prev/next row (the first v2 cut let the footer cover the last
+              ~250px of a tall photo). */}
+          <div style={{ margin: "0 auto", width: "100%", maxWidth: 900, padding: "0 8px 170px" }}>
+            <img
+              src={cdnTransform(galleryImages[selectedImageIndex], 1200)}
+              alt={`${listing.title} — photo ${selectedImageIndex + 1}`}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                display: "block",
+                width: "100%",
+                height: "auto",
+                borderRadius: 10,
+                touchAction: "pan-y",
+              }}
+            />
+          </div>
+
+          {/* Footer row: prev/next ride BELOW the image (never overlapping
+              the photo) + a swipe hint when there are multiple photos. */}
+          <div
+            style={{
+              position: "sticky",
+              bottom: 0,
+              zIndex: 2,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              gap: 14,
+              padding: "12px 14px 18px",
+              background: "linear-gradient(0deg, rgba(15,20,16,.85), transparent)",
             }}
           >
-            <X size={24} />
-          </button>
-
-          {galleryImages.length > 1 && (
-            <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : galleryImages.length - 1));
-                }}
-                style={{
-                  position: "absolute",
-                  left: 20,
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "none",
-                  color: "white",
-                  cursor: "pointer",
-                  padding: 12,
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedImageIndex((prev) => (prev < galleryImages.length - 1 ? prev + 1 : 0));
-                }}
-                style={{
-                  position: "absolute",
-                  right: 20,
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "none",
-                  color: "white",
-                  cursor: "pointer",
-                  padding: 12,
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <ChevronRight size={24} />
-              </button>
-            </>
-          )}
-
-          <img
-            src={galleryImages[selectedImageIndex]}
-            alt={listing.title}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: "90%",
-              maxHeight: "90%",
-              objectFit: "contain",
-            }}
-          />
+            {galleryImages.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : galleryImages.length - 1));
+                  }}
+                  aria-label="Previous photo"
+                  style={{
+                    background: "rgba(246,241,230,.12)",
+                    border: "none",
+                    color: "var(--color-cream)",
+                    cursor: "pointer",
+                    padding: "10px 18px",
+                    borderRadius: 999,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontFamily: "var(--role-font-ui)",
+                    fontSize: 13,
+                    fontWeight: 600,
+                  }}
+                >
+                  <ChevronLeft size={16} /> Prev
+                </button>
+                <span style={{ color: "rgba(246,241,230,.55)", fontSize: 12, fontFamily: "var(--role-font-ui)" }}>
+                  or swipe the listing photos
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImageIndex((prev) => (prev < galleryImages.length - 1 ? prev + 1 : 0));
+                  }}
+                  aria-label="Next photo"
+                  style={{
+                    background: "rgba(246,241,230,.12)",
+                    border: "none",
+                    color: "var(--color-cream)",
+                    cursor: "pointer",
+                    padding: "10px 18px",
+                    borderRadius: 999,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontFamily: "var(--role-font-ui)",
+                    fontSize: 13,
+                    fontWeight: 600,
+                  }}
+                >
+                  Next <ChevronRight size={16} />
+                </button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
