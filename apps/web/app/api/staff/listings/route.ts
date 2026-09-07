@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   mockListingsRepo,
   mockVendorRepo,
+  mockNotificationRepo,
   logAudit,
-  notifyContentAction,
 } from "@voeq/data";
 import { requireCapability } from "@/lib/session";
 
@@ -100,16 +100,24 @@ export async function POST(req: NextRequest) {
 
   // Staff batch 1 (P2): the vendor learns WHY, verbatim, with an appeal path.
   // Resolve listing → vendor → identity; skip silently if the chain is broken.
+  // FEATURE DESTINATION FIX (2026-09-07): a "you're featured" notice is good
+  // news — send type "system" + refId=listing so the notification center routes
+  // the vendor to their dashboard (they can see the featured badge on their
+  // listing), instead of /settings (the account_action enforcement target).
   if (action === "remove" || action === "feature") {
     const vendor = await mockVendorRepo.getById(listing.vendorId).catch(() => null);
     if (vendor?.identityId) {
-      await notifyContentAction({
+      await mockNotificationRepo.create({
         recipientId: vendor.identityId,
+        type: action === "feature" ? "system" : "account_action",
         title:
           action === "remove"
             ? `Your listing "${listing.title}" was removed`
-            : `Your listing "${listing.title}" is now featured`,
-        reason: reason || undefined,
+            : `Your listing "${listing.title}" is now featured ⭐`,
+        body:
+          action === "feature"
+            ? "Voeq's team featured your listing — it will appear at the top of Explore and in the landing trending rail for 30 days."
+            : `Your listing was removed by moderation.${reason ? ` Reason: ${reason}` : ""}`,
         refId: listing.id,
       }).catch(() => undefined);
     }

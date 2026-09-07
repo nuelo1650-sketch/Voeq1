@@ -17,7 +17,7 @@ import { ContextBack } from "@/components/shopper/ContextBack";
 import { ReportForm } from "@/components/shopper/ReportForm";
 import { usePendingIntent } from "@/lib/usePendingIntent";
 import { trackEvent } from "@/lib/track";
-import { Heart, Share2, Flag, X, ChevronLeft, ChevronRight, MessageCircle, Link2 } from "lucide-react";
+import { Heart, Share2, Flag, X, ChevronLeft, ChevronRight, MessageCircle, Link2, Store } from "lucide-react";
 
 /**
  * ListingDetail — K2.3 enhanced with gallery, vendor card, recommendation rows (Doc 04 PG-PUB-005).
@@ -775,6 +775,35 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
             <MessageCircle size={19} />
             Message {listing.vendorName}
           </button>
+
+          {/* STOREFRONT VISIBILITY (2026-09-07, founder: "'go to storefront'
+              is not very visible in listings"): the byline link was too quiet.
+              A real outlined button under the Message CTA gives the vendor's
+              storefront equal billing — browse the shop, not just one item. */}
+          <Link
+            href={`/vendor/${listing.vendorId}`}
+            data-testid="listing-detail-storefront-cta"
+            style={{
+              width: "100%",
+              padding: "13px 28px",
+              fontSize: "14px",
+              fontWeight: 650,
+              fontFamily: "var(--role-font-ui)",
+              background: "transparent",
+              color: "var(--color-forest, #0F2A1D)",
+              border: "1.5px solid rgba(15,42,29,.25)",
+              borderRadius: 999,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              textDecoration: "none",
+            }}
+          >
+            <Store size={17} />
+            Go to {listing.vendorName}'s storefront
+          </Link>
 
           {/* A2: micro-actions — the existing Share/Save/Like/Report row (kept
               in the gallery column below) IS the quiet action row; the

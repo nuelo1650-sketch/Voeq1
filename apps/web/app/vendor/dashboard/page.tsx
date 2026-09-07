@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireConsent, getStaffIdentity } from "@/lib/session";
 import {
@@ -49,6 +50,13 @@ export default async function VendorDashboardPage() {
   const campus = campusList.find((c) => c.id === vendor.campus);
   const campusName = campus?.name || vendor.campus;
 
+  // OTHERS NICHE NUDGE (2026-09-07): published listings under the "other"
+  // category without a "Niche:" line in their short description — the vendor
+  // picked Other and never said what they actually offer.
+  const otherListings = listings.filter(
+    (l) => l.categoryId === "other" && !(l.shortDescription ?? "").startsWith("Niche:"),
+  );
+
   // Time-aware greeting. P-A round 66: the SERVER version used UTC
   // (new Date().getHours() is UTC on Render/Vercel) — wrong for West Africa
   // Time (UTC+1): e.g. 00:30 Lagos read "Good evening" at 23:30 UTC.
@@ -94,6 +102,20 @@ export default async function VendorDashboardPage() {
       {vendor.status === "suspended" && (
         <div data-testid="vendor-suspended-banner" role="alert" style={{ background: "var(--color-danger)", color: "var(--color-cream)", padding: "var(--space-3)", borderRadius: 8, marginBottom: "var(--space-3)" }}>
           Your storefront is suspended. Contact support@voeq.ng for details.
+        </div>
+      )}
+
+      {/* OTHERS NICHE NUDGE (2026-09-07, founder: "there is a vendor already
+          that has created a listing under others but not specified as its
+          niche… require them to update"): one-time prompt for vendors whose
+          listings sit under the "other" category with no niche line. */}
+      {otherListings.length > 0 && (
+        <div data-testid="others-niche-banner" role="status" style={{ background: "rgba(232,163,61,.12)", border: "1px solid rgba(232,163,61,.4)", color: "var(--color-forest)", padding: "var(--space-3)", borderRadius: 8, marginBottom: "var(--space-3)", fontFamily: "var(--role-font-ui)", fontSize: 14 }}>
+          <strong>Help students find you:</strong>{" "}
+          {otherListings.length === 1 ? "1 listing sits" : `${otherListings.length} listings sit`} under the generic “Other” category without saying what it actually is.{" "}
+          <Link href="/vendor/listings" style={{ color: "var(--color-forest-mid, #2d5a3d)", fontWeight: 650, textDecoration: "none" }}>
+            Add your niche →
+          </Link>
         </div>
       )}
 

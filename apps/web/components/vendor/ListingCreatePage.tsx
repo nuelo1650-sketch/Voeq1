@@ -39,6 +39,8 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
   const [shortDesc, setShortDesc] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  // OTHERS NICHE (2026-09-07): free-text niche when category is "Other".
+  const [niche, setNiche] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
@@ -91,6 +93,10 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
       case "shortDesc":
         if (value.length > 150) return "Short description must be under 150 characters";
         return null;
+      case "niche":
+        if (value.trim().length < 3) return "Describe your niche (at least 3 characters)";
+        if (value.length > 80) return "Niche must be under 80 characters";
+        return null;
       case "description":
         if (value.length < 20) return "Full description must be at least 20 characters";
         if (value.length > 2000) return "Full description must be under 2000 characters";
@@ -129,6 +135,12 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
 
     const catError = validateField("categoryId", categoryId);
     if (catError) newErrors.categoryId = catError;
+
+    // OTHERS NICHE: required only when the "Other" category is selected.
+    if (categoryId === "other") {
+      const nicheError = validateField("niche", niche);
+      if (nicheError) newErrors.niche = nicheError;
+    }
 
     const minPriceError = validateField("minPrice", minPrice);
     if (minPriceError) newErrors.minPrice = minPriceError;
@@ -282,7 +294,7 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
-          shortDescription: shortDesc || null,
+          shortDescription: (categoryId === "other" && niche.trim() ? `Niche: ${niche.trim()}` : shortDesc) || null,
           description,
           categoryId,
           priceMinMinor: Math.round(Number(minPrice) * 100),
@@ -513,6 +525,35 @@ export function ListingCreatePage({ categories: categoryRows }: { categories?: C
                 ))}
               </select>
             </Field>
+
+            {/* OTHERS NICHE (2026-09-07, founder: "other doesn't bring a drop
+                down menu so the vendor can input their actual niche"): picking
+                "Other" reveals a free-text niche box. It is REQUIRED and rides
+                the shortDescription slot (prefixed "Niche:") so it displays on
+                cards/detail everywhere short descriptions already render — no
+                schema change, no migration, launch-safe. */}
+            {categoryId === "other" && (
+              <Field
+                label={`What exactly do you offer? (your niche)`}
+                required
+                error={errors.niche}
+                hint='e.g. "Phone accessories", "Thrift sneakers", "Hair dye" — students will see this on your listing'
+              >
+                <input
+                  type="text"
+                  value={niche}
+                  onChange={(e) => {
+                    setNiche(e.target.value);
+                    const error = validateField("niche", e.target.value);
+                    setErrors((prev) => ({ ...prev, niche: error || "" }));
+                  }}
+                  maxLength={80}
+                  placeholder="Describe your niche in a few words"
+                  style={inputStyle}
+                  required
+                />
+              </Field>
+            )}
 
             {/* Price range */}
             <fieldset style={{ border: "none", padding: 0, margin: 0 }}>

@@ -124,6 +124,11 @@ export async function GET(req: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
+      // SIGN-OUT FIX (2026-09-07, founder: "why do I have to keep signing in
+      // every time I visit"): the cookie had NO expires = a browser-session
+      // cookie, wiped on every browser close — while the DB session lived
+      // 30 days. Set the cookie to match the session's real expiry.
+      expires: new Date(session.expiresAt),
     });
     await logAudit("google.login", existing.id, { consentOk });
     await recordAuthEvent({ identityId: existing.id, event: "google_login", email: existing.email, ip: clientIpFrom(req.headers.get("x-forwarded-for")), userAgent: req.headers.get("user-agent") });
