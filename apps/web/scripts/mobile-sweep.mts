@@ -77,7 +77,7 @@ const ROUTES: Array<[string, string, string | null]> = [
   ["listing-detail", `/listing/${listing?.id ?? "x"}`, null],
   ["storefront", `/vendor/${demo.vendor_id}`, null],
   ["how-it-works", "/how-it-works", null], ["for-vendors", "/for-vendors", null],
-  ["about", "/about", null], ["contact", "/contact", null], ["faq", "/faq", null], ["help", "/help", null],
+  ["about", "/about", null], ["help", "/help", null],
   ["terms", "/terms", null], ["privacy", "/privacy", null],
   ["login", "/login", null], ["signup", "/signup", null],
   ["settings", "/settings", sSession], ["onboarding-shopper", "/onboarding/shopper", sSession],

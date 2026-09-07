@@ -23,7 +23,7 @@ function isPublicPage(pathname: string): boolean {
   // Exact public pages (marketing + legal). Per David: footer belongs ONLY on
   // public-facing pages — NEVER dashboards, onboarding, explore, admin,
   // messages, auth flows. Explore is a product surface; no footer.
-  const exacts = ["/", "/how-it-works", "/for-vendors", "/become-vendor", "/terms", "/privacy", "/about", "/contact", "/faq", "/help"];
+  const exacts = ["/", "/how-it-works", "/for-vendors", "/become-vendor", "/terms", "/privacy", "/about", "/contact", "/help"];
   return exacts.includes(pathname);
 }
 

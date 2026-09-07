@@ -39,16 +39,24 @@ export function CampusFingerprint({
       style={{ opacity: 0.7 }}
       {...rest}
     >
-      {activity.map((v, i) => (
-        <circle
-          key={i}
-          cx={32 + Math.cos((i / activity.length) * Math.PI * 2) * 24}
-          cy={32 + Math.sin((i / activity.length) * Math.PI * 2) * 24}
-          r={2 + v * 6}
-          fill="var(--role-accent)"
-          opacity={0.15 + v * 0.5}
-        />
-      ))}
+      {activity.map((v, i) => {
+        // HYDRATION FIX (2026-09-07 render audit): Node (server) and V8
+        // (browser) Math.sin/cos differ in the last float bits — cy came out
+        // ...475 vs ...479 and React logged a hydration mismatch on every
+        // listing page. Rounding to 3dp makes both sides emit identical
+        // strings; visually indistinguishable on a 64px motif.
+        const angle = (i / activity.length) * Math.PI * 2;
+        return (
+          <circle
+            key={i}
+            cx={Math.round((32 + Math.cos(angle) * 24) * 1000) / 1000}
+            cy={Math.round((32 + Math.sin(angle) * 24) * 1000) / 1000}
+            r={Math.round((2 + v * 6) * 1000) / 1000}
+            fill="var(--role-accent)"
+            opacity={Math.round((0.15 + v * 0.5) * 1000) / 1000}
+          />
+        );
+      })}
     </svg>
   );
 }

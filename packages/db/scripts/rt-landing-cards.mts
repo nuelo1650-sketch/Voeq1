@@ -34,37 +34,33 @@ try {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 
-  // ---- A: landing trending rail cards ----
-  await page.goto(BASE + "/", { waitUntil: "networkidle", timeout: 60000 });
-  const cardCount = await page.locator("[data-testid='landing-vendor-card']").count();
-  check("A0: landing vendor cards render", cardCount > 0, `n=${cardCount}`);
-  if (cardCount > 0) {
-    const geom = await page.evaluate(`(() => {
-      const card = document.querySelector("[data-testid='landing-vendor-card']");
-      const cb = card.getBoundingClientRect();
-      const btns = [...card.querySelectorAll(".vendor-save button")];
-      const status = card.querySelector(".vendor-status");
-      const sr = status ? status.getBoundingClientRect() : null;
-      const out = [];
-      for (const b of btns) {
-        const r = b.getBoundingClientRect();
-        const inCard = r.left >= cb.left - 1 && r.right <= cb.right + 1 && r.top >= cb.top - 1 && r.bottom <= cb.bottom + 1;
-        const hitsStatus = sr ? !(r.right <= sr.left || r.left >= sr.right || r.bottom <= sr.top || r.top >= sr.bottom) : false;
-        out.push({ w: Math.round(r.width), h: Math.round(r.height), inCard, hitsStatus });
-      }
-      return JSON.stringify({ btnCount: btns.length, out });
-    })()`);
-    const g = JSON.parse(geom);
-    check("A1: two compact icon buttons (heart + follow)", g.btnCount === 2, `n=${g.btnCount}`);
-    check("A2: buttons inside the card box", g.out.every((b: { inCard: boolean }) => b.inCard), JSON.stringify(g.out));
-    check("A3: buttons ~30px compact (no pill overflow)", g.out.every((b: { w: number; h: number }) => b.w <= 34 && b.h <= 34), JSON.stringify(g.out.map((b: { w: number; h: number }) => b.w + "x" + b.h)));
-    check("A4: no collision with status badge", g.out.every((b: { hitsStatus: boolean }) => !b.hitsStatus));
-    // follow click works (auth gate redirect for anon = /login)
-    await page.locator("[data-testid='landing-vendor-card'] .vendor-save button").nth(1).click();
-    await page.waitForURL(/\/login/, { timeout: 15000 }).catch(() => {});
-    const url = page.url();
-    check("A5: follow tap acts (auth-gated to /login for anon)", url.includes("/login"), url.slice(0, 60));
-  }
+  // ---- A: landing trending rail (e2ef2fd: rail now shows LISTINGS, not
+  // vendor profiles — the old VendorCard geometry test is obsolete; assert the
+  // new contract instead: listing cards render, images have srcs, cards link)
+  await page.goto(BASE + "/", { waitUntil: "domcontentloaded", timeout: 60000 });
+  // Wait for the rail to SETTLE (cards rendered OR honest empty state) —
+  // /api/explore cold-compiles on first dev hit and can exceed a fixed wait.
+  await page.waitForFunction(`(() => {
+    const rail = document.querySelector("[data-testid='landing-trending-rail']");
+    if (!rail) return false;
+    const t = rail.textContent || "";
+    return rail.querySelectorAll("[data-testid='listing-card']").length > 0 || t.includes("No listings");
+  })()`, undefined, { timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(500);
+  const railCards = await page.locator("[data-testid='landing-trending-rail'] [data-testid='listing-card']").count();
+  check("A0: landing rail renders listing cards", railCards > 0, `n=${railCards}`);
+  const railBadImgs = await page.evaluate(`(() => {
+    const rail = document.querySelector("[data-testid='landing-trending-rail']");
+    if (!rail) return -1;
+    return [...rail.querySelectorAll("img")].filter(i => !i.getAttribute("src") || i.getAttribute("src").trim() === "").length;
+  })()`);
+  check("A1: rail card images all have srcs", railBadImgs === 0, `bad=${railBadImgs}`);
+  const railLinks = await page.evaluate(`(() => {
+    const rail = document.querySelector("[data-testid='landing-trending-rail']");
+    if (!rail) return -1;
+    return [...rail.querySelectorAll("[data-testid='listing-card-link']")].filter(a => (a.getAttribute("href") || "").startsWith("/listing/")).length;
+  })()`);
+  check("A2: rail cards are clickable links", railLinks === railCards, `links=${railLinks} cards=${railCards}`);
 
   // ---- B: empty-string image guard ----
   await page.goto(`${BASE}/vendor/${vendorId}`, { waitUntil: "networkidle", timeout: 60000 });
