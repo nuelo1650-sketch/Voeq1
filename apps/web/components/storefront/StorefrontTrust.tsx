@@ -1,48 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import type { VendorStorefrontView } from "@voeq/data";
-import { FollowButton } from "@/components/shopper/FollowButton";
 import { LikeButton } from "@/components/shopper/LikeButton";
 import { ReviewForm } from "@/components/shopper/ReviewForm";
 import { ReviewsList } from "@/components/shopper/ReviewsList";
 import { ReportForm } from "@/components/shopper/ReportForm";
 
 /**
- * StorefrontTrust — reviews (real, public-read) + Follow / Message CTAs.
- * Reviews + Follow are LIVE (VS4.3/4.4). Message (VS6): an authed shopper
- * creates the conversation and is routed to the thread; unauthed shoppers see
- * the /login?next=<current> gate (Doc 03 §3.9 auth-to-act pattern).
+ * StorefrontTrust — S1 "Goods first" (2026-09-06): reviews block + quiet
+ * Like/Report. Follow moved to the hero CTA row; the duplicate Message button
+ * is GONE (the hero's Contact is the single conversation entry point — one
+ * place per action). Auth-to-act for reviews/report unchanged.
  */
 
 export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [gated, setGated] = useState<null | "review" | "message" | "report">(null);
-  const [msgBusy, setMsgBusy] = useState(false);
-
-  async function startConversation() {
-    setMsgBusy(true);
-    try {
-      const res = await fetch("/api/conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vendorId: vendor.id }),
-      });
-      if (res.status === 401) {
-        setGated("message"); // unauth -> show login gate
-        return;
-      }
-      const data = await res.json();
-      if (data.conversation?.id) {
-        router.push(`/messages/${data.conversation.id}`);
-      }
-    } finally {
-      setMsgBusy(false);
-    }
-  }
+  const [gated, setGated] = useState<null | "review" | "report">(null);
 
   const ctaStyle: React.CSSProperties = {
     fontFamily: "var(--role-font-ui)",
@@ -81,26 +54,24 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
       )}
 
       <div style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-2)", flexWrap: "wrap" }}>
-        <FollowButton vendorId={vendor.id} className="storefront-follow-btn" />
+        {/* S1: Follow moved to the hero CTA row; Message removed (the hero's
+            Contact is the single conversation entry point). Like + Report stay
+            here as quiet secondary actions. */}
         <LikeButton targetType="vendor" targetId={vendor.id} className="storefront-like-btn" />
-        <button
-          data-testid="storefront-message-btn"
-          onClick={startConversation}
-          disabled={msgBusy}
-          style={{ ...ctaStyle, background: "transparent", color: "var(--role-accent-strong)" }}
-        >
-          Message
-        </button>
         <button
           data-testid="storefront-report-btn"
           onClick={() => setGated("report")}
-          style={{ background: "transparent", border: "1px solid var(--role-border)", color: "var(--role-text-muted)", borderRadius: "var(--radius)", padding: "12px 18px", fontSize: "14px", fontFamily: "var(--role-font-ui)", cursor: "pointer" }}
+          style={{ background: "transparent", border: "1px solid var(--role-border)", color: "var(--role-text-muted)", borderRadius: 999, padding: "11px 18px", fontSize: "13px", fontFamily: "var(--role-font-ui)", cursor: "pointer" }}
         >
           Report
         </button>
       </div>
 
-      {gated && (
+      {/* S1: the gate is report-only now — the review form renders inline above
+          and FollowButton self-gates its own auth redirect. The old
+          message/follow gate text was dead code (gated could never be "follow",
+          and "message" left with the duplicate Message button). */}
+      {gated === "report" && (
         <div
           data-testid="storefront-auth-gate"
           role="status"
@@ -118,36 +89,7 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
             gap: "var(--space-2)",
           }}
         >
-          {gated === "report" ? (
-            <ReportForm targetType="vendor" targetId={vendor.id} onDone={() => setGated(null)} />
-          ) : (
-            <>
-              <span data-testid="storefront-auth-gate-text">
-                {gated === "message"
-                  ? `Sign in to message ${vendor.name} directly.`
-                  : `Sign in to follow ${vendor.name} and get updates on new listings.`}
-              </span>
-              <Link
-                href={`/login?next=${encodeURIComponent(pathname)}&intent=${encodeURIComponent(
-                  gated === "message" ? `message:${vendor.id}` : `follow:${vendor.id}`,
-                )}`}
-                data-testid="storefront-auth-gate-cta"
-                style={{
-                  alignSelf: "flex-start",
-                  fontFamily: "var(--role-font-ui)",
-                  fontWeight: 600,
-                  fontSize: "14px",
-                  padding: "10px 18px",
-                  borderRadius: "var(--radius)",
-                  background: "var(--role-accent-strong)",
-                  color: "var(--role-on-accent)",
-                  textDecoration: "none",
-                }}
-              >
-                Get Started
-              </Link>
-            </>
-          )}
+          <ReportForm targetType="vendor" targetId={vendor.id} onDone={() => setGated(null)} />
         </div>
       )}
     </section>

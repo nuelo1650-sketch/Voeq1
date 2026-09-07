@@ -94,9 +94,11 @@ export default async function StorefrontPage({ params }: StorefrontPageProps) {
         relatedVendors={relatedVendors}
         vendorName={vendor.name}
       />
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "24px var(--nav-inline-pad)" }}>
-        <h2 style={{ fontSize: "var(--fs-h3)", fontFamily: "var(--font-display)" }}>Share this store</h2>
-        <ShareButtons vendorId={vendor.id} />
+      {/* S1: share folds into a slim bar (was a lonely full section with its
+          own heading at the very bottom). */}
+      <section data-testid="storefront-share-bar" className="vs-sharebar" aria-label="Share this store">
+        <span>Share this store</span>
+        <ShareButtons vendorId={vendor.id} compact />
       </section>
     </main>
   );

@@ -5431,8 +5431,10 @@ header.AppShell,
   display: flex; flex-direction: column; gap: 14px;
   padding: 14px 0 6px; max-width: 1100px; margin: 0 auto;
 }
+/* S1: the hero-top is now a COLUMN (idrow → description → CTA row → socials →
+   statbar). The avatar/meta side-by-side lives in .vs-idrow inside it. */
 .vs-hero-top {
-  display: flex; align-items: flex-start; gap: 18px;
+  display: flex; flex-direction: column; align-items: stretch; gap: 14px;
 }
 .vs-avatar {
   width: 84px; height: 84px; border-radius: 24px; flex-shrink: 0;
@@ -5480,6 +5482,51 @@ header.AppShell,
 .vs-stat { display: flex; flex-direction: column; gap: 3px; }
 .vs-stat-value { font-size: 24px; font-weight: 750; color: var(--color-forest); font-family: var(--role-font-mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; }
 .vs-stat-label { font-size: 12.5px; color: var(--color-ink-muted, #6f6a5e); font-family: var(--role-font-ui); }
+
+/* ============================================================
+   S1 "GOODS FIRST" STOREFRONT (2026-09-06, founder-picked from the
+   storefront-layouts mock). Compact identity header → stat bar → listings
+   immediately. The About card is retired (description lives in the header
+   once); Follow rides the hero CTA row; share folds into a slim bar.
+   ============================================================ */
+.vs-idrow { display: flex; align-items: flex-start; gap: 16px; min-width: 0; }
+.vs-idmeta { flex: 1; min-width: 0; }
+.vs-namerow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.vs-ctarow { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+.vs-ctarow .vs-cta { flex: 1 1 240px; align-self: auto; }
+.vs-follow {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  font-family: var(--role-font-ui); font-weight: 600; font-size: 14px;
+  background: transparent; color: var(--color-forest-mid, #2d5a3d);
+  border: 1px solid rgba(30,59,47,.22); border-radius: 999px; padding: 13px 22px;
+  cursor: pointer; white-space: nowrap;
+}
+.vs-follow:hover { background: rgba(45,90,61,.07); }
+/* S1 stat bar: three honest numbers in one warm strip (S2 treatment). */
+.vs-statbar {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: var(--color-glass-white, #fffef9);
+  border: 1px solid rgba(30,59,47,.09); border-radius: 16px;
+  overflow: hidden; box-shadow: 0 4px 14px rgba(30,59,47,.05);
+}
+.vs-statbar .vs-stat { align-items: center; text-align: center; padding: 13px 6px; }
+.vs-statbar .vs-stat + .vs-stat { border-left: 1px solid rgba(30,59,47,.08); }
+.vs-statbar .vs-stat b { font-family: var(--role-font-display); font-size: 19px; font-weight: 700; color: var(--color-forest); font-variant-numeric: tabular-nums; }
+.vs-statbar .vs-stat span { font-size: 9.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #9a6d1f; margin-top: 2px; }
+/* S1 slim share bar (replaces the lonely bottom section). */
+.vs-sharebar {
+  max-width: 1100px; margin: 26px auto 0; padding: 13px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  background: var(--color-glass-white, #fffef9);
+  border: 1px solid rgba(30,59,47,.09); border-radius: 16px;
+}
+.vs-sharebar > span { font-size: 13.5px; font-weight: 600; color: var(--color-ink-muted, #6f6a5e); font-family: var(--role-font-ui); }
+@media (max-width: 767px) {
+  .vs-idrow { gap: 12px; }
+  .vs-ctarow .vs-cta { flex: 1 1 100%; }
+  .vs-follow { flex: 1 1 100%; }
+  .vs-statbar .vs-stat b { font-size: 17px; }
+}
 
 /* About / info card */
 .vs-card {

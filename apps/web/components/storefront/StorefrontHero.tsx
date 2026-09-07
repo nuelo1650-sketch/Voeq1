@@ -4,22 +4,26 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { VendorStorefrontView } from "@voeq/data";
+// S1 (2026-09-06): client-safe category data for id→NAME pills (the old hero
+// rendered raw ids — shoppers literally saw "food"). Pure data, no repo leak.
+import { categories } from "@voeq/data/explore-view";
 import type { AuthStatusResponse } from "@/lib/authStatus";
 import { trackEvent } from "@/lib/track";
 import { OpenNowBadge } from "@/components/vendor/OpenNowBadge";
 import { ContextBack } from "@/components/shopper/ContextBack";
+import { FollowButton } from "@/components/shopper/FollowButton";
 import { usePendingIntent } from "@/lib/usePendingIntent";
 import { MessageCircle } from "lucide-react";
 
 /**
- * StorefrontHero — K2.4 enhanced vendor arrival band (PG-PUB-004).
- * Features:
- * - Large vendor avatar (80px forest green circle with initials)
- * - Vendor name (Playfair display), verified badge, rating
- * - Vendor description and category badges
- * - Stats row (total listings, rating average, verified count)
- * - Primary "Contact vendor" CTA (forest green, auth-gated)
- * - About section with campus location
+ * StorefrontHero — S1 "Goods first" (2026-09-06, founder-picked from the
+ * storefront-layouts mock). Compact identity header: avatar + name + trust
+ * line + category NAME pills + FULL description (the About card is retired —
+ * the description lives here once, no lede duplication) + Contact/Follow row
+ * + social chips + stat bar. Listings render immediately below.
+ *
+ * All behavior preserved: auth-to-act contact flow, pending-intent resume,
+ * storefront_view tracking, ContextBack, OpenNowBadge, social links.
  */
 
 function initials(name: string): string {
@@ -31,12 +35,15 @@ function initials(name: string): string {
     .join("");
 }
 
+const CAT_NAME_BY_ID: Record<string, string> = Object.fromEntries(
+  categories.map((c) => [c.id, c.name]),
+);
 
 export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
   const hasRating = typeof vendor.ratingAvg === "number" && vendor.ratingAvg > 0;
   const pathname = usePathname();
   const router = useRouter();
-  
+
   // Auth check for messaging
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
@@ -81,7 +88,7 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
       );
       return;
     }
-    
+
     // Create or open conversation (K2.4 #4)
     try {
       const res = await fetch("/api/conversations", {
@@ -91,7 +98,7 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
           vendorId: vendor.id,
         }),
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         // P-A round 7 (A3): API returns { ok, conversation: { id } } —
@@ -143,33 +150,26 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
     if (pendingIntent) consumeIntent();
   }, [pendingIntent, consumeIntent]);
 
-  // Category display
-  const categories = Array.isArray(vendor.categoryIds) ? vendor.categoryIds : [];
+  const categoriesShown = Array.isArray(vendor.categoryIds) ? vendor.categoryIds : [];
+  const reviewCount = vendor.reviews.length;
 
-  // LAYOUT PASS (2026-09-06): short lede for the hero (full text lives in the
-  // About card — no more back-to-back duplication).
-  const lede = (text: string) => {
-    const firstSentence = text.split(/(?<=[.!?])\s/)[0] ?? text;
-    return firstSentence.length > 140 ? firstSentence.slice(0, 137).trimEnd() + "…" : firstSentence;
-  };
-  
   return (
     <div className="vs-hero">
-      {/* Hero header */}
+      {/* S1 identity header */}
       <header data-testid="storefront-hero" className="vs-hero-top">
-        {/* Avatar — P-A round 31: render the vendor PHOTO when one exists
-            (Cloudinary) instead of always showing initials. */}
-        <div data-testid="storefront-avatar" aria-hidden className="vs-avatar" style={vendor.profilePhotoUrl ? { background: "none", boxShadow: "0 8px 20px rgba(15,42,29,.18)" } : undefined}>
-          {vendor.profilePhotoUrl ? (
-            <img src={vendor.profilePhotoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 24 }} />
-          ) : (
-            initials(vendor.name)
-          )}
-        </div>
+        <div className="vs-idrow">
+          {/* Avatar — P-A round 31: render the vendor PHOTO when one exists
+              (Cloudinary) instead of always showing initials. */}
+          <div data-testid="storefront-avatar" aria-hidden className="vs-avatar" style={vendor.profilePhotoUrl ? { background: "none", boxShadow: "0 8px 20px rgba(15,42,29,.18)" } : undefined}>
+            {vendor.profilePhotoUrl ? (
+              <img src={vendor.profilePhotoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 24 }} />
+            ) : (
+              initials(vendor.name)
+            )}
+          </div>
 
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px", minWidth: 0 }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: 8 }}>
+          <div className="vs-idmeta">
+            <div className="vs-namerow">
               <h1 data-testid="storefront-name" className="vs-name">
                 {vendor.name}
               </h1>
@@ -183,7 +183,7 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
                 </span>
               )}
               {hasRating && (
-                <span data-testid="storefront-rating">★ {vendor.ratingAvg!.toFixed(1)} ({vendor.ratingCount} {vendor.ratingCount === 1 ? 'review' : 'reviews'})</span>
+                <span data-testid="storefront-rating">★ {vendor.ratingAvg!.toFixed(1)} ({vendor.ratingCount} {vendor.ratingCount === 1 ? "review" : "reviews"})</span>
               )}
               <span data-testid="storefront-campus" style={{ color: "var(--color-ink-muted, #6f6a5e)", fontSize: 13.5 }}>{vendor.campus}</span>
               <span aria-hidden style={{ color: "var(--color-ink-subtle, #d9d2c3)" }}>·</span>
@@ -206,25 +206,28 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
               />
             </div>
 
-            {/* Category badges */}
-            {categories.length > 0 && (
-              <div className="vs-cat-badges" style={{ marginBottom: 12 }}>
-                {categories.slice(0, 3).map((cat) => (
-                  <span key={cat} className="vs-cat-badge">{cat}</span>
+            {/* S1: category pills show NAMES (the old hero rendered raw ids —
+                shoppers saw "food"). Unknown ids fall back to the id. */}
+            {categoriesShown.length > 0 && (
+              <div className="vs-cat-badges" style={{ marginTop: 8 }}>
+                {categoriesShown.slice(0, 3).map((cat) => (
+                  <span key={cat} className="vs-cat-badge">{CAT_NAME_BY_ID[cat] ?? cat}</span>
                 ))}
               </div>
             )}
-
-            {/* LAYOUT PASS (2026-09-06): the hero used to render the description
-                here AND again in the About card below — the same text twice,
-                back to back. The hero now carries a SHORT lede (first sentence,
-                140 chars) and the About card holds the full text + location. */}
-            {vendor.description && (
-              <p className="vs-desc">{lede(vendor.description)}</p>
-            )}
           </div>
+        </div>
 
-          {/* Primary CTA */}
+        {/* S1: the FULL description lives here once — the About card is
+            retired (no more lede + full-text duplication). storefront-about
+            rides this element so the probe contract (full text present) holds. */}
+        {vendor.description && (
+          <p data-testid="storefront-about" className="vs-desc">{vendor.description}</p>
+        )}
+
+        {/* S1: Contact + Follow side by side (Follow moved up from Trust —
+            one place per action). */}
+        <div className="vs-ctarow">
           <button
             data-testid="storefront-contact-cta"
             onClick={handleContactVendor}
@@ -234,74 +237,52 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
             <MessageCircle size={18} />
             Contact {vendor.name}
           </button>
-
-          {/* Socials (existing) */}
-          {(vendor.socials?.phone || vendor.socials?.instagram || vendor.socials?.twitter || vendor.socials?.tiktok || vendor.socials?.whatsappChannel) && (
-            <div data-testid="storefront-socials" className="vs-socials">
-              {vendor.socials.phone && (
-                <a href={`tel:${vendor.socials.phone}`} data-testid="storefront-social-phone" className="vs-social">📞 {vendor.socials.phone}</a>
-              )}
-              {/* L4b (2026-09-06): WhatsApp CHANNEL link — a public profile
-                  (same rule as Instagram/TikTok). The Doc 13 §13.13 ban covers
-                  vendor MESSAGING, not channel links. Full URL expected
-                  (https://www.whatsapp.com/channel/…) — mobile apps resolve to
-                  the channel, not WhatsApp Business. */}
-              {vendor.socials.whatsappChannel && (
-                <a href={vendor.socials.whatsappChannel} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-whatsapp" className="vs-social">WhatsApp channel</a>
-              )}
-              {vendor.socials.instagram && (
-                <a href={`https://instagram.com/${vendor.socials.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-instagram" className="vs-social">Instagram: {vendor.socials.instagram}</a>
-              )}
-              {vendor.socials.twitter && (
-                <a href={`https://x.com/${vendor.socials.twitter.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-twitter" className="vs-social">Twitter: {vendor.socials.twitter}</a>
-              )}
-              {vendor.socials.tiktok && (
-                <a href={`https://tiktok.com/@${vendor.socials.tiktok.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-tiktok" className="vs-social">TikTok: {vendor.socials.tiktok}</a>
-              )}
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* Stats row */}
-      <div data-testid="storefront-stats" className="vs-stats">
-        <div className="vs-stat">
-          <div className="vs-stat-value">{vendor.listingCount}</div>
-          <div className="vs-stat-label">{vendor.listingCount === 1 ? 'Listing' : 'Listings'}</div>
+          <FollowButton vendorId={vendor.id} className="storefront-follow-btn vs-follow" />
         </div>
 
-        {hasRating && (
-          <div className="vs-stat">
-            <div className="vs-stat-value">{vendor.ratingAvg!.toFixed(1)} ★</div>
-            <div className="vs-stat-label">Average rating</div>
+        {/* Socials as chips */}
+        {(vendor.socials?.phone || vendor.socials?.instagram || vendor.socials?.twitter || vendor.socials?.tiktok || vendor.socials?.whatsappChannel) && (
+          <div data-testid="storefront-socials" className="vs-socials">
+            {vendor.socials.phone && (
+              <a href={`tel:${vendor.socials.phone}`} data-testid="storefront-social-phone" className="vs-social">📞 {vendor.socials.phone}</a>
+            )}
+            {/* L4b (2026-09-06): WhatsApp CHANNEL link — a public profile
+                (same rule as Instagram/TikTok). The Doc 13 §13.13 ban covers
+                vendor MESSAGING, not channel links. Full URL expected
+                (https://www.whatsapp.com/channel/…) — mobile apps resolve to
+                the channel, not WhatsApp Business. */}
+            {vendor.socials.whatsappChannel && (
+              <a href={vendor.socials.whatsappChannel} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-whatsapp" className="vs-social">✆ WhatsApp channel</a>
+            )}
+            {vendor.socials.instagram && (
+              <a href={`https://instagram.com/${vendor.socials.instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-instagram" className="vs-social">📷 {vendor.socials.instagram}</a>
+            )}
+            {vendor.socials.twitter && (
+              <a href={`https://x.com/${vendor.socials.twitter.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-twitter" className="vs-social">𝕏 {vendor.socials.twitter}</a>
+            )}
+            {vendor.socials.tiktok && (
+              <a href={`https://tiktok.com/@${vendor.socials.tiktok.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" data-testid="storefront-social-tiktok" className="vs-social">🎵 TikTok</a>
+            )}
           </div>
         )}
 
-        {/* LAYOUT PASS (2026-09-06): "Verified listings" dropped — the ✓
-            badge in the trust row already communicates verification, and the
-            number confused shoppers next to the listing count. Two honest
-            stats (listings + rating) read cleaner than three with one
-            puzzling. */}
-      </div>
-
-      {/* About section */}
-      <div data-testid="storefront-about" className="vs-card">
-        <h2 className="vs-card-title">About</h2>
-        <div className="vs-card-body">
-          {vendor.description ? (
-            <p style={{ margin: 0, marginBottom: 12 }}>{vendor.description}</p>
-          ) : (
-            <p style={{ margin: 0, marginBottom: 12, color: "var(--color-ink-muted, #6f6a5e)" }}>
-              No description available yet.
-            </p>
-          )}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-ink-muted, #6f6a5e)" }}>
-            <span>📍</span>
-            <span>{vendor.campus}</span>
-            {vendor.subArea && <span>• {vendor.subArea}</span>}
+        {/* S1 stat bar: LISTINGS / RATING / REVIEWS — honest numbers only
+            (rating shows — until real reviews exist; never invented). */}
+        <div data-testid="storefront-stats" className="vs-statbar">
+          <div className="vs-stat">
+            <b>{vendor.listingCount}</b>
+            <span>{vendor.listingCount === 1 ? "LISTING" : "LISTINGS"}</span>
+          </div>
+          <div className="vs-stat">
+            <b>{hasRating ? `${vendor.ratingAvg!.toFixed(1)}★` : "—"}</b>
+            <span>RATING</span>
+          </div>
+          <div className="vs-stat">
+            <b>{reviewCount}</b>
+            <span>{reviewCount === 1 ? "REVIEW" : "REVIEWS"}</span>
           </div>
         </div>
-      </div>
+      </header>
     </div>
   );
 }

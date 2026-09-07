@@ -56,15 +56,22 @@ try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.context().addCookies([{ name: "sessionId", value: sessId, url: BASE }]);
 
-  // ---- A: storefront lede + stats ----
+  // ---- A: storefront S1 "goods first" header ----
   await page.goto(`${BASE}/vendor/${vendorId}`, { waitUntil: "domcontentloaded", timeout: 60000 });
   await page.waitForSelector("[data-testid='storefront-hero']", { timeout: 30000 });
+  // S1 (2026-09-06): the About card is retired — the hero carries the FULL
+  // description ONCE (storefront-about rides the .vs-desc element).
   const heroDesc = (await page.locator(".vs-desc").textContent()) ?? "";
-  check("A1: hero shows LEDE (first sentence only)", heroDesc.trim() === "Hot jollof rice served fresh every evening.", JSON.stringify(heroDesc.slice(0, 60)));
-  const aboutDesc = (await page.locator("[data-testid='storefront-about'] p").first().textContent()) ?? "";
-  check("A2: About card keeps FULL description", aboutDesc.includes("party packs"), aboutDesc.slice(0, 40));
+  check("A1: hero shows FULL description once", heroDesc.includes("Hot jollof rice served fresh every evening.") && heroDesc.includes("party packs"), JSON.stringify(heroDesc.slice(0, 60)));
+  const aboutCount = await page.locator("[data-testid='storefront-about']").count();
+  check("A2: no duplicate About card (single description)", aboutCount === 1, `count: ${aboutCount}`);
   const verifiedStat = await page.locator("[data-testid='storefront-stats']").locator("text=Verified").count();
   check("A3: 'Verified listings' stat removed", verifiedStat === 0, `count: ${verifiedStat}`);
+  // S1: category pills show NAMES not raw ids; statbar has 3 honest cells.
+  const catPill = (await page.locator(".vs-cat-badge").first().textContent()) ?? "";
+  check("A4: category pill shows NAME not id", catPill.length > 0 && catPill !== catPill.toLowerCase(), catPill);
+  const statCells = await page.locator("[data-testid='storefront-stats'] .vs-stat").count();
+  check("A5: statbar = listings/rating/reviews", statCells === 3, `cells: ${statCells}`);
 
   // ---- B: preview banner v2 ----
   await page.goto(`${BASE}/vendor/preview`, { waitUntil: "domcontentloaded", timeout: 60000 });

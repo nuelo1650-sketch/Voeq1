@@ -47,7 +47,7 @@ function InstagramIcon() {
  * K2.10: Upgraded with branded colors, icons, WhatsApp support, and collapsible QR.
  * Note: WhatsApp SHARE (URL sharing) is allowed. WhatsApp MESSAGING (vendor contact) is banned (Doc 13 §13.13).
  */
-export function ShareButtons({ vendorId }: { vendorId: string }) {
+export function ShareButtons({ vendorId, compact = false }: { vendorId: string; compact?: boolean }) {
   const [data, setData] = useState<ShareData | null>(null);
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
@@ -66,6 +66,26 @@ export function ShareButtons({ vendorId }: { vendorId: string }) {
   if (!data) return <div data-testid="share-loading">Loading share…</div>;
 
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`Check out this vendor on Voeq: ${data.canonical}`)}`;
+
+  // S1 (2026-09-06): compact = the slim storefront share bar — Copy + WhatsApp
+  // inline, no QR/social rows. Full mode unchanged (listing detail uses it).
+  if (compact) {
+    return (
+      <div data-testid="share-buttons" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <button type="button" data-testid="share-copy"
+          style={{ ...btnBase, ...btnCopy, padding: "8px 16px", fontSize: 13 }}
+          onClick={() => { navigator.clipboard?.writeText(data.canonical); setCopied(true); setTimeout(() => setCopied(false), 1500); }}>
+          <Link2 size={15} />
+          {copied ? "Copied!" : "Copy link"}
+        </button>
+        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" data-testid="share-whatsapp"
+           style={{ ...btnBase, ...btnWhatsApp, padding: "8px 16px", fontSize: 13 }}>
+          <WhatsAppIcon />
+          WhatsApp
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="share-buttons" style={{ display: "flex", flexDirection: "column", gap: 16, alignItems: "flex-start", maxWidth: 400 }}>

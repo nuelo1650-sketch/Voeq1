@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq — Storefront layout variants</title>
+<style>
+  :root {
+    --forest: #0F2A1D;
+    --forest-mid: #2d5a3d;
+    --amber: #E8A33D;
+    --amber-soft: rgba(232,163,61,.14);
+    --cream: #f6f1e6;
+    --ink: #23201a;
+    --ink-muted: #6f6a5e;
+    --ink-subtle: #d9d2c3;
+    --surface: #fffef9;
+    --display: 'Fraunces', 'Playfair Display', Georgia, serif;
+    --ui: 'Inter', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #e5dfd2; font-family: var(--ui); padding: 28px 16px 90px; color: var(--ink); }
+  .wrap { max-width: 1280px; margin: 0 auto; }
+  h1 { font-family: var(--display); font-size: 26px; color: var(--forest); margin-bottom: 6px; }
+  .lede { color: var(--ink-muted); font-size: 14px; margin-bottom: 28px; max-width: 780px; }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 26px; }
+  .variant h2 { font-family: var(--display); font-size: 18px; color: var(--forest); margin-bottom: 3px; }
+  .variant .why { font-size: 12.5px; color: var(--ink-muted); margin-bottom: 14px; line-height: 1.55; }
+  .phone { width: 340px; max-width: 100%; margin: 0 auto; background: var(--cream); border-radius: 26px; border: 10px solid #1c1c1c; overflow: hidden; box-shadow: 0 18px 44px rgba(15,42,29,.22); }
+  .screen { overflow-y: auto; max-height: 820px; }
+  .serif { font-family: var(--display); }
+  .ava { width: 64px; height: 64px; border-radius: 999px; background: linear-gradient(135deg, #a3653b, #7d4a28); display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 22px; flex-shrink: 0; }
+  .vbadge { width: 15px; height: 15px; border-radius: 999px; background: var(--forest); color: var(--cream); font-size: 9.5px; display: grid; place-items: center; font-weight: 700; flex-shrink: 0; }
+  .openpill { font-size: 10px; font-weight: 700; color: #2d5a3d; background: rgba(45,90,61,.1); padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .catname { font-size: 10px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: #9a6d1f; }
+  .card { background: var(--surface); border: 1px solid rgba(30,59,47,.09); border-radius: 15px; }
+  .lcard { border-radius: 13px; overflow: hidden; background: var(--surface); border: 1px solid rgba(30,59,47,.09); }
+  .lcard .img { aspect-ratio: 4/3; display: grid; place-items: center; font-size: 34px; }
+  .lcard .img.food { background: linear-gradient(135deg, #a3653b, #7d4a28); }
+  .lcard .img.tech { background: linear-gradient(135deg, #3b6ea3, #28507d); }
+  .lcard .b { padding: 9px 10px 10px; }
+  .lcard .t { font-family: var(--display); font-weight: 600; font-size: 12.5px; color: var(--forest); line-height: 1.25; margin: 3px 0 4px; }
+  .lcard .p { font-family: var(--display); font-weight: 700; font-size: 13.5px; color: var(--forest); }
+  .lcard .f { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-muted); margin-top: 4px; }
+  .cta { background: var(--forest); color: var(--cream); border: none; border-radius: 999px; padding: 13px 22px; font-size: 14px; font-weight: 650; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+  .ghost { background: transparent; border: 1px solid var(--ink-subtle); border-radius: 999px; padding: 11px 16px; font-size: 12.5px; font-weight: 600; color: var(--ink-muted); display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .sect { font-family: var(--display); font-size: 17px; font-weight: 600; color: var(--forest); margin: 20px 0 10px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .socialchip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--forest-mid); background: var(--surface); border: 1px solid rgba(30,59,47,.09); padding: 6px 11px; border-radius: 999px; text-decoration: none; }
+  .review { display: flex; gap: 9px; padding: 11px 0; border-bottom: 1px solid rgba(30,59,47,.07); }
+  .review:last-child { border-bottom: none; }
+  .rava { width: 30px; height: 30px; border-radius: 999px; background: var(--amber-soft); color: #9a6d1f; display: grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .stars { color: var(--amber); font-size: 11px; }
+
+  /* ===== S1 — "Goods first" ===== */
+  .s1 .hero { padding: 16px 14px 0; }
+  .s1 .herotop { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+  .s1 .name { font-size: 21px; font-weight: 600; color: var(--forest); line-height: 1.1; }
+  .s1 .trust { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--ink-muted); margin-top: 5px; flex-wrap: wrap; }
+  .s1 .cats { display: flex; gap: 6px; margin-top: 8px; }
+  .s1 .cat { font-size: 10px; font-weight: 650; color: var(--forest-mid); background: rgba(45,90,61,.08); padding: 4px 10px; border-radius: 999px; }
+  .s1 .desc { font-size: 12.5px; line-height: 1.55; color: var(--ink); margin-top: 9px; }
+  .s1 .ctarow { display: flex; gap: 8px; margin-top: 12px; }
+  .s1 .ctarow .cta { flex: 1.4; }
+  .s1 .ctarow .ghost { flex: 1; }
+  .s1 .socials { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 11px; }
+  .s1 .body { padding: 0 14px 18px; }
+  .s1 .statbar { display: flex; gap: 0; margin: 14px 0 0; border-radius: 13px; overflow: hidden; border: 1px solid rgba(30,59,47,.09); }
+  .s1 .stat { flex: 1; background: var(--surface); padding: 10px 6px; text-align: center; }
+  .s1 .stat b { display: block; font-family: var(--display); font-size: 16px; color: var(--forest); }
+  .s1 .stat span { font-size: 9.5px; letter-spacing: .6px; text-transform: uppercase; color: #9a6d1f; font-weight: 700; }
+  .s1 .more { font-size: 12px; font-weight: 650; color: var(--forest-mid); text-decoration: none; display: inline-block; margin-top: 9px; }
+  .s1 .sharebar { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; margin-top: 18px; }
+  .s1 .sharebar span { font-size: 12.5px; font-weight: 600; color: var(--ink-muted); }
+  .s1 .sharebar button { background: var(--forest); color: var(--cream); border: none; border-radius: 999px; padding: 8px 16px; font-size: 12px; font-weight: 650; }
+
+  /* ===== S2 — "Magazine cover" ===== */
+  .s2 .cover { position: relative; height: 190px; background: linear-gradient(135deg, #a3653b, #7d4a28); }
+  .s2 .cover .big { position: absolute; inset: 0; display: grid; place-items: center; font-size: 64px; opacity: .9; }
+  .s2 .cover .scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,42,29,.72), transparent 55%); }
+  .s2 .cover .cap { position: absolute; left: 14px; right: 14px; bottom: 12px; color: #fff; }
+  .s2 .cover .cap .name { font-family: var(--display); font-size: 22px; font-weight: 600; }
+  .s2 .cover .cap .sub { font-size: 11.5px; opacity: .85; margin-top: 3px; display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+  .s2 .sheet { background: var(--cream); border-radius: 18px 18px 0 0; margin-top: -16px; position: relative; padding: 16px 14px 18px; }
+  .s2 .desc { font-size: 12.5px; line-height: 1.55; color: var(--ink); margin-bottom: 12px; }
+  .s2 .ctarow { display: flex; gap: 8px; margin-bottom: 12px; }
+  .s2 .ctarow .cta { flex: 1.4; }
+  .s2 .ctarow .ghost { flex: 1; }
+  .s2 .socials { display: flex; gap: 7px; flex-wrap: wrap; }
+  .s2 .statbar { display: flex; margin-top: 12px; }
+  .s2 .stat { flex: 1; text-align: center; padding: 9px 4px; }
+  .s2 .stat b { display: block; font-family: var(--display); font-size: 17px; color: var(--forest); }
+  .s2 .stat span { font-size: 9.5px; letter-spacing: .6px; text-transform: uppercase; color: #9a6d1f; font-weight: 700; }
+  .s2 .sharebar { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; margin-top: 18px; }
+  .s2 .sharebar span { font-size: 12.5px; font-weight: 600; color: var(--ink-muted); }
+  .s2 .sharebar button { background: var(--forest); color: var(--cream); border: none; border-radius: 999px; padding: 8px 16px; font-size: 12px; font-weight: 650; }
+
+  /* ===== S3 — "Compact command" ===== */
+  .s3 .hero { padding: 14px; display: flex; gap: 11px; align-items: center; }
+  .s3 .ava { width: 52px; height: 52px; font-size: 18px; }
+  .s3 .name { font-size: 17px; font-weight: 600; color: var(--forest); line-height: 1.15; }
+  .s3 .trust { font-size: 11px; color: var(--ink-muted); margin-top: 3px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .s3 .actions { display: flex; gap: 7px; padding: 0 14px 12px; }
+  .s3 .ab { flex: 1; border: 1px solid var(--ink-subtle); background: var(--surface); border-radius: 12px; padding: 9px 4px; font-size: 11px; font-weight: 650; color: var(--forest-mid); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .s3 .ab.pri { background: var(--forest); color: var(--cream); border-color: var(--forest); }
+  .s3 .ab i { font-style: normal; font-size: 15px; }
+  .s3 .strip { display: flex; gap: 6px; padding: 0 14px 12px; overflow-x: auto; }
+  .s3 .body { padding: 0 14px 18px; }
+  .s3 .sharebar { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; margin-top: 18px; }
+  .s3 .sharebar span { font-size: 12.5px; font-weight: 600; color: var(--ink-muted); }
+  .s3 .sharebar button { background: var(--forest); color: var(--cream); border: none; border-radius: 999px; padding: 8px 16px; font-size: 12px; font-weight: 650; }
+
+  .verdict { background: var(--forest); color: var(--cream); border-radius: 14px; padding: 17px 22px; font-size: 13.5px; line-height: 1.65; margin-top: 34px; }
+  .verdict b { color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Storefront — three arrangements</h1>
+  <p class="lede">All three fix the same six defects: category NAMES not ids, no lede duplication, listings moved ABOVE about, one Message CTA (hero), socials as chips, share folded into a slim bar. They differ in how much the hero dominates.</p>
+
+  <div class="row">
+
+    <!-- S1 -->
+    <section class="variant s1">
+      <h2>S1 — "Goods first"</h2>
+      <p class="why">Compact identity header (avatar, name, trust, category pills, one-line description, Contact + Follow, social chips) → stat bar → LISTINGS immediately → reviews → related → share bar. The About card is GONE — the description lives in the header once. Most marketplace-standard.</p>
+      <div class="phone"><div class="screen">
+        <div class="hero">
+          <div class="herotop">
+            <div class="ava">MT</div>
+            <div style="flex:1;min-width:0">
+              <div class="name serif">Mama Tuli's Kitchen</div>
+              <div class="trust"><span class="vbadge">✓</span> Verified · ★ 4.8 (23) · NMU Okerenkoko <span class="openpill">● OPEN NOW</span></div>
+              <div class="cats"><span class="cat">Food &amp; Drinks</span><span class="cat">Baking</span></div>
+            </div>
+          </div>
+          <p class="desc">Hot jollof, party packs and small chops — fresh every evening near Gate 2.</p>
+          <div class="ctarow">
+            <button class="cta">💬 Contact vendor</button>
+            <button class="ghost">+ Follow</button>
+          </div>
+          <div class="socials">
+            <a class="socialchip">📷 @mamatuli</a>
+            <a class="socialchip">🎵 TikTok</a>
+            <a class="socialchip">✆ WhatsApp</a>
+          </div>
+          <div class="statbar">
+            <div class="stat"><b>8</b><span>LISTINGS</span></div>
+            <div class="stat"><b>4.8★</b><span>RATING</span></div>
+            <div class="stat"><b>23</b><span>REVIEWS</span></div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="sect">Listings</div>
+          <div class="grid2">
+            <div class="lcard"><div class="img food">🍛</div><div class="b"><span class="catname">FOOD &amp; DRINKS</span><div class="t">Jollof rice party tray — serves 10</div><div class="p">₦12,500</div><div class="f"><span>★ 4.8</span><span>♡ 18</span></div></div></div>
+            <div class="lcard"><div class="img food">🥘</div><div class="b"><span class="catname">FOOD &amp; DRINKS</span><div class="t">Small chops bundle (50 pcs)</div><div class="p">₦7,000</div><div class="f"><span>★ 4.9</span><span>♡ 11</span></div></div></div>
+          </div>
+          <a class="more">View all 8 listings →</a>
+          <div class="sect">Reviews</div>
+          <div class="card" style="padding: 4px 13px">
+            <div class="review"><div class="rava">B</div><div><div style="font-size:12px;font-weight:650">Blessing <span class="stars">★★★★★</span></div><div style="font-size:12px;color:var(--ink-muted);line-height:1.5;margin-top:2px">Ordered the tray for my birthday — hot, generous, arrived on time.</div></div></div>
+            <div class="review"><div class="rava">K</div><div><div style="font-size:12px;font-weight:650">Kelechi <span class="stars">★★★★☆</span></div><div style="font-size:12px;color:var(--ink-muted);line-height:1.5;margin-top:2px">Small chops were fresh. Portion could be bigger.</div></div></div>
+          </div>
+          <button class="ghost" style="width:100%;margin-top:9px">Write a review</button>
+          <div class="card sharebar"><span>Share this store</span><button>↗ Share</button></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- S2 -->
+    <section class="variant s2">
+      <h2>S2 — "Magazine cover"</h2>
+      <p class="why">The photo IS the storefront: full-bleed cover (vendor's best listing photo or profile photo), name + trust over a forest scrim, then a rounded sheet that overlaps it carrying everything else. Most premium, most DOT-like. Risk: text-on-image legibility (the thing you rejected on cards — but here it's one big scrim, not 12 tiny ones).</p>
+      <div class="phone"><div class="screen">
+        <div class="cover">
+          <div class="big">🍛</div>
+          <div class="scrim"></div>
+          <div class="cap">
+            <div class="name">Mama Tuli's Kitchen</div>
+            <div class="sub"><span class="vbadge">✓</span> Verified · ★ 4.8 (23) · NMU Okerenkoko <span class="openpill" style="background:rgba(246,241,230,.2);color:#fff">● OPEN NOW</span></div>
+          </div>
+        </div>
+        <div class="sheet">
+          <p class="desc">Hot jollof, party packs and small chops — fresh every evening near Gate 2. Order 24h ahead for events.</p>
+          <div class="ctarow">
+            <button class="cta">💬 Contact vendor</button>
+            <button class="ghost">+ Follow</button>
+          </div>
+          <div class="socials">
+            <a class="socialchip">📷 @mamatuli</a>
+            <a class="socialchip">🎵 TikTok</a>
+            <a class="socialchip">✆ WhatsApp</a>
+          </div>
+          <div class="statbar card">
+            <div class="stat"><b>8</b><span>LISTINGS</span></div>
+            <div class="stat"><b>4.8★</b><span>RATING</span></div>
+            <div class="stat"><b>23</b><span>REVIEWS</span></div>
+          </div>
+          <div class="sect">Listings</div>
+          <div class="grid2">
+            <div class="lcard"><div class="img food">🍛</div><div class="b"><span class="catname">FOOD &amp; DRINKS</span><div class="t">Jollof rice party tray — serves 10</div><div class="p">₦12,500</div><div class="f"><span>★ 4.8</span><span>♡ 18</span></div></div></div>
+            <div class="lcard"><div class="img food">🥘</div><div class="b"><span class="catname">FOOD &amp; DRINKS</span><div class="t">Small chops bundle (50 pcs)</div><div class="p">₦7,000</div><div class="f"><span>★ 4.9</span><span>♡ 11</span></div></div></div>
+          </div>
+          <a class="more" style="font-size:12px;font-weight:650;color:var(--forest-mid);text-decoration:none;display:inline-block;margin-top:9px">View all 8 listings →</a>
+          <div class="sect">Reviews</div>
+          <div class="card" style="padding: 4px 13px">
+            <div class="review"><div class="rava">B</div><div><div style="font-size:12px;font-weight:650">Blessing <span class="stars">★★★★★</span></div><div style="font-size:12px;color:var(--ink-muted);line-height:1.5;margin-top:2px">Ordered the tray for my birthday — hot, generous, arrived on time.</div></div></div>
+          </div>
+          <div class="card sharebar"><span>Share this store</span><button>↗ Share</button></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- S3 -->
+    <section class="variant s3">
+      <h2>S3 — "Compact command"</h2>
+      <p class="why">The app-like cut: one tight identity row, then a 4-tile action bar (Contact / Follow / Like / Share — every action one thumb-reach), then category chips as a scroll strip, then straight into listings. Zero description in the header (About card keeps the full text). Fastest to browse; least warmth.</p>
+      <div class="phone"><div class="screen">
+        <div class="hero">
+          <div class="ava">MT</div>
+          <div style="flex:1;min-width:0">
+            <div class="name serif">Mama Tuli's Kitchen <span class="vbadge" style="display:inline-grid;vertical-align:1px">✓</span></div>
+            <div class="trust">★ 4.8 (23) · NMU Okerenkoko <span class="openpill">● OPEN</span></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="ab pri"><i>💬</i>Contact</button>
+          <button class="ab"><i>＋</i>Follow</button>
+          <button class="ab"><i>♡</i>Like</button>
+          <button class="ab"><i>↗</i>Share</button>
+        </div>
+        <div class="strip">
+          <span class="cat" style="font-size:10px;font-weight:650;color:var(--forest-mid);background:rgba(45,90,61,.08);padding:4px 10px;border-radius:999px;white-space:nowrap">Food &amp; Drinks</span>
+          <span class="cat" style="font-size:10px;font-weight:650;color:var(--forest-mid);background:rgba(45,90,61,.08);padding:4px 10px;border-radius:999px;white-space:nowrap">Baking</span>
+          <a class="socialchip" style="white-space:nowrap">📷 @mamatuli</a>
+          <a class="socialchip" style="white-space:nowrap">✆ WhatsApp</a>
+        </div>
+        <div class="body">
+          <div class="sect" style="margin-top:6px">Listings</div>
+          <div class="grid2">
+            <div class="lcard"><div class="img food">🍛</div><div class="b"><span class="catname">FOOD &amp; DRINKS</span><div class="t">Jollof rice party tray — serves 10</div><div class="p">₦12,500</div><div class="f"><span>★ 4.8</span><span>♡ 18</span></div></div></div>
+            <div class="lcard"><div class="img food">🥘</div><div class="b"><span class="catname">FOOD &amp; DRINKS</span><div class="t">Small chops bundle (50 pcs)</div><div class="p">₦7,000</div><div class="f"><span>★ 4.9</span><span>♡ 11</span></div></div></div>
+            <div class="lcard"><div class="img tech">🍰</div><div class="b"><span class="catname">BAKING</span><div class="t">Custom birthday cakes</div><div class="p">₦15,000+</div><div class="f"><span>★ 5.0</span><span>♡ 7</span></div></div></div>
+            <div class="lcard"><div class="img food">🥤</div><div class="b"><span class="catname">FOOD &amp; DRINKS</span><div class="t">Zobo &amp; Chapman packs</div><div class="p">₦1,500</div><div class="f"><span>★ 4.7</span><span>♡ 9</span></div></div></div>
+          </div>
+          <div class="sect">About</div>
+          <div class="card" style="padding:12px 13px;font-size:12.5px;line-height:1.55;color:var(--ink)">Hot jollof, party packs and small chops — fresh every evening near Gate 2. Order 24h ahead for events.</div>
+          <div class="sect">Reviews</div>
+          <div class="card" style="padding: 4px 13px">
+            <div class="review"><div class="rava">B</div><div><div style="font-size:12px;font-weight:650">Blessing <span class="stars">★★★★★</span></div><div style="font-size:12px;color:var(--ink-muted);line-height:1.5;margin-top:2px">Ordered the tray for my birthday — hot, generous, arrived on time.</div></div></div>
+          </div>
+          <div class="card sharebar"><span>Share this store</span><button>↗ Share</button></div>
+        </div>
+      </div></div>
+    </section>
+  </div>
+
+  <div class="verdict">
+    <b>My ranking: S1 > S2 > S3.</b> S1 is the marketplace-standard arrangement — identity, proof, goods, reviews, share — with zero duplication and one Message CTA. S2 is the most beautiful but puts text on an image (the legibility gamble you rejected on cards, at 12× the size) and depends on vendors having a good cover photo — many don't yet. S3 is the fastest to browse but the coldest; the action tiles also duplicate what the hero already does. <b>S1 with S2's stat-bar treatment</b> is where I'd land. Pick one (or mix) and I implement on the real StorefrontHero/Grid/Trust/page with the full gate chain.
+  </div>
+</div>
+</body>
+</html>
