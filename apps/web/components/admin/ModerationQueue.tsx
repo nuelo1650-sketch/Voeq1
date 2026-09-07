@@ -186,7 +186,12 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
           const d = await res.json().catch(() => ({}));
           setToast({ kind: "error", text: `Verification failed: ${(d as { error?: string }).error ?? res.status}` });
         } else {
+          // QUEUE REFRESH FIX (2026-09-07, founder: "I approve a vendor and it
+          // still shows the same thing"): the API resolves the case + notifies
+          // the vendor, but the list kept the stale row until a manual reload.
+          // Bump refreshKey to re-fetch immediately.
           setToast({ kind: "success", text: `${actionModal.action === "approve" ? "Approved" : "Denied"} ✓` });
+          setRefreshKey((k) => k + 1);
         }
       } catch {
         setToast({ kind: "error", text: "Network error — action not applied." });
@@ -224,6 +229,7 @@ export function ModerationQueue({ staff, capabilities }: ModerationQueueProps) {
         return;
       }
       setToast({ kind: "success", text: "Action applied ✓" });
+      setRefreshKey((k) => k + 1); // reports/appeals queue refresh (same fix as verifications)
     } catch {
       setToast({ kind: "error", text: "Network error — action not applied." });
     }
@@ -541,8 +547,8 @@ function ReportsTab({
   );
 }
 
-function VerificationsTab({ 
-  verifications, 
+function VerificationsTab({
+  verifications,
   onOpenDetail,
   onAction,
 }: {
@@ -550,12 +556,22 @@ function VerificationsTab({
   onOpenDetail: (id: string) => void;
   onAction: (action: string, id: string) => void;
 }) {
+  // QUEUE SEMANTICS FIX (2026-09-07, founder: "I approve a vendor and it
+  // still shows the same thing"): the cases API returns ALL verification
+  // cases including resolved/dismissed ones, and every case rendered as a
+  // card — so approving left the row sitting there forever. A queue shows
+  // actionable items: open + triaged only.
   const isMobile = useIsMobile();
+  const pending = verifications.filter((v) => v.status === "open" || v.status === "triaged");
   return (
     <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 8, overflow: "hidden" }}>
-      {isMobile ? (
+      {pending.length === 0 ? (
+        <p data-testid="verifications-empty" style={{ margin: 0, padding: "18px 16px", color: "var(--role-text-muted)", fontSize: 14, fontFamily: "var(--role-font-ui)" }}>
+          No pending verification requests — the queue is clear.
+        </p>
+      ) : isMobile ? (
         <div data-testid="verifications-mobile-cards" style={{ display: "flex", flexDirection: "column" }}>
-          {verifications.map((verification) => (
+          {pending.map((verification) => (
             <div key={verification.id} data-testid={`verification-card-${verification.id}`} style={{ padding: "14px 16px", borderBottom: "1px solid var(--role-surface-sunken)", display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Link href={`/vendor/${verification.vendorId}`} style={{ ...linkButton, fontSize: 15, fontWeight: 600 }}>
@@ -591,7 +607,7 @@ function VerificationsTab({
           </tr>
         </thead>
         <tbody>
-          {verifications.map((verification) => (
+          {pending.map((verification) => (
             <tr key={verification.id} style={{ borderBottom: "1px solid var(--role-surface-sunken)" }}>
               <td style={tdStyle}>
                 <Link href={`/vendor/${verification.vendorId}`} style={linkButton}>
