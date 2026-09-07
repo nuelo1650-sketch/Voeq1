@@ -1614,6 +1614,55 @@
   z-index: 3;
 }
 
+/* ============================================================
+   LANDING VENDOR CARD — C1 WARM UPGRADE (2026-09-06, founder:
+   "landing page cards also need upgrading cause it has follow and some
+   buttons that's not rendering well"). The old Follow PILL overflowed the
+   260px rail card; actions are now compact frosted icon buttons moved to the
+   TOP-LEFT (status badge keeps top-right — they no longer collide), and the
+   body carries the C1 eyebrow + serif name so the rail rhymes with Explore.
+   ============================================================ */
+.vendor-card.voeq-warm-card {
+  background: var(--color-glass-white, #fffef9);
+  border: 1px solid rgba(30, 59, 47, .09);
+  box-shadow: 0 4px 14px rgba(15, 42, 29, .06);
+}
+.vendor-card.voeq-warm-card .vendor-save {
+  top: 10px;
+  bottom: auto;
+  left: 10px;
+  right: auto;
+}
+.vendor-card.voeq-warm-card .vendor-name {
+  font-family: var(--role-font-display);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-forest);
+  line-height: 1.25;
+  letter-spacing: -.01em;
+}
+.vendor-card.voeq-warm-card .vendor-card-body {
+  padding: var(--space-md) var(--space-md) var(--space-lg);
+}
+.vendor-card.voeq-warm-card .vendor-meta {
+  margin-bottom: 0;
+  font-variant-numeric: tabular-nums;
+}
+.vendor-card.voeq-warm-card .vendor-rating {
+  font-family: var(--role-font-display);
+  font-weight: 700;
+  color: var(--color-forest);
+}
+.vendor-card.voeq-warm-card .vendor-price-inline {
+  margin-left: auto;
+  font-family: var(--role-font-display);
+  font-weight: 600;
+  font-size: .875rem;
+  color: var(--color-forest);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .vendor-card-body {
   padding: var(--space-lg);
 }

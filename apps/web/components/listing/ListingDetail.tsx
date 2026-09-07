@@ -378,12 +378,14 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
     );
   }
 
-  // Prepare gallery images
-  const galleryImages = Array.isArray(listing.images) && listing.images.length > 0 
+  // Prepare gallery images — MATRIX FIX (2026-09-06): filter falsy URLs (a
+  // demo listing carries an empty string in images[] → <img src=""> broke the
+  // prod verify-matrix; same guard as ListingCard).
+  const galleryImages = (Array.isArray(listing.images) && listing.images.length > 0 
     ? listing.images 
     : listing.image 
     ? [listing.image] 
-    : [];
+    : []).filter((u): u is string => typeof u === "string" && u.trim() !== "");
 
   return (
     <div

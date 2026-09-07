@@ -47,12 +47,16 @@ export function SavedClient({
         <section style={{ marginTop: 24 }}>
           <h2 style={{ fontFamily: "var(--role-font-display)", fontSize: 20, color: "var(--color-forest)" }}>Listings</h2>
           <div className="voeq-grid" data-testid="saved-grid">
-            {listings.map((l) => (
+            {listings.map((l) => {
+              // MATRIX FIX (2026-09-06): filter falsy image URLs (empty string
+              // in images[] rendered <img src=""> — same guard as ListingCard).
+              const imgs = (l.images ?? []).filter((u) => typeof u === "string" && u.trim() !== "");
+              return (
               <Link key={l.id} href={`/listing/${l.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                 <div className="voeq-card">
                   {/* BUG-C (2026-09-06): saved cards show ALL photos via the
                       same swipe track (was first-photo-only). */}
-                  {l.images && l.images.length > 0 && (
+                  {imgs.length > 0 && (
                     <div className="voeq-card-image" style={{ position: "relative" }}>
                       <div
                         data-testid="saved-card-track"
@@ -60,7 +64,7 @@ export function SavedClient({
                         onScroll={(e) => {
                           const el = e.currentTarget;
                           if (el.clientWidth === 0) return;
-                          const i = Math.max(0, Math.min((l.images?.length ?? 1) - 1, Math.round(el.scrollLeft / el.clientWidth)));
+                          const i = Math.max(0, Math.min(imgs.length - 1, Math.round(el.scrollLeft / el.clientWidth)));
                           const dots = el.parentElement?.querySelectorAll("[data-saved-dot]");
                           dots?.forEach((d, di) => {
                             (d as HTMLElement).style.background = di === i ? "var(--color-cream)" : "rgba(246,241,230,.45)";
@@ -68,14 +72,14 @@ export function SavedClient({
                         }}
                         style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", width: "100%", height: "100%", scrollbarWidth: "none" }}
                       >
-                        {l.images.map((src, i) => (
+                        {imgs.map((src, i) => (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img key={i} src={src} alt={`${l.title} — photo ${i + 1}`} style={{ minWidth: "100%", width: "100%", height: "100%", objectFit: "cover", display: "block", scrollSnapAlign: "start" }} loading="lazy" />
                         ))}
                       </div>
-                      {(l.images?.length ?? 0) > 1 && (
+                      {imgs.length > 1 && (
                         <div style={{ position: "absolute", bottom: 6, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5, pointerEvents: "none" }}>
-                          {l.images.map((_, i) => (
+                          {imgs.map((_, i) => (
                             <span key={i} data-saved-dot style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "var(--color-cream)" : "rgba(246,241,230,.45)", boxShadow: "0 0 2px rgba(15,42,29,.5)" }} />
                           ))}
                         </div>
@@ -91,7 +95,8 @@ export function SavedClient({
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

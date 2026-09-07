@@ -65,7 +65,12 @@ export function ListingCard({
   onVendor?: boolean;
 }) {
   const img = listing.image;
-  const images = listing.images && listing.images.length > 0 ? listing.images : img ? [img] : [];
+  // MATRIX FIX (2026-09-06): a demo listing carries an EMPTY string in
+  // images[] — the swipe track rendered it as <img src=""> and the prod
+  // verify-matrix flagged a broken image at phone-390. Filter falsy URLs at
+  // the card (the same guard belongs anywhere images[] maps to <img>).
+  const rawImages = listing.images && listing.images.length > 0 ? listing.images : img ? [img] : [];
+  const images = rawImages.filter((u): u is string => typeof u === "string" && u.trim() !== "");
   // P-A round 81 (F): the second image used to be hover-only — on a phone there
   // is no hover, so extra photos were invisible unless you opened the listing.
   // Now: horizontal scroll-snap track (native touch swipe) + dot indicators.

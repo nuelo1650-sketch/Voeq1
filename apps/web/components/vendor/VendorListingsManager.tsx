@@ -196,6 +196,9 @@ export function VendorListingsManager({ vendor, isPublic, listings }: Props) {
             const live = isLive(l);
             const stat = stats.get(l.id);
             const isTop = l.id === topId;
+            // MATRIX FIX (2026-09-06): filter falsy image URLs (empty string in
+            // images[] rendered <img src=""> — same guard as ListingCard).
+            const imgs = (l.images ?? []).filter((u) => typeof u === "string" && u.trim() !== "");
             return (
               <div
                 key={l.id}
@@ -207,27 +210,26 @@ export function VendorListingsManager({ vendor, isPublic, listings }: Props) {
                 }}
               >
                 <Link href={`/listing/${l.id}`} aria-label={`View ${l.title}`} style={{ display: "block", position: "relative", aspectRatio: "16/10", background: "var(--color-amber-soft, rgba(232,163,61,.14))", textDecoration: "none" }}>
-                  {l.images && l.images.length > 1 ? (
+                  {imgs.length > 1 ? (
                     /* BUG-3 FIX (2026-09-05): swipeable multi-image track on the
                        vendor's own listing cards (was first-photo-only). */
                     <div
                       className="voeq-card-track"
                       onScroll={(e) => {
                         const el = e.currentTarget;
-                        const imgs = l.images ?? [];
                         const idx = Math.round(el.scrollLeft / Math.max(1, el.scrollWidth / imgs.length));
                         setActiveImg(Math.min(imgs.length - 1, Math.max(0, idx)));
                       }}
                       style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", width: "100%", height: "100%", scrollbarWidth: "none" }}
                     >
-                      {l.images.map((src, ii) => (
+                      {imgs.map((src, ii) => (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img key={ii} src={src} alt="" loading="lazy" style={{ minWidth: "100%", width: "100%", height: "100%", objectFit: "cover", display: "block", scrollSnapAlign: "start" }} />
                       ))}
                     </div>
-                  ) : l.images[0] ? (
+                  ) : imgs[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={l.images[0]} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={imgs[0]} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
                     <span style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", fontSize: 30 }}>🛍️</span>
                   )}

@@ -17,11 +17,15 @@ export function SaveButton({
   targetId,
   initialSaved = false,
   className,
+  compact = false,
 }: {
   targetType: "listing" | "vendor";
   targetId: string;
   initialSaved?: boolean;
   className?: string;
+  /** C1 landing card (2026-09-06): frosted circle so the heart stays legible
+   *  on any photo (the bare transparent icon vanished on light images). */
+  compact?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -78,7 +82,20 @@ export function SaveButton({
       aria-label={saved ? "Remove from saved" : "Save"}
       onClick={onClick}
       className={className}
-      style={{
+      style={compact ? {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 30,
+        height: 30,
+        borderRadius: 999,
+        background: "rgba(246,241,230,.92)",
+        border: "1px solid rgba(15,42,29,.18)",
+        cursor: "pointer",
+        color: saved ? "var(--color-amber, #E8A33D)" : "var(--color-forest, #0F2A1D)",
+        boxShadow: "0 1px 4px rgba(15,42,29,.18)",
+        padding: 0,
+      } : {
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
@@ -89,7 +106,7 @@ export function SaveButton({
         padding: 6,
       }}
     >
-      <Heart size={18} fill={saved ? "currentColor" : "none"} />
+      <Heart size={compact ? 15 : 18} fill={saved ? "currentColor" : "none"} />
     </button>
   );
 }

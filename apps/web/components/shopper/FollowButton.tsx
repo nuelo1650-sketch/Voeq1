@@ -14,10 +14,14 @@ export function FollowButton({
   vendorId,
   initialFollowing = false,
   className,
+  compact = false,
 }: {
   vendorId: string;
   initialFollowing?: boolean;
   className?: string;
+  /** C1 landing card (2026-09-06): small frosted pill for photo-corner use —
+   *  the full-size pill overflowed the trending rail cards. */
+  compact?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -71,7 +75,24 @@ export function FollowButton({
       aria-pressed={following}
       onClick={onClick}
       className={className}
-      style={{
+      style={compact ? {
+        // C1 landing card: small frosted pill — "+"/"✓" glyph, no text.
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 30,
+        height: 30,
+        borderRadius: 999,
+        fontFamily: "var(--role-font-ui)",
+        fontSize: "15px",
+        fontWeight: 700,
+        lineHeight: 1,
+        background: following ? "var(--color-forest, #0F2A1D)" : "rgba(246,241,230,.92)",
+        color: following ? "#f6f1e6" : "var(--color-forest, #0F2A1D)",
+        border: "1px solid rgba(15,42,29,.18)",
+        cursor: "pointer",
+        boxShadow: "0 1px 4px rgba(15,42,29,.18)",
+      } : {
         fontFamily: "var(--role-font-ui)",
         fontSize: "15px",
         fontWeight: 600,
@@ -83,7 +104,7 @@ export function FollowButton({
         cursor: "pointer",
       }}
     >
-      {following ? "Following" : "Follow"}
+      {compact ? (following ? "✓" : "+") : (following ? "Following" : "Follow")}
     </button>
   );
 }
