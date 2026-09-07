@@ -26,9 +26,11 @@ export function ListingRow({
 }) {
   // BUG-C (2026-09-06): row thumbnail is now a mini swipe track — every
   // listing surface shows ALL photos, not just the first.
-  const imgs = Array.isArray(listing.images) && listing.images.length > 0
+  // MATRIX FIX (2026-09-06): filter falsy image URLs (empty string in
+  // images[] rendered <img src=""> — same guard as ListingCard).
+  const imgs = (Array.isArray(listing.images) && listing.images.length > 0
     ? listing.images
-    : listing.image ? [listing.image] : [];
+    : listing.image ? [listing.image] : []).filter((u): u is string => typeof u === "string" && u.trim() !== "");
   const [idx, setIdx] = useState(0);
   return (
     <Link

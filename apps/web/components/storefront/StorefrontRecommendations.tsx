@@ -91,9 +91,12 @@ export function StorefrontRecommendations({ otherListings, relatedVendors, vendo
 /** Recommendation card matching K2.3 ListingCard design */
 function RecommendationCard({ listing }: { listing: ExploreListing }) {
   // BUG-C (2026-09-06): recommendation cards show ALL photos (was single image).
-  const imgs = Array.isArray(listing.images) && listing.images.length > 0
+  // MATRIX FIX (2026-09-06): filter falsy image URLs (empty string in
+  // images[] rendered <img src=""> — same guard as ListingCard). This is the
+  // rail that broke the prod matrix on /vendor/4d64781a (Gel Manicure).
+  const imgs = (Array.isArray(listing.images) && listing.images.length > 0
     ? listing.images
-    : listing.image ? [listing.image] : [];
+    : listing.image ? [listing.image] : []).filter((u): u is string => typeof u === "string" && u.trim() !== "");
   const [idx, setIdx] = useState(0);
   return (
     <Link
