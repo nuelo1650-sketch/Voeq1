@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 import type { ExploreListing } from "@voeq/data";
 import { CampusFingerprint } from "@voeq/contour";
 import { Heart } from "lucide-react";
@@ -55,6 +56,7 @@ export function ListingCard({
   isBookmarked,
   onToggleBookmark,
   onVendor = true,
+  link = true,
 }: {
   listing: ExploreListing;
   loading?: boolean;
@@ -63,6 +65,13 @@ export function ListingCard({
   /** C1 (2026-09-06): storefront grids pass false — a store's own grid
    *  shouldn't repeat its own name on every card. */
   onVendor?: boolean;
+  /** CLICKABILITY FIX (2026-09-07): C1 deleted the old linked
+   *  StorefrontListingCard twin but the shared card never carried its own
+   *  <Link> — Explore/EmptyState wrapped it externally, so every OTHER
+   *  surface (storefront grid, rails, detail cross-sells) rendered DEAD
+   *  cards. The card now self-links by default; wrappers pass link={false}
+   *  (nested <a> is invalid HTML). */
+  link?: boolean;
 }) {
   const img = listing.image;
   // MATRIX FIX (2026-09-06): a demo listing carries an EMPTY string in
@@ -91,7 +100,7 @@ export function ListingCard({
     if (onToggleBookmark) onToggleBookmark(listing.id);
   };
 
-  return (
+  const card = (
     <article
       data-testid="listing-card"
       className="voeq-card"
@@ -209,8 +218,22 @@ export function ListingCard({
         </div>
       </div>
       </article>
-      );
-      }
+  );
+
+  if (!link) return card;
+  // CLICKABILITY FIX (2026-09-07): the card carries its own link so EVERY
+  // surface (storefront grid, rails, cross-sells) is clickable out of the
+  // box; external wrappers (Explore grid) pass link={false}.
+  return (
+    <Link
+      href={`/listing/${listing.id}`}
+      data-testid="listing-card-link"
+      style={{ textDecoration: "none", color: "inherit", display: "block" }}
+    >
+      {card}
+    </Link>
+  );
+}
 
 const shimmerStyle: React.CSSProperties = {
   position: "absolute",

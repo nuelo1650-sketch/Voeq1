@@ -500,6 +500,7 @@ function SocialLinksSection({ vendor, disabled }: { vendor: Vendor; disabled: bo
   const [twitter, setTwitter] = useState(s.twitter ?? "");
   const [tiktok, setTiktok] = useState(s.tiktok ?? "");
   const [phone, setPhone] = useState(s.phone ?? "");
+  const [whatsappChannel, setWhatsappChannel] = useState(s.whatsappChannel ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -515,7 +516,7 @@ function SocialLinksSection({ vendor, disabled }: { vendor: Vendor; disabled: bo
       const res = await fetch("/api/vendor/socials", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ instagram, twitter, tiktok, phone }),
+        body: JSON.stringify({ instagram, twitter, tiktok, phone, whatsappChannel }),
       });
 
       if (res.ok) {
@@ -574,6 +575,22 @@ function SocialLinksSection({ vendor, disabled }: { vendor: Vendor; disabled: bo
           onChange={(e) => setPhone(e.target.value)}
           disabled={disabled}
           placeholder="+234..."
+          style={inputStyle}
+        />
+      </Field>
+
+      {/* L4b field parity (2026-09-07): the API + storefront already render
+          whatsappChannel, but the live form never had an input for it — the
+          only way to set it was the orphaned StorefrontSocialsForm. A public
+          CHANNEL link is allowed (Doc 13 §13.13 bans vendor MESSAGING, not
+          profile links). */}
+      <Field label="WhatsApp channel" hint="Full channel URL (broadcast, not chat)">
+        <input
+          type="url"
+          value={whatsappChannel}
+          onChange={(e) => setWhatsappChannel(e.target.value)}
+          disabled={disabled}
+          placeholder="https://www.whatsapp.com/channel/..."
           style={inputStyle}
         />
       </Field>

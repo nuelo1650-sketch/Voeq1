@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { Star } from "lucide-react";
 import type { ReviewResponse } from "@/lib/apiTypes";
 
 /**
@@ -59,21 +60,38 @@ export function ReviewForm({ vendorId }: { vendorId: string }) {
 
   return (
     <form onSubmit={submit} data-testid="review-form" className="voeq-comment-form">
-      <div style={{ display: "flex", gap: 4 }} aria-label="Star rating">
-        {[1, 2, 3, 4, 5].map((n) => (
-          <button
-            key={n}
-            type="button"
-            aria-label={`${n} star`}
-            aria-pressed={rating >= n}
-            onMouseEnter={() => setHover(n)}
-            onMouseLeave={() => setHover(0)}
-            onClick={() => setRating(n)}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: (hover || rating) >= n ? "var(--color-amber)" : "var(--color-ink-subtle, #d8d2c4)", transition: "color .12s ease" }}
-          >
-            ★
-          </button>
-        ))}
+      {/* REVIEW STARS v2 (2026-09-07, founder: "the stars when you want to
+          give a review should show better"): 22px glyphs on a low-contrast
+          #d8d2c4 were nearly invisible on cream. Now 34px, outlined star
+          shapes with a visible empty state, hover/selected fill amber, and a
+          live "n / 5" label so the pick is unmistakable. */}
+      <div style={{ display: "flex", gap: 6, alignItems: "center" }} aria-label="Star rating">
+        {[1, 2, 3, 4, 5].map((n) => {
+          const filled = (hover || rating) >= n;
+          return (
+            <button
+              key={n}
+              type="button"
+              aria-label={`${n} star${n > 1 ? "s" : ""}`}
+              aria-pressed={rating >= n}
+              onMouseEnter={() => setHover(n)}
+              onMouseLeave={() => setHover(0)}
+              onClick={() => setRating(n)}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 2, lineHeight: 1, display: "inline-flex" }}
+            >
+              <Star
+                size={34}
+                fill={filled ? "var(--color-amber, #E8A33D)" : "transparent"}
+                stroke={filled ? "var(--color-amber, #E8A33D)" : "var(--color-forest, #0F2A1D)"}
+                strokeWidth={filled ? 0 : 1.5}
+                style={{ transition: "fill .12s ease, stroke .12s ease" }}
+              />
+            </button>
+          );
+        })}
+        <span data-testid="review-rating-label" style={{ marginLeft: 8, fontFamily: "var(--role-font-ui)", fontSize: 13, fontWeight: 650, color: rating > 0 ? "var(--color-forest)" : "var(--color-ink-muted, #6f6a5e)", whiteSpace: "nowrap" }}>
+          {rating > 0 ? `${rating} / 5` : "Tap to rate"}
+        </span>
       </div>
       <textarea
         data-testid="review-body"

@@ -1,96 +1,93 @@
 'use client';
 import { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { VendorCard } from './VendorCard';
-import type { VendorSummary } from '@voeq/data';
+import { ListingCard } from '@/components/explore/ListingCard';
+import type { ExploreListing } from '@voeq/data';
 
 type FilterTab = 'popular' | 'new' | 'topRated' | 'trending';
 
-const filterTabs = [
-  { id: 'popular' as FilterTab, label: 'Popular on Voeq', description: 'Vendors with highest views' },
-  { id: 'new' as FilterTab, label: 'New to Voeq', description: 'Recently added vendors' },
-  { id: 'topRated' as FilterTab, label: 'Top Rated', description: 'Highest rated vendors' },
-  { id: 'trending' as FilterTab, label: 'Trending Now', description: 'Recent activity spike' },
+const filterTabs: { id: FilterTab; label: string; description: string }[] = [
+  { id: 'popular', label: 'Popular on Voeq', description: 'Most relevant listings right now' },
+  { id: 'new', label: 'New on Voeq', description: 'Recently posted listings' },
+  { id: 'topRated', label: 'Top Rated', description: 'Highest rated vendors' },
+  { id: 'trending', label: 'Trending Now', description: 'Featured by the Voeq team' },
 ];
 
 /**
- * Rank a VendorSummary by real, available signals (Phase-2 relevance alignment).
- * Uses only fields the feed genuinely carries: rating, reviewCount, status.
- * Confidence-smooths rating by review count (a single 5-star ≠ a rock-solid 4.6),
- * and small open/boost so a live vendor edges a closed one. No invented data.
+ * Landing TrendingRail — LISTINGS (2026-09-07, founder: "is it not supposed
+ * to be only listings, why is a vendor profile showing on the landing
+ * page"). The rail used to render VendorCard profiles; the landing's job is
+ * to show what you can actually FIND on the marketplace, so it now renders
+ * the same ListingCard as Explore (C1 design language) fed by the REAL
+ * /api/explore feed (Neon in prod — no mock, no showcase fallback).
+ *
+ * Tabs map to honest API params: popular=relevance ranking, new=newest,
+ * topRated=rating-desc, trending=featuredOnly (a real staff-curated signal,
+ * not invented analytics).
  */
-function rankVendor(v: VendorSummary): number {
-  const rating = v.rating ?? 0;
-  const reviews = v.reviewCount ?? 0;
-  const ratingSignal = (rating / 5) * Math.min(1, reviews / 5); // 0..1
-  const openSignal = v.status === 'open' ? 0.15 : 0;
-  return ratingSignal + openSignal;
-}
+const TAB_PARAMS: Record<FilterTab, string> = {
+  popular: 'sort=relevance',
+  new: 'sort=newest',
+  topRated: 'sort=rating-desc',
+  trending: 'featuredOnly=true&sort=relevance',
+};
 
 export function TrendingRail() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<FilterTab>('popular');
   const [isRotating, setIsRotating] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
-  const [vendors, setVendors] = useState<VendorSummary[]>([]);
+  const [listings, setListings] = useState<ExploreListing[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  // F-A9: fetch REAL vendors from /api/vendors (Neon in prod, showcase in dev).
+  // Fetch REAL listings for the active tab from /api/explore.
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/vendors')
+    setLoaded(false);
+    fetch(`/api/explore?${TAB_PARAMS[activeTab]}&limit=12`)
       .then((r) => r.json())
-      .then((d) => { if (!cancelled) setVendors(d.vendors ?? []); })
-      .catch(() => { /* leave empty; honest empty state */ })
+      .then((d) => { if (!cancelled) setListings(Array.isArray(d?.data) ? d.data : []); })
+      .catch(() => { /* honest empty state below */ })
       .finally(() => { if (!cancelled) setLoaded(true); });
     return () => { cancelled = true; };
-  }, []);
+  }, [activeTab]);
 
   // Auto-rotation every 7 seconds
   useEffect(() => {
-    if (!isRotating || isPaused) return;
-
-    const interval = setInterval(() => {
-      setActiveTab(current => {
-        const currentIndex = filterTabs.findIndex(tab => tab.id === current);
-        const nextIndex = (currentIndex + 1) % filterTabs.length;
-        return filterTabs[nextIndex].id;
-      });
+    if (!isRotating || isPaused || listings.length === 0) return;
+    const id = setInterval(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (el.scrollLeft >= max - 4) el.scrollTo({ left: 0, behavior: 'smooth' });
+      else el.scrollBy({ left: el.clientWidth * 0.8, behavior: 'smooth' });
     }, 7000);
+    return () => clearInterval(id);
+  }, [isRotating, isPaused, listings.length]);
 
-    return () => clearInterval(interval);
-  }, [isRotating, isPaused]);
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (!scrollRef.current) return;
-    const scrollAmount = 320;
-    const newScrollLeft = scrollRef.current.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount);
-    scrollRef.current.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+  const scroll = (dir: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'left' ? -el.clientWidth * 0.8 : el.clientWidth * 0.8, behavior: 'smooth' });
   };
 
-  const handleTabClick = (tabId: FilterTab) => {
-    setActiveTab(tabId);
-    setIsRotating(false); // Stop rotation when user manually clicks
+  const handleTabClick = (tab: FilterTab) => {
+    setActiveTab(tab);
+    setIsRotating(false);
+    scrollRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
   };
-
-  // Filter vendors based on active tab (real vendors rarely carry curated tags;
-  // fall back to showing all when a tab has no matches so the rail is never empty).
-  const filteredVendors = vendors.filter(vendor => vendor.tags.includes(activeTab));
-  const pool = filteredVendors.length > 0 ? filteredVendors : vendors;
-  // Phase-2-relevance: rank the visible pool by a real-data score so "Popular on Voeq"
-  // and "Trending Now" reflect genuine rating/engagement — not arbitrary vendor order.
-  const displayVendors = [...pool].sort((a, b) => rankVendor(b) - rankVendor(a));
 
   return (
     <section 
       className="trending-rail-section"
+      data-testid="landing-trending-rail"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="trending-rail-header">
         <div>
           <h2 className="trending-rail-title">Trending on campus</h2>
-          <p className="trending-rail-subtitle">Popular vendors students are discovering right now</p>
+          <p className="trending-rail-subtitle">Real listings students are discovering right now</p>
         </div>
         <div className="trending-rail-controls">
           <button 
@@ -126,15 +123,15 @@ export function TrendingRail() {
 
       <div className="trending-rail-scroll" ref={scrollRef}>
         <div className="trending-rail-content">
-          {displayVendors.length > 0 ? (
-            displayVendors.map((vendor) => (
-              <div key={vendor.id} className="trending-rail-item">
-                <VendorCard vendor={vendor} />
+          {listings.length > 0 ? (
+            listings.map((l) => (
+              <div key={l.id} className="trending-rail-item" style={{ flex: '0 0 240px' }}>
+                <ListingCard listing={l} />
               </div>
             ))
           ) : (
             <div className="trending-rail-empty">
-              <p>{loaded ? 'No vendors in this category yet.' : 'Loading vendors…'}</p>
+              <p>{loaded ? 'No listings in this feed yet — check back soon.' : 'Loading listings…'}</p>
             </div>
           )}
         </div>

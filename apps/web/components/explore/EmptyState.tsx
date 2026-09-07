@@ -149,7 +149,7 @@ export function EmptyState({
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "var(--space-3)" }}>
               {topMatches.map((l) => (
                 <Link key={l.id} href={`/listing/${l.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                  <ListingCard listing={l} />
+                  <ListingCard listing={l} link={false} />
                 </Link>
               ))}
             </div>

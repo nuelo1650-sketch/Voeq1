@@ -472,6 +472,7 @@ export function Explore({
                     >
                       <ListingCard 
                         listing={l} 
+                        link={false}
                         isBookmarked={isBookmarked(l.id)}
                         onToggleBookmark={toggleBookmark}
                       />
