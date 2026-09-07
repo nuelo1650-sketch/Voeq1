@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Search,
@@ -101,30 +102,33 @@ export function LandingHero() {
             </button>
           </form>
 
-          {/* Category chips — wired to /explore?category=slug */}
+          {/* Category chips — wired to /explore?category=slug.
+              B4 FIX (2026-09-07, launch audit): these were router.push
+              buttons — invisible to crawlers and to screen-reader link
+              lists. Static targets, so they're real <Link>s now. */}
           <div className="hero-chips">
             {categories.slice(0, 5).map((c) => (
-              <button
+              <Link
                 key={c.id}
-                type="button"
+                href={`/explore?category=${c.slug}`}
                 className="hero-chip"
-                onClick={() => router.push(`/explore?category=${c.slug}`)}
               >
                 <span className="hero-chip-icon">{CAT_ICONS[c.slug] ?? null}</span>
                 <span>{c.name.replace(/ &.*$/, "")}</span>
-              </button>
+              </Link>
             ))}
           </div>
 
-          {/* Primary CTA — unmissable path to Explore */}
-          <button
-            type="button"
+          {/* Primary CTA — unmissable path to Explore (real link: crawlable
+              + keyboard/SR accessible; B4 fix 2026-09-07). */}
+          <Link
+            href="/explore"
             className="hero-cta-btn"
-            onClick={() => router.push("/explore")}
+            data-testid="hero-explore-cta"
           >
             Explore marketplace
             <ArrowRight size={17} aria-hidden="true" />
-          </button>
+          </Link>
 
           {/* Honest value props — no fake numbers */}
           <div className="hero-props">

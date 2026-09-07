@@ -1149,6 +1149,7 @@
   box-shadow: 0 10px 24px rgba(30,59,47,.22);
   transition: transform .18s, box-shadow .18s;
   margin-bottom: 26px;
+  text-decoration: none; /* B4 (2026-09-07): CTA is a real <Link> now */
 }
 .hero-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(30,59,47,.30); }
 
@@ -1159,6 +1160,7 @@
   border: 1px solid rgba(30,59,47,.12); background: rgba(255,253,248,.7); color: var(--color-forest);
   font-family: var(--role-font-ui); font-size: 13.5px; font-weight: 500; cursor: pointer;
   transition: all .18s;
+  text-decoration: none; /* B4 (2026-09-07): chips are real <Link>s now */
 }
 .hero-chip:hover { background: var(--color-forest); color: #fff; border-color: var(--color-forest); transform: translateY(-2px); }
 .hero-chip-icon { display: inline-flex; align-items: center; opacity: .75; }
