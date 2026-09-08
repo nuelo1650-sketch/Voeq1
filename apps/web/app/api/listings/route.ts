@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { mockAuthRepo, mockVendorRepo, mockListingsRepo, logAudit, goLive, MAX_IMAGES_PER_LISTING } from "@voeq/data/server";
+import { mockAuthRepo, mockVendorRepo, mockListingsRepo, mockStaffRepo, mockNotificationRepo, logAudit, goLive, MAX_IMAGES_PER_LISTING } from "@voeq/data/server";
 import { SESSION_COOKIE } from "@/lib/session";
 
 /**
@@ -93,6 +93,60 @@ export async function POST(req: NextRequest) {
   if (vendor?.status === "pending_listings") {
     const result = await goLive(identity.id);
     promoted = result?.ok ?? false;
+
+    // PUBLISH=GO-LIVE COMPLETENESS (2026-09-08, founder: "new vendors are not
+    // being seen in admin for verification of their account and we can't see
+    // them" + "a notification should appear in their dashboard that it has
+    // worked"): the MANUAL go-live route (api/vendor/go-live) has always
+    // created a verifications staff_cases row for staff review — this auto-
+    // promote path didn't, so every vendor who went live by publishing their
+    // first listing never appeared in the admin Verifications queue. Mirror
+    // the manual route exactly (same queue, same decision, same payload), with
+    // a dedupe guard so republishes never double-create. Also notify the
+    // vendor on their dashboard that go-live worked. Both are wrapped in
+    // try/catch — a case/notification failure must NEVER break listing
+    // creation (the listing itself is the product; the case is admin
+    // bookkeeping).
+    if (promoted) {
+      try {
+        const v = await mockVendorRepo.getById(identity.vendorId!);
+        const existing = await mockStaffRepo
+          .listCases("verifications")
+          .then((cs) =>
+            cs.some(
+              (c) =>
+                (c.payload as Record<string, unknown> | null)?.vendorId === identity.vendorId &&
+                c.status !== "resolved" && c.status !== "dismissed",
+            ),
+          )
+          .catch(() => false);
+        if (!existing) {
+          await mockStaffRepo.create({
+            queue: "verifications",
+            decision: "pending_verification",
+            consequence: null,
+            payload: {
+              vendorId: identity.vendorId,
+              vendorName: v?.name ?? null,
+              description: v?.description ?? null,
+            },
+          });
+        }
+      } catch (e) {
+        console.error(`[listings] verification case create failed: ${e instanceof Error ? e.message : e}`);
+      }
+      try {
+        await mockNotificationRepo.create({
+          recipientId: identity.id,
+          type: "system",
+          title: "You're live 🎉",
+          body: "Your first published listing just took your storefront live — students across your campus can now find you on Explore. Our team reviews every new vendor for the ✓ verified badge, so keep an eye on your notifications.",
+          refId: vendor.id,
+        });
+      } catch (e) {
+        console.error(`[listings] go-live notification failed: ${e instanceof Error ? e.message : e}`);
+      }
+    }
   }
 
   await logAudit("vendor.listing.create", identity.id, { id: listing.id, autoGolive: promoted });
