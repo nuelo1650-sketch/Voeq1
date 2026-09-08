@@ -66,7 +66,32 @@ export function Explore({
   categoryOptions?: { slug: string; label: string }[];
 }) {
   const cats = categoryOptions ?? CATEGORIES;
-  const [filters, setFilters] = useState<ExploreFilters>({});
+  // FILTER PERSISTENCE (2026-09-07, founder: "why does filter always reset
+  // when I leave the page"): Explore filter state lived in useState alone —
+  // every fresh /explore mount wiped category/price/sort/verified. Persist to
+  // sessionStorage (per-tab, clears on tab close — no stale-filters surprise)
+  // and restore on mount. Campus is separately persisted (voeq:preferred-
+  // campus, long-lived by design).
+  const [filters, setFiltersState] = useState<ExploreFilters>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = sessionStorage.getItem("voeq:explore-filters");
+      return raw ? (JSON.parse(raw) as ExploreFilters) : {};
+    } catch {
+      return {};
+    }
+  });
+  const setFilters = useCallback((next: ExploreFilters | ((prev: ExploreFilters) => ExploreFilters)) => {
+    setFiltersState((prev) => {
+      const resolved = typeof next === "function" ? next(prev) : next;
+      try {
+        sessionStorage.setItem("voeq:explore-filters", JSON.stringify(resolved));
+      } catch {
+        /* storage full/blocked — filters still work in-memory */
+      }
+      return resolved;
+    });
+  }, []);
   const [query, setQuery] = useState(initialQuery || "");
   const [campus, setCampus] = useState(initialCampus);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
