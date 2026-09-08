@@ -61,10 +61,15 @@ try {
   check("A5: listing appears in explore feed", inExplore);
 
   // ---- B: verify = resolve + notify ----
-  // seed a verification case for this vendor
-  const caseId = "lf-case-" + stamp;
-  await sql`INSERT INTO staff_cases (id, queue, status, payload, created_at)
-    VALUES (${caseId}, 'verifications', 'open', ${JSON.stringify({ vendorId, vendorName: "LF Vendor", description: "probe case" })}::jsonb, ${new Date().toISOString()})`;
+  // 2026-09-08 UPDATE: publish=go-live now AUTO-CREATES the verification case
+  // (commit 890d802), so this probe must test the NEW contract: the auto-
+  // created case is what staff see in the queue, and approving the vendor
+  // must resolve THAT case (the first open/triaged match for this vendor).
+  // No manual seeding anymore — that created a second case and the approve
+  // resolved the auto one while the probe asserted on the seeded one.
+  const autoCases = await sql`SELECT id, status FROM staff_cases WHERE queue = 'verifications' AND payload->>'vendorId' = ${vendorId} AND status IN ('open','triaged')`;
+  check("B0: auto-created verification case exists", autoCases.length === 1, `n=${autoCases.length}`);
+  const caseId = autoCases[0]?.id as string;
   await page.context().clearCookies();
   await page.context().addCookies([{ name: "sessionId", value: staffSess, url: BASE }]);
   const verRes = await page.request.post(BASE + "/api/staff/verify-vendor", {
