@@ -2,6 +2,14 @@
 **Status: FOUNDER GO RECEIVED · 2026-09-08 · Founder decisions locked: Featured = Option 1 (admin-curated) · Seeds = YES (S1-S5 conditions) · Google intent fix · Non-campus onboarding in scope**
 *[v2] sections updated after GO. §0–§6 from the original plan stand unchanged — restored below in full.*
 
+## ✅ PHASE A SHIPPED TO PROD (2026-09-09)
+- Branch `money-bag-build` pushed (0ce3b7d foundations, a847c81 Phase A, 96afb77 A3 root cause) — master NOT touched
+- PROD migrations APPLIED + VERIFIED: 4 tables + listings.source + vendors.area_id + listings.created_at (30d backfill)
+- PROD deploy voeq-q6frt1hb8 live on voeq.ng — `/api/explore?sections=1` verified live: freshDrops 0 (correct: no listings <72h old yet) · live 2 · grid 13
+- PROD matrix **120/120** — zero regressions
+- A3 S4 root cause: Drizzle schema.ts missing the new columns → typed queries silently dropped source/createdAt. Lesson recorded: DB column + pgTable declaration ship in the SAME commit.
+- NEXT: Phase B (explore system) behind `?next=mb` canary.
+
 ---
 
 ## [v2] SEEDS — the full contract (founder conditions)
