@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { playfair, inter, jetbrainsMono } from "./fonts";
 import "@voeq/design-tokens/tokens.css";
 import "./globals.css";
+import "./mb-explore.css";
 import { SmartFooter } from "@/components/shell/SmartFooter";
 
 export const metadata: Metadata = {

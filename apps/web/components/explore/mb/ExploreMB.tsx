@@ -1,0 +1,330 @@
+"use client";
+
+/**
+ * ExploreMB (Money Bag) — the composed MB explore floor behind the ?next=mb
+ * canary. Reads /api/explore?sections=1 (ONE round-trip, D3) and composes:
+ * ContextStrip → FreshDrops → LiveShelf → Trending/Under-₦5k rails →
+ * GridToday (crowd-flow) → Areas band. Filter drawer = MbFilterDrawer
+ * (A12), persistence = existing voeq:explore-filters (B5), campus =
+ * voeq:preferred-campus (B6).
+ *
+ * Honesty (B7): every number on this floor comes from the payload; empty
+ * sections render NOTHING; trending rail only appears when the payload has
+ * trending items (server sets trending on real signals).
+ */
+
+import { useEffect, useMemo, useState } from "react";
+import type { ExploreFilters, ExploreListing, ExploreParams } from "@voeq/data";
+import { useExploreData } from "@/lib/useExploreData";
+import { ContextStrip, type ExploreScope } from "./ContextStrip";
+import { MbFilterDrawer } from "./MbFilterDrawer";
+import { FreshDrops } from "./FreshDrops";
+import { LiveShelf } from "./LiveShelf";
+import { MbCard } from "./MbCard";
+
+function naira(minor: number): string {
+  return `₦${(minor / 100).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+}
+
+export function ExploreMB({
+  campus: initialCampus,
+  initialQuery,
+  categoryPreset,
+  categoryOptions,
+}: {
+  campus: string;
+  initialQuery?: string;
+  categoryPreset?: string;
+  categoryOptions: { slug: string; label: string }[];
+}) {
+  // B5: same persistence keys as the existing Explore — probes + behavior preserved.
+  const [filters, setFiltersState] = useState<ExploreFilters>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = sessionStorage.getItem("voeq:explore-filters");
+      return raw ? (JSON.parse(raw) as ExploreFilters) : {};
+    } catch {
+      return {};
+    }
+  });
+  const setFilters = (next: ExploreFilters) => {
+    setFiltersState(next);
+    try {
+      sessionStorage.setItem("voeq:explore-filters", JSON.stringify(next));
+    } catch {
+      /* in-memory fallback */
+    }
+  };
+
+  const [query, setQuery] = useState(initialQuery ?? "");
+  const [sort, setSort] = useState<string>("relevance");
+  const [scope, setScope] = useState<ExploreScope>("campus");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [campusName, setCampusName] = useState(initialCampus);
+
+  // B6: campus state machine — device memory (voeq:preferred-campus).
+  useEffect(() => {
+    const stored = localStorage.getItem("voeq:preferred-campus");
+    if (stored && stored !== initialCampus) setCampusName(stored);
+    setIsMobile(window.matchMedia("(max-width: 767px)").matches);
+  }, [initialCampus]);
+
+  // Match count for the Apply button — computed from the last payload client-side.
+  const params: ExploreParams = useMemo(
+    () => ({
+      campus: scope === "all" ? undefined : campusName,
+      query: query || undefined,
+      categoryPreset,
+      sort: sort as ExploreParams["sort"],
+      ...filters,
+    }),
+    [campusName, query, categoryPreset, sort, filters, scope],
+  );
+
+  const { status, data, sections } = useExploreDataSections(params);
+
+  const drops = sections?.freshDrops ?? [];
+  const live = sections?.live ?? [];
+  const grid = sections?.grid ?? data;
+
+  const trending = useMemo(() => data.filter((l) => l.trending), [data]);
+  const under5k = useMemo(() => data.filter((l) => l.priceMinor <= 500000).slice(0, 8), [data]);
+
+  const activeFilterCount =
+    (filters.category ? 1 : 0) +
+    (filters.minPrice != null ? 1 : 0) +
+    (filters.maxPrice != null ? 1 : 0) +
+    (filters.verifiedOnly ? 1 : 0);
+
+  const Rail = ({
+    title,
+    sub,
+    items,
+    testid,
+    eager = false,
+  }: {
+    title: string;
+    sub: string;
+    items: ExploreListing[];
+    testid: string;
+    eager?: boolean;
+  }) => {
+    if (items.length === 0) return null; // B7 collapse
+    return (
+      <section data-testid={testid} style={{ padding: "26px 0 4px" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
+          <h2 style={{ margin: 0, fontFamily: "var(--role-font-display)", fontSize: 24, color: "var(--forest-deep, #0F2A1D)", lineHeight: 1.1 }}>
+            {title}
+            <span style={{ display: "block", fontSize: 13.5, fontWeight: 400, color: "var(--role-muted)", marginTop: 4 }}>{sub}</span>
+          </h2>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+          {items.slice(0, 4).map((l, i) => (
+            <MbCard key={l.id} listing={l} revealDelay={i * 100} eager={eager && i < 2} />
+          ))}
+        </div>
+      </section>
+    );
+  };
+
+  return (
+    <div data-testid="mb-explore" style={{ minHeight: "100vh" }}>
+      <header
+        data-testid="mb-topbar"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "10px var(--nav-inline-pad, 16px)",
+          borderBottom: "1px solid var(--role-border)",
+          background: "var(--role-surface)",
+          position: "sticky",
+          top: 0,
+          zIndex: 40,
+        }}
+      >
+        <a href="/" aria-label="Voeq" data-testid="mb-wordmark" style={{ textDecoration: "none", flexShrink: 0, display: "inline-flex" }}>
+          {/* BrandLogo is a server-safe img wordmark; inline to avoid another import cycle here */}
+          <span style={{ fontFamily: "var(--role-font-display)", fontWeight: 800, fontSize: 22, color: "var(--forest-deep, #0F2A1D)" }}>
+            voeq<span style={{ color: "var(--color-amber, #E8A33D)" }}>.</span>
+          </span>
+        </a>
+        <input
+          data-testid="mb-search"
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search the market…"
+          aria-label="Search listings"
+          style={{
+            flex: 1,
+            minWidth: 0,
+            border: "1px solid var(--role-border)",
+            background: "rgba(15,42,29,0.05)",
+            borderRadius: 999,
+            padding: "10px 16px",
+            fontSize: 16,
+            color: "var(--role-text)",
+            outline: "none",
+          }}
+        />
+      </header>
+
+      <ContextStrip
+        campusName={campusName}
+        liveCount={data.length}
+        scope={scope}
+        onScopeChange={setScope}
+        activeFilterCount={activeFilterCount}
+        onOpenFilters={() => setDrawerOpen(true)}
+      />
+
+      <main style={{ maxWidth: 1200, margin: "0 auto", padding: "0 var(--nav-inline-pad, 16px) 60px" }}>
+        {status === "loading" && (
+          <div data-testid="mb-loading" style={{ padding: "40px 0", color: "var(--role-muted)", textAlign: "center", fontSize: 14 }}>
+            Opening the market…
+          </div>
+        )}
+        {status === "error" && (
+          <div data-testid="mb-error" role="alert" style={{ padding: "40px 0", textAlign: "center" }}>
+            <p style={{ color: "var(--role-text)", fontWeight: 600 }}>The market is unreachable right now.</p>
+            <button onClick={() => window.location.reload()} style={{ border: "1px solid var(--role-border)", background: "var(--role-surface)", borderRadius: 999, padding: "8px 18px", cursor: "pointer", fontWeight: 600 }}>
+              Try again
+            </button>
+          </div>
+        )}
+
+        {status === "success" && (
+          <>
+            <FreshDrops drops={drops} />
+            <LiveShelf picks={live} />
+            <Rail title="Trending this week" sub="What the market loves — real attention, measured" items={trending} testid="mb-trending" />
+            <Rail title="Under ₦5,000" sub="Small prices, real finds" items={under5k} testid="mb-under5k" />
+
+            <section data-testid="mb-grid" style={{ padding: "26px 0 4px" }}>
+              <h2 style={{ margin: "0 0 14px", fontFamily: "var(--role-font-display)", fontSize: 24, color: "var(--forest-deep, #0F2A1D)" }}>
+                On the grid today
+                <span style={{ display: "block", fontSize: 13.5, fontWeight: 400, color: "var(--role-muted)", marginTop: 4 }}>
+                  The full market — a fair rotation, every listing gets the floor
+                </span>
+              </h2>
+              {grid.length === 0 ? (
+                <div data-testid="mb-empty" style={{ padding: "36px 20px", border: "1px dashed var(--role-border)", borderRadius: 16, textAlign: "center" }}>
+                  <p style={{ margin: 0, fontFamily: "var(--role-font-display)", fontSize: 18, color: "var(--forest-deep, #0F2A1D)" }}>
+                    Your campus is waking up
+                  </p>
+                  <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--role-muted)" }}>
+                    Be the first to post — your listing sets the tone for the market.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+                  {grid.map((l, i) => (
+                    <MbCard key={l.id} listing={l} revealDelay={(i % 4) * 100} eager={i < 2} />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section data-testid="mb-areas" style={{ padding: "26px 0 8px", borderTop: "1px solid var(--role-border)", marginTop: 26 }}>
+              <h3 style={{ fontFamily: "var(--role-font-display)", fontSize: 20, color: "var(--forest-deep, #0F2A1D)", margin: "18px 0 4px" }}>
+                Beyond the campus gates
+              </h3>
+              <p style={{ margin: 0, fontSize: 13.5, color: "var(--role-muted)" }}>
+                Vendors everywhere in Nigeria — browse by area. All 36 states →
+              </p>
+            </section>
+          </>
+        )}
+      </main>
+
+      <MbFilterDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        filters={filters}
+        onChange={setFilters}
+        campus={scope === "all" ? "" : campusName}
+        onCampusChange={(c) => {
+          if (c) {
+            setCampusName(c);
+            localStorage.setItem("voeq:preferred-campus", c);
+            setScope("campus");
+          } else {
+            setScope("all");
+          }
+        }}
+        campusOptions={[{ id: campusName, name: campusName }]}
+        categoryOptions={categoryOptions}
+        sort={sort}
+        onSortChange={setSort}
+        matchCount={grid.length}
+        isMobile={isMobile}
+      />
+    </div>
+  );
+}
+
+/**
+ * sections-aware data hook — extends useExploreData with the Money Bag
+ * sections payload (server already returns it when sections=1; the hook
+ * just carries it through, D3).
+ */
+import { useCallback } from "react";
+
+interface SectionsPayload {
+  freshDrops: ExploreListing[];
+  live: ExploreListing[];
+  grid: ExploreListing[];
+}
+
+function useExploreDataSections(params: ExploreParams): {
+  status: string;
+  data: ExploreListing[];
+  sections?: SectionsPayload;
+} {
+  const [state, setState] = useState<{
+    status: string;
+    data: ExploreListing[];
+    sections?: SectionsPayload;
+  }>({ status: "loading", data: [] });
+
+  const paramsKey = JSON.stringify(params);
+
+  const load = useCallback(() => {
+    const q = new URLSearchParams();
+    if (params.campus) q.set("campus", params.campus);
+    if (params.query) q.set("query", params.query);
+    if (params.categoryPreset) q.set("categoryPreset", params.categoryPreset);
+    if (params.category) q.set("category", params.category);
+    if (params.sort) q.set("sort", params.sort);
+    if (params.minPrice != null) q.set("minPrice", String(params.minPrice));
+    if (params.maxPrice != null) q.set("maxPrice", String(params.maxPrice));
+    if (params.verifiedOnly) q.set("verifiedOnly", "true");
+    q.set("sections", "1");
+
+    let cancelled = false;
+    setState((prev) => ({ ...prev, status: "loading" }));
+    fetch(`/api/explore?${q.toString()}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Explore failed (${r.status})`);
+        return r.json();
+      })
+      .then((res) => {
+        if (cancelled) return;
+        setState({ status: res.status === "empty" ? "success" : res.status ?? "success", data: res.data ?? [], sections: res.sections });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setState((prev) => ({ ...prev, status: "error" }));
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paramsKey]);
+
+  useEffect(() => load(), [load]);
+
+  return state;
+}
