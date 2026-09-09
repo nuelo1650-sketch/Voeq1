@@ -29,6 +29,9 @@ export interface Vendor {
   areaId?: string | null;
   /** VS3.4: profile photo (Cloudinary mock URL). Null until uploaded. */
   profilePhotoUrl: string | null;
+  /** Money Bag D2a (A17 hybrid banner): vendor cover photo. Null = brand
+   *  banner renders; set = the same slot shows the vendor's cover. */
+  photoCover?: string | null;
   /** VS5.3: operating hours. Null until set — "Open now" badge only renders when present (honest). */
   hours?: { open: string; close: string; days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] } | null;
   /** VS5.3: contact socials. WhatsApp MESSAGING is banned (Doc 13 §13.13) —

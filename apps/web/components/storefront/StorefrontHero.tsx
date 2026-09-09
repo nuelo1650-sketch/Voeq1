@@ -12,6 +12,7 @@ import { trackEvent } from "@/lib/track";
 import { OpenNowBadge } from "@/components/vendor/OpenNowBadge";
 import { ContextBack } from "@/components/shopper/ContextBack";
 import { FollowButton } from "@/components/shopper/FollowButton";
+import { BrandBanner } from "@/components/storefront/BrandBanner";
 import { usePendingIntent } from "@/lib/usePendingIntent";
 import { MessageCircle } from "lucide-react";
 
@@ -155,6 +156,14 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
 
   return (
     <div className="vs-hero">
+      {/* MONEY BAG D2a (A17 hybrid banner): the banner slot ABOVE the identity
+          header — brand plate by default, vendor cover when set. The name
+          stays the identity-card hero below (v1.7 watermark rule). */}
+      <BrandBanner
+        vendorName={vendor.name}
+        categoryNames={categoriesShown.map((id) => CAT_NAME_BY_ID[id] ?? id).filter(Boolean)}
+        photoCover={vendor.photoCover}
+      />
       {/* S1 identity header */}
       <header data-testid="storefront-hero" className="vs-hero-top">
         <div className="vs-idrow">

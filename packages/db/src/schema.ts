@@ -172,6 +172,9 @@ export const vendors = pgTable("vendors", {
   description: text("description").notNull().default(""),
   subArea: text("sub_area"),
   profilePhotoUrl: text("profile_photo_url"),
+  // Money Bag D2a (A17 hybrid banner): vendor cover photo. Null = brand
+  // banner renders; set = the same slot shows the vendor's cover.
+  photoCover: text("photo_cover"),
   hours: jsonb("hours").$type<
     { open: string; close: string; days: string[] } | null
   >(),

@@ -18,6 +18,7 @@ import { ReportForm } from "@/components/shopper/ReportForm";
 import { usePendingIntent } from "@/lib/usePendingIntent";
 import { trackEvent } from "@/lib/track";
 import { Heart, Share2, Flag, X, ChevronLeft, ChevronRight, MessageCircle, Link2, Store } from "lucide-react";
+import { StickyCtaBar } from "@/components/listing/StickyCtaBar";
 
 /**
  * ListingDetail — K2.3 enhanced with gallery, vendor card, recommendation rows (Doc 04 PG-PUB-005).
@@ -471,6 +472,51 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
                     ))}
                   </div>
                 )}
+                {/* MONEY BAG D1 (B8): ▹ 1/N counter synced to the swipe track. */}
+                {galleryImages.length > 1 && (
+                  <span
+                    data-testid="listing-detail-imgcount"
+                    style={{
+                      position: "absolute",
+                      top: 10,
+                      right: 10,
+                      background: "rgba(15,42,29,0.72)",
+                      color: "#f6f1e6",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      borderRadius: 999,
+                      padding: "3px 9px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    ▹ {selectedImageIndex + 1}/{galleryImages.length}
+                  </span>
+                )}
+                {/* MONEY BAG D1 (A15): gold ✦ Voeq Live seal on featured listings. */}
+                {listing.featured && (
+                  <span
+                    data-testid="listing-detail-live-seal"
+                    style={{
+                      position: "absolute",
+                      top: 10,
+                      left: 10,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                      background: "var(--color-forest, #0F2A1D)",
+                      color: "var(--color-amber, #E8A33D)",
+                      fontSize: 11,
+                      fontWeight: 800,
+                      letterSpacing: "0.06em",
+                      borderRadius: 999,
+                      padding: "5px 11px",
+                      boxShadow: "0 4px 14px rgba(15,42,29,0.35)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    ✦ Voeq Live
+                  </span>
+                )}
               </>
             ) : (
               <CampusFingerprint
@@ -726,6 +772,19 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
                   <small style={{ fontFamily: "var(--role-font-ui)", fontSize: 12, fontWeight: 500, color: "var(--role-text-muted)" }}> – {formatPrice(listing.priceMaxMinor)}</small>
                 ) : null}
               </span>
+              {/* MONEY BAG D1 (B9): the free-market rule in UX — the price is
+                  the opening bid of a conversation, never a fixed tag. */}
+              <span
+                data-testid="listing-detail-price-note"
+                style={{
+                  flexBasis: "100%",
+                  fontSize: 12,
+                  color: "var(--role-text-muted)",
+                  fontFamily: "var(--role-font-ui)",
+                }}
+              >
+                Price agreed in chat — you set it with the vendor.
+              </span>
               {typeof listing.vendorRatingAvg === "number" && (listing.vendorRatingCount ?? 0) > 0 ? (
                 <span data-testid="listing-detail-rating" style={{ fontSize: 12.5, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
                   <span style={{ color: "var(--color-amber)" }}>★</span> {listing.vendorRatingAvg.toFixed(1)} ({listing.vendorRatingCount})
@@ -905,6 +964,36 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
         <CommentsList comments={comments} listingId={listing.id} />
         <CommentForm listingId={listing.id} />
       </section>
+
+      {/* MONEY BAG D1 (A15): sticky mobile CTA bar — Message + save + share
+          float at the bottom on phones only. Desktop keeps the inline CTA.
+          Hidden once the main Message CTA scrolls into view (no duplication
+          on screen); B2: disabled under prefers-reduced-motion is NOT needed
+          (it's position, not motion). */}
+      <StickyCtaBar
+        onMessage={handleMessageVendor}
+        authLoading={authLoading}
+        saveSlot={<SaveButton targetType="listing" targetId={listing.id} className="listing-detail-save-sticky" />}
+        shareSlot={
+          <button
+            data-testid="listing-detail-sticky-share"
+            onClick={() => {
+              const el = document.querySelector('[data-testid="listing-detail-share"]') as HTMLButtonElement | null;
+              el?.click();
+              el?.scrollIntoView({ block: "center" });
+            }}
+            aria-label="Share"
+            style={{
+              width: 44, height: 44, borderRadius: 999, border: "1px solid var(--role-border)",
+              background: "var(--role-surface)", color: "var(--role-text)", cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}
+          >
+            <Share2 size={18} />
+          </button>
+        }
+        mainCtaSelector='[data-testid="listing-detail-message-cta"]'
+      />
 
       {/* LIGHTBOX v2 (2026-09-06, founder bug report): the old modal centered
           the image with flex + maxWidth/maxHeight 90% — a tall photo overflowed

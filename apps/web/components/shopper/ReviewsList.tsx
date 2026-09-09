@@ -10,6 +10,10 @@ import type { Review } from "@voeq/data";
  * per-review star rows + author chips, warm cards (cream surface, soft radius)
  * matching the one-shared-design-language directive.
  */
+// MONEY BAG A19 (founder-locked): aggregate score + distribution bars unlock
+// at 50 real reviews — below that, individual texts carry the honesty.
+const UNLOCK_AT = 50;
+
 export function ReviewsList({
   reviews,
   ratingAvg,
@@ -29,7 +33,15 @@ export function ReviewsList({
     <div data-testid="reviews-list" style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: "var(--space-2)" }}>
         <h3 style={{ margin: 0, fontFamily: "var(--role-font-display)", fontSize: "1.4rem" }}>Reviews</h3>
-        {ratingAvg != null && ratingCount > 0 && (
+        {/* MONEY BAG A19 (founder-locked twice): the aggregate score + distribution
+            bars are HIDDEN until 50 real reviews exist — "scores unlock after 50
+            reviews (keeps ratings honest)". Individual texts + star glyphs stay. */}
+        {ratingAvg != null && ratingCount > 0 && ratingCount < UNLOCK_AT && (
+          <span data-testid="reviews-unlock-note" style={{ color: "var(--role-text-muted)", fontSize: 12.5 }}>
+            {ratingCount} {ratingCount === 1 ? "review" : "reviews"} · scores unlock after {UNLOCK_AT}
+          </span>
+        )}
+        {ratingAvg != null && ratingCount >= UNLOCK_AT && (
           <span data-testid="reviews-rating" style={{ color: "var(--color-amber)", fontSize: 15 }}>
             ★ {ratingAvg.toFixed(1)} <span style={{ color: "var(--role-text-muted)" }}>({ratingCount})</span>
           </span>
@@ -42,8 +54,9 @@ export function ReviewsList({
         </p>
       ) : (
         <>
-          {/* Distribution bars — 5★ on top, honest proportions from the real
-              array; a bar renders empty (not fabricated) when a bucket is 0. */}
+          {/* A19: distribution bars — ONLY render at score-unlock (>=50 reviews).
+              Below that, individual review texts carry the honesty. */}
+          {ratingCount >= UNLOCK_AT && (
           <div data-testid="reviews-distribution" style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 4 }}>
             {dist.map(({ stars, count }) => {
               const pct = ratingCount > 0 ? Math.round((count / ratingCount) * 100) : 0;
@@ -58,6 +71,7 @@ export function ReviewsList({
               );
             })}
           </div>
+          )}
 
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
             {reviews.map((r) => (

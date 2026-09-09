@@ -82,6 +82,7 @@ export function StorefrontManagement({ vendor, disabled }: { vendor: Vendor; dis
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
           <BusinessIdentitySection vendor={vendor} disabled={disabled} />
           <ProfilePhotoSection vendor={vendor} disabled={disabled} />
+          <CoverPhotoSection vendor={vendor} disabled={disabled} />
           <OperatingHoursSection vendor={vendor} disabled={disabled} />
           <SocialLinksSection vendor={vendor} disabled={disabled} />
           <VerificationSection vendor={vendor} />
@@ -360,6 +361,130 @@ function ProfilePhotoSection({ vendor, disabled }: { vendor: Vendor; disabled: b
           </div>
         </Modal>
       )}
+    </Section>
+  );
+}
+
+// MONEY BAG D2a (A17 hybrid banner): cover photo section — the storefront
+// banner slot. Empty = the system brand banner renders; set = the vendor's
+// cover fills the same slot. Remove reverts to the brand banner. Polished
+// equally with the profile-photo section (the founder's hybrid promise).
+function CoverPhotoSection({ vendor, disabled }: { vendor: Vendor; disabled: boolean }) {
+  const router = useRouter();
+  const [uploading, setUploading] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file");
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    try {
+      // Same DIRECT pipeline as the profile photo: signed Cloudinary upload,
+      // server-side moderation, URL-only persistence (no base64 through us).
+      const prep = await prepareImageForUpload(file);
+      if ("error" in prep) { setError(prep.error); return; }
+      const uploadFile = prep.blob ? new File([prep.blob], file.name, { type: prep.mimeType || file.type }) : file;
+      const result = await uploadPhotoDirect(uploadFile, "vendor_photo");
+      if (!result.ok || !result.url) {
+        setError(result.reason ?? "Upload failed");
+        return;
+      }
+      const save = await fetch("/api/vendor/cover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name, url: result.url }),
+      });
+      if (!save.ok) {
+        const sd = await save.json().catch(() => ({}));
+        setError(sd.error ?? "Could not save your cover photo. Please try again.");
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError("Network error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeCover = async () => {
+    setRemoving(true);
+    try {
+      const res = await fetch("/api/vendor/cover", { method: "DELETE" });
+      if (res.ok) router.refresh();
+      else setError("Failed to remove cover photo");
+    } catch {
+      setError("Network error");
+    } finally {
+      setRemoving(false);
+    }
+  };
+
+  return (
+    <Section title="Storefront banner" icon={<Camera size={24} />} hint="A wide photo at the top of your storefront. Until you add one, Voeq shows your brand banner.">
+      {vendor.photoCover ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <img
+            src={vendor.photoCover}
+            alt={`${vendor.name} banner`}
+            style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: 12, border: "1px solid var(--color-ink-subtle)" }}
+          />
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <label style={{ ...secondaryButtonStyle, cursor: disabled ? "not-allowed" : "pointer", display: "inline-flex", whiteSpace: "nowrap" }}>
+              Replace
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
+                disabled={disabled || uploading}
+                style={{ display: "none" }}
+              />
+            </label>
+            <button
+              onClick={removeCover}
+              disabled={disabled || removing}
+              style={{ ...secondaryButtonStyle, color: "var(--color-danger)", borderColor: "var(--color-danger)", whiteSpace: "nowrap" }}
+            >
+              {removing ? "Removing..." : "Remove — use brand banner"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <label
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+            padding: "var(--space-4)",
+            border: "2px dashed var(--color-ink-subtle)",
+            borderRadius: 12,
+            cursor: disabled ? "not-allowed" : "pointer",
+            background: "var(--color-glass-white)",
+          }}
+        >
+          <Upload size={28} style={{ color: "var(--color-ink-muted)" }} />
+          <span style={{ color: "var(--color-ink-muted)", fontSize: 14, textAlign: "center" }}>
+            {uploading ? "Uploading..." : "Add a cover photo — or keep your brand banner"}
+          </span>
+          <span style={{ color: "var(--color-ink-subtle)", fontSize: 12 }}>
+            Wide images look best (around 1200 × 400)
+          </span>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
+            disabled={disabled || uploading}
+            style={{ display: "none" }}
+          />
+        </label>
+      )}
+      {error && <ErrorMessage>{error}</ErrorMessage>}
     </Section>
   );
 }
