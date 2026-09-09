@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq Listing v1 — A2 + Money Bag alignment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#0F2A1D; --forest-deep:#0B211A; --forest-mid:#2D5A3D;
+    --amber:#E8A33D; --amber-dark:#D4922A; --amber-light:#F5C36A;
+    --cream:#FAF6EC; --glass:#F5F1E8; --white:#fff;
+    --ink:#0A0A0A; --ink-muted:#4A4A4A; --ink-subtle:#7A7A7A;
+    --r-lg:16px; --r-xl:22px;
+    --shadow-card:0 4px 14px rgba(15,42,29,.09);
+    --shadow-lift:0 16px 36px rgba(15,42,29,.18);
+    --spring:cubic-bezier(.34,1.4,.64,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Inter,system-ui,sans-serif;background:var(--glass);color:var(--ink);overflow-x:hidden}
+  .display{font-family:Fraunces,Georgia,serif}
+  img{display:block;max-width:100%}
+  button{font-family:inherit;border:none;cursor:pointer;background:none}
+  a{text-decoration:none;color:inherit}
+  .ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 3.2s ease-in-out infinite;flex:0 0 auto}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.7);opacity:.5}}
+
+  /* NAV — minimal, matching site spine */
+  .nav1{background:var(--glass);border-bottom:1px solid rgba(15,42,29,.07);position:sticky;top:0;z-index:50}
+  .nav1-in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+  .logo{width:64px;flex:0 0 auto}
+  .crumb{font-size:.76rem;font-weight:600;color:var(--ink-subtle);display:flex;align-items:center;gap:6px;min-width:0}
+  .crumb b{color:var(--forest);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .back{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:var(--forest);padding:8px 13px;border-radius:999px;background:rgba(15,42,29,.06)}
+  .nav-cta{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .si{font-size:.8rem;font-weight:700;color:var(--forest)}
+  .si b{font-weight:800}
+  .divider{width:1px;height:22px;background:rgba(15,42,29,.18)}
+
+  /* GALLERY — swipe track + dots + counters + lightbox hint */
+  .wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+  .gallery{position:relative;margin:18px -16px 0}
+  .track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth}
+  .track::-webkit-scrollbar{display:none}
+  .slide{flex:0 0 100%;scroll-snap-align:center;aspect-ratio:4/3.6;background:linear-gradient(135deg,#EDE7D8,#E2DAC8);position:relative}
+  .slide img{width:100%;height:100%;object-fit:cover}
+  .slide .zoom{position:absolute;right:12px;bottom:12px;background:rgba(250,246,236,.9);border-radius:999px;padding:8px 13px;font-size:.66rem;font-weight:800;color:var(--forest);display:flex;align-items:center;gap:6px;box-shadow:var(--shadow-card)}
+  .counter{position:absolute;top:14px;right:16px;z-index:2;background:rgba(11,33,26,.6);color:var(--cream);font-size:.68rem;font-weight:700;border-radius:999px;padding:6px 12px;display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px)}
+  .seal{position:absolute;top:14px;left:16px;z-index:2;background:var(--amber);color:var(--forest);font-weight:900;font-size:.6rem;letter-spacing:.14em;padding:7px 13px;border-radius:4px;transform:rotate(-2deg);box-shadow:0 4px 10px rgba(0,0,0,.3);text-transform:uppercase}
+  .dots{display:flex;gap:6px;justify-content:center;margin-top:12px}
+  .dot{width:6px;height:6px;border-radius:50%;background:rgba(15,42,29,.22);transition:all .5s}
+  .dot.on{background:var(--amber);width:20px;border-radius:99px}
+
+  /* HEAD — A2 soft editorial */
+  .head{padding:22px 0 4px}
+  .catline{display:flex;align-items:center;gap:10px;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-subtle);font-weight:800}
+  .catline .rule{flex:0 0 22px;height:1.5px;background:var(--amber)}
+  .catline b{color:var(--amber-dark)}
+  h1.title{font-family:Fraunces,serif;font-weight:900;font-size:clamp(1.6rem,5.6vw,2.4rem);line-height:1.08;color:var(--forest);margin:10px 0 10px;letter-spacing:-.01em}
+  .byline{display:flex;align-items:center;gap:9px;font-size:.82rem;color:var(--ink-muted);flex-wrap:wrap}
+  .byline .vname{color:var(--forest);font-weight:800;border-bottom:1.5px solid var(--amber);padding-bottom:1px;display:inline-flex;align-items:center;gap:5px}
+  .vdot{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;background:var(--forest);border-radius:50%;color:var(--cream);font-size:.5rem}
+  .byline .dot-sep{color:var(--ink-subtle)}
+
+  /* PRICE ROW — serif price + rating + availability */
+  .price-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 0;padding:14px 16px;background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-card);flex-wrap:wrap}
+  .price-big{font-family:Fraunces,serif;font-weight:900;font-size:clamp(1.6rem,6vw,2.1rem);color:var(--forest);line-height:1}
+  .price-note{font-size:.62rem;color:var(--ink-subtle);display:block;margin-top:4px;font-family:Inter;font-weight:600;letter-spacing:.04em}
+  .pr-right{display:flex;align-items:center;gap:12px}
+  .rate-pill{display:flex;align-items:center;gap:6px;background:var(--glass);border-radius:999px;padding:8px 13px;font-size:.78rem;font-weight:800;color:var(--forest)}
+  .avail{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:800;color:var(--forest-mid)}
+  .avail .live-dot{width:7px;height:7px;background:var(--forest-mid)}
+
+  /* CTA ZONE — floating message + storefront */
+  .ctas{position:sticky;bottom:0;z-index:40;background:rgba(245,241,232,.94);backdrop-filter:blur(12px);padding:12px 16px;border-top:1px solid rgba(15,42,29,.07);margin:18px -16px 0;display:flex;gap:10px}
+  .cta-msg{flex:2;background:var(--forest);color:var(--cream);border-radius:999px;padding:14px;font-weight:800;font-size:.92rem;text-align:center;box-shadow:0 8px 20px rgba(15,42,29,.3);transition:transform .35s var(--spring)}
+  .cta-msg:active{transform:scale(.97)}
+  .cta-save{flex:0 0 52px;background:var(--white);border:1.5px solid rgba(15,42,29,.16);border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--forest);transition:transform .35s var(--spring)}
+  .cta-save:active{transform:scale(1.15)}
+  .cta-share{flex:0 0 52px;background:var(--white);border:1.5px solid rgba(15,42,29,.16);border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--forest)}
+
+  /* ABOUT + FACTS */
+  .about{margin-top:22px}
+  .about h2,.facts-h{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-subtle);font-weight:800;margin-bottom:10px}
+  .about-card{background:var(--white);border-radius:var(--r-lg);padding:16px 16px;box-shadow:var(--shadow-card)}
+  .about-card p{font-size:.88rem;color:var(--ink-muted);line-height:1.65}
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+  .fact{background:var(--white);border-radius:var(--r-lg);padding:13px 14px;box-shadow:var(--shadow-card)}
+  .fact small{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-subtle);font-weight:800;display:block;margin-bottom:4px}
+  .fact b{font-size:.82rem;color:var(--forest);font-weight:700}
+
+  /* VENDOR CARD — mini stall (Money Bag language) */
+  .vendor{margin-top:22px;background:var(--forest);border-radius:var(--r-xl);padding:18px;color:var(--cream);position:relative;overflow:hidden}
+  .vendor::before{content:"";position:absolute;top:-40%;right:-20%;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(232,163,61,.18),transparent 70%)}
+  .vendor .kick{font-size:.58rem;letter-spacing:.18em;font-weight:800;color:var(--amber-light);text-transform:uppercase}
+  .v-row{display:flex;align-items:center;gap:12px;margin-top:10px;position:relative}
+  .avatar{width:52px;height:52px;max-width:52px;max-height:52px;border-radius:50%;border:2.5px solid var(--amber);object-fit:cover;flex:0 0 52px;box-shadow:0 4px 10px rgba(0,0,0,.3)}
+  .v-row b.name{display:block;font-family:Fraunces,serif;font-size:1.08rem;font-weight:700}
+  .v-row small{font-size:.66rem;opacity:.82;display:block;margin-top:2px}
+  .v-meta{display:flex;gap:14px;margin-top:12px;position:relative;flex-wrap:wrap}
+  .vm{font-size:.66rem;opacity:.85;display:flex;align-items:center;gap:6px}
+  .vm b{color:var(--amber-light);font-family:'JetBrains Mono',monospace;font-weight:700}
+  .v-cta{margin-top:14px;display:flex;gap:10px;position:relative}
+  .v-cta .b1{flex:1;background:var(--amber);color:var(--forest);border-radius:999px;padding:12px;font-weight:800;font-size:.82rem;text-align:center}
+  .v-cta .b2{flex:0 0 auto;border:1.5px solid rgba(250,246,236,.4);color:var(--cream);border-radius:999px;padding:12px 18px;font-weight:700;font-size:.8rem}
+
+  /* COMMENTS v3 — minimal */
+  .cm{margin-top:32px}
+  .cm-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .cm h2{font-size:1.15rem;font-weight:900;color:var(--forest)}
+  .cm-count{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--ink-subtle);font-weight:600;margin-left:4px}
+  .cm-followup{font-size:.68rem;font-weight:800;color:var(--forest);background:var(--white);border:1.5px solid rgba(15,42,29,.15);border-radius:999px;padding:7px 13px;cursor:pointer;font-family:inherit;transition:border-color .3s}
+  .cm-followup:hover{border-color:var(--forest)}
+  .cm-post{display:flex;align-items:center;gap:10px;background:var(--white);border-radius:999px;padding:6px 6px 6px 6px;box-shadow:var(--shadow-card);margin-bottom:16px;border:1.5px solid transparent;transition:border-color .3s}
+  .cm-post:focus-within{border-color:var(--forest)}
+  .cm-av{width:36px;height:36px;max-width:36px;max-height:36px;border-radius:50%;flex:0 0 36px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.74rem;background:var(--forest);color:var(--cream)}
+  .cm-av.dim{background:var(--sand);color:var(--ink-subtle)}
+  .cm-post input{flex:1;border:none;outline:none;font-size:.86rem;font-family:inherit;background:transparent;color:var(--ink);min-width:0;padding:6px 2px}
+  .cm-post input::placeholder{color:var(--ink-subtle)}
+  .cm-send{width:38px;height:38px;max-width:38px;border-radius:50%;background:var(--forest);color:var(--cream);display:flex;align-items:center;justify-content:center;flex:0 0 38px;border:none;cursor:pointer;transition:transform .3s var(--spring),opacity .3s;opacity:.35}
+  .cm-post:focus-within .cm-send,.cm-post .cm-send.active{opacity:1}
+  .cm-send:active{transform:scale(.9)}
+  .cm-anon{flex:1;font-size:.8rem;color:var(--ink-muted)}
+  .cm-anon b{color:var(--forest)}
+  .cm-signin{font-size:.76rem;font-weight:800;color:var(--forest);border-bottom:1.5px solid var(--amber);padding-bottom:1px;white-space:nowrap}
+  .cm-row{display:flex;gap:11px;padding:14px 2px;border-top:1px solid rgba(15,42,29,.08)}
+  .cm-body{flex:1;min-width:0}
+  .cm-meta{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+  .cm-meta b{font-size:.78rem;color:var(--forest)}
+  .cm-b{font-size:.54rem;font-weight:800;color:var(--forest-mid);background:rgba(45,90,61,.1);border-radius:3px;padding:2px 6px;text-transform:uppercase;letter-spacing:.04em}
+  .cm-t{font-size:.6rem;color:var(--ink-subtle);font-family:'JetBrains Mono',monospace}
+  .cm-body>p{font-size:.84rem;color:var(--ink);line-height:1.55;word-break:break-word}
+  .cm-reply{margin-top:10px;background:var(--glass);border-left:2.5px solid var(--amber);border-radius:0 10px 10px 0;padding:9px 12px}
+  .cm-reply-name{font-size:.7rem;font-weight:800;color:var(--forest);display:block;margin-bottom:2px}
+  .cm-v{font-size:.52rem;font-weight:800;color:var(--amber-dark);background:rgba(232,163,61,.15);border-radius:3px;padding:2px 5px;text-transform:uppercase;letter-spacing:.04em}
+  .cm-reply p{font-size:.78rem;color:var(--ink-muted);line-height:1.5}
+  .cm-all{display:block;text-align:center;font-size:.78rem;font-weight:700;color:var(--amber-dark);padding:12px 0 2px}
+
+  /* SHARE DROPDOWN (listing) */
+  .share-dd{position:absolute;top:110%;right:0;background:var(--white);border-radius:14px;box-shadow:var(--shadow-lift);padding:6px;display:flex;flex-direction:column;gap:2px;min-width:170px;z-index:60}
+  .sd{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;font-size:.76rem;font-weight:700;color:var(--forest);background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:none}
+  .sd:hover{background:var(--glass)}
+  .sd .ico{width:15px;height:15px}
+  /* SIMILAR — cross-suggestion rail (system standard) */
+  .similar{margin-top:30px}
+  .similar .sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:13px}
+  .similar .sec-title{font-size:1.22rem;font-weight:900;color:var(--forest)}
+  .similar .sec-title .thin{display:block;font-weight:600;color:var(--ink-muted);font-size:.74rem;font-family:Inter;margin-top:3px}
+  .similar .sec-link{font-size:.76rem;font-weight:700;color:var(--amber-dark)}
+  .rail{display:flex;gap:13px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none;scroll-snap-type:x proximity;scroll-behavior:smooth}
+  .rail::-webkit-scrollbar{display:none}
+  .gcard{flex:0 0 46%;max-width:46%;scroll-snap-align:start;background:var(--white);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-card);display:flex;flex-direction:column;transition:transform .45s var(--spring),box-shadow .45s}
+  @media(hover:hover){.gcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}}
+  .gimg{aspect-ratio:1/1.02;position:relative;background:linear-gradient(135deg,#EDE7D8,#E2DAC8);overflow:hidden}
+  .gimg img{width:100%;height:100%;object-fit:cover}
+  .gtag{position:absolute;top:9px;left:9px;background:var(--forest);color:var(--cream);font-size:.55rem;font-weight:800;letter-spacing:.1em;padding:4px 8px;border-radius:4px}
+  .gtag.gold{background:var(--amber);color:var(--forest)}
+  .imgcount{position:absolute;top:9px;right:9px;background:rgba(11,33,26,.6);color:var(--cream);font-size:.56rem;font-weight:700;border-radius:999px;padding:4px 8px}
+  .mini-rate{position:absolute;bottom:8px;right:8px;background:rgba(250,246,236,.94);color:var(--forest);font-size:.6rem;font-weight:800;border-radius:999px;padding:4px 8px}
+  .gbody{padding:10px 12px 12px;display:flex;flex-direction:column;flex:1}
+  .gbody h4{font-size:.85rem;font-weight:700;line-height:1.28;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.2em}
+  .grow{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px}
+  .gprice{font-weight:800;color:var(--forest);font-size:.95rem;font-family:Fraunces,serif}
+  .gmeta{font-size:.62rem;color:var(--ink-subtle);white-space:nowrap}
+
+  /* COMMENTS teaser */
+  .comments{margin-top:28px}
+  .c-row{display:flex;gap:11px;padding:12px 0;border-top:1px solid rgba(15,42,29,.08)}
+  .c-row:first-child{border-top:none}
+  .c-av{width:34px;height:34px;border-radius:50%;background:var(--sand);flex:0 0 34px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.72rem;color:var(--forest)}
+  .c-row b{font-size:.76rem;color:var(--forest)}
+  .c-row p{font-size:.78rem;color:var(--ink-muted);line-height:1.5;margin-top:2px}
+  .c-row .ct{font-size:.6rem;color:var(--ink-subtle)}
+
+  .endpad{height:20px}
+  @media(min-width:760px){
+    .logo{width:76px}
+    .wrap{padding:0 16px}
+    .gallery{margin:24px -16px 0;border-radius:var(--r-xl);overflow:hidden}
+    .slide{aspect-ratio:16/8.5}
+    .lg-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:34px;align-items:start;padding-top:26px}
+    .gallery{margin-top:0}
+    .ctas{position:static;margin:20px 0 0;background:none;border:none;padding:0;backdrop-filter:none}
+    .facts{grid-template-columns:1fr 1fr}
+    .gcard{flex:0 0 calc((100% - 39px)/4.15)}
+    .vendor{margin-top:26px}
+    .sticky-col{position:sticky;top:76px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav1"><div class="nav1-in">
+  <svg class="logo" viewBox="0 0 240 159"><rect width="240" height="159" rx="18" fill="#0F2A1D"/><text x="50%" y="62%" text-anchor="middle" font-family="Fraunces,serif" font-weight="900" font-size="52" fill="#FAF6EC">voeq<tspan fill="#E8A33D">.</tspan></text></svg>
+  <span class="crumb">Explore <span style="opacity:.5">/</span> <b>Party Jollof + Grilled Chicken</b></span>
+  <div class="nav-cta"><a class="back hdesk" href="#">← Back</a><span class="divider"></span><span class="si">Sign in <b>|</b> Sign up</span></div>
+</div></nav>
+
+<main class="wrap">
+  <div class="lg-grid">
+    <div>
+      <!-- GALLERY: swipe track, counter, seal, dots -->
+      <div class="gallery">
+        <span class="seal">✦ Voeq Live</span>
+        <span class="counter">▹ <span id="curIdx">1</span>/4</span>
+        <div class="track" id="track">
+          <div class="slide"><img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=1100&q=76" alt="" loading="lazy"><span class="zoom">🔍 Tap to zoom</span></div>
+          <div class="slide"><img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=1100&q=76" alt="" loading="lazy"></div>
+          <div class="slide"><img src="https://images.unsplash.com/photo-1591160690555-5debfba289f0?w=1100&q=76" alt="" loading="lazy"></div>
+          <div class="slide"><img src="https://images.unsplash.com/photo-1512058564366-18510be2db19?w=1100&q=76" alt="" loading="lazy"></div>
+        </div>
+        <div class="dots" id="galDots"></div>
+      </div>
+
+    </div>
+
+    <div class="sticky-col">
+      <!-- HEAD -->
+      <div class="head">
+        <div class="catline"><span class="rule"></span>FOOD &amp; DRINKS <b>· FEATURED</b></div>
+        <h1 class="title">Party Jollof + Grilled Chicken Platter</h1>
+        <div class="byline">
+          by <span class="vname">Mama Tuli's Kitchen <span class="vdot">✓</span></span>
+          <span class="dot-sep">·</span> Food &amp; Drinks
+        </div>
+      </div>
+
+      <!-- PRICE ROW -->
+      <div class="price-row">
+        <span><span class="price-big">₦3,500</span><span class="price-note">per platter · price agreed in chat</span></span>
+        <span class="pr-right">
+          
+          <span class="avail"><span class="live-dot"></span>Available today</span>
+        </span>
+      </div>
+
+      <!-- CTAs -->
+      <div class="ctas">
+        <button class="cta-msg">💬 Message the stall</button>
+        <button class="cta-save" aria-label="Save">🤍</button>
+        <div style="position:relative;flex:0 0 52px;display:flex">
+          <button class="cta-share" aria-label="Share" id="shareBtn" style="width:100%">↗</button>
+          <div class="share-dd" id="shareDD" style="display:none">
+            <button class="sd" id="ddCopy"><svg class="ico" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy link</button>
+            <a class="sd" href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>WhatsApp</a>
+            <a class="sd" href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/></svg>X</a>
+            <a class="sd" href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>Facebook</a>
+            <button class="sd"><svg class="ico" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 12h10M12 7v10"/></svg>QR code</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABOUT -->
+      <section class="about">
+        <h2>About this listing</h2>
+        <div class="about-card">
+          <p>Smoky party jollof cooked over firewood, served with a half grilled chicken, fried plantain and our signature pepper sauce. Cooked fresh daily — order before 4pm for same-evening delivery to hostel gates.</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><small>Category</small><b>Food &amp; Drinks</b></div>
+          <div class="fact"><small>Vendor</small><b>Mama Tuli's ✓</b></div>
+          <div class="fact"><small>Prep time</small><b>30–45 min</b></div>
+          <div class="fact"><small>Contact</small><b>Chat on Voeq</b></div>
+        </div>
+      </section>
+
+      <!-- VENDOR CARD -->
+      <section class="vendor">
+        <span class="kick">From the stall</span>
+        <div class="v-row">
+          <img class="avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=140&q=64" alt="">
+          <span><b class="name">Mama Tuli's Kitchen</b><small>Campus favorite · replies in minutes</small></span>
+        </div>
+        <div class="v-meta">
+          <span class="vm">★ <b>4.9</b></span>
+          <span class="vm">📅 <b>2026</b> on Voeq</span>
+          <span class="vm">💬 <b>~5 min</b> reply</span>
+        </div>
+        <div class="v-cta">
+          <button class="b1">Visit the storefront →</button>
+          <button class="b2">Follow</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;position:relative;flex-wrap:wrap">
+          <a class="soc" href="#" style="display:inline-flex;align-items:center;gap:6px;background:rgba(250,246,236,.08);border:1px solid rgba(250,246,236,.16);border-radius:999px;padding:7px 13px;font-size:.68rem;font-weight:700;color:var(--cream)"><svg class="ico" style="width:13px;height:13px" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>WhatsApp channel</a>
+          <a class="soc" href="#" style="display:inline-flex;align-items:center;gap:6px;background:rgba(250,246,236,.08);border:1px solid rgba(250,246,236,.16);border-radius:999px;padding:7px 13px;font-size:.68rem;font-weight:700;color:var(--cream)"><svg class="ico" style="width:13px;height:13px" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/></svg>Instagram</a>
+          <a class="soc" href="#" style="display:inline-flex;align-items:center;gap:6px;background:rgba(250,246,236,.08);border:1px solid rgba(250,246,236,.16);border-radius:999px;padding:7px 13px;font-size:.68rem;font-weight:700;color:var(--cream)"><svg class="ico" style="width:13px;height:13px" viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>TikTok</a>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- SIMILAR rail -->
+  <section class="similar">
+    <div class="sec-head"><h2 class="sec-title display">More from this market<span class="thin">Same category, same campus — keep browsing</span></h2><span class="sec-link">See all →</span></div>
+    <div class="rail">
+      <article class="gcard"><div class="gimg"><img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=600&q=72" alt="" loading="lazy"><span class="gtag gold">LIVE</span><span class="mini-rate">★ 4.9</span></div><div class="gbody"><h4>Peppered Chicken &amp; Chips</h4><div class="grow"><span class="gprice">₦3,500</span><span class="gmeta">Food</span></div></div></article>
+      <article class="gcard"><div class="gimg"><img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&q=72" alt="" loading="lazy"><span class="imgcount">▹ 1/2</span><span class="mini-rate">★ 4.9</span></div><div class="gbody"><h4>Small Chops Tray</h4><div class="grow"><span class="gprice">₦4,200</span><span class="gmeta">Food</span></div></div></article>
+      <article class="gcard"><div class="gimg"><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=72" alt="" loading="lazy"><span class="gtag">NEW</span><span class="mini-rate">★ 4.7</span></div><div class="gbody"><h4>Grilled Fish, Full Portion</h4><div class="grow"><span class="gprice">₦5,000</span><span class="gmeta">Food</span></div></div></article>
+      <article class="gcard"><div class="gimg"><img src="https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=600&q=72" alt="" loading="lazy"><span class="mini-rate">★ 4.6</span></div><div class="gbody"><h4>French Toast Breakfast</h4><div class="grow"><span class="gprice">₦2,800</span><span class="gmeta">Food</span></div></div></article>
+      <article class="gcard"><div class="gimg"><img src="https://images.unsplash.com/photo-1547825407-2d060104b7f8?w=600&q=72" alt="" loading="lazy"><span class="mini-rate">★ 4.7</span></div><div class="gbody"><h4>Weekly Meal Plan</h4><div class="grow"><span class="gprice">₦9,000</span><span class="gmeta">Food</span></div></div></article>
+    </div>
+  </section>
+
+  <!-- COMMENTS v3 — minimal list, smart details -->
+  <section class="cm">
+    <div class="cm-head">
+      <h2 class="display">Comments <span class="cm-count">12</span></h2>
+      <button class="cm-followup">Follow</button>
+    </div>
+
+    <!-- post: single calm input row -->
+    <div class="cm-post" id="writeBox">
+      <span class="cm-av">D</span>
+      <input id="cta" placeholder="Add a comment…" />
+      <button class="cm-send" id="postBtn" aria-label="Post"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="cm-post anon" id="anonBox" style="display:none">
+      <span class="cm-av dim">✦</span>
+      <p class="cm-anon">Sign in to comment — it keeps the market honest.</p>
+      <a class="cm-signin" href="#">Sign in</a>
+    </div>
+
+    <div id="vlist">
+      <div class="cm-row">
+        <span class="cm-av">A</span>
+        <div class="cm-body">
+          <div class="cm-meta"><b>Adaeze</b><span class="cm-b">bought this</span><span class="cm-t">2d</span></div>
+          <p>Ordered twice already — the portion is honest and it arrives hot. 10/10.</p>
+          <div class="cm-reply">
+            <span class="cm-reply-name">Mama Tuli <span class="cm-v">vendor</span></span>
+            <p>Thank you! Tomorrow's pots are on by 3pm. 🧡</p>
+          </div>
+        </div>
+      </div>
+      <div class="cm-row">
+        <span class="cm-av">T</span>
+        <div class="cm-body">
+          <div class="cm-meta"><b>Tunde</b><span class="cm-t">4d</span></div>
+          <p>Asked for extra pepper in the chat, they got it right.</p>
+        </div>
+      </div>
+      <div class="cm-row">
+        <span class="cm-av">K</span>
+        <div class="cm-body">
+          <div class="cm-meta"><b>Kemi</b><span class="cm-b">bought this</span><span class="cm-t">1w</span></div>
+          <p>The plantain ratio is generous. Worth every naira.</p>
+        </div>
+      </div>
+    </div>
+    <a class="cm-all" href="#">Show all 12 comments</a>
+  </section>
+
+  <div class="endpad"></div>
+</main>
+
+<script>
+  // share dropdown toggle
+  var sBtn=document.getElementById('shareBtn'),sDD=document.getElementById('shareDD');
+  sBtn.addEventListener('click',function(e){e.stopPropagation();var open=sDD.style.display==='none';sDD.style.display=open?'flex':'none'});
+  document.addEventListener('click',function(e){if(!e.target.closest('#shareBtn')&&!e.target.closest('#shareDD'))sDD.style.display='none'});
+  document.getElementById('ddCopy').addEventListener('click',function(){this.innerHTML='<svg class="ico" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Copied!';setTimeout(function(){location.reload()},900)});
+  // gallery track: dots + counter sync; free swipe
+  var track=document.getElementById('track'), slides=[].slice.call(track.children), dotsEl=document.getElementById('galDots'), cur=document.getElementById('curIdx');
+  slides.forEach(function(_,i){var d=document.createElement('span');d.className='dot'+(i?'':' on');dotsEl.appendChild(d)});
+  var gi=0;
+  track.addEventListener('scroll',function(){
+    var mid=track.scrollLeft+track.clientWidth/2,best=0,bd=1e9;
+    slides.forEach(function(sl,i){var cm=sl.offsetLeft+sl.clientWidth/2;var d=Math.abs(cm-mid);if(d<bd){bd=d;best=i}});
+    if(best!==gi){gi=best;[].forEach.call(dotsEl.children,function(d,j){d.classList.toggle('on',j===gi)});cur.textContent=gi+1}
+  },{passive:true});
+  // COMMENTS v3: minimal post (enter or arrow button), anon toggle (A)
+  var cta=document.getElementById('cta'), send=document.getElementById('postBtn');
+  cta.addEventListener('input',function(){send.classList.toggle('active',!!cta.value.trim())});
+  function postComment(){
+    var v=(cta.value||'').trim(); if(!v) return;
+    var row=document.createElement('div');
+    row.className='cm-row';
+    row.innerHTML='<span class="cm-av">D</span><div class="cm-body"><div class="cm-meta"><b>You</b><span class="cm-t">now</span></div><p>'+v.replace(/</g,'&lt;')+'</p></div>';
+    document.getElementById('vlist').prepend(row);
+    cta.value=''; send.classList.remove('active');
+  }
+  send.addEventListener('click',postComment);
+  cta.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();postComment()}});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='a'&&!e.metaKey&&!e.ctrlKey&&!/input|textarea/i.test(document.activeElement.tagName)){
+      var ab=document.getElementById('anonBox'), wb=document.getElementById('writeBox');
+      var showAnon=ab.style.display==='none';
+      ab.style.display=showAnon?'flex':'none';
+      wb.style.display=showAnon?'none':'flex';
+    }
+  });
+  // lightbox = tap zoom (visual only in mock)
+</script>
+</body>
+</html>

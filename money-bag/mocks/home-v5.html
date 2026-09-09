@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq Home v5 — the fusion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#0F2A1D; --forest-deep:#0B211A; --forest-mid:#2D5A3D;
+    --amber:#E8A33D; --amber-dark:#D4922A; --amber-light:#F5C36A;
+    --cream:#FAF6EC; --glass:#F5F1E8; --sand:#EFE7D3; --white:#fff;
+    --ink:#0A0A0A; --ink-muted:#4A4A4A; --ink-subtle:#7A7A7A;
+    --r-lg:16px; --r-xl:22px;
+    --shadow-card:0 4px 14px rgba(15,42,29,.09);
+    --shadow-lift:0 16px 36px rgba(15,42,29,.18);
+    --shadow-photo:0 10px 26px rgba(15,42,29,.16);
+    --spring:cubic-bezier(.34,1.4,.64,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Inter,system-ui,sans-serif;background:var(--glass);color:var(--ink);overflow-x:hidden}
+  .display{font-family:Fraunces,Georgia,serif}
+  img{display:block;max-width:100%}
+  button{font-family:inherit;border:none;cursor:pointer;background:none}
+  a{text-decoration:none;color:inherit}
+
+  /* ============ NAV ROW 1 — search-first ============ */
+  .nav1{background:var(--glass);border-bottom:1px solid rgba(15,42,29,.07)}
+  .nav1-in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+  .logo{width:64px;flex:0 0 auto}
+  .hsearch{flex:1;display:flex;align-items:center;gap:9px;background:var(--forest);border-radius:999px;padding:11px 18px;min-width:0}
+  .hsearch input{flex:1;background:transparent;border:none;outline:none;color:var(--cream);font-size:.9rem;font-weight:600;font-family:inherit;min-width:0}
+  .hsearch input::placeholder{color:rgba(250,246,236,.75);font-weight:500}
+  .nav-cta{display:flex;gap:12px;align-items:center;flex:0 0 auto}
+  .nic{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--forest)}
+  .divider{width:1px;height:22px;background:rgba(15,42,29,.18)}
+  .si{font-size:.8rem;font-weight:700;color:var(--forest);white-space:nowrap}
+  .si b{font-weight:800}
+
+  /* ============ NAV ROW 2 — categories ============ */
+  .nav2{background:var(--glass);border-bottom:1px solid rgba(15,42,29,.08)}
+  .nav2-in{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
+  .nav2-in::-webkit-scrollbar{display:none}
+  .nl{padding:10px 11px;font-size:.8rem;font-weight:600;color:var(--ink-muted);white-space:nowrap;border-bottom:2px solid transparent}
+  .nl.on{color:var(--forest);font-weight:700;border-bottom-color:var(--amber)}
+  .nl.hot{color:var(--amber-dark);font-weight:800}
+  .sell-pill{margin-left:auto;background:var(--forest);color:var(--cream);font-size:.76rem;font-weight:800;border-radius:999px;padding:8px 15px;white-space:nowrap;flex:0 0 auto;transition:transform .3s var(--spring)}
+  .sell-pill:active{transform:scale(.95)}
+
+  /* ============ HERO — serif left, polaroid collage right ============ */
+  .hero{max-width:1200px;margin:0 auto;padding:34px 16px 10px;display:grid;grid-template-columns:1fr;gap:8px;position:relative}
+  .hero::before{content:"";position:absolute;inset:-20% -10% 30% -10%;pointer-events:none;background:
+    radial-gradient(45% 40% at 12% 25%, rgba(232,163,61,.16), transparent 70%),
+    radial-gradient(40% 35% at 90% 15%, rgba(45,90,61,.09), transparent 70%)}
+  .hero-copy{position:relative;z-index:2}
+  h1.hero-h{font-family:Fraunces,serif;font-weight:900;color:var(--forest);font-size:clamp(2.3rem,9.5vw,3.1rem);line-height:1.02;letter-spacing:-.01em;margin:10px 0 10px}
+  h1.hero-h .g{color:var(--amber-dark);font-style:italic}
+  .hero-sub{color:var(--ink-muted);font-size:.92rem;max-width:34ch;line-height:1.6}
+  .hero-cta{margin-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .cta-main{background:var(--forest);color:var(--cream);border-radius:999px;padding:14px 26px;font-weight:800;font-size:.92rem;box-shadow:0 10px 24px rgba(15,42,29,.3);transition:transform .35s var(--spring)}
+  .cta-main:active{transform:scale(.96)}
+  .cta-ghost{color:var(--forest);font-weight:700;font-size:.84rem;display:inline-flex;align-items:center;gap:6px}
+  /* polaroid collage */
+  .collage{position:relative;z-index:2;margin:22px -16px 6px;padding:6px 16px 26px;display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}
+  .collage::-webkit-scrollbar{display:none}
+  .pol{flex:0 0 62%;max-width:62%;scroll-snap-align:center;background:var(--white);padding:9px 9px 12px;border-radius:6px;box-shadow:var(--shadow-photo);transition:transform .5s var(--spring)}
+  .pol:nth-child(1){transform:rotate(-2.6deg)}
+  .pol:nth-child(2){transform:rotate(1.8deg) translateY(10px)}
+  .pol:nth-child(3){transform:rotate(-1.2deg)}
+  .pol:active{transform:rotate(0) scale(1.03)}
+  .pol img{width:100%;aspect-ratio:1/1.04;object-fit:cover;border-radius:3px}
+  .pol figcaption{padding:9px 3px 0}
+  .pol .pc-name{font-size:.78rem;font-weight:700;color:var(--forest);line-height:1.25;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .pol .pc-meta{display:flex;align-items:center;justify-content:space-between;margin-top:3px}
+  .pol .pc-price{font-family:Fraunces,serif;font-weight:900;font-size:.9rem;color:var(--forest)}
+  .pol .pc-campus{font-size:.6rem;color:var(--ink-subtle);display:flex;align-items:center;gap:4px}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 3.2s ease-in-out infinite;flex:0 0 auto}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.7);opacity:.5}}
+
+  /* ============ SAND STATS BAND ============ */
+  .band{background:var(--sand);margin-top:14px;padding:16px;border-top:1px solid rgba(15,42,29,.06);border-bottom:1px solid rgba(15,42,29,.06)}
+  .band-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:0;justify-content:space-between;flex-wrap:wrap;row-gap:12px}
+  .stat{display:flex;align-items:center;gap:10px;padding:0 14px}
+  .stat+.stat{border-left:1px solid rgba(15,42,29,.14)}
+  .stat:first-child{padding-left:2px}
+  .sic{width:38px;height:38px;border-radius:12px;background:var(--white);box-shadow:var(--shadow-card);display:flex;align-items:center;justify-content:center;font-size:1rem;flex:0 0 auto}
+  .stat b{display:block;font-size:.82rem;color:var(--forest);font-weight:800;line-height:1.2}
+  .stat small{font-size:.64rem;color:var(--ink-subtle)}
+  .market-open{display:flex;align-items:center;gap:8px;background:var(--white);border-radius:999px;padding:9px 15px;box-shadow:var(--shadow-card);font-size:.72rem;font-weight:800;color:var(--forest)}
+  .market-open .live-dot{width:8px;height:8px}
+
+  /* ============ SECTIONS (approved, carried) ============ */
+  .sec{padding:32px 16px 4px}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:15px;gap:10px}
+  .sec-title{font-size:1.32rem;font-weight:900;color:var(--forest)}
+  .sec-title small{display:block;font-weight:600;color:var(--ink-muted);font-size:.78rem;font-family:Inter;margin-top:3px}
+  .sec-link{font-size:.8rem;font-weight:700;color:var(--amber-dark);white-space:nowrap}
+
+  /* Fresh drops */
+  .drops-band{background:var(--forest);padding:28px 0 32px;margin-top:30px;color:var(--cream)}
+  .drops-band .sec-title{color:var(--cream)} .drops-band .sec-link{color:var(--amber-light)}
+  .drops-band .sec-title small{color:rgba(250,246,236,.62)}
+  .live-pill{display:inline-flex;align-items:center;gap:6px;background:var(--amber);color:var(--forest);font-weight:800;font-size:.62rem;letter-spacing:.12em;padding:5px 10px;border-radius:999px;text-transform:uppercase;margin-bottom:10px}
+  .rail{display:flex;gap:14px;overflow-x:auto;padding:6px 16px 8px;margin:0 -16px;scrollbar-width:none;scroll-behavior:smooth}
+  .rail::-webkit-scrollbar{display:none}
+  .bigcard{position:relative;flex:0 0 84%;max-width:84%;border-radius:var(--r-xl);overflow:hidden;aspect-ratio:4/4.8;background:#123524;box-shadow:0 14px 34px rgba(0,0,0,.4);transition:transform .55s var(--spring)}
+  .bigcard:active{transform:scale(.98)}
+  .bigcard img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+  .bigcard .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,33,26,.1) 0%,transparent 32%,transparent 42%,rgba(11,33,26,.9) 92%)}
+  .rate{position:absolute;top:12px;left:12px;background:rgba(250,246,236,.94);color:var(--forest);font-weight:800;font-size:.68rem;border-radius:999px;padding:5px 9px}
+  .tag{position:absolute;top:12px;right:52px;background:rgba(15,42,29,.72);color:var(--amber-light);font-weight:700;font-size:.62rem;letter-spacing:.06em;border-radius:999px;padding:5px 10px;backdrop-filter:blur(4px)}
+  .heart{position:absolute;top:9px;right:9px;width:34px;height:34px;border-radius:50%;background:rgba(250,246,236,.94);display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(0,0,0,.25);transition:transform .4s var(--spring);z-index:3}
+  .heart:active{transform:scale(1.3)}
+  .binfo{position:absolute;left:0;right:0;bottom:0;padding:16px 16px 18px;color:var(--cream)}
+  .binfo .cat{font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-light);font-weight:800}
+  .binfo h3{font-family:Fraunces,serif;font-size:1.36rem;font-weight:700;line-height:1.12;margin:5px 0 3px}
+  .binfo .by{font-size:.68rem;opacity:.88}
+  .binfo .by b{font-weight:700}
+  .brow{display:flex;align-items:center;justify-content:space-between;margin-top:11px;gap:8px}
+  .price{font-family:Fraunces,serif;font-weight:900;font-size:1.32rem;white-space:nowrap}
+  .buy{background:var(--amber);color:var(--forest);font-weight:800;font-size:.78rem;border-radius:999px;padding:9px 16px;transition:transform .35s var(--spring);white-space:nowrap}
+  .buy:active{transform:scale(.94)}
+  .dots{display:flex;gap:6px;justify-content:center;margin-top:16px}
+  .dot{width:6px;height:6px;border-radius:50%;background:rgba(250,246,236,.28);transition:all .6s ease}
+  .dot.on{background:var(--amber);width:20px;border-radius:99px}
+
+  /* Vendor spotlight */
+  .spot{margin:28px 16px 0;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-lift);position:relative;background:var(--forest-deep)}
+  .spot-stage{position:relative;aspect-ratio:16/10.5}
+  .spot-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.8s ease}
+  .spot-slide.on{opacity:1}
+  .spot-slide img{width:100%;height:100%;object-fit:cover}
+  .spot-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,33,26,.16) 0%,transparent 30%,transparent 40%,rgba(11,33,26,.92) 88%)}
+  .spot-tag .seal{position:absolute;top:14px;left:14px;z-index:2;display:inline-block;background:var(--amber);color:var(--forest);font-weight:900;font-size:.6rem;letter-spacing:.14em;padding:6px 12px;border-radius:4px;transform:rotate(-2deg);box-shadow:0 4px 10px rgba(0,0,0,.35);text-transform:uppercase}
+  .spot-stat{position:absolute;right:12px;top:12px;z-index:2;background:rgba(250,246,236,.95);border-radius:999px;padding:6px 11px;font-size:.66rem;font-weight:800;color:var(--forest)}
+  .spot-id{position:absolute;left:16px;right:16px;bottom:58px;z-index:2;color:#fff}
+  .spot-id .who{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+  .avatar{width:48px;height:48px;border-radius:50%;border:2px solid var(--amber);object-fit:cover}
+  .spot-id b.name{display:block;font-family:Fraunces,serif;font-size:1.28rem;font-weight:700;line-height:1.1}
+  .spot-id small{font-size:.7rem;opacity:.88;display:block;margin-top:2px}
+  .spot-id .pickline{font-size:.78rem;color:rgba(250,246,236,.85);background:rgba(250,246,236,.08);border:1px solid rgba(250,246,236,.14);border-radius:12px;padding:9px 12px;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .spot-id .pickline .pp small{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber-light);font-weight:800;display:block}
+  .spot-id .pickline .pp b{font-family:Fraunces,serif;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .spot-visit{background:var(--amber);color:var(--forest);font-weight:800;font-size:.72rem;border-radius:999px;padding:9px 15px;white-space:nowrap}
+  .spot-nav{position:absolute;bottom:14px;right:14px;z-index:3;display:flex;gap:7px}
+  .spot-nav .sn{width:30px;height:30px;border-radius:50%;background:rgba(250,246,236,.16);backdrop-filter:blur(6px);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;border:1px solid rgba(250,246,236,.25)}
+  .fair-note{font-size:.68rem;color:var(--ink-subtle);text-align:center;margin-top:10px}
+
+  /* Grid */
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+  .gcard{background:var(--white);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-card);transition:transform .45s var(--spring),box-shadow .45s;display:flex;flex-direction:column}
+  .gcard:active{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+  .gimg{aspect-ratio:1/1.05;position:relative;background:linear-gradient(135deg,#EDE7D8,#E2DAC8)}
+  .gimg img{width:100%;height:100%;object-fit:cover}
+  .gtag{position:absolute;top:9px;left:9px;background:var(--forest);color:var(--cream);font-size:.56rem;font-weight:800;letter-spacing:.1em;padding:4px 8px;border-radius:4px}
+  .gtag.gold{background:var(--amber);color:var(--forest)}
+  .mini-rate{position:absolute;bottom:8px;right:8px;background:rgba(250,246,236,.94);color:var(--forest);font-size:.62rem;font-weight:800;border-radius:999px;padding:4px 8px}
+  .gbody{padding:11px 12px 13px;display:flex;flex-direction:column;flex:1}
+  .gbody h4{font-size:.88rem;font-weight:700;line-height:1.28;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.25em}
+  .grow{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:7px}
+  .gprice{font-weight:800;color:var(--forest);font-size:.98rem;font-family:Fraunces,serif}
+  .gmeta{font-size:.64rem;color:var(--ink-subtle)}
+  .reveal{opacity:0;transform:translateY(16px)}
+  .reveal.in{animation:rise 1.1s cubic-bezier(.22,1,.36,1) forwards;animation-delay:var(--d,0ms)}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  /* Market wall (light) — replaces category tiles */
+  .market-wall{background:var(--glass);padding:2px 16px 26px;position:relative;overflow:hidden}
+  .mw-glow{position:absolute;inset:auto -30% -40% -30%;height:80%;background:radial-gradient(50% 60% at 50% 100%, rgba(232,163,61,.14), transparent 70%)}
+  .mw{display:flex;flex-wrap:wrap;align-items:baseline;gap:.45em .55em;position:relative;justify-content:center}
+  .mw span{font-family:Fraunces,serif;line-height:1.05;cursor:pointer;transition:transform .4s var(--spring),color .3s;display:inline-block}
+  .mw span:active{transform:scale(1.08) rotate(-1deg)}
+  .mw .c1{font-size:1.9rem;font-weight:900;color:var(--forest)}
+  .mw .c2{font-size:1.35rem;font-weight:600;font-style:italic;color:var(--amber-dark)}
+  .mw .c3{font-size:1.05rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--forest-mid)}
+  .mw .c4{font-size:1.15rem;font-weight:900;color:var(--ink)}
+  .mw .dot{color:rgba(15,42,29,.2);font-size:1.2rem}
+
+  /* Find it / Sell it */
+  .split{display:grid;grid-template-columns:1fr;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-lift);margin:0 16px}
+  .half{padding:26px 18px 24px;display:flex;flex-direction:column;min-height:250px;position:relative}
+  .half.buy{background:var(--forest);color:var(--cream)}
+  .half.sell{background:var(--cream);color:var(--forest);border-top:1px solid rgba(15,42,29,.12)}
+  .half .kick{font-size:.58rem;letter-spacing:.2em;font-weight:800;text-transform:uppercase;opacity:.65}
+  .half h3{font-family:Fraunces,serif;font-size:2.2rem;font-weight:900;line-height:1;margin:10px 0 8px}
+  .half.buy h3 em{font-style:normal;color:var(--amber)}
+  .half.sell h3 em{font-style:normal;color:var(--amber-dark)}
+  .half p{font-size:.74rem;line-height:1.5;opacity:.82;max-width:26ch}
+  .half .act{margin-top:auto;align-self:flex-start;border-radius:999px;padding:10px 16px;font-weight:800;font-size:.76rem;transition:transform .35s var(--spring)}
+  .half .act:active{transform:scale(.95)}
+  .half.buy .act{background:var(--amber);color:var(--forest)}
+  .half.sell .act{background:var(--forest);color:var(--cream)}
+  .hinge{grid-column:1/-1;display:flex;justify-content:center;height:0;position:relative;z-index:3}
+  .hinge .seal{transform:translateY(-50%);background:var(--forest);color:var(--amber);border:2px solid var(--amber);font-weight:900;font-size:.66rem;letter-spacing:.22em;padding:9px 18px;border-radius:999px;text-transform:uppercase;box-shadow:0 6px 16px rgba(15,42,29,.3)}
+
+  .to-explore{margin:22px 16px 0;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:999px;border:1.5px dashed rgba(15,42,29,.28);color:var(--forest);font-weight:700;font-size:.84rem;background:rgba(255,255,255,.5)}
+
+  /* Footer */
+  footer{background:var(--forest);color:rgba(250,246,236,.8);margin-top:34px;padding:30px 16px 20px}
+  .f-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:18px 0}
+  .f-grid h5{color:var(--cream);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+  .f-grid a{display:block;font-size:.8rem;padding:4px 0}
+  .f-soc{display:flex;gap:10px;margin:14px 0}
+  .f-soc a{width:38px;height:38px;border-radius:50%;background:rgba(250,246,236,.1);display:flex;align-items:center;justify-content:center}
+  .f-base{border-top:1px solid rgba(250,246,236,.14);padding-top:14px;font-size:.66rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+  @media(min-width:760px){
+    .logo{width:76px}
+    .hero{grid-template-columns:1.05fr 1fr;gap:30px;align-items:center;padding-top:44px}
+    .collage{margin:0;padding:10px 0 30px;overflow:visible}
+    .pol{flex:1;max-width:none}
+    .grid2{grid-template-columns:repeat(4,1fr)}
+    .split{grid-template-columns:1fr 1fr}
+    .half.sell{border-top:none;border-left:1px solid rgba(15,42,29,.12)}
+    .f-grid{grid-template-columns:repeat(4,1fr)}
+    .spot{max-width:900px;margin-left:auto;margin-right:auto}
+    .spot-stage{aspect-ratio:16/8}
+    .nl{display:inline-block}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV ROW 1: search-first (filled forest pill) -->
+<nav class="nav1"><div class="nav1-in">
+  <svg class="logo" viewBox="0 0 240 159"><rect width="240" height="159" rx="18" fill="#0F2A1D"/><text x="50%" y="62%" text-anchor="middle" font-family="Fraunces,serif" font-weight="900" font-size="52" fill="#FAF6EC">voeq<tspan fill="#E8A33D">.</tspan></text></svg>
+  <div class="hsearch"><span>🔎</span><input placeholder="Search campus items — jollof, braids, iPhones…"></div>
+  <div class="nav-cta">
+    <span class="nic">🤍</span><span class="nic">💬</span>
+    <span class="divider"></span>
+    <span class="si">Sign in <b>|</b> Sign up</span>
+  </div>
+</div></nav>
+
+<!-- NAV ROW 2: our categories + Voeq Live (amber accent) + sell CTA -->
+<nav class="nav2"><div class="nav2-in">
+  <span class="nl on">All</span>
+  <span class="nl">Food &amp; Drinks</span>
+  <span class="nl">Fashion</span>
+  <span class="nl">Hair</span>
+  <span class="nl">Gadgets</span>
+  <span class="nl">Pastries</span>
+  <span class="nl hot">✦ Voeq Live</span>
+  <span class="sell-pill">Sell on Voeq</span>
+</div></nav>
+
+<!-- HERO: serif brand line left, real-listing polaroids right -->
+<header class="hero">
+  <div class="hero-copy">
+    <h1 class="hero-h">Find it.<br>Chat it.<br><span class="g">Get it.</span></h1>
+    <p class="hero-sub">The trusted voice of your campus market — who sells what, around you, right now.</p>
+    <div class="hero-cta">
+      <button class="cta-main">Explore the market →</button>
+      <span class="cta-ghost">or sell on Voeq ›</span>
+    </div>
+  </div>
+  <!-- real-listing polaroids (warm, palette-coherent; captions = real listing data at build) -->
+  <div class="collage">
+    <figure class="pol">
+      <img src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=640&q=74" alt="Film camera">
+      <figcaption>
+        <div class="pc-name">Vintage film camera, clean</div>
+        <div class="pc-meta"><span class="pc-price">₦25,000</span><span class="pc-campus"><span class="live-dot"></span>UNIBEN</span></div>
+      </figcaption>
+    </figure>
+    <figure class="pol">
+      <img src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=640&q=74" alt="Ankara fabric">
+      <figcaption>
+        <div class="pc-name">Ankara two-piece, tailored</div>
+        <div class="pc-meta"><span class="pc-price">₦12,000</span><span class="pc-campus"><span class="live-dot"></span>UNILAG</span></div>
+      </figcaption>
+    </figure>
+    <figure class="pol">
+      <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=640&q=74" alt="Books">
+      <figcaption>
+        <div class="pc-name">Textbook bundle, 200L</div>
+        <div class="pc-meta"><span class="pc-price">₦6,000</span><span class="pc-campus"><span class="live-dot"></span>NMU</span></div>
+      </figcaption>
+    </figure>
+  </div>
+</header>
+
+<!-- SAND BAND: honest trust trio + real market-open state -->
+<div class="band"><div class="band-in">
+  <span class="stat"><span class="sic">✔</span><span><b>Campus verified</b><small>every vendor checked</small></span></span>
+  <span class="stat"><span class="sic">💬</span><span><b>Chat before you buy</b><small>native messaging</small></span></span>
+  <span class="stat"><span class="sic">🛡</span><span><b>Meet-on-campus safe</b><small>public spots, real people</small></span></span>
+  <span class="market-open"><span class="live-dot"></span>Market open — NMU Okerenkoko</span>
+</div></div>
+
+<!-- FRESH DROPS (approved, 9s) -->
+<section class="drops-band">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="sec" style="padding:0 16px">
+      <div class="sec-head">
+        <div><span class="live-pill"><span class="live-dot"></span>Voeq Live</span><h2 class="sec-title display">Fresh drops</h2><small>New listings surface as they land — the shelf never goes stale</small></div>
+        <span class="sec-link">See all →</span>
+      </div>
+    </div>
+    <div class="rail" id="dropsRail">
+      <article class="bigcard">
+        <img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=900&q=72" alt="">
+        <div class="scrim"></div>
+        <span class="rate">★ 4.9</span><span class="tag">FOOD</span><button class="heart">🤍</button>
+        <div class="binfo"><span class="cat">Food &amp; Drinks · NMU Okerenkoko</span><h3>Peppered Chicken &amp; Chips Platter</h3><span class="by">by <b>Mama Tuli's Kitchen</b> · verified</span><div class="brow"><span class="price">₦3,500</span><button class="buy">Message</button></div></div>
+      </article>
+      <article class="bigcard">
+        <img src="https://images.unsplash.com/photo-1590658268038-85f5164613ce?w=900&q=72" alt="">
+        <div class="scrim"></div>
+        <span class="rate">★ 4.7</span><span class="tag">HAIR</span><button class="heart">🤍</button>
+        <div class="binfo"><span class="cat">Hair Services · UNIBEN</span><h3>Knotless Braids, Any Length</h3><span class="by">by <b>Glam by Zee</b> · verified</span><div class="brow"><span class="price">₦8,500</span><button class="buy">Message</button></div></div>
+      </article>
+      <article class="bigcard">
+        <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=900&q=72" alt="">
+        <div class="scrim"></div>
+        <span class="rate">★ 4.6</span><span class="tag">GADGETS</span><button class="heart">🤍</button>
+        <div class="binfo"><span class="cat">Gadgets · UNILORIN</span><h3>Wireless Earbuds, 36h Battery</h3><span class="by">by <b>Byte Shop</b> · verified</span><div class="brow"><span class="price">₦18,500</span><button class="buy">Message</button></div></div>
+      </article>
+      <article class="bigcard">
+        <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=900&q=72" alt="">
+        <div class="scrim"></div>
+        <span class="rate">★ 4.9</span><span class="tag">CRAFTS</span><button class="heart">🤍</button>
+        <div class="binfo"><span class="cat">Crafts · UNIBEN</span><h3>Weekend Picnic Pack for Two</h3><span class="by">by <b>Little Things Co</b> · verified</span><div class="brow"><span class="price">₦6,500</span><button class="buy">Message</button></div></div>
+      </article>
+    </div>
+    <div class="dots" id="dropsDots"></div>
+  </div>
+</section>
+
+<!-- VENDOR SPOTLIGHT (approved) -->
+<section class="sec">
+  <div class="sec-head"><h2 class="sec-title display">Stalls worth knowing<span class="thin">A rotating light on our vendors — every vendor gets a turn</span></h2><span class="sec-link">All vendors →</span></div>
+  <div class="spot">
+    <div class="spot-stage">
+      <div class="spot-slide on"><img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1100&q=72" alt="">
+        <span class="spot-tag"><span class="seal">✦ Vendor Spotlight</span></span>
+        <span class="spot-stat">★ 4.9 · 1.2k sales</span>
+        <div class="spot-id">
+          <div class="who"><img class="avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=60" alt=""><span><b class="name">Mama Tuli's Kitchen</b><small>Food &amp; Drinks · NMU Okerenkoko · open till 10pm</small></span></div>
+          <div class="pickline"><span class="pp"><small>Today's pick</small><b>Peppered Chicken &amp; Chips — ₦3,500</b></span><button class="spot-visit">Visit stall →</button></div>
+        </div>
+      </div>
+      <div class="spot-slide"><img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1100&q=72" alt="">
+        <span class="spot-tag"><span class="seal">✦ Vendor Spotlight</span></span>
+        <span class="spot-stat">★ 4.8 · 860 sales</span>
+        <div class="spot-id">
+          <div class="who"><img class="avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&q=60" alt=""><span><b class="name">Campus Threads</b><small>Fashion · UNILAG · replies in minutes</small></span></div>
+          <div class="pickline"><span class="pp"><small>Today's pick</small><b>Ankara Two-Piece — ₦12,000</b></span><button class="spot-visit">Visit stall →</button></div>
+        </div>
+      </div>
+      <div class="spot-slide"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1100&q=72" alt="">
+        <span class="spot-tag"><span class="seal">✦ Vendor Spotlight</span></span>
+        <span class="spot-stat">★ 4.9 · 640 sales</span>
+        <div class="spot-id">
+          <div class="who"><img class="avatar" src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=120&q=60" alt=""><span><b class="name">Zee Hair Studio</b><small>Hair · Benin City · 12 min from UNIBEN</small></span></div>
+          <div class="pickline"><span class="pp"><small>Today's pick</small><b>Knotless Braids — ₦8,500</b></span><button class="spot-visit">Visit stall →</button></div>
+        </div>
+      </div>
+      <div class="spot-nav"><button class="sn" data-dir="-1">‹</button><button class="sn" data-dir="1">›</button></div>
+    </div>
+  </div>
+  <p class="fair-note">⚖️ Rotation is fair — visibility is earned and every active vendor gets time in the light.</p>
+</section>
+
+<!-- GRID (approved) -->
+<section class="sec">
+  <div class="sec-head"><h2 class="sec-title display">On the grid today<span class="thin">A fair rotation — every listing gets time on the floor</span></h2><span class="sec-link">More →</span></div>
+  <div class="grid2">
+    <article class="gcard reveal" style="--d:0ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=72" alt=""><span class="gtag gold">LIVE</span><span class="mini-rate">★ 4.8</span></div><div class="gbody"><h4>Nike Air Force 1, clean</h4><div class="grow"><span class="gprice">₦38,000</span><span class="gmeta">UNILAG</span></div></div></article>
+    <article class="gcard reveal" style="--d:100ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=72" alt=""><span class="mini-rate">★ 4.6</span></div><div class="gbody"><h4>Studio headphones</h4><div class="grow"><span class="gprice">₦22,000</span><span class="gmeta">UNIBEN</span></div></div></article>
+    <article class="gcard reveal" style="--d:200ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1547825407-2d060104b7f8?w=600&q=72" alt=""><span class="gtag">NEW</span><span class="mini-rate">★ 5.0</span></div><div class="gbody"><h4>Gele &amp; beads set</h4><div class="grow"><span class="gprice">₦8,000</span><span class="gmeta">UNILAG</span></div></div></article>
+    <article class="gcard reveal" style="--d:300ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=72" alt=""><span class="mini-rate">★ 4.9</span></div><div class="gbody"><h4>Minimal steel watch</h4><div class="grow"><span class="gprice">₦15,500</span><span class="gmeta">UNILORIN</span></div></div></article>
+    <article class="gcard reveal" style="--d:0ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=600&q=72" alt=""><span class="mini-rate">★ 4.8</span></div><div class="gbody"><h4>Room plant, starter kit</h4><div class="grow"><span class="gprice">₦4,200</span><span class="gmeta">UNIBEN</span></div></div></article>
+    <article class="gcard reveal" style="--d:100ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=72" alt=""><span class="gtag">NEW</span><span class="mini-rate">★ 4.9</span></div><div class="gbody"><h4>Shea butter skincare set</h4><div class="grow"><span class="gprice">₦5,800</span><span class="gmeta">UNILAG</span></div></div></article>
+    <article class="gcard reveal" style="--d:200ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1547825407-2d060104b7f8?w=600&q=72" alt=""><span class="mini-rate">★ 4.7</span></div><div class="gbody"><h4>Weekly meal plan</h4><div class="grow"><span class="gprice">₦9,000</span><span class="gmeta">NMU</span></div></div></article>
+    <article class="gcard reveal" style="--d:300ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&q=72" alt=""><span class="gtag gold">LIVE</span><span class="mini-rate">★ 4.6</span></div><div class="gbody"><h4>Gaming mouse, RGB</h4><div class="grow"><span class="gprice">₦11,000</span><span class="gmeta">UNILORIN</span></div></div></article>
+  </div>
+</section>
+
+<!-- MARKET WALL (replaces category tiles) -->
+<section class="sec" style="padding-bottom:10px">
+  <div class="sec-head"><h2 class="sec-title display">The market sells<span class="thin">Tap your stall — every word is a live category</span></h2></div>
+</section>
+<div class="market-wall"><div class="mw-glow"></div>
+  <div class="mw">
+    <span class="c1">Food &amp; Drinks</span><span class="dot">·</span>
+    <span class="c2">Pastries</span><span class="dot">·</span>
+    <span class="c3">HAIR</span><span class="dot">·</span>
+    <span class="c4">Gadgets</span><span class="dot">·</span>
+    <span class="c2">Skincare</span><span class="dot">·</span>
+    <span class="c3">FITNESS</span><span class="dot">·</span>
+    <span class="c1">Fashion</span><span class="dot">·</span>
+    <span class="c2">Crafts</span><span class="dot">·</span>
+    <span class="c4">Music</span><span class="dot">·</span>
+    <span class="c3">Drinks</span>
+  </div>
+</div>
+
+<!-- FIND IT / SELL IT -->
+<section class="sec" style="padding-bottom:0"><div class="sec-head"><h2 class="sec-title display">Your move.</h2></div></section>
+<div class="split">
+  <div class="hinge"><span class="seal">VOEQ</span></div>
+  <div class="half buy">
+    <span class="kick">Shopping?</span>
+    <h3><em>Find</em> it.</h3>
+    <p>Real vendors around you. Chat first, meet safe, pay when happy.</p>
+    <button class="act">Start exploring</button>
+  </div>
+  <div class="half sell">
+    <span class="kick">Selling?</span>
+    <h3><em>Sell</em> it.</h3>
+    <p>Your stall opens in minutes. Free to list — keep your money.</p>
+    <button class="act">Open my stall</button>
+  </div>
+</div>
+
+<a class="to-explore" href="#">The full market — filters, categories, everything <span>→</span></a>
+
+<footer><div style="max-width:1200px;margin:0 auto">
+  <svg style="width:84px;margin-bottom:12px" viewBox="0 0 240 159"><rect width="240" height="159" rx="18" fill="rgba(250,246,236,.06)"/><text x="50%" y="62%" text-anchor="middle" font-family="Fraunces,serif" font-weight="900" font-size="52" fill="#FAF6EC">voeq<tspan fill="#E8A33D">.</tspan></text></svg>
+  <p style="font-size:.8rem;max-width:36ch;line-height:1.5">The market for Nigerian students — every campus, every corner of Nigeria.</p>
+  <div class="f-grid">
+    <div><h5>Market</h5><a href="#">Explore</a><a href="#">Categories</a><a href="#">Across the areas</a></div>
+    <div><h5>Sell</h5><a href="#">Become a vendor</a><a href="#">Sell on Voeq</a><a href="#">Vendor handbook</a></div>
+    <div><h5>Company</h5><a href="#">How it works</a><a href="#">About</a><a href="#">Press</a></div>
+    <div><h5>Help</h5><a href="#">Safety</a><a href="#">FAQ</a><a href="#">Contact</a></div>
+  </div>
+  <div class="f-soc"><a>📷</a><a>🎵</a><a>💬</a></div>
+  <div class="f-base"><span>© 2026 Voeq</span><span>Powered by Legacy LM</span></div>
+</div></footer>
+
+<script>
+  // Fresh drops: 9s, pause on touch 12s
+  const rail=document.getElementById('dropsRail'), cards=[...rail.children], dotsEl=document.getElementById('dropsDots');
+  cards.forEach((_,i)=>{const d=document.createElement('span');d.className='dot'+(i?'':' on');dotsEl.appendChild(d)});
+  let idx=0,holding=false,resume;
+  const go=i=>{idx=(i+cards.length)%cards.length;rail.children[idx].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});[...dotsEl.children].forEach((d,j)=>d.classList.toggle('on',j===idx))};
+  rail.addEventListener('touchstart',()=>{holding=true;clearTimeout(resume)},{passive:true});
+  rail.addEventListener('touchend',()=>{resume=setTimeout(()=>holding=false,12000)},{passive:true});
+  setInterval(()=>{if(!holding&&!document.hidden)go(idx+1)},9000);
+  // Spotlight 9s + manual arrows
+  const slides=[...document.querySelectorAll('.spot-slide')];let s=0;
+  const show=n=>{slides[s].classList.remove('on');s=(n+slides.length)%slides.length;slides[s].classList.add('on')};
+  let spotTimer=setInterval(()=>{if(!document.hidden)show(s+1)},9000);
+  document.querySelectorAll('.spot-nav .sn').forEach(b=>b.addEventListener('click',()=>{clearInterval(spotTimer);show(s+ +b.dataset.dir);spotTimer=setInterval(()=>{if(!document.hidden)show(s+1)},9000)}));
+  // Reveal
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

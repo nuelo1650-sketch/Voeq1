@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq Hero Lab — all combinations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#0F2A1D; --forest-deep:#0B211A; --forest-mid:#2D5A3D;
+    --amber:#E8A33D; --amber-dark:#D4922A; --amber-light:#F5C36A;
+    --cream:#FAF6EC; --glass:#F5F1E8; --white:#fff;
+    --ink:#0A0A0A; --ink-muted:#4A4A4A; --ink-subtle:#7A7A7A;
+    --r-lg:16px; --r-xl:22px;
+    --shadow-card:0 4px 14px rgba(15,42,29,.09);
+    --shadow-lift:0 16px 36px rgba(15,42,29,.18);
+    --spring:cubic-bezier(.34,1.4,.64,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Inter,system-ui,sans-serif;background:#E9E4D8;color:var(--ink);padding:18px 12px 60px}
+  .lab-head{max-width:430px;margin:0 auto 22px;text-align:center}
+  .lab-head h1{font-family:Fraunces,serif;font-weight:900;color:var(--forest);font-size:1.3rem}
+  .lab-head p{font-size:.72rem;color:var(--ink-muted);margin-top:4px;line-height:1.5}
+
+  .phone{max-width:430px;margin:0 auto 30px;background:var(--glass);border-radius:26px;overflow:hidden;box-shadow:0 20px 50px rgba(15,42,29,.22);border:1px solid rgba(15,42,29,.1)}
+  .phone-label{background:var(--forest);color:var(--cream);padding:10px 16px;font-size:.72rem;font-weight:800;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between}
+  .phone-label small{font-weight:600;opacity:.7;text-transform:none;letter-spacing:0}
+
+  /* ============ SHARED HERO PIECES ============ */
+  .hero{padding:30px 20px 30px;position:relative}
+  .hero::before{content:"";position:absolute;inset:-30% -10% auto;height:120%;pointer-events:none;background:
+    radial-gradient(50% 42% at 15% 22%, rgba(232,163,61,.17), transparent 70%),
+    radial-gradient(44% 38% at 92% 12%, rgba(45,90,61,.11), transparent 70%)}
+  .eyebrow{font-size:.62rem;font-weight:800;letter-spacing:.2em;color:var(--amber-dark);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:20px;height:2px;background:var(--amber);border-radius:2px}
+  h1.hero-h{font-family:Fraunces,serif;font-size:2.15rem;line-height:1.05;font-weight:900;color:var(--forest);margin:11px 0 8px;letter-spacing:-.01em}
+  h1.hero-h em{font-style:normal;color:var(--amber-dark)}
+  .hero-sub{color:var(--ink-muted);font-size:.88rem;max-width:32ch;line-height:1.55}
+
+  .mode{display:inline-flex;background:rgba(15,42,29,.07);border-radius:999px;padding:4px;margin-bottom:16px}
+  .mode button{border-radius:999px;padding:8px 18px;font-size:.78rem;font-weight:700;color:var(--ink-muted);transition:all .45s var(--spring)}
+  .mode button.on{background:var(--forest);color:var(--cream);box-shadow:0 3px 10px rgba(15,42,29,.25)}
+
+  .search{background:var(--white);border-radius:20px;box-shadow:var(--shadow-lift);padding:8px;position:relative;z-index:2}
+  .srow{display:flex;align-items:center;gap:8px;padding:9px 10px}
+  .srow+.srow{border-top:1px dashed rgba(15,42,29,.14)}
+  .search input{flex:1;border:none;outline:none;font-size:.95rem;font-family:inherit;font-weight:600;background:transparent;min-width:0}
+  .search input::placeholder{color:var(--ink-subtle);font-weight:500}
+  .swap{font-size:.82rem;color:var(--amber-dark);font-weight:700;min-height:1.2em;transition:opacity .6s ease}
+  .campus-chip{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;font-weight:700;color:var(--forest);background:var(--glass);border-radius:999px;padding:7px 12px;white-space:nowrap}
+  .srow .alt{font-size:.72rem;color:var(--ink-subtle);margin-left:auto;white-space:nowrap}
+  .srow .alt b{color:var(--amber-dark)}
+  .sgo{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--forest);color:var(--cream);border-radius:14px;padding:14px;font-weight:800;font-size:.95rem;margin-top:2px;transition:transform .35s var(--spring),background .5s;box-shadow:0 8px 20px rgba(15,42,29,.28)}
+  .sgo:active{transform:scale(.97)}
+  .sgo.sell{background:var(--amber);color:var(--forest)}
+  .trust{display:flex;gap:13px;margin-top:15px;flex-wrap:wrap}
+  .ti{display:flex;align-items:center;gap:6px;font-size:.69rem;font-weight:700;color:var(--forest)}
+
+  /* ===== H1: BIG BRAND WALL ===== */
+  .wall{position:relative;padding:26px 20px 30px;background:var(--forest-deep);color:var(--cream)}
+  .wall .eyebrow{color:var(--amber-light)}.wall .eyebrow::before{background:var(--amber)}
+  .wall h1{font-family:Fraunces,serif;font-weight:900;font-size:2.2rem;line-height:1.02;color:var(--cream);margin:12px 0 6px}
+  .wall h1 em{font-style:normal;color:var(--amber)}
+  .wall p{color:rgba(250,246,236,.72);font-size:.86rem;max-width:34ch;line-height:1.55}
+  .wall .search{margin-top:20px}
+  .market-wall{background:var(--forest-deep);padding:6px 20px 34px;position:relative;overflow:hidden}
+  .mw-glow{position:absolute;inset:auto -30% -40% -30%;height:80%;background:radial-gradient(50% 60% at 50% 100%, rgba(232,163,61,.16), transparent 70%)}
+  .mw{display:flex;flex-wrap:wrap;align-items:baseline;gap:.45em .55em;position:relative;justify-content:center}
+  .mw span{font-family:Fraunces,serif;line-height:1.05;cursor:pointer;transition:transform .4s var(--spring),color .3s;display:inline-block}
+  .mw span:active{transform:scale(1.08) rotate(-1deg)}
+  .mw .c1{font-size:1.9rem;font-weight:900;color:var(--cream)}
+  .mw .c2{font-size:1.35rem;font-weight:600;font-style:italic;color:var(--amber-light)}
+  .mw .c3{font-size:1.05rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(250,246,236,.85)}
+  .mw .c4{font-size:1.15rem;font-weight:900;color:var(--amber)}
+  .mw .dot{color:rgba(250,246,236,.25);font-size:1.2rem}
+  .mw-note{position:relative;text-align:center;font-size:.6rem;color:rgba(250,246,236,.4);margin-top:18px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+
+  /* ===== H2: THE COUNTER (Nigerian greeting) ===== */
+  .counter{position:relative;padding:34px 20px 30px;background:linear-gradient(175deg,#123524,var(--forest-deep));color:var(--cream)}
+  .counter .sun{position:absolute;top:-70px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(232,163,61,.32),transparent 68%);animation:breathe 8s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.1);opacity:1}}
+  .counter .open{font-size:.66rem;font-weight:800;letter-spacing:.2em;color:var(--amber-light);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+  .counter .open .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);animation:pulse 3.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.7);opacity:.5}}
+  .counter h1{font-family:Fraunces,serif;font-weight:900;font-size:2.35rem;line-height:1.06;margin:14px 0 6px;position:relative}
+  .counter h1 .naija{color:var(--amber)}
+  .counter .sub{color:rgba(250,246,236,.72);font-size:.85rem;max-width:32ch;line-height:1.5;position:relative}
+  .counter .search{margin-top:22px}
+  .counter .campus-chip{background:rgba(250,246,236,.1);color:var(--cream)}
+  .counter .alt{color:rgba(250,246,236,.6)!important}
+  .counter .alt b{color:var(--amber-light)!important}
+  .counter .sgo{background:var(--amber);color:var(--forest)}
+  .counter .trust .ti{color:rgba(250,246,236,.85)}
+
+  /* ===== H3: DUAL MODE (Buy/Sell toggle) ===== */
+  .fadebox{transition:opacity .5s ease}
+  .fadebox.out{opacity:0}
+
+  /* ===== SECTION REPLACEMENTS ===== */
+  .lab-sec{padding:26px 20px 30px}
+  .lab-sec .eyebrow{margin-bottom:12px}
+  .lab-sec h2{font-family:Fraunces,serif;font-weight:900;color:var(--forest);font-size:1.4rem;margin-bottom:4px}
+  .lab-sec .lead{color:var(--ink-muted);font-size:.8rem;margin-bottom:18px;line-height:1.5}
+
+  /* MARKET WALL (replaces Shop the market) — light version inside sections */
+  .mw-light .c1{color:var(--forest)} .mw-light .c2{color:var(--amber-dark)} .mw-light .c3{color:var(--forest-mid)} .mw-light .c4{color:var(--ink)}
+  .mw-light{background:var(--glass)}
+  .mw-light .dot{color:rgba(15,42,29,.2)}
+
+  /* FIND IT / SELL IT (replaces Your move) — no photos, pure type */
+  .split{display:grid;grid-template-columns:1fr 1fr;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-lift);margin:0 16px}
+  .half{padding:26px 18px 24px;display:flex;flex-direction:column;min-height:270px;position:relative}
+  .half.buy{background:var(--forest);color:var(--cream)}
+  .half.sell{background:var(--cream);color:var(--forest);border-left:1px solid rgba(15,42,29,.12)}
+  .half .kick{font-size:.58rem;letter-spacing:.2em;font-weight:800;text-transform:uppercase;opacity:.65}
+  .half h3{font-family:Fraunces,serif;font-size:2.3rem;font-weight:900;line-height:1;margin:10px 0 8px}
+  .half.buy h3 em{font-style:normal;color:var(--amber)}
+  .half.sell h3 em{font-style:normal;color:var(--amber-dark)}
+  .half p{font-size:.74rem;line-height:1.5;opacity:.82;max-width:24ch}
+  .half .act{margin-top:auto;align-self:flex-start;border-radius:999px;padding:10px 16px;font-weight:800;font-size:.76rem;transition:transform .35s var(--spring)}
+  .half .act:active{transform:scale(.95)}
+  .half.buy .act{background:var(--amber);color:var(--forest)}
+  .half.sell .act{background:var(--forest);color:var(--cream)}
+  .hinge{grid-column:1/-1;display:flex;justify-content:center;padding:0;height:0;position:relative;z-index:3}
+  .hinge .seal{transform:translateY(-50%);background:var(--forest);color:var(--amber);border:2px solid var(--amber);font-weight:900;font-size:.66rem;letter-spacing:.22em;padding:9px 18px;border-radius:999px;font-family:Inter;text-transform:uppercase;box-shadow:0 6px 16px rgba(15,42,29,.3)}
+  @media(max-width:420px){.half h3{font-size:1.9rem}}
+</style>
+</head>
+<body>
+
+<div class="lab-head">
+  <h1>Hero Lab — 4 combinations + 2 section fixes</h1>
+  <p>Same brand law everywhere: Find it. Chat it. Get it. No stock photos. No proof numbers. Judge each phone separately.</p>
+</div>
+
+<!-- ================= H1: MARKET WALL (dark, signboard) ================= -->
+<div class="phone">
+  <div class="phone-label"><span>H1 — THE MARKET WALL</span><small>typography IS the hero</small></div>
+  <div class="wall">
+    <p class="eyebrow">The student market</p>
+    <h1>Find it.<br>Chat it.<br><em>Get it.</em></h1>
+    <p>Food, fits, gadgets, hair — from every campus and corner of Nigeria.</p>
+  </div>
+  <div class="market-wall">
+    <div class="mw-glow"></div>
+    <div class="mw">
+      <span class="c1">Food &amp; Drinks</span><span class="dot">·</span>
+      <span class="c2">Pastries</span><span class="dot">·</span>
+      <span class="c3">Hair</span><span class="dot">·</span>
+      <span class="c4">Gadgets</span><span class="dot">·</span>
+      <span class="c2">Skincare</span><span class="dot">·</span>
+      <span class="c3">Fitness</span><span class="dot">·</span>
+      <span class="c1">Fashion</span><span class="dot">·</span>
+      <span class="c2">Crafts</span><span class="dot">·</span>
+      <span class="c4">Music</span><span class="dot">·</span>
+      <span class="c3">Drinks</span>
+    </div>
+    <p class="mw-note">— every stall, one market —</p>
+  </div>
+  <div class="hero" style="padding-top:18px">
+    <div class="search">
+      <div class="srow"><span>🔎</span><input placeholder="What are you looking for?"></div>
+      <div class="srow"><span class="campus-chip">📍 NMU Okerenkoko ▾</span><span class="alt">or <b>across Nigeria →</b></span></div>
+      <button class="sgo">Search the market →</button>
+    </div>
+    <div class="trust"><span class="ti">✔ Campus verified</span><span class="ti">✔ Chat before you buy</span></div>
+  </div>
+</div>
+
+<!-- ================= H2: THE COUNTER (Nigerian greeting) ================= -->
+<div class="phone">
+  <div class="phone-label"><span>H2 — THE COUNTER</span><small>greeted like a person</small></div>
+  <div class="counter">
+    <div class="sun"></div>
+    <p class="open"><span class="dot"></span>MARKET OPEN · NMU OKERENKOKO</p>
+    <h1>Wetin you<br><span class="naija">dey find?</span></h1>
+    <p class="sub">Find it. Chat it. Get it. — food, fits, gadgets, hair, from every campus and corner of Nigeria.</p>
+    <div class="search">
+      <div class="srow"><span>🔎</span><input placeholder="Type am — jollof spices, iPhone 12, braids…"></div>
+      <div class="srow"><span class="campus-chip">📍 NMU Okerenkoko ▾</span><span class="alt">or <b>across Nigeria →</b></span></div>
+      <button class="sgo">Search the market →</button>
+    </div>
+    <div class="trust"><span class="ti">✔ Campus verified</span><span class="ti">✔ Chat before you buy</span><span class="ti">✔ Meet safe</span></div>
+  </div>
+</div>
+
+<!-- ================= H3: DUAL MODE (toggle) ================= -->
+<div class="phone">
+  <div class="phone-label"><span>H3 — DUAL MODE</span><small>one hero, two doors (toggle it)</small></div>
+  <div class="hero">
+    <div class="mode" id="mode3">
+      <button class="on" data-m="buy">I'm shopping</button><button data-m="sell">I'm selling</button>
+    </div>
+    <p class="eyebrow" id="eb3">Nigeria's campus market</p>
+    <h1 class="hero-h fadebox" id="h3h">Find it.<br><em>Chat it.</em> Get it.</h1>
+    <p class="hero-sub fadebox" id="h3s">Food, fits, gadgets, hair — from every campus and corner of Nigeria.</p>
+    <div class="hero-search" style="margin-top:18px">
+      <div class="search">
+        <div class="srow"><span>🔎</span><input placeholder="Jollof spices, iPhone 12, braids…"></div>
+        <div class="srow"><span class="campus-chip">📍 NMU Okerenkoko ▾</span><span class="alt">or <b>across Nigeria →</b></span></div>
+        <button class="sgo" id="go3">Search the market →</button>
+      </div>
+    </div>
+    <div class="trust" id="t3"><span class="ti">✔ Campus verified</span><span class="ti">✔ Chat before you buy</span></div>
+  </div>
+</div>
+
+<!-- ================= H4: FUSION (brand line + living search, light) ================= -->
+<div class="phone">
+  <div class="phone-label"><span>H4 — LIVING SEARCH</span><small>search teaches itself · quietest</small></div>
+  <div class="hero">
+    <p class="eyebrow">Nigeria's campus market</p>
+    <h1 class="hero-h">Find it.<br><em>Chat it.</em> Get it.</h1>
+    <p class="hero-sub">Real students. Real vendors. Zero wahala.</p>
+    <div class="hero-search" style="margin-top:20px">
+      <div class="search">
+        <div class="srow"><span>🔎</span><input placeholder=" "><span class="swap" id="swap4" style="position:absolute;left:44px;pointer-events:none"></span></div>
+        <div class="srow"><span class="campus-chip">📍 NMU Okerenkoko ▾</span><span class="alt">or <b>across Nigeria →</b></span></div>
+        <button class="sgo">Search the market →</button>
+      </div>
+    </div>
+    <div class="trust"><span class="ti">✔ Campus verified</span><span class="ti">✔ Chat before you buy</span><span class="ti">✔ Meet-on-campus safe</span></div>
+  </div>
+</div>
+
+<!-- ================= SECTION FIX 1: MARKET WALL replaces category tiles ================= -->
+<div class="phone">
+  <div class="phone-label"><span>FIX-A — MARKET WALL (light)</span><small>replaces "Shop the market" tiles</small></div>
+  <div class="lab-sec" style="padding-bottom:8px">
+    <h2>The market sells</h2>
+    <p class="lead">Tap your stall — every word below is a live category.</p>
+  </div>
+  <div class="market-wall mw-light" style="border-radius:0">
+    <div class="mw">
+      <span class="c1">Food &amp; Drinks</span><span class="dot">·</span>
+      <span class="c2">Pastries</span><span class="dot">·</span>
+      <span class="c3">HAIR</span><span class="dot">·</span>
+      <span class="c4">Gadgets</span><span class="dot">·</span>
+      <span class="c2">Skincare</span><span class="dot">·</span>
+      <span class="c3">FITNESS</span><span class="dot">·</span>
+      <span class="c1">Fashion</span><span class="dot">·</span>
+      <span class="c2">Crafts</span><span class="dot">·</span>
+      <span class="c4">Music</span><span class="dot">·</span>
+      <span class="c3">Drinks</span>
+    </div>
+  </div>
+  <div style="padding:16px 20px 26px;background:var(--glass)">
+    <a class="to-explore" style="margin:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:999px;border:1.5px dashed rgba(15,42,29,.28);color:var(--forest);font-weight:700;font-size:.84rem;background:rgba(255,255,255,.5)" href="#">The full market — filters, categories, everything <span>→</span></a>
+  </div>
+</div>
+
+<!-- ================= SECTION FIX 2: FIND IT / SELL IT (no photos) ================= -->
+<div class="phone">
+  <div class="phone-label"><span>FIX-B — FIND IT / SELL IT</span><small>replaces "Your move" — pure type, no photos</small></div>
+  <div class="lab-sec" style="padding-bottom:10px">
+    <h2>Your move.</h2>
+  </div>
+  <div class="split">
+    <div class="hinge"><span class="seal">VOEQ</span></div>
+    <div class="half buy">
+      <span class="kick">Shopping?</span>
+      <h3><em>Find</em> it.</h3>
+      <p>Real vendors around you. Chat first, meet safe, pay when happy.</p>
+      <button class="act">Start exploring</button>
+    </div>
+    <div class="half sell">
+      <span class="kick">Selling?</span>
+      <h3><em>Sell</em> it.</h3>
+      <p>Your stall opens in minutes. Free to list — keep your money.</p>
+      <button class="act">Open my stall</button>
+    </div>
+  </div>
+  <div style="height:26px;background:var(--glass)"></div>
+</div>
+
+<script>
+  // H3 dual mode
+  const m3=document.getElementById('mode3');
+  const content={
+    buy:{eb:"Nigeria's campus market",h:"Find it.<br><em>Chat it.</em> Get it.",s:"Food, fits, gadgets, hair — from every campus and corner of Nigeria.",go:"Search the market →",sell:false},
+    sell:{eb:"Open for vendors",h:"Your stall opens<br>in <em>minutes.</em>",s:"Snap it, list it, price it your way. Free to list — you keep your money.",go:"Open my stall — free",sell:true}
+  };
+  m3.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    m3.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    const c=content[b.dataset.m];
+    const h=document.getElementById('h3h'),s=document.getElementById('h3s'),g=document.getElementById('go3'),eb=document.getElementById('eb3'),t=document.getElementById('t3');
+    h.classList.add('out');s.classList.add('out');
+    setTimeout(()=>{
+      h.innerHTML=c.h;s.textContent=c.s;g.textContent=c.go;eb.textContent=c.eb;
+      g.classList.toggle('sell',c.sell);
+      t.innerHTML=c.sell?'<span class="ti">✔ Free to list</span><span class="ti">✔ You keep your money</span><span class="ti">✔ Sell campus-wide</span>':'<span class="ti">✔ Campus verified</span><span class="ti">✔ Chat before you buy</span>';
+      h.classList.remove('out');s.classList.remove('out');
+    },280);
+  });
+  // H4 living search — real-feeling queries, gentle 3.5s crossfade
+  const qs=['jollof spices…','knotless braids…','iPhone 12…','gele & beads…','study lamp…','sneakers…','airfryer…'];
+  const sw=document.getElementById('swap4'); let qi=0;
+  function cyc(){sw.style.opacity=0;setTimeout(()=>{sw.textContent=qs[qi];qi=(qi+1)%qs.length;sw.style.opacity=1},600)}
+  sw.style.transition='opacity .6s ease'; cyc(); setInterval(cyc,3500);
+</script>
+</body>
+</html>

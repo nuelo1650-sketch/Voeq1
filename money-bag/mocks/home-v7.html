@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq Home v7 — final landing mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#0F2A1D; --forest-deep:#0B211A; --forest-mid:#2D5A3D;
+    --amber:#E8A33D; --amber-dark:#D4922A; --amber-light:#F5C36A;
+    --cream:#FAF6EC; --glass:#F5F1E8; --sand:#EFE7D3; --white:#fff;
+    --ink:#0A0A0A; --ink-muted:#4A4A4A; --ink-subtle:#7A7A7A;
+    --r-lg:16px; --r-xl:22px;
+    --shadow-card:0 4px 14px rgba(15,42,29,.09);
+    --shadow-lift:0 16px 36px rgba(15,42,29,.18);
+    --shadow-photo:0 10px 26px rgba(15,42,29,.16);
+    --spring:cubic-bezier(.34,1.4,.64,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Inter,system-ui,sans-serif;background:var(--glass);color:var(--ink);overflow-x:hidden}
+  .display{font-family:Fraunces,Georgia,serif}
+  img{display:block;max-width:100%}
+  button{font-family:inherit;border:none;cursor:pointer;background:none}
+  a{text-decoration:none;color:inherit}
+  .ico{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* NAV 1 — real icons, no emoji */
+  .nav1{background:var(--glass);border-bottom:1px solid rgba(15,42,29,.07);position:sticky;top:0;z-index:50}
+  .nav1-in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+  .logo{width:64px;flex:0 0 auto}
+  .hsearch{flex:1;display:flex;align-items:center;gap:9px;background:var(--forest);border-radius:999px;padding:11px 18px;min-width:0}
+  .hsearch svg{flex:0 0 auto;opacity:.85}
+  .hsearch input{flex:1;background:transparent;border:none;outline:none;color:var(--cream);font-size:.9rem;font-weight:600;font-family:inherit;min-width:0}
+  .hsearch input::placeholder{color:rgba(250,246,236,.75);font-weight:500}
+  .nav-cta{display:flex;gap:10px;align-items:center;flex:0 0 auto}
+  .nic{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--forest);transition:background .3s}
+  .nic:hover{background:rgba(15,42,29,.07)}
+  .divider{width:1px;height:22px;background:rgba(15,42,29,.18)}
+  .si{font-size:.8rem;font-weight:700;color:var(--forest);white-space:nowrap}
+  .si b{font-weight:800}
+  .burger{display:flex;width:38px;height:38px;border-radius:50%;align-items:center;justify-content:center;color:var(--forest)}
+  .mmenu{display:none;background:var(--glass);border-bottom:1px solid rgba(15,42,29,.08);padding:12px 16px 14px;gap:10px}
+  .mmenu.open{display:flex;flex-direction:column;animation:mdrop .35s cubic-bezier(.22,1,.36,1)}
+  @keyframes mdrop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  .mm-search{display:flex;align-items:center;gap:9px;background:var(--forest);border-radius:999px;padding:11px 18px;color:var(--cream)}
+  .mm-search input{flex:1;background:transparent;border:none;outline:none;color:var(--cream);font-size:.9rem;font-weight:600;font-family:inherit;min-width:0}
+  .mm-search input::placeholder{color:rgba(250,246,236,.75)}
+  .mm-quick{display:flex;gap:10px}
+  .mm-quick .nic{background:rgba(15,42,29,.06);border-radius:12px;width:auto;height:auto;padding:9px 14px;gap:7px;font-size:.78rem;font-weight:700;color:var(--forest)}
+
+  /* NAV 2 */
+  .nav2{background:var(--glass);border-bottom:1px solid rgba(15,42,29,.08)}
+  .nav2-in{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
+  .nav2-in::-webkit-scrollbar{display:none}
+  .nl{padding:11px 11px;font-size:.8rem;font-weight:600;color:var(--ink-muted);white-space:nowrap;border-bottom:2px solid transparent;transition:color .3s}
+  .nl:hover{color:var(--forest)}
+  .nl.on{color:var(--forest);font-weight:700;border-bottom-color:var(--amber)}
+  .nl.hot{color:var(--amber-dark);font-weight:800}
+  .sell-pill{margin-left:auto;background:var(--forest);color:var(--cream);font-size:.76rem;font-weight:800;border-radius:999px;padding:9px 16px;white-space:nowrap;flex:0 0 auto;transition:transform .3s var(--spring)}
+  .sell-pill:active{transform:scale(.95)}
+
+  /* HERO v7 mobile-first — tighter, brighter, fuller */
+  .hero{max-width:1200px;margin:0 auto;padding:28px 16px 8px;position:relative}
+  .hero::before{content:"";position:absolute;inset:-25% -10% 25% -10%;pointer-events:none;background:
+    radial-gradient(45% 40% at 12% 25%, rgba(232,163,61,.2), transparent 70%),
+    radial-gradient(40% 35% at 90% 15%, rgba(45,90,61,.1), transparent 70%)}
+  .hero-copy{position:relative;z-index:2;text-align:center;max-width:560px;margin:0 auto}
+  .eyebrow{font-size:.62rem;font-weight:800;letter-spacing:.22em;color:var(--amber-dark);text-transform:uppercase;display:inline-flex;align-items:center;gap:8px}
+  .eyebrow::before,.eyebrow::after{content:"";width:18px;height:2px;background:var(--amber);border-radius:2px}
+  h1.hero-h{font-family:Fraunces,serif;font-weight:900;color:var(--forest);font-size:clamp(2.2rem,10vw,3.4rem);line-height:1.03;letter-spacing:-.01em;margin:12px 0 10px}
+  h1.hero-h .g{color:var(--amber-dark);font-style:italic}
+  .hero-sub{color:var(--ink-muted);font-size:.9rem;max-width:36ch;line-height:1.6;margin:0 auto}
+  .hero-cta{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+  .cta-main{background:var(--forest);color:var(--cream);border-radius:999px;padding:14px 28px;font-weight:800;font-size:.92rem;box-shadow:0 10px 24px rgba(15,42,29,.3);transition:transform .35s var(--spring)}
+  .cta-main:active{transform:scale(.96)}
+  .cta-ghost{color:var(--forest);font-weight:700;font-size:.84rem;display:inline-flex;align-items:center;gap:5px}
+  /* collage — mobile: compact 3-up swipe; desktop: fan */
+  .collage{position:relative;z-index:2;margin:20px -16px 4px;padding:8px 16px 24px;display:flex;gap:13px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}
+  .collage::-webkit-scrollbar{display:none}
+  .pol{flex:0 0 46%;max-width:46%;scroll-snap-align:center;background:var(--white);padding:8px 8px 11px;border-radius:6px;box-shadow:var(--shadow-photo);transition:transform .5s var(--spring)}
+  .pol:nth-child(1){transform:rotate(-2.4deg)}
+  .pol:nth-child(2){transform:rotate(1.7deg) translateY(9px)}
+  .pol:nth-child(3){transform:rotate(-1deg)}
+  .pol:hover{transform:rotate(0) translateY(-4px)}
+  .pol img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:3px;background:linear-gradient(135deg,#EDE7D8,#E2DAC8)}
+  .pol figcaption{padding:8px 3px 0}
+  .pol .pc-name{font-size:.76rem;font-weight:700;color:var(--forest);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pol .pc-meta{display:flex;align-items:center;justify-content:space-between;margin-top:3px;gap:6px}
+  .pol .pc-price{font-family:Fraunces,serif;font-weight:900;font-size:.88rem;color:var(--forest)}
+  .pol .pc-campus{font-size:.58rem;color:var(--ink-subtle);display:flex;align-items:center;gap:4px;white-space:nowrap}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 3.2s ease-in-out infinite;flex:0 0 auto}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.7);opacity:.5}}
+  .swipe-hint{text-align:center;font-size:.6rem;color:var(--ink-subtle);letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:-12px;padding-bottom:6px}
+
+  /* SAND BAND */
+  .band{background:var(--sand);margin-top:10px;padding:16px;border-top:1px solid rgba(15,42,29,.06);border-bottom:1px solid rgba(15,42,29,.06)}
+  .band-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:12px}
+  .stat{display:flex;align-items:center;gap:10px;padding:0 14px}
+  .stat+.stat{border-left:1px solid rgba(15,42,29,.14)}
+  .stat:first-child{padding-left:2px}
+  .sic{width:38px;height:38px;border-radius:12px;background:var(--white);box-shadow:var(--shadow-card);display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:var(--forest)}
+  .stat b{display:block;font-size:.82rem;color:var(--forest);font-weight:800;line-height:1.2}
+  .stat small{font-size:.64rem;color:var(--ink-subtle)}
+  .market-open{display:flex;align-items:center;gap:8px;background:var(--white);border-radius:999px;padding:9px 15px;box-shadow:var(--shadow-card);font-size:.72rem;font-weight:800;color:var(--forest)}
+  .market-open .live-dot{width:8px;height:8px}
+
+  /* SECTIONS */
+  .sec{padding:32px 16px 4px;max-width:1200px;margin:0 auto}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:15px;gap:10px}
+  .sec-title{font-size:1.32rem;font-weight:900;color:var(--forest)}
+  .sec-title .thin{display:block;font-weight:600;color:var(--ink-muted);font-size:.78rem;font-family:Inter;margin-top:3px}
+  .sec-link{font-size:.8rem;font-weight:700;color:var(--amber-dark);white-space:nowrap}
+
+  /* FRESH DROPS */
+  .drops-band{background:var(--forest);padding:28px 0 32px;margin-top:30px;color:var(--cream)}
+  .drops-in{max-width:1200px;margin:0 auto;padding:0 16px}
+  .drops-in .sec-title{color:var(--cream)} .drops-in .sec-link{color:var(--amber-light)}
+  .drops-in .sec-title .thin{color:rgba(250,246,236,.62)}
+  .live-pill{display:inline-flex;align-items:center;gap:6px;background:var(--amber);color:var(--forest);font-weight:800;font-size:.62rem;letter-spacing:.12em;padding:5px 10px;border-radius:999px;text-transform:uppercase;margin-bottom:10px}
+  .rail{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 8px;scrollbar-width:none;scroll-behavior:smooth}
+  .rail::-webkit-scrollbar{display:none}
+  .bigcard{position:relative;flex:0 0 84%;max-width:84%;border-radius:var(--r-xl);overflow:hidden;aspect-ratio:4/4.6;background:#123524;box-shadow:0 14px 34px rgba(0,0,0,.4);transition:transform .55s var(--spring);outline:1px solid rgba(250,246,236,.08);outline-offset:-1px}
+  .bigcard img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;background:#123524}
+  .bigcard .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,33,26,.1) 0%,transparent 32%,transparent 42%,rgba(11,33,26,.9) 92%)}
+  .rate{position:absolute;top:12px;left:12px;background:rgba(250,246,236,.94);color:var(--forest);font-weight:800;font-size:.68rem;border-radius:999px;padding:5px 9px}
+  .tag{position:absolute;top:12px;right:52px;background:rgba(15,42,29,.72);color:var(--amber-light);font-weight:700;font-size:.62rem;letter-spacing:.06em;border-radius:999px;padding:5px 10px;backdrop-filter:blur(4px)}
+  .heart{position:absolute;top:9px;right:9px;width:34px;height:34px;border-radius:50%;background:rgba(250,246,236,.94);display:flex;align-items:center;justify-content:center;color:var(--forest);box-shadow:0 2px 8px rgba(0,0,0,.25);transition:transform .4s var(--spring);z-index:3}
+  .heart:active{transform:scale(1.3)}
+  .binfo{position:absolute;left:0;right:0;bottom:0;padding:16px 16px 18px;color:var(--cream)}
+  .binfo .cat{font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-light);font-weight:800}
+  .binfo h3{font-family:Fraunces,serif;font-size:clamp(1.1rem,1.6vw,1.4rem);font-weight:700;line-height:1.12;margin:5px 0 3px}
+  .binfo .by{font-size:.68rem;opacity:.88}
+  .binfo .by b{font-weight:700}
+  .brow{display:flex;align-items:center;justify-content:space-between;margin-top:11px;gap:8px}
+  .price{font-family:Fraunces,serif;font-weight:900;font-size:clamp(1.1rem,1.5vw,1.32rem);white-space:nowrap}
+  .buy{background:var(--amber);color:var(--forest);font-weight:800;font-size:.78rem;border-radius:999px;padding:9px 16px;transition:transform .35s var(--spring);white-space:nowrap}
+  .buy:active{transform:scale(.94)}
+  .dots{display:flex;gap:6px;justify-content:center;margin-top:16px}
+  .dot{width:6px;height:6px;border-radius:50%;background:rgba(250,246,236,.28);transition:all .6s ease}
+  .dot.on{background:var(--amber);width:20px;border-radius:99px}
+  @media(hover:hover){.bigcard:hover{transform:translateY(-4px)}}
+
+  /* VENDOR SPOTLIGHT — mobile: taller stage, better avatar */
+  .spot{margin:28px 16px 0;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-lift);position:relative;background:var(--forest-deep)}
+  @media(min-width:760px){.spot{margin:28px auto 0;max-width:960px}}
+  .spot-stage{position:relative;aspect-ratio:4/3.8}
+  .spot-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.8s ease}
+  .spot-slide.on{opacity:1}
+  .spot-slide img{width:100%;height:100%;object-fit:cover;background:#123524}
+  .spot-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,33,26,.14) 0%,transparent 32%,transparent 40%,rgba(11,33,26,.93) 90%)}
+  .spot-tag .seal{position:absolute;top:14px;left:14px;z-index:2;display:inline-block;background:var(--amber);color:var(--forest);font-weight:900;font-size:.6rem;letter-spacing:.14em;padding:6px 12px;border-radius:4px;transform:rotate(-2deg);box-shadow:0 4px 10px rgba(0,0,0,.35);text-transform:uppercase}
+  .spot-stat{position:absolute;right:12px;top:14px;z-index:2;background:rgba(250,246,236,.95);border-radius:999px;padding:6px 11px;font-size:.66rem;font-weight:800;color:var(--forest)}
+  .spot-id{position:absolute;left:14px;right:14px;bottom:14px;z-index:2;color:#fff}
+  .spot-id .who{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+  .avatar{width:52px;height:52px;max-width:52px;max-height:52px;border-radius:50%;border:2.5px solid var(--amber);object-fit:cover;flex:0 0 52px;display:block;box-shadow:0 4px 12px rgba(0,0,0,.35);background:#123524}
+  .spot-id b.name{display:block;font-family:Fraunces,serif;font-size:clamp(1.05rem,2.4vw,1.3rem);font-weight:700;line-height:1.1}
+  .spot-id small{font-size:.68rem;opacity:.88;display:block;margin-top:3px}
+  .spot-id .pickline{font-size:.76rem;color:rgba(250,246,236,.88);background:rgba(11,33,26,.5);border:1px solid rgba(250,246,236,.16);border-radius:12px;padding:9px 12px;backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .spot-id .pickline .pp{min-width:0}
+  .spot-id .pickline .pp small{font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-light);font-weight:800;display:block;margin-top:0}
+  .spot-id .pickline .pp b{font-family:Fraunces,serif;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .spot-visit{background:var(--amber);color:var(--forest);font-weight:800;font-size:.72rem;border-radius:999px;padding:9px 15px;white-space:nowrap;flex:0 0 auto;transition:transform .35s var(--spring)}
+  .spot-visit:active{transform:scale(.95)}
+  .spot-nav{position:absolute;right:12px;top:calc(50% - 34px);z-index:3;display:flex;flex-direction:column;gap:7px}
+  .spot-nav .sn{width:32px;height:32px;border-radius:50%;background:rgba(11,33,26,.55);backdrop-filter:blur(8px);color:#fff;display:flex;align-items:center;justify-content:center;border:1px solid rgba(250,246,236,.3);transition:background .3s}
+  .spot-nav .sn:active{background:var(--amber);color:var(--forest)}
+  .fair-note{font-size:.68rem;color:var(--ink-subtle);text-align:center;margin-top:10px}
+  @media(min-width:760px){
+    .spot-stage{aspect-ratio:16/7.4}
+    .spot-id{left:22px;right:22px;bottom:18px}
+    .spot-nav{flex-direction:row;top:auto;bottom:18px;transform:none;right:18px}
+    .spot-visit{padding:10px 18px}
+  }
+
+  /* GRID */
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+  .gcard{background:var(--white);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-card);transition:transform .45s var(--spring),box-shadow .45s;display:flex;flex-direction:column}
+  .gimg{aspect-ratio:1/1.05;position:relative;background:linear-gradient(135deg,#EDE7D8,#E2DAC8);overflow:hidden}
+  .gimg img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s ease}
+  @media(hover:hover){.gcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}.gcard:hover .gimg img{transform:scale(1.05)}}
+  .gtag{position:absolute;top:9px;left:9px;background:var(--forest);color:var(--cream);font-size:.56rem;font-weight:800;letter-spacing:.1em;padding:4px 8px;border-radius:4px}
+  .gtag.gold{background:var(--amber);color:var(--forest)}
+  .mini-rate{position:absolute;bottom:8px;right:8px;background:rgba(250,246,236,.94);color:var(--forest);font-size:.62rem;font-weight:800;border-radius:999px;padding:4px 8px}
+  .gbody{padding:11px 12px 13px;display:flex;flex-direction:column;flex:1}
+  .gbody h4{font-size:.88rem;font-weight:700;line-height:1.28;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.25em}
+  .grow{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:7px}
+  .gprice{font-weight:800;color:var(--forest);font-size:.98rem;font-family:Fraunces,serif}
+  .gmeta{font-size:.64rem;color:var(--ink-subtle)}
+  .reveal{opacity:0;transform:translateY(16px)}
+  .reveal.in{animation:rise 1.1s cubic-bezier(.22,1,.36,1) forwards;animation-delay:var(--d,0ms)}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  /* WHAT IS VOEQ + VENDOR PANEL */
+  .explain{background:var(--sand);margin-top:32px;padding:34px 0 38px;border-top:1px solid rgba(15,42,29,.06);border-bottom:1px solid rgba(15,42,29,.06)}
+  .explain-in{max-width:1200px;margin:0 auto;padding:0 16px}
+  .ex-head{max-width:46ch;margin-bottom:22px}
+  .ex-head h2{font-family:Fraunces,serif;font-weight:900;color:var(--forest);font-size:1.7rem;line-height:1.1}
+  .ex-head p{color:var(--ink-muted);font-size:.88rem;line-height:1.6;margin-top:8px}
+  .ex-rows{display:flex;flex-direction:column}
+  .ex-row{display:flex;gap:16px;align-items:flex-start;padding:15px 2px;border-top:1px solid rgba(15,42,29,.1)}
+  .ex-row:first-child{border-top:none}
+  .ex-n{font-family:Fraunces,serif;font-weight:900;color:var(--amber-dark);font-size:1.05rem;flex:0 0 30px}
+  .ex-row b{display:block;font-size:.95rem;color:var(--forest);font-weight:800;margin-bottom:3px}
+  .ex-row p{font-size:.8rem;color:var(--ink-muted);line-height:1.55;max-width:56ch}
+  .vendor-panel{background:var(--forest);border-radius:var(--r-xl);padding:26px 20px;color:var(--cream);position:relative;overflow:hidden;margin-top:26px}
+  .vendor-panel::before{content:"";position:absolute;top:-45%;right:-25%;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(232,163,61,.2),transparent 70%)}
+  .vp-kick{font-size:.6rem;letter-spacing:.2em;font-weight:800;color:var(--amber-light);text-transform:uppercase}
+  .vendor-panel h3{font-family:Fraunces,serif;font-weight:900;font-size:clamp(1.55rem,5vw,2.1rem);line-height:1.06;margin:10px 0 8px;position:relative}
+  .vendor-panel h3 em{font-style:italic;color:var(--amber)}
+  .vendor-panel h3 .ul{position:relative;display:inline-block}
+  .vendor-panel h3 .ul::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.3em;background:var(--amber);opacity:.35;border-radius:2px}
+  .vendor-panel>p{font-size:.84rem;color:rgba(250,246,236,.78);line-height:1.55;max-width:46ch;position:relative}
+  .vp-steps{display:grid;grid-template-columns:1fr;gap:10px;margin:20px 0;position:relative}
+  .vp-step{display:flex;gap:11px;align-items:flex-start;background:rgba(250,246,236,.06);border:1px solid rgba(250,246,236,.12);border-radius:14px;padding:12px 14px}
+  .vp-n{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:var(--amber);color:var(--forest);font-weight:900;font-size:.78rem;display:flex;align-items:center;justify-content:center}
+  .vp-step b{display:block;font-size:.84rem}
+  .vp-step p{font-size:.7rem;color:rgba(250,246,236,.7);line-height:1.45;margin-top:1px}
+  .vp-cta{display:flex;gap:10px;flex-wrap:wrap;position:relative}
+  .vp-cta .b1{background:var(--amber);color:var(--forest);border-radius:999px;padding:13px 24px;font-weight:800;font-size:.88rem;transition:transform .35s var(--spring)}
+  .vp-cta .b1:active{transform:scale(.96)}
+  .vp-cta .b2{border:1.5px solid rgba(250,246,236,.4);color:var(--cream);border-radius:999px;padding:13px 20px;font-weight:700;font-size:.86rem}
+  .vp-note{font-size:.66rem;color:rgba(250,246,236,.55);margin-top:12px;position:relative}
+
+  .to-explore{margin:24px 16px 0;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:999px;border:1.5px dashed rgba(15,42,29,.28);color:var(--forest);font-weight:700;font-size:.84rem;background:rgba(255,255,255,.5)}
+
+  /* ============ FOOTER v2 — site-wide (SmartFooter) ============ */
+  footer{background:var(--forest-deep);color:rgba(250,246,236,.78);margin-top:36px;padding:0 0 22px}
+  .f-in{max-width:1200px;margin:0 auto;padding:36px 16px 0}
+  .f-top{display:flex;flex-direction:column;gap:8px;padding-bottom:26px;border-bottom:1px solid rgba(250,246,236,.12)}
+  .f-brand{display:flex;align-items:center;gap:12px}
+  .f-brand svg{width:74px}
+  .f-brand .live-dot{width:8px;height:8px}
+  .f-open{margin-left:auto;display:none;align-items:center;gap:7px;background:rgba(250,246,236,.07);border:1px solid rgba(250,246,236,.14);border-radius:999px;padding:8px 14px;font-size:.68rem;font-weight:700;color:var(--cream)}
+  .f-tag{font-size:.84rem;max-width:44ch;line-height:1.55}
+  .f-mid{display:grid;grid-template-columns:1fr 1fr;gap:26px;padding:26px 0}
+  .f-col h5{color:var(--cream);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;opacity:.9}
+  .f-col a{display:flex;align-items:center;gap:8px;font-size:.8rem;padding:5px 0;transition:color .3s}
+  .f-col a:hover{color:var(--amber-light)}
+  .f-col .new{font-size:.52rem;font-weight:800;letter-spacing:.08em;background:var(--amber);color:var(--forest);border-radius:3px;padding:2px 5px;text-transform:uppercase}
+  .f-help{background:rgba(250,246,236,.05);border:1px solid rgba(250,246,236,.12);border-radius:var(--r-lg);padding:16px;margin-top:4px}
+  .f-help b{color:var(--cream);font-size:.82rem;display:block;margin-bottom:3px}
+  .f-help p{font-size:.7rem;color:rgba(250,246,236,.65);line-height:1.5;margin-bottom:10px}
+  .f-help a.mail{display:inline-flex;align-items:center;gap:7px;background:var(--amber);color:var(--forest);font-weight:800;font-size:.76rem;border-radius:999px;padding:9px 15px}
+  .f-soc{display:flex;gap:10px;padding:4px 0 22px}
+  .f-soc a{width:40px;height:40px;border-radius:50%;background:rgba(250,246,236,.08);border:1px solid rgba(250,246,236,.14);display:flex;align-items:center;justify-content:center;transition:all .3s}
+  .f-soc a:hover{background:var(--amber);color:var(--forest);border-color:var(--amber)}
+  .f-base{border-top:1px solid rgba(250,246,236,.12);padding-top:16px;font-size:.66rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;color:rgba(250,246,236,.5)}
+  .f-base .legal{display:flex;gap:16px;flex-wrap:wrap}
+  @media(max-width:759px){ .hdesk{display:none} }
+  @media(min-width:760px){
+    .burger{display:none}
+    .mmenu{display:none!important}
+    .logo{width:76px}
+    .hero{padding-top:46px}
+    .hero-copy{text-align:left;margin:0}
+    .eyebrow::after{display:none}
+    .hero-sub{margin:0}
+    .hero-cta{justify-content:flex-start}
+    .hero{grid-template-columns:1.02fr 1fr;gap:34px;align-items:center;display:grid}
+    .collage{margin:0;padding:10px 0 30px;overflow:visible;gap:16px}
+    .pol{flex:1;max-width:none}
+    .swipe-hint{display:none}
+    .bigcard{flex:0 0 calc((100% - 42px)/2.16);max-width:calc((100% - 42px)/2.16)}
+    .grid2{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .gbody{padding:13px 14px 15px}
+    .ex-rows{flex-direction:row;gap:22px}
+    .ex-row{flex:1;flex-direction:column;border-top:3px solid rgba(15,42,29,.12);padding:18px 2px 0}
+    .ex-row:first-child{border-top:3px solid var(--amber)}
+    .ex-row p{max-width:none}
+    .vendor-panel{padding:36px 34px}
+    .vp-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+    .vp-steps{grid-template-columns:1fr;margin:0}
+    .split{grid-template-columns:1fr 1fr}
+    .half.sell{border-top:none;border-left:1px solid rgba(15,42,29,.12)}
+    .f-top{flex-direction:row;align-items:center}
+    .f-tag{margin-left:18px}
+    .f-open{display:inline-flex}
+    .f-mid{grid-template-columns:1fr 1fr 1fr 1.3fr}
+    .sec{padding:40px 16px 4px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav1"><div class="nav1-in">
+  <svg class="logo" viewBox="0 0 240 159"><rect width="240" height="159" rx="18" fill="#0F2A1D"/><text x="50%" y="62%" text-anchor="middle" font-family="Fraunces,serif" font-weight="900" font-size="52" fill="#FAF6EC">voeq<tspan fill="#E8A33D">.</tspan></text></svg>
+  <div class="hsearch hdesk">
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input placeholder="Search campus items — jollof, braids, iPhones…">
+  </div>
+  <div class="nav-cta">
+    <button class="nic hdesk" aria-label="Saved"><svg class="ico" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
+    <button class="nic hdesk" aria-label="Messages"><svg class="ico" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    <span class="divider hdesk"></span>
+    <span class="si">Sign in <b>|</b> Sign up</span>
+    <button class="burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><line x1="4" x2="20" y1="7" y2="7"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="17" y2="17"/></svg></button>
+  </div>
+</div></nav>
+
+<!-- MOBILE MENU DRAWER -->
+<div class="mmenu" id="mmenu">
+  <div class="mm-search">
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input placeholder="Search the market…">
+  </div>
+  <div class="mm-quick">
+    <button class="nic" aria-label="Saved"><svg class="ico" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg><span>Saved</span></button>
+    <button class="nic" aria-label="Messages"><svg class="ico" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Messages</span></button>
+  </div>
+</div>
+
+<nav class="nav2"><div class="nav2-in">
+  <span class="nl on">All</span>
+  <span class="nl">Food &amp; Drinks</span>
+  <span class="nl">Fashion</span>
+  <span class="nl">Hair</span>
+  <span class="nl">Gadgets</span>
+  <span class="nl">Pastries</span>
+  <span class="nl hot">✦ Voeq Live</span>
+  <span class="sell-pill">Sell on Voeq</span>
+</div></nav>
+
+<header class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">The student market</p>
+    <h1 class="hero-h">Find it.<br>Chat it.<br><span class="g">Get it.</span></h1>
+    <p class="hero-sub">The trusted voice of your campus market — who sells what, around you, right now.</p>
+    <div class="hero-cta">
+      <button class="cta-main">Explore the market →</button>
+      <span class="cta-ghost">or sell on Voeq ›</span>
+    </div>
+  </div>
+  <div>
+    <div class="collage">
+      <figure class="pol">
+        <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=640&q=76" alt="Jollof rice bowl">
+        <figcaption>
+          <div class="pc-name">Party Jollof + Grilled Chicken</div>
+          <div class="pc-meta"><span class="pc-price">₦3,500</span><span class="pc-campus"><span class="live-dot"></span>NMU</span></div>
+        </figcaption>
+      </figure>
+      <figure class="pol">
+        <img src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=640&q=76" alt="Vibrant Ankara">
+        <figcaption>
+          <div class="pc-name">Ankara two-piece, tailored</div>
+          <div class="pc-meta"><span class="pc-price">₦12,000</span><span class="pc-campus"><span class="live-dot"></span>UNILAG</span></div>
+        </figcaption>
+      </figure>
+      <figure class="pol">
+        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=640&q=76" alt="Red sneakers">
+        <figcaption>
+          <div class="pc-name">Nike Air Force 1, clean</div>
+          <div class="pc-meta"><span class="pc-price">₦38,000</span><span class="pc-campus"><span class="live-dot"></span>UNILAG</span></div>
+        </figcaption>
+      </figure>
+    </div>
+    <p class="swipe-hint">← live from the market →</p>
+  </div>
+</header>
+
+<div class="band"><div class="band-in">
+  <span class="stat"><span class="sic"><svg class="ico" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Campus verified</b><small>every vendor checked</small></span></span>
+  <span class="stat"><span class="sic"><svg class="ico" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span><b>Chat before you buy</b><small>native messaging</small></span></span>
+  <span class="stat"><span class="sic"><svg class="ico" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span><span><b>Meet-on-campus safe</b><small>public spots, real people</small></span></span>
+  <span class="market-open"><span class="live-dot"></span>Market open — NMU Okerenkoko</span>
+</div></div>
+
+<!-- FRESH DROPS -->
+<section class="drops-band">
+  <div class="drops-in">
+    <div class="sec-head">
+      <div><span class="live-pill"><span class="live-dot"></span>Voeq Live</span><h2 class="sec-title display">Fresh drops</h2><span class="thin">New listings surface as they land — the shelf never goes stale</span></div>
+      <span class="sec-link">See all →</span>
+    </div>
+    <div class="rail" id="dropsRail">
+      <article class="bigcard reveal" style="--d:0ms">
+        <img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=900&q=72" alt="" loading="lazy">
+        <div class="scrim"></div>
+        <span class="rate">★ 4.9</span><span class="tag">FOOD</span><button class="heart"><svg class="ico" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
+        <div class="binfo"><span class="cat">Food &amp; Drinks · NMU Okerenkoko</span><h3>Peppered Chicken &amp; Chips Platter</h3><span class="by">by <b>Mama Tuli's Kitchen</b> · verified</span><div class="brow"><span class="price">₦3,500</span><button class="buy">Message</button></div></div>
+      </article>
+      <article class="bigcard reveal" style="--d:120ms">
+        <img src="https://images.unsplash.com/photo-1590658268038-85f5164613ce?w=900&q=72" alt="" loading="lazy">
+        <div class="scrim"></div>
+        <span class="rate">★ 4.7</span><span class="tag">HAIR</span><button class="heart"><svg class="ico" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
+        <div class="binfo"><span class="cat">Hair Services · UNIBEN</span><h3>Knotless Braids, Any Length</h3><span class="by">by <b>Glam by Zee</b> · verified</span><div class="brow"><span class="price">₦8,500</span><button class="buy">Message</button></div></div>
+      </article>
+      <article class="bigcard reveal" style="--d:240ms">
+        <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=900&q=72" alt="" loading="lazy">
+        <div class="scrim"></div>
+        <span class="rate">★ 4.6</span><span class="tag">GADGETS</span><button class="heart"><svg class="ico" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
+        <div class="binfo"><span class="cat">Gadgets · UNILORIN</span><h3>Wireless Earbuds, 36h Battery</h3><span class="by">by <b>Byte Shop</b> · verified</span><div class="brow"><span class="price">₦18,500</span><button class="buy">Message</button></div></div>
+      </article>
+      <article class="bigcard reveal" style="--d:360ms">
+        <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=900&q=72" alt="" loading="lazy">
+        <div class="scrim"></div>
+        <span class="rate">★ 4.9</span><span class="tag">CRAFTS</span><button class="heart"><svg class="ico" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
+        <div class="binfo"><span class="cat">Crafts · UNIBEN</span><h3>Weekend Picnic Pack for Two</h3><span class="by">by <b>Little Things Co</b> · verified</span><div class="brow"><span class="price">₦6,500</span><button class="buy">Message</button></div></div>
+      </article>
+    </div>
+    <div class="dots" id="dropsDots"></div>
+  </div>
+</section>
+
+<!-- VENDOR SPOTLIGHT -->
+<section class="sec">
+  <div class="sec-head"><h2 class="sec-title display">Vendor Spotlight<span class="thin">A rotating light on our vendors — every vendor gets a turn</span></h2><span class="sec-link">All vendors →</span></div>
+  <div class="spot">
+    <div class="spot-stage">
+      <div class="spot-slide on"><img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1100&q=72" alt="" loading="lazy">
+        <span class="spot-tag"><span class="seal">✦ Vendor Spotlight</span></span>
+        <span class="spot-stat">★ 4.9 · 1.2k sales</span>
+        <div class="spot-id">
+          <div class="who"><img class="avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=140&q=64" alt=""><span><b class="name">Mama Tuli's Kitchen</b><small>Food &amp; Drinks · NMU Okerenkoko · open till 10pm</small></span></div>
+          <div class="pickline"><span class="pp"><small>Today's pick</small><b>Peppered Chicken &amp; Chips — ₦3,500</b></span><button class="spot-visit">Visit stall →</button></div>
+        </div>
+      </div>
+      <div class="spot-slide"><img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1100&q=72" alt="" loading="lazy">
+        <span class="spot-tag"><span class="seal">✦ Vendor Spotlight</span></span>
+        <span class="spot-stat">★ 4.8 · 860 sales</span>
+        <div class="spot-id">
+          <div class="who"><img class="avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=140&q=64" alt=""><span><b class="name">Campus Threads</b><small>Fashion · UNILAG · replies in minutes</small></span></div>
+          <div class="pickline"><span class="pp"><small>Today's pick</small><b>Ankara Two-Piece — ₦12,000</b></span><button class="spot-visit">Visit stall →</button></div>
+        </div>
+      </div>
+      <div class="spot-slide"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1100&q=72" alt="" loading="lazy">
+        <span class="spot-tag"><span class="seal">✦ Vendor Spotlight</span></span>
+        <span class="spot-stat">★ 4.9 · 640 sales</span>
+        <div class="spot-id">
+          <div class="who"><img class="avatar" src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=140&q=64" alt=""><span><b class="name">Zee Hair Studio</b><small>Hair · Benin City · 12 min from UNIBEN</small></span></div>
+          <div class="pickline"><span class="pp"><small>Today's pick</small><b>Knotless Braids — ₦8,500</b></span><button class="spot-visit">Visit stall →</button></div>
+        </div>
+      </div>
+      <div class="spot-nav"><button class="sn" data-dir="-1">‹</button><button class="sn" data-dir="1">›</button></div>
+    </div>
+  </div>
+  <p class="fair-note">⚖️ Rotation is fair — visibility is earned and every active vendor gets time in the light.</p>
+</section>
+
+<!-- GRID -->
+<section class="sec">
+  <div class="sec-head"><h2 class="sec-title display">On the grid today<span class="thin">A fair rotation — every listing gets time on the floor</span></h2><span class="sec-link">More →</span></div>
+  <div class="grid2">
+    <article class="gcard reveal" style="--d:0ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=72" alt="" loading="lazy"><span class="gtag gold">LIVE</span><span class="mini-rate">★ 4.8</span></div><div class="gbody"><h4>Nike Air Force 1, clean</h4><div class="grow"><span class="gprice">₦38,000</span><span class="gmeta">UNILAG</span></div></div></article>
+    <article class="gcard reveal" style="--d:100ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=72" alt="" loading="lazy"><span class="mini-rate">★ 4.6</span></div><div class="gbody"><h4>Studio headphones</h4><div class="grow"><span class="gprice">₦22,000</span><span class="gmeta">UNIBEN</span></div></div></article>
+    <article class="gcard reveal" style="--d:200ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1547825407-2d060104b7f8?w=600&q=72" alt="" loading="lazy"><span class="gtag">NEW</span><span class="mini-rate">★ 5.0</span></div><div class="gbody"><h4>Gele &amp; beads set</h4><div class="grow"><span class="gprice">₦8,000</span><span class="gmeta">UNILAG</span></div></div></article>
+    <article class="gcard reveal" style="--d:300ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=72" alt="" loading="lazy"><span class="mini-rate">★ 4.9</span></div><div class="gbody"><h4>Minimal steel watch</h4><div class="grow"><span class="gprice">₦15,500</span><span class="gmeta">UNILORIN</span></div></div></article>
+    <article class="gcard reveal" style="--d:0ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=600&q=72" alt="" loading="lazy"><span class="mini-rate">★ 4.8</span></div><div class="gbody"><h4>Room plant, starter kit</h4><div class="grow"><span class="gprice">₦4,200</span><span class="gmeta">UNIBEN</span></div></div></article>
+    <article class="gcard reveal" style="--d:100ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=72" alt="" loading="lazy"><span class="gtag">NEW</span><span class="mini-rate">★ 4.9</span></div><div class="gbody"><h4>Shea butter skincare set</h4><div class="grow"><span class="gprice">₦5,800</span><span class="gmeta">UNILAG</span></div></div></article>
+    <article class="gcard reveal" style="--d:200ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=600&q=72" alt="" loading="lazy"><span class="mini-rate">★ 4.7</span></div><div class="gbody"><h4>Weekly meal plan</h4><div class="grow"><span class="gprice">₦9,000</span><span class="gmeta">NMU</span></div></div></article>
+    <article class="gcard reveal" style="--d:300ms"><div class="gimg"><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&q=72" alt="" loading="lazy"><span class="gtag gold">LIVE</span><span class="mini-rate">★ 4.6</span></div><div class="gbody"><h4>Gaming mouse, RGB</h4><div class="grow"><span class="gprice">₦11,000</span><span class="gmeta">UNILORIN</span></div></div></article>
+  </div>
+</section>
+
+<!-- WHAT IS VOEQ + VENDOR -->
+<div class="explain"><div class="explain-in">
+  <div class="ex-head">
+    <h2 class="display">What is Voeq?</h2>
+    <p>The market for Nigerian students — a place to discover who sells what around you, talk to them directly, and get it without wahala. Built for campuses, open to every corner of Nigeria.</p>
+  </div>
+  <div class="ex-rows">
+    <div class="ex-row"><span class="ex-n">01</span><span><b>Find it</b><p>Search the market or browse stalls by category. Every vendor is campus-verified — real people, real businesses, no guesswork.</p></span></div>
+    <div class="ex-row"><span class="ex-n">02</span><span><b>Chat it</b><p>Message vendors right here on Voeq. Ask questions, agree a price, agree where to meet — no WhatsApp juggling.</p></span></div>
+    <div class="ex-row"><span class="ex-n">03</span><span><b>Get it</b><p>Meet on campus or get it delivered. You pay when you're happy — that's how a trusted market works.</p></span></div>
+  </div>
+
+  <div class="vendor-panel">
+    <div class="vp-grid">
+      <div>
+        <span class="vp-kick">For vendors</span>
+        <h3>Your stall opens<br>in <em class="ul">minutes.</em></h3>
+        <p>Turn what you make, cook, fix or sell into a real storefront that your campus — and every campus — can find. Free to list. You keep your money.</p>
+        <div class="vp-cta" style="margin-top:18px">
+          <button class="b1">Become a vendor — free</button>
+          <button class="b2">See how it works</button>
+        </div>
+        <p class="vp-note">No listing fees · no commission on meet-up sales · you set your prices</p>
+      </div>
+      <div class="vp-steps">
+        <div class="vp-step"><span class="vp-n">1</span><span><b>Create your stall</b><p>Name, photo, campus or area — two minutes, no paperwork.</p></span></div>
+        <div class="vp-step"><span class="vp-n">2</span><span><b>List what you sell</b><p>Photos, price, done. Publish = your stall is live on Explore instantly.</p></span></div>
+        <div class="vp-step"><span class="vp-n">3</span><span><b>Chat &amp; grow</b><p>Students message you directly. Deliver, meet, earn — and climb the shelf.</p></span></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<a class="to-explore" href="#">The full market — filters, categories, everything <span>→</span></a>
+
+<div style="height:34px"></div>
+
+<!-- ============ FOOTER v2 — SITE-WIDE ============ -->
+<footer><div class="f-in">
+  <div class="f-top">
+    <div class="f-brand">
+      <svg viewBox="0 0 240 159"><rect width="240" height="159" rx="18" fill="rgba(250,246,236,.06)"/><text x="50%" y="62%" text-anchor="middle" font-family="Fraunces,serif" font-weight="900" font-size="52" fill="#FAF6EC">voeq<tspan fill="#E8A33D">.</tspan></text></svg>
+      <span class="live-dot"></span>
+    </div>
+    <p class="f-tag">The market for Nigerian students — every campus, every corner of Nigeria. Find it. Chat it. Get it.</p>
+    <span class="f-open"><span class="live-dot"></span>Market open — NMU Okerenkoko</span>
+  </div>
+  <div class="f-mid">
+    <div class="f-col">
+      <h5>Market</h5>
+      <a href="#">Explore</a>
+      <a href="#">Categories</a>
+      <a href="#">Voeq Live <span class="new">new</span></a>
+      <a href="#">Across the areas <span class="new">soon</span></a>
+      <a href="#">Saved items</a>
+    </div>
+    <div class="f-col">
+      <h5>Sell</h5>
+      <a href="#">Become a vendor</a>
+      <a href="#">Sell on Voeq</a>
+      <a href="#">Vendor handbook</a>
+      <a href="#">Go-live checklist</a>
+    </div>
+    <div class="f-col">
+      <h5>Company</h5>
+      <a href="#">How it works</a>
+      <a href="#">About</a>
+      <a href="#">Press</a>
+      <a href="#">Careers</a>
+    </div>
+    <div class="f-col">
+      <div class="f-help">
+        <b>Need help?</b>
+        <p>Questions about an order, a vendor, or your account — we reply fast.</p>
+        <a class="mail" href="mailto:support@voeq.ng">support@voeq.ng</a>
+      </div>
+      <div style="margin-top:14px">
+        <h5 style="margin-bottom:8px">Trust &amp; legal</h5>
+        <a href="#">Safety center</a>
+        <a href="#">Terms · Privacy</a>
+      </div>
+    </div>
+  </div>
+  <div class="f-soc">
+    <a href="#" aria-label="Instagram"><svg class="ico" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+    <a href="#" aria-label="TikTok"><svg class="ico" viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg></a>
+    <a href="#" aria-label="WhatsApp channel"><svg class="ico" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg></a>
+  </div>
+  <div class="f-base">
+    <span>© 2026 Voeq · Powered by Legacy LM</span>
+    <span class="legal"><a href="#">Sitemap</a><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Cookies</a></span>
+  </div>
+</div></footer>
+
+<script>
+  // ===== FRESH DROPS: auto-advance that NEVER seizes the page =====
+  // (the old bug: scrollIntoView scrolls ALL ancestors — the whole page jumped.
+  //  Fix: rail.scrollTo moves ONLY the carousel's own scroll position.)
+  const rail=document.getElementById('dropsRail'), cards=[...rail.children], dotsEl=document.getElementById('dropsDots');
+  cards.forEach((_,i)=>{const d=document.createElement('span');d.className='dot'+(i?'':' on');dotsEl.appendChild(d)});
+  let idx=0, holding=false, resume, userScrollT;
+  const go=i=>{
+    idx=(i+cards.length)%cards.length;
+    const c=cards[idx];
+    rail.scrollTo({left: c.offsetLeft - cards[0].offsetLeft - (rail.clientWidth - c.clientWidth)/2, behavior:'smooth'});
+    [...dotsEl.children].forEach((d,j)=>d.classList.toggle('on',j===idx));
+  };
+  // touch/pointer hold pauses automation
+  rail.addEventListener('touchstart',()=>{holding=true;clearTimeout(resume)},{passive:true});
+  rail.addEventListener('touchend',()=>{resume=setTimeout(()=>holding=false,12000)},{passive:true});
+  // free horizontal scrolling by the user pauses automation too (and syncs dots)
+  rail.addEventListener('scroll',()=>{
+    clearTimeout(userScrollT);
+    holding=true;
+    userScrollT=setTimeout(()=>{holding=false},5000);
+    // sync dots to nearest card center
+    const mid=rail.scrollLeft + rail.clientWidth/2;
+    let best=0,bd=1e9;
+    cards.forEach((c,i)=>{const cm=c.offsetLeft+c.clientWidth/2; const d=Math.abs(cm-mid); if(d<bd){bd=d;best=i}});
+    if(best!==idx){idx=best;[...dotsEl.children].forEach((d,j)=>d.classList.toggle('on',j===idx))}
+  },{passive:true});
+  // desktop arrows too (hover users)
+  const dropsNav=document.createElement('div');
+  setInterval(()=>{if(!holding&&!document.hidden)go(idx+1)},9000);
+  // ===== SPOTLIGHT: 9s crossfade + manual arrows =====
+  const slides=[...document.querySelectorAll('.spot-slide')];let s=0;
+  const show=n=>{slides[s].classList.remove('on');s=(n+slides.length)%slides.length;slides[s].classList.add('on')};
+  let spotTimer=setInterval(()=>{if(!document.hidden)show(s+1)},9000);
+  document.querySelectorAll('.spot-nav .sn').forEach(b=>b.addEventListener('click',()=>{clearInterval(spotTimer);show(s+ +b.dataset.dir);spotTimer=setInterval(()=>{if(!document.hidden)show(s+1)},9000)}));
+  // ===== MOBILE MENU =====
+  document.getElementById('burger').addEventListener('click',()=>document.getElementById('mmenu').classList.toggle('open'));
+  // ===== REVEAL =====
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

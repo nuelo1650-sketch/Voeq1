@@ -51,3 +51,8 @@ ALTER TABLE listings ADD COLUMN IF NOT EXISTS source text;
 
 -- 6. vendors.area_id — non-campus vendor identity
 ALTER TABLE vendors ADD COLUMN IF NOT EXISTS area_id text REFERENCES areas(id);
+
+-- 7. listings.created_at (Money Bag fresh window): TEXT ISO timestamp column,
+--    backfilled for legacy rows. New writes set it explicitly.
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS created_at text;
+UPDATE listings SET created_at = COALESCE(created_at, to_char(now() - interval '30 days', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')) WHERE created_at IS NULL;

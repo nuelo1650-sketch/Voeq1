@@ -56,6 +56,9 @@ export interface ExploreParams extends ExploreFilters {
   query?: string;
   categoryPreset?: string; // from /c/[slug]
   forceError?: boolean; // dev/test path (?exploreError=1)
+  /** Money Bag (2026-09-09): sections=1 returns the full floor payload
+   *  (freshDrops/live/grid) in ONE request — mobile single round-trip. */
+  sections?: boolean;
 }
 
 export type ExploreStatus = "idle" | "loading" | "success" | "empty" | "error";
@@ -67,6 +70,12 @@ export interface ExploreResult {
   error?: string;
   /** Last-good data retained across a retryable error (Doc 04 error/recovery). */
   cached?: ExploreListing[];
+  /** Money Bag sections payload (only when params.sections). */
+  sections?: {
+    freshDrops: ExploreListing[];
+    live: ExploreListing[];
+    grid: ExploreListing[];
+  };
 }
 
 function toExploreListing(l: Listing, vendors: Vendor[], vendorRatings?: Map<string, { avg: number; count: number }>, maps?: { slugToId: Record<string, string>; idToSlug: Record<string, string> }): ExploreListing {
@@ -303,6 +312,38 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
 
     const filtered = applySort(applyFilters(mapped, { ...params, category: categorySlug }), params.sort);
     const trending = mapped.filter((m) => m.trending);
+
+    // MONEY BAG (2026-09-09, sections=1): ONE request feeds the whole explore
+    // floor — fresh drops (72h recency FIFO, real-only), live shelf (featured),
+    // trending board, crowd-flow grid (real first, seeds backfill the cap).
+    // Without this the floor would fire 4+ API round-trips on mobile data.
+    if (params.sections) {
+      const now = Date.now();
+      const freshWindow = (l: typeof mapped[number]) => {
+        const created = l.createdAt ? new Date(l.createdAt).getTime() : 0;
+        return now - created < 72 * 3600 * 1000;
+      };
+      const isSeed = (l: typeof mapped[number]) => (l as { source?: string | null }).source === "seed";
+      const reals = filtered.filter((l) => !isSeed(l));
+      const seeds = filtered.filter(isSeed);
+      // Fresh drops: newest first, real-only, 72h window, cap 6
+      const freshDrops = reals
+        .filter(freshWindow)
+        .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
+        .slice(0, 6);
+      // Live shelf: featured real listings, cap 2 (editorial picks are human-chosen)
+      const live = reals.filter((l) => l.featured).slice(0, 2);
+      // Crowd-flow grid: real first, seeds backfill (seedCap = max(0, 8 - realCount))
+      const seedCap = Math.max(0, 8 - reals.length);
+      const grid = [...reals, ...seeds.slice(0, seedCap)];
+      return {
+        status: grid.length === 0 ? "empty" : "success",
+        data: filtered,
+        trending,
+        sections: { freshDrops, live, grid },
+        cached: filtered.length ? filtered : undefined,
+      };
+    }
 
     return {
       status: filtered.length === 0 ? "empty" : "success",

@@ -61,6 +61,12 @@ export interface Listing {
   isFeatured: boolean;
   /** VS7.9: expiry of the feature (null if not featured). */
   featuredUntil?: string | null;
+  /** Money Bag: creation timestamp (TEXT ISO) — feeds the 72h fresh window.
+   *  Backfilled for legacy rows by the Phase A migration's UPDATE. */
+  createdAt?: string | null;
+  /** Money Bag (2026-09-09): 'seed' = founder-commissioned placeholder (crowd-flow
+   *  rules apply: real listings always render first; null/undefined = real listing). */
+  source?: "seed" | null;
 }
 
 export interface VendorRepo {

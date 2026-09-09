@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voeq Trending — what the market is buying</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#0F2A1D; --forest-deep:#0B211A; --forest-mid:#2D5A3D;
+    --amber:#E8A33D; --amber-dark:#D4922A; --amber-light:#F5C36A;
+    --cream:#FAF6EC; --glass:#F5F1E8; --white:#fff;
+    --ink:#0A0A0A; --ink-muted:#4A4A4A; --ink-subtle:#7A7A7A;
+    --hot:#B85C3E;
+    --r-lg:16px; --r-xl:22px;
+    --shadow-card:0 4px 14px rgba(15,42,29,.09);
+    --shadow-lift:0 16px 36px rgba(15,42,29,.18);
+    --spring:cubic-bezier(.34,1.4,.64,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Inter,system-ui,sans-serif;background:var(--glass);color:var(--ink);overflow-x:hidden}
+  .display{font-family:Fraunces,Georgia,serif}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+  img{display:block;max-width:100%}
+  button{font-family:inherit;border:none;cursor:pointer;background:none}
+  a{text-decoration:none;color:inherit}
+  .ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* NAV — shared spine */
+  .nav1{background:var(--glass);border-bottom:1px solid rgba(15,42,29,.07);position:sticky;top:0;z-index:50}
+  .nav1-in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+  .logo{width:64px;flex:0 0 auto}
+  .crumb{font-size:.76rem;font-weight:600;color:var(--ink-subtle);display:flex;align-items:center;gap:6px}
+  .crumb b{color:var(--forest);font-weight:800}
+  .nav-cta{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .si{font-size:.8rem;font-weight:700;color:var(--forest)}
+  .si b{font-weight:800}
+  .divider{width:1px;height:22px;background:rgba(15,42,29,.18)}
+
+  /* HERO v2 — ranked energy + living stage */
+  .hero{background:var(--forest);color:var(--cream);padding:34px 16px 40px;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:auto -10% -60% auto;width:60%;aspect-ratio:1;background:radial-gradient(circle,rgba(184,92,62,.3),transparent 70%);border-radius:50%}
+  .hero-in{max-width:1200px;margin:0 auto;position:relative}
+  .hero-grid{display:grid;grid-template-columns:1fr;gap:26px}
+  .kicker{display:inline-flex;align-items:center;gap:8px;background:var(--hot);color:var(--cream);font-weight:800;font-size:.62rem;letter-spacing:.16em;padding:7px 13px;border-radius:4px;text-transform:uppercase}
+  .kicker .fd{width:7px;height:7px;border-radius:50%;background:var(--cream);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.65);opacity:.55}}
+  .hero h1{font-family:Fraunces,serif;font-weight:900;font-size:clamp(2.1rem,8.5vw,3.3rem);line-height:1.03;margin:15px 0 9px}
+  .hero h1 em{font-style:italic;color:var(--amber)}
+  .hero-sub{color:rgba(250,246,236,.75);font-size:.88rem;max-width:46ch;line-height:1.6}
+  .hero-sub .mono{color:var(--amber-light)}
+  .hero-ctas{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
+  .cta-gold{background:var(--amber);color:var(--forest);font-weight:800;font-size:.86rem;border-radius:999px;padding:13px 24px;transition:transform .35s var(--spring);box-shadow:0 8px 20px rgba(0,0,0,.3)}
+  .cta-gold:active{transform:scale(.95)}
+  .cta-ghost{color:rgba(250,246,236,.8);font-weight:700;font-size:.78rem;border-bottom:1px solid rgba(250,246,236,.35);padding-bottom:2px}
+  .hero-meta{display:flex;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap}
+  .hm{display:flex;align-items:center;gap:7px;font-size:.68rem;font-weight:700;color:rgba(250,246,236,.8)}
+  .hm .d{width:6px;height:6px;border-radius:50%;background:var(--amber);opacity:.7}
+  .hero-stage{position:relative}
+  .hs-track{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;padding:6px 2px 14px;scroll-behavior:smooth}
+  .hs-track::-webkit-scrollbar{display:none}
+  .hs-card{position:relative;flex:0 0 42%;max-width:42%;scroll-snap-align:center;border-radius:14px;overflow:hidden;aspect-ratio:3/3.6;background:#123524;box-shadow:0 10px 26px rgba(0,0,0,.4);transition:transform .5s var(--spring)}
+  .hs-card:nth-child(odd){transform:rotate(-1.4deg)}
+  .hs-card:nth-child(even){transform:rotate(1.2deg) translateY(8px)}
+  .hs-card:active{transform:rotate(0) scale(.97)}
+  .hs-card img{width:100%;height:100%;object-fit:cover}
+  .hs-rank{position:absolute;top:8px;left:8px;z-index:2;background:var(--forest-deep);color:var(--amber-light);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.72rem;padding:5px 9px;border-radius:8px;border:1px solid rgba(250,246,236,.18)}
+  .hs-card.top .hs-rank{background:var(--hot);color:var(--cream)}
+  .hs-cap{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 9px;background:linear-gradient(180deg,transparent,rgba(11,33,26,.9));color:var(--cream);font-size:.64rem;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .hs-cap b{font-family:Fraunces,serif;font-weight:900;color:var(--amber-light);white-space:nowrap}
+  .hs-hint{display:flex;align-items:center;gap:7px;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:rgba(250,246,236,.5);margin-top:2px}
+  .hs-hint .fd{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 1.6s ease-in-out infinite}
+  .xsec{max-width:1200px;margin:32px auto 0;padding:0 16px}
+  .x-tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+  .x-tabs::-webkit-scrollbar{display:none}
+  .xtab{flex:0 0 auto;border:1.5px solid rgba(15,42,29,.15);background:var(--white);border-radius:999px;padding:9px 15px;font-size:.74rem;font-weight:700;color:var(--ink-muted);transition:all .3s;cursor:pointer}
+  .xtab.on{background:var(--forest);color:var(--cream);border-color:var(--forest)}
+  .rail{display:flex;gap:13px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none;scroll-behavior:smooth}
+  .rail::-webkit-scrollbar{display:none}
+  .rail .gcard{flex:0 0 46%;max-width:46%;scroll-snap-align:start;background:var(--white);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-card);display:flex;flex-direction:column;transition:transform .45s var(--spring),box-shadow .45s}
+  @media(hover:hover){.rail .gcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}}
+  .gimg{aspect-ratio:1/1.02;position:relative;background:linear-gradient(135deg,#EDE7D8,#E2DAC8);overflow:hidden}
+  .gimg img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s ease}
+  .gtag{position:absolute;top:9px;left:9px;background:var(--forest);color:var(--cream);font-size:.55rem;font-weight:800;letter-spacing:.1em;padding:4px 8px;border-radius:4px}
+  .gtag.gold{background:var(--amber);color:var(--forest)}
+  .imgcount{position:absolute;top:9px;right:9px;background:rgba(11,33,26,.6);color:var(--cream);font-size:.56rem;font-weight:700;border-radius:999px;padding:4px 8px}
+  .mini-rate{position:absolute;bottom:8px;right:8px;background:rgba(250,246,236,.94);color:var(--forest);font-size:.6rem;font-weight:800;border-radius:999px;padding:4px 8px}
+  .gbody{padding:10px 12px 12px;display:flex;flex-direction:column;flex:1}
+  .gbody h4{font-size:.85rem;font-weight:700;line-height:1.28;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.2em}
+  .grow{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px}
+  .gprice{font-weight:800;color:var(--forest);font-size:.95rem;font-family:Fraunces,serif}
+  .gmeta{font-size:.62rem;color:var(--ink-subtle);white-space:nowrap}
+  .x-foot{margin-top:2px}
+  .x-foot a{font-size:.78rem;font-weight:700;color:var(--amber-dark)}
+  @media(min-width:760px){
+    .rail .gcard{flex:0 0 calc((100% - 39px)/4.15)}
+  }
+  @media(min-width:760px){
+    .hero{padding:52px 16px 46px}
+    .hero-grid{grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
+    .hs-card{flex:0 0 calc((100% - 24px)/3)}
+  }
+
+  /* WEEK SWITCH */
+  .weeks{max-width:1200px;margin:0 auto;padding:18px 16px 0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+  .weeks::-webkit-scrollbar{display:none}
+  .wk{flex:0 0 auto;border:1.5px solid rgba(15,42,29,.15);background:var(--white);border-radius:999px;padding:9px 15px;font-size:.74rem;font-weight:700;color:var(--ink-muted);transition:all .3s}
+  .wk.on{background:var(--forest);color:var(--cream);border-color:var(--forest)}
+  .wk .mono{font-size:.66rem;opacity:.75;margin-left:5px}
+
+  /* THE RANKED LIST — rank numerals, momentum deltas */
+  .board{max-width:1200px;margin:16px auto 0;padding:0 16px;display:flex;flex-direction:column;gap:12px}
+  .tcard{display:grid;grid-template-columns:112px 1fr;background:var(--white);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-card);transition:transform .45s var(--spring),box-shadow .45s;position:relative}
+  .tcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+  .timg{position:relative;background:linear-gradient(135deg,#EDE7D8,#E2DAC8)}
+  .timg img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+  .trank{position:absolute;top:0;left:0;z-index:2;background:var(--forest);color:var(--amber-light);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.92rem;padding:7px 11px;border-radius:0 0 12px 0}
+  .tcard.top .trank{background:var(--hot);color:var(--cream)}
+  .timg .hotflame{position:absolute;bottom:8px;left:8px;z-index:2;background:rgba(11,33,26,.72);color:var(--amber-light);font-size:.56rem;font-weight:800;letter-spacing:.08em;border-radius:999px;padding:4px 9px;display:flex;align-items:center;gap:4px;backdrop-filter:blur(4px)}
+  .tbody{padding:13px 14px 14px;display:flex;flex-direction:column;min-width:0}
+  .tbody .tcat{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber-dark);font-weight:800}
+  .tbody h3{font-size:.94rem;font-weight:800;color:var(--ink);line-height:1.25;margin:4px 0 3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tbody .twhy{font-size:.7rem;color:var(--ink-muted);line-height:1.45}
+  .tbody .twhy .mono{color:var(--hot);font-weight:700}
+  .trow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:9px}
+  .tprice{font-family:Fraunces,serif;font-weight:900;color:var(--forest);font-size:1.02rem}
+  .tmeta{display:flex;align-items:center;gap:10px;font-size:.62rem;color:var(--ink-subtle);white-space:nowrap}
+  .tmeta .delta{color:var(--forest-mid);font-weight:700}
+  .tmeta .delta.up{color:var(--forest-mid)}
+  .tgo{width:34px;height:34px;border-radius:50%;background:var(--glass);display:flex;align-items:center;justify-content:center;color:var(--forest);flex:0 0 auto;transition:all .3s}
+  .tgo:active{background:var(--forest);color:var(--cream)}
+  .reveal{opacity:0;transform:translateY(16px)}
+  .reveal.in{animation:rise 1s cubic-bezier(.22,1,.36,1) forwards;animation-delay:var(--d,0ms)}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  .board-foot{max-width:1200px;margin:18px auto 0;padding:0 16px;display:flex;justify-content:center}
+  .board-foot button{padding:13px 26px;border-radius:999px;background:var(--forest);color:var(--cream);font-weight:800;font-size:.84rem}
+  .end{max-width:1200px;margin:22px auto 0;padding:0 16px 40px;display:flex;justify-content:center}
+  .end a{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:999px;border:1.5px dashed rgba(15,42,29,.3);color:var(--forest);font-weight:700;font-size:.84rem;background:rgba(255,255,255,.5)}
+
+  @media(min-width:760px){
+    .logo{width:76px}
+    .tcard{grid-template-columns:150px 1fr}
+    .tbody h3{font-size:1.02rem}
+    .board{gap:13px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav1"><div class="nav1-in">
+  <svg class="logo" viewBox="0 0 240 159"><rect width="240" height="159" rx="18" fill="#0F2A1D"/><text x="50%" y="62%" text-anchor="middle" font-family="Fraunces,serif" font-weight="900" font-size="52" fill="#FAF6EC">voeq<tspan fill="#E8A33D">.</tspan></text></svg>
+  <span class="crumb">Explore <span style="opacity:.5">/</span> <b>Trending</b></span>
+  <div class="nav-cta"><span class="divider"></span><span class="si">Sign in <b>|</b> Sign up</span></div>
+</div></nav>
+
+<!-- HERO v2 — ranked energy + living stage -->
+<header class="hero">
+  <div class="hero-in hero-grid">
+    <div class="hero-copy">
+      <span class="kicker"><span class="fd"></span>Market heat — live</span>
+      <h1>What the market<br><em>loves.</em></h1>
+      <p class="hero-sub">Ranked by real attention this week — saves, messages and views. <span class="mono">Not guesses. Not ads.</span></p>
+      <div class="hero-ctas">
+        <button class="cta-gold">See the top 20 ↓</button>
+        <a class="cta-ghost" href="#">How ranking works</a>
+      </div>
+      <div class="hero-meta">
+        <span class="hm"><span class="d"></span>Re-ranked hourly</span>
+        <span class="hm"><span class="d"></span>Week 37 · 1,240 active listings</span>
+      </div>
+    </div>
+    <div class="hero-stage">
+      <div class="hs-track" id="hsTrack">
+        <a class="hs-card top" href="#"><span class="hs-rank">#1</span><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=74" alt="" loading="lazy"><span class="hs-cap">Air Force 1 <b>₦38,000</b></span></a>
+        <a class="hs-card" href="#"><span class="hs-rank">#2</span><img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=500&q=74" alt="" loading="lazy"><span class="hs-cap">Chicken &amp; Chips <b>₦3,500</b></span></a>
+        <a class="hs-card" href="#"><span class="hs-rank">#3</span><img src="https://images.unsplash.com/photo-1590658268038-85f5164613ce?w=500&q=74" alt="" loading="lazy"><span class="hs-cap">Knotless Braids <b>₦8,500</b></span></a>
+        <a class="hs-card" href="#"><span class="hs-rank">#4</span><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=500&q=74" alt="" loading="lazy"><span class="hs-cap">Wireless Earbuds <b>₦18,500</b></span></a>
+        <a class="hs-card" href="#"><span class="hs-rank">#5</span><img src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500&q=74" alt="" loading="lazy"><span class="hs-cap">Ankara Two-Piece <b>₦12,000</b></span></a>
+      </div>
+      <div class="hs-hint"><span class="fd" style="background:var(--amber)"></span>the board, live</div>
+    </div>
+  </div>
+</header>
+
+<!-- WEEK SWITCH -->
+<div class="weeks">
+  <button class="wk on">This week <span class="mono">w37</span></button>
+  <button class="wk">Last week</button>
+  <button class="wk">Food week</button>
+  <button class="wk">Gadget week</button>
+  <button class="wk">All time</button>
+</div>
+
+<!-- THE BOARD -->
+<main class="board">
+  <article class="tcard top reveal" style="--d:0ms">
+    <div class="timg"><span class="trank">#1</span><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=72" alt="" loading="lazy"><span class="hotflame">🔥 ON FIRE</span></div>
+    <div class="tbody">
+      <span class="tcat">Fashion</span>
+      <h3>Nike Air Force 1, clean</h3>
+      <p class="twhy"><span class="mono">+212%</span> vs last week — <span class="mono">74 saves</span> in 3 days</p>
+      <div class="trow"><span class="tprice">₦38,000</span><span class="tmeta"><span class="delta up">▲ 3 up</span> · UNILAG</span><button class="tgo"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+  </article>
+
+  <article class="tcard reveal" style="--d:80ms">
+    <div class="timg"><span class="trank">#2</span><img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=500&q=72" alt="" loading="lazy"><span class="hotflame">🔥 RISING</span></div>
+    <div class="tbody">
+      <span class="tcat">Food &amp; Drinks</span>
+      <h3>Peppered Chicken &amp; Chips Platter</h3>
+      <p class="twhy"><span class="mono">+148%</span> — most-messaged stall this month</p>
+      <div class="trow"><span class="tprice">₦3,500</span><span class="tmeta"><span class="delta up">▲ 5 up</span> · NMU</span><button class="tgo"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+  </article>
+
+  <article class="tcard reveal" style="--d:160ms">
+    <div class="timg"><span class="trank">#3</span><img src="https://images.unsplash.com/photo-1590658268038-85f5164613ce?w=500&q=72" alt="" loading="lazy"></div>
+    <div class="tbody">
+      <span class="tcat">Hair · Area vendor</span>
+      <h3>Knotless Braids, Any Length</h3>
+      <p class="twhy"><span class="mono">+96%</span> — <span class="mono">31 chats started</span> this week from campus</p>
+      <div class="trow"><span class="tprice">₦8,500</span><span class="tmeta"><span class="delta up">▲ 2 up</span> · 12 min from UNIBEN</span><button class="tgo"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+  </article>
+
+  <article class="tcard reveal" style="--d:240ms">
+    <div class="timg"><span class="trank">#4</span><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=500&q=72" alt="" loading="lazy"></div>
+    <div class="tbody">
+      <span class="tcat">Gadgets</span>
+      <h3>Wireless Earbuds, 36h Battery</h3>
+      <p class="twhy"><span class="mono">+58%</span> — steady climber, 3 weeks running</p>
+      <div class="trow"><span class="tprice">₦18,500</span><span class="tmeta"><span class="delta up">—</span> · UNILORIN</span><button class="tgo"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+  </article>
+
+  <article class="tcard reveal" style="--d:320ms">
+    <div class="timg"><span class="trank">#5</span><img src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500&q=72" alt="" loading="lazy"></div>
+    <div class="tbody">
+      <span class="tcat">Fashion</span>
+      <h3>Ankara Two-Piece, Tailored</h3>
+      <p class="twhy"><span class="mono">+41%</span> — weekend surge, 18 new saves</p>
+      <div class="trow"><span class="tprice">₦12,000</span><span class="tmeta"><span class="delta up">▼ 1 down</span> · UNILAG</span><button class="tgo"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+  </article>
+
+  <article class="tcard reveal" style="--d:400ms">
+    <div class="timg"><span class="trank">#6</span><img src="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=500&q=72" alt="" loading="lazy"></div>
+    <div class="tbody">
+      <span class="tcat">Crafts</span>
+      <h3>Room plant, starter kit</h3>
+      <p class="twhy"><span class="mono">+34%</span> — hostel-decor wave, first time on the board</p>
+      <div class="trow"><span class="tprice">₦4,200</span><span class="tmeta"><span class="delta up">★ new</span> · UNIBEN</span><button class="tgo"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+  </article>
+
+  <article class="tcard reveal" style="--d:480ms">
+    <div class="timg"><span class="trank">#7</span><img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&q=72" alt="" loading="lazy"></div>
+    <div class="tbody">
+      <span class="tcat">Skincare</span>
+      <h3>Shea Butter Skincare Set</h3>
+      <p class="twhy"><span class="mono">+27%</span> — d-season staple, restocked twice</p>
+      <div class="trow"><span class="tprice">₦5,800</span><span class="tmeta"><span class="delta up">▼ 2 down</span> · UNILAG</span><button class="tgo"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+  </article>
+</main>
+
+<div class="board-foot"><button>Load ranks 8–20</button></div>
+
+<!-- CROSS-SUGGESTIONS — industrial: same standard as Live -->
+<section class="xsec">
+  <div class="sec-head"><h2 class="sec-title display">While you're here<span class="thin">The market keeps moving — same cards, different views</span></h2></div>
+  <div class="x-tabs">
+    <button class="xtab on" data-sort="trend">✦ Voeq Live picks</button>
+    <button class="xtab" data-sort="fresh">🆕 Freshest</button>
+    <button class="xtab" data-sort="cheap">💸 Under ₦5,000</button>
+    <button class="xtab" data-sort="food">🍗 Food</button>
+  </div>
+  <div class="rail" id="xrail">
+    <article class="gcard" data-cat="food" data-price="3500" data-trend="92" data-fresh="1" data-live="1"><div class="gimg"><img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&q=72" alt="" loading="lazy"><span class="gtag gold">✦ LIVE PICK</span><span class="mini-rate">★ 4.9</span></div><div class="gbody"><h4>Party Jollof + Grilled Chicken</h4><div class="grow"><span class="gprice">₦3,500</span><span class="gmeta">NMU</span></div></div></article>
+    <article class="gcard" data-cat="fashion" data-price="12000" data-trend="55" data-fresh="5" data-live="1"><div class="gimg"><img src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&q=72" alt="" loading="lazy"><span class="gtag gold">✦ LIVE PICK</span><span class="imgcount">▹ 1/2</span><span class="mini-rate">★ 4.8</span></div><div class="gbody"><h4>Ankara Two-Piece</h4><div class="grow"><span class="gprice">₦12,000</span><span class="gmeta">UNILAG</span></div></div></article>
+    <article class="gcard" data-cat="fashion" data-price="38000" data-trend="100" data-fresh="3"><div class="gimg"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=72" alt="" loading="lazy"><span class="gtag gold">LIVE</span><span class="imgcount">▹ 1/3</span><span class="mini-rate">★ 4.8</span></div><div class="gbody"><h4>Nike Air Force 1, clean</h4><div class="grow"><span class="gprice">₦38,000</span><span class="gmeta">UNILAG</span></div></div></article>
+    <article class="gcard" data-cat="hair" data-price="8500" data-trend="78" data-fresh="2"><div class="gimg"><img src="https://images.unsplash.com/photo-1590658268038-85f5164613ce?w=600&q=72" alt="" loading="lazy"><span class="mini-rate">★ 4.7</span></div><div class="gbody"><h4>Knotless Braids</h4><div class="grow"><span class="gprice">₦8,500</span><span class="gmeta">UNIBEN</span></div></div></article>
+    <article class="gcard" data-cat="gadgets" data-price="18500" data-trend="64" data-fresh="4"><div class="gimg"><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&q=72" alt="" loading="lazy"><span class="mini-rate">★ 4.6</span></div><div class="gbody"><h4>Wireless Earbuds</h4><div class="grow"><span class="gprice">₦18,500</span><span class="gmeta">UNILORIN</span></div></div></article>
+    <article class="gcard" data-cat="crafts" data-price="4200" data-trend="41" data-fresh="6"><div class="gimg"><img src="https://images.unsplash.com/photo-1567016432779-094069958ea5?w=600&q=72" alt="" loading="lazy"><span class="mini-rate">★ 4.8</span></div><div class="gbody"><h4>Room plant, starter kit</h4><div class="grow"><span class="gprice">₦4,200</span><span class="gmeta">UNIBEN</span></div></div></article>
+    <article class="gcard" data-cat="food" data-price="2800" data-trend="33" data-fresh="7"><div class="gimg"><img src="https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=600&q=72" alt="" loading="lazy"><span class="gtag">NEW</span><span class="mini-rate">★ 4.6</span></div><div class="gbody"><h4>French Toast Breakfast</h4><div class="grow"><span class="gprice">₦2,800</span><span class="gmeta">UNILORIN</span></div></div></article>
+    <article class="gcard" data-cat="skincare" data-price="5800" data-trend="27" data-fresh="8"><div class="gimg"><img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&q=72" alt="" loading="lazy"><span class="imgcount">▹ 1/2</span><span class="mini-rate">★ 4.9</span></div><div class="gbody"><h4>Shea butter set</h4><div class="grow"><span class="gprice">₦5,800</span><span class="gmeta">UNILAG</span></div></div></article>
+  </div>
+  <div class="x-foot"><a href="#">Open in the full market →</a></div>
+</section>
+
+<div class="end"><a href="#">← Back to the full market</a></div>
+<script>
+  document.querySelectorAll('.wk').forEach(function(b){b.addEventListener('click',function(){
+    document.querySelectorAll('.wk').forEach(function(x){x.classList.toggle('on',x===b)});
+  })});
+  var xrail=document.getElementById('xrail');
+  var xcards=Array.prototype.slice.call(xrail.children);
+  document.querySelectorAll('.xtab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      document.querySelectorAll('.xtab').forEach(function(x){x.classList.toggle('on',x===tab)});
+      var mode=tab.dataset.sort;
+      var visible=xcards.filter(function(c){
+        if(mode==='cheap') return parseInt(c.dataset.price)<5000;
+        if(mode==='food') return c.dataset.cat==='food';
+        return true;
+      });
+      visible.sort(function(a,b){
+        if(mode==='fresh') return a.dataset.fresh-b.dataset.fresh;
+        if(mode==='cheap') return a.dataset.price-b.dataset.price;
+        if(mode==='trend') return (b.dataset.live?1:0)-(a.dataset.live?1:0) || parseInt(b.dataset.trend)-parseInt(a.dataset.trend);
+        return parseInt(b.dataset.trend)-parseInt(a.dataset.trend);
+      });
+      xcards.forEach(function(c){c.style.display='none'});
+      visible.forEach(function(c){xrail.appendChild(c);c.style.display='flex'});
+      xrail.scrollTo({left:0,behavior:'smooth'});
+    });
+  });
+  document.querySelectorAll('#hsTrack,#xrail').forEach(function(rail){
+    var hold=false,t;
+    rail.addEventListener('touchstart',function(){hold=true;clearTimeout(t)},{passive:true});
+    rail.addEventListener('touchend',function(){t=setTimeout(function(){hold=false},6000)},{passive:true});
+    rail.addEventListener('mouseenter',function(){hold=true});
+    rail.addEventListener('mouseleave',function(){hold=false});
+    setInterval(function(){
+      if(hold||document.hidden||!rail.clientWidth) return;
+      var max=rail.scrollWidth-rail.clientWidth;
+      if(max<=4) return;
+      var next=rail.scrollLeft>=max-4 ? 0 : rail.scrollLeft+Math.min(rail.clientWidth*.6,max-rail.scrollLeft);
+      rail.scrollTo({left:next,behavior:'smooth'});
+    },4200);
+  });
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){
+    if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
+  })},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+</script>
+</body>
+</html>

@@ -659,6 +659,8 @@ function mapListing(r: typeof s.listings.$inferSelect): Listing {
     status: r.status as Listing["status"],
     isFeatured: r.isFeatured,
     featuredUntil: r.featuredUntil ?? null,
+    source: (r as { source?: string | null }).source as "seed" | null | undefined,
+    createdAt: (r as { created_at?: string | null }).created_at ?? null,
   };
 }
 export const realListingsRepo = {
@@ -712,12 +714,17 @@ export const realListingsRepo = {
       status: (input.status ?? "active") as Listing["status"],
       isFeatured: input.isFeatured ?? false,
       featuredUntil: input.featuredUntil ?? null,
+      // Money Bag (2026-09-09): creation timestamp drives the 72h fresh-drop
+      // window — a listing without it would NEVER surface in Fresh drops.
+      createdAt: input.createdAt ?? new Date().toISOString(),
+      source: (input as { source?: "seed" | null }).source ?? null,
     };
     await getDb().insert(s.listings).values(rec);
     return mapListing(rec);
   },
   async update(lid: string, p: Partial<Listing>): Promise<Listing | null> {
     const update: Record<string, unknown> = {};
+    if (p.source !== undefined) update.source = p.source;
     for (const k of Object.keys(p)) {
       if ((p as Record<string, unknown>)[k] !== undefined) update[k] = (p as Record<string, unknown>)[k];
     }

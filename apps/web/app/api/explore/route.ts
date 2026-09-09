@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
     hasPhotos: sp.get("hasPhotos") === "true",
     recentlyActive: sp.get("recentlyActive") === "true",
     forceError: sp.get("exploreError") === "1",
+    sections: sp.get("sections") === "1",
   };
 
   try {
