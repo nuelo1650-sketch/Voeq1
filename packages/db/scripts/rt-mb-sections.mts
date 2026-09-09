@@ -61,6 +61,8 @@ try {
   // 2) freshDrops: real-only + 72h
   check("S2: fresh drops exclude seeds", dropsIds.every((id) => !id.startsWith("mb-l-seed")), `drops=${dropsIds.join(",")}`);
   check("S3: fresh drops exclude 5-day-old listing (outside 72h)", !dropsIds.some((id) => id.includes("-old-")));
+  const freshApi = (body.sections?.freshDrops ?? []).find((x: { id: string }) => x.id.includes("-fresh-"));
+  const g0 = (body.sections?.grid ?? [])[0];
   check("S4: fresh drops include the fresh real listing", dropsIds.some((id) => id.includes("-fresh-")));
 
   // 3) crowd-flow: real first, seeds backfill (3 real + 4 seeds = 7 total, cap 8)

@@ -659,8 +659,8 @@ function mapListing(r: typeof s.listings.$inferSelect): Listing {
     status: r.status as Listing["status"],
     isFeatured: r.isFeatured,
     featuredUntil: r.featuredUntil ?? null,
-    source: (r as { source?: string | null }).source as "seed" | null | undefined,
-    createdAt: (r as { created_at?: string | null }).created_at ?? null,
+    source: (r.source ?? null) as "seed" | null | undefined,
+    createdAt: r.createdAt ?? null,
   };
 }
 export const realListingsRepo = {

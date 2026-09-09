@@ -201,6 +201,10 @@ export const listings = pgTable("listings", {
   status: text("status").notNull().default("active"),
   isFeatured: boolean("is_featured").notNull().default(false),
   featuredUntil: text("featured_until"),
+  // Money Bag Phase A: seed marker + creation timestamp (72h fresh window).
+  // DB columns added by money-bag-phase-a.sql (listings.source, listings.created_at).
+  source: text("source"),
+  createdAt: text("created_at"),
 });
 
 export const reviews = pgTable("reviews", {
