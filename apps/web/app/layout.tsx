@@ -4,11 +4,12 @@ import "@voeq/design-tokens/tokens.css";
 import "./globals.css";
 import "./mb-explore.css";
 import { SmartFooter } from "@/components/shell/SmartFooter";
+import { JsonLd, orgJsonLd, websiteJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://voeq.ng"),
   title: {
-    default: "Voeq — Find. Connect. Grow.",
+    default: "Voeq — Find it. Chat it. Get it.",
     template: "%s · Voeq",
   },
   description:
@@ -39,13 +40,13 @@ export const metadata: Metadata = {
     locale: "en_NG",
     url: "https://voeq.ng",
     siteName: "Voeq",
-    title: "Voeq — Find. Connect. Grow.",
+    title: "Voeq — Find it. Chat it. Get it.",
     description:
       "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Voeq — Find. Connect. Grow.",
+    title: "Voeq — Find it. Chat it. Get it.",
     description:
       "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
   },
@@ -64,6 +65,10 @@ export default function RootLayout({
     <html lang="en" data-env="cream" className={`${playfair.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        {/* SEO JSON-LD (2026-09-10): Organization + WebSite(SearchAction) —
+            sitelinks searchbox eligibility. Server-built real values only. */}
+        <JsonLd data={orgJsonLd()} />
+        <JsonLd data={websiteJsonLd()} />
       </head>
       <body
         style={{

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { loadListing } from "@voeq/data";
 import { ListingDetail } from "@/components/listing/ListingDetail";
+import { JsonLd, productJsonLd } from "@/lib/seo";
 
 /**
  * /listing/[id] — PG-PUB-005 (Doc 04). Editorial listing detail. Cream environment (default).
@@ -63,5 +64,22 @@ export default async function ListingPage({ params }: ListingPageProps) {
   // notFound() could abort (same disease as round 57 A1, documented in
   // middleware.ts). Boundary removed; notFound() now sets a real 404.
   if (!listing) notFound();
-  return <ListingDetail id={id} initialListing={listing} />;
+  return (
+    <>
+      {/* SEO (2026-09-10): Product+Offer JSON-LD from the real listing row. */}
+      <JsonLd
+        data={productJsonLd({
+          id: listing.id,
+          title: listing.title,
+          description: listing.description,
+          images: listing.images,
+          priceMinor: listing.priceMinor,
+          priceMaxMinor: listing.priceMaxMinor,
+          vendorName: listing.vendorName,
+          vendorId: listing.vendorId,
+        })}
+      />
+      <ListingDetail id={id} initialListing={listing} />
+    </>
+  );
 }

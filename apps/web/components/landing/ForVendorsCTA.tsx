@@ -10,7 +10,7 @@ const benefits = [
   {
     icon: Users,
     title: 'Reach students',
-    description: 'Connect directly with thousands of students on your campus.',
+    description: 'Put your products in front of students on your campus — right where they already look.',
   },
   {
     icon: TrendingUp,
@@ -27,7 +27,7 @@ export function ForVendorsCTA() {
           <div className="for-vendors-text">
             <h2 className="for-vendors-title">Are you a campus vendor?</h2>
             <p className="for-vendors-subtitle">
-              Join hundreds of student entrepreneurs already growing their business on Voeq.
+              Turn what you sell into a real campus business — seen, messaged, and trusted on Voeq.
             </p>
 
             <div className="for-vendors-benefits">

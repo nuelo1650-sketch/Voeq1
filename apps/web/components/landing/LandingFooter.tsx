@@ -127,7 +127,6 @@ export function LandingFooter() {
             <h4 className="footer-col-title">Company</h4>
             <Link href="/about" className="footer-link">About us</Link>
             <Link href="/careers" className="footer-link">Careers</Link>
-            <Link href="/press" className="footer-link">Press</Link>
 
             <h4 className="footer-col-title footer-col-title--news">Stay in the loop</h4>
             <p className="footer-newsletter-desc">
