@@ -69,6 +69,9 @@ export function middleware(req: NextRequest) {
   }
 
   const { pathname, search } = req.nextUrl;
+  // MONEY BAG D5 (F2): intent query params (from /become-vendor?intent=vendor)
+  // must survive the auth bounce.
+  const searchParams = req.nextUrl.searchParams;
 
   // Guarded?
   const isProtected = PROTECTED_PREFIXES.some(
@@ -83,6 +86,13 @@ export function middleware(req: NextRequest) {
   if (!hasSession) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("next", pathname + search);
+    // MONEY BAG D5 (F2): vendor-intent entries carry their intent THROUGH the
+    // auth gate — /become-vendor?intent=vendor must not lose it when bounced
+    // to /login, or Google/email auth decides the user is a shopper.
+    const intent = searchParams.get("intent");
+    if (intent === "vendor" || intent === "shopper") {
+      loginUrl.searchParams.set("intent", intent);
+    }
     return NextResponse.redirect(loginUrl);
   }
   return NextResponse.next();

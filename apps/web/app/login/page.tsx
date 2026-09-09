@@ -121,7 +121,7 @@ function LoginForm() {
             /consent when isConsentCurrent() is false). */}
         <button
           type="button"
-          onClick={() => startGoogleOAuth()}
+          onClick={() => startGoogleOAuth(intent === "vendor" ? "vendor" : intent === "shopper" ? "shopper" : undefined)}
           className="auth-google-btn auth-google-btn-brand"
           data-testid="google-login"
         >

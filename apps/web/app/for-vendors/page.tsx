@@ -113,7 +113,7 @@ export default function ForVendorsPage() {
             No complicated setup.
           </p>
           <div className="vendor-cta-group" data-testid="for-vendors-cta">
-            <Link href="/become-vendor" className="vendor-cta-primary">
+            <Link href="/become-vendor?intent=vendor" className="vendor-cta-primary">
               Create Vendor Listing
             </Link>
             <Link href="/help" className="vendor-cta-secondary">

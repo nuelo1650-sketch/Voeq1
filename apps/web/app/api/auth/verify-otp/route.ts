@@ -166,5 +166,12 @@ export async function POST(req: NextRequest) {
   if (consentNowCurrent && !identity.vendorId && identity.intent === "vendor") {
     redirectTo = "/onboarding/vendor";
   }
+  // MONEY BAG F2 SAFETY NET (founder: "we don't just let google auth decide"):
+  // a Google user whose intent never arrived (cookie+param mismatch, or an
+  // old link) gets the ONE-TIME choice screen instead of a default shopper
+  // path. Google never decides; the human does.
+  if (consentNowCurrent && !identity.vendorId && !identity.intent) {
+    redirectTo = "/account-choice";
+  }
   return NextResponse.json({ ok: true, redirect: redirectTo });
 }

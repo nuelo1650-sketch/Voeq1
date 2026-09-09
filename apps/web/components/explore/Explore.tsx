@@ -415,7 +415,7 @@ export function Explore({
                   There are no listings for this filter yet — but vendors are arriving every day. Be the first on the next one.
                 </p>
                 <div className="voeq-state-actions">
-                  <Link href="/become-vendor" data-testid="explore-empty-vendor" className="voeq-btn voeq-btn--primary">Be the first to post what you're selling →</Link>
+                  <Link href="/become-vendor?intent=vendor" data-testid="explore-empty-vendor" className="voeq-btn voeq-btn--primary">Be the first to post what you're selling →</Link>
                   <Link href="/for-vendors" data-testid="explore-empty-browse" className="voeq-btn voeq-btn--ghost">How it works</Link>
                 </div>
               </div>

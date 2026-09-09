@@ -15,6 +15,9 @@ import {
 import { roleHomeFor } from "@/lib/postAuth";
 
 const GOOGLE_STATE_COOKIE = "google_oauth_state";
+// MONEY BAG F2 (D5): intent cookie — set client-side alongside the state
+// cookie, cross-checked against the ?intent= param (allowlist-validated).
+const GOOGLE_INTENT_COOKIE = "google_oauth_intent";
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://voeq.ng";
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
@@ -51,6 +54,19 @@ export async function GET(req: NextRequest) {
   // Consume state cookie (single-use).
   const res = NextResponse.next();
   res.cookies.delete(GOOGLE_STATE_COOKIE);
+
+  // MONEY BAG F2 (D5): resolve the user's intent. Sources: ?intent= param AND
+  // the google_oauth_intent cookie set client-side. Both must AGREE (a param
+  // without its cookie = tampered URL = intent dropped). Allowlist-validated;
+  // anything else → null (the choice screen safety net decides later).
+  const intentParam = params.get("intent");
+  const intentCookie = store.get(GOOGLE_INTENT_COOKIE)?.value ?? null;
+  res.cookies.delete(GOOGLE_INTENT_COOKIE);
+  const allowedIntents = new Set(["shopper", "vendor"]);
+  const oauthIntent =
+    intentParam && intentCookie && intentParam === intentCookie && allowedIntents.has(intentParam)
+      ? (intentParam as "shopper" | "vendor")
+      : null;
 
   const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
   const clientSecret = process.env.AUTH_GOOGLE_CLIENT_SECRET;
@@ -177,12 +193,14 @@ export async function GET(req: NextRequest) {
   }
 
   // New Google user: create pending, verify via OTP (NOT magic link).
+  // MONEY BAG F2: the resolved intent (shopper|vendor|null) is stored on the
+  // pending identity — verify-otp routes on it; null = choice-screen safety net.
   const identity = await mockIdentityRepo.createPending({
     email: profile.email,
     name: profile.name ?? profile.email.split("@")[0],
     passwordHash: null,
     method: "google",
-    intent: null,
+    intent: oauthIntent,
     googleSubject: profile.sub,
   });
 

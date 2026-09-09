@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { InfoPageShell } from "@/components/info/InfoPageShell";
 import { AuthHeader } from "@/components/auth/AuthHeader";
-import { startGoogleOAuth } from "@/lib/googleOAuth";
+import { startGoogleOAuth, type OAuthIntent } from "@/lib/googleOAuth";
 
 const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
@@ -225,7 +225,7 @@ export default function SignupPage() {
         {/* FIX #3: Google button respects consent checkbox (first-time acceptance) */}
         <button
           type="button"
-          onClick={() => startGoogleOAuth()}
+          onClick={() => startGoogleOAuth(intent as OAuthIntent)}
           className="auth-google-btn auth-google-btn-brand"
           disabled={!consent}
           data-testid="google-signup"
