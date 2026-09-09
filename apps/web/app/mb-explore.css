@@ -28,3 +28,31 @@
   .mb-live-dot { animation: none !important; }
   .mb-gcard, .mb-gcard:hover { transition: none; transform: none; }
 }
+
+/* ---- MONEY BAG C1: landing nav responsive split (A1/A2) ---------------- */
+/* Mobile: hide the desktop search pill + row 2; show burger.              */
+/* Desktop (>=760): hide burger; show search pill + row 2.                 */
+.mb-nav-search-desktop { display: none; }
+.mb-nav-row2 { display: none; }
+.mb-nav-burger { display: inline-flex !important; }
+@media (min-width: 760px) {
+  .mb-nav-search-desktop { display: flex; }
+  .mb-nav-row2 { display: block; }
+  .mb-nav-burger { display: none !important; }
+}
+
+/* Landing polaroid hover-straighten (pointer devices only, B2-safe) */
+@media (hover: hover) and (pointer: fine) {
+  .mb-pol { transition: transform .5s cubic-bezier(.34,1.4,.64,1); }
+  .mb-pol:hover { transform: rotate(0) translateY(-4px) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mb-pol { transition: none; }
+  .mb-pol:hover { transform: none !important; }
+}
+
+/* Spotlight crossfade (1.8s marination, B1) */
+@keyframes mbCrossfade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .mb-crossfade-guard { animation: none !important; }
+}
