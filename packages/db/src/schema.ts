@@ -182,6 +182,10 @@ export const vendors = pgTable("vendors", {
   agreementAcceptedAt: text("agreement_accepted_at"),
   identityId: text("identity_id"),
   slug: text("slug").notNull(),
+  // Money Bag B3 (F1): non-campus vendor identity — areas taxonomy id.
+  // DB column added by money-bag-phase-a.sql (vendors.area_id). Twin rule:
+  // pgTable declaration ships WITH the migration commit.
+  areaId: text("area_id"),
 });
 
 export const listings = pgTable("listings", {

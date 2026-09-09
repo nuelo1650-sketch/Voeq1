@@ -579,6 +579,7 @@ function mapVendor(r: typeof s.vendors.$inferSelect): Vendor {
     verified: r.verified,
     description: r.description,
     subArea: r.subArea ?? null,
+    areaId: r.areaId ?? null,
     profilePhotoUrl: r.profilePhotoUrl ?? null,
     hours: (r.hours ?? null) as Vendor["hours"],
     socials: r.socials ?? null,
@@ -621,6 +622,7 @@ export const realVendorRepo = {
       verified: input.verified ?? false,
       description: input.description ?? "",
       subArea: input.subArea ?? null,
+      areaId: input.areaId ?? null,
       profilePhotoUrl: input.profilePhotoUrl ?? null,
       hours: input.hours ?? null,
       socials: input.socials ?? null,
@@ -664,10 +666,18 @@ function mapListing(r: typeof s.listings.$inferSelect): Listing {
   };
 }
 export const realListingsRepo = {
-  async list(params?: { campus?: string; category?: string; publicOnly?: boolean }): Promise<Listing[]> {
+  async list(params?: { campus?: string; area?: string; category?: string; publicOnly?: boolean }): Promise<Listing[]> {
     const rows = await getDb().select().from(s.listings);
     let listings = rows.map(mapListing);
-    if (params?.campus) {
+    if (params?.area) {
+      // Money Bag B3 (F1): non-campus vendors live in the areas taxonomy —
+      // match via vendors.area_id (campus filter ignored when area is set).
+      const areaVendorIds = (
+        await getDb().select({ id: s.vendors.id }).from(s.vendors).where(eq(s.vendors.areaId, params.area))
+      ).map((v) => v.id);
+      const idSet = new Set(areaVendorIds);
+      listings = listings.filter((l) => idSet.has(l.vendorId));
+    } else if (params?.campus) {
       const campusVendorIds = (
         await getDb().select({ id: s.vendors.id }).from(s.vendors).where(eq(s.vendors.campus, params.campus))
       ).map((v) => v.id);

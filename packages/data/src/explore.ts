@@ -53,6 +53,9 @@ export interface ExploreFilters {
 
 export interface ExploreParams extends ExploreFilters {
   campus?: string;
+  /** Money Bag B3: area taxonomy id (F1 non-campus vendors). When set, the
+   *  campus filter is ignored and vendors are matched by area_id instead. */
+  area?: string;
   query?: string;
   categoryPreset?: string; // from /c/[slug]
   forceError?: boolean; // dev/test path (?exploreError=1)
@@ -268,7 +271,7 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
   try {
     const [listings, vendors] = await Promise.all([
       // P-A round 69: Explore is PUBLIC -> publicOnly (published+active+live vendor).
-      listingsRepo.list({ campus: params.campus, category: categoryForRepo, publicOnly: true }),
+      listingsRepo.list({ campus: params.campus, area: params.area, category: categoryForRepo, publicOnly: true }),
       mockVendorRepo.listVendors({ campus: params.campus, publicOnly: true }),
     ]);
     // P-A round 75 (N+1 FIX — the 'Neon flaky' root cause): the old code ran

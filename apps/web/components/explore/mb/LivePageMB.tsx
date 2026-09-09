@@ -349,7 +349,7 @@ export function LivePageMB({ campus }: { campus: string }) {
             </h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
               {catCounts.map(([slug, n]) => (
-                <Link key={slug} href={`/explore?next=mb&category=${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 14, padding: "13px 14px", fontSize: 13.5, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none" }}>
+                <Link key={slug} href={`/explore/c/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 14, padding: "13px 14px", fontSize: 13.5, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none" }}>
                   <span style={{ textTransform: "capitalize" }}>{slug.replace(/-/g, " ")}</span>
                   <small style={{ marginLeft: "auto", fontFamily: "var(--role-font-mono, monospace)", fontSize: 11, color: "var(--role-muted)" }}>{n}</small>
                 </Link>

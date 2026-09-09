@@ -24,6 +24,9 @@ export interface Vendor {
   description: string;
   /** VS3.2: campus sub-area (hostel/faculty) — optional. */
   subArea: string | null;
+  /** Money Bag B3 (F1): non-campus vendor identity — areas taxonomy id.
+   *  Null for campus vendors; set at onboarding when State→Area is picked. */
+  areaId?: string | null;
   /** VS3.4: profile photo (Cloudinary mock URL). Null until uploaded. */
   profilePhotoUrl: string | null;
   /** VS5.3: operating hours. Null until set — "Open now" badge only renders when present (honest). */
@@ -149,7 +152,7 @@ export interface ListingsRepo {
       (Explore/storefront) must be isPublished + status="active" AND owned by a
       LIVE vendor. This is the single source of truth — repo layer decided,
       not each page. */
-  list(params?: { campus?: string; category?: string; publicOnly?: boolean }): Promise<Listing[]>;
+  list(params?: { campus?: string; area?: string; category?: string; publicOnly?: boolean }): Promise<Listing[]>;
   getById(id: string): Promise<Listing | null>;
   create(input: Partial<Listing> & { vendorId: string; title: string; priceMinMinor: number; categoryId: string }): Promise<Listing>;
   /** VS5.7: edit a listing (inline form). Ownership enforced by caller. */

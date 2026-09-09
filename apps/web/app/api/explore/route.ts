@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
 
   const params: ExploreParams = {
     campus: sp.get("campus") ?? undefined,
+    area: sp.get("area") ?? undefined,
     query: sp.get("query") ?? undefined,
     categoryPreset: sp.get("categoryPreset") ?? undefined,
     category: sp.get("category") ?? undefined,

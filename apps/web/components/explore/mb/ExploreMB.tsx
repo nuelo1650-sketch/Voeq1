@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import type { ExploreFilters, ExploreListing, ExploreParams } from "@voeq/data";
 import { useExploreData } from "@/lib/useExploreData";
 import { ContextStrip, type ExploreScope } from "./ContextStrip";
@@ -232,8 +233,22 @@ export function ExploreMB({
                 Beyond the campus gates
               </h3>
               <p style={{ margin: 0, fontSize: 13.5, color: "var(--role-muted)" }}>
-                Vendors everywhere in Nigeria — browse by area. All 36 states →
+                Vendors everywhere in Nigeria — browse by area.
               </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+                {["delta-okerenkoko", "delta-warri", "edo-benin-city", "rivers-port-harcourt", "lagos-ikeja"].map((id) => (
+                  <Link
+                    key={id}
+                    href={`/explore/areas/${id}`}
+                    style={{ border: "1px solid var(--role-border)", borderRadius: 999, padding: "7px 14px", fontSize: 13, fontWeight: 600, color: "var(--role-text)", textDecoration: "none", background: "var(--role-surface)" }}
+                  >
+                    {id.split("-")[1].replace(/^\w/, (c) => c.toUpperCase())}
+                  </Link>
+                ))}
+                <Link href="/explore/areas/delta-okerenkoko" style={{ border: "1px solid rgba(15,42,29,0.3)", borderRadius: 999, padding: "7px 14px", fontSize: 13, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none" }}>
+                  All 36 states →
+                </Link>
+              </div>
             </section>
           </>
         )}
