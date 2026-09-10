@@ -9,6 +9,11 @@
  *   the user never sees two Message buttons at once; reappears after it
  *   scrolls away — that's the whole point: the CTA is always reachable.
  * - Safe-area padding for iPhone home indicator. No motion (B2-safe).
+ *
+ * PROBE NOTE (2026-09-10): initial render is intentional — the component
+ * waits one effect cycle for matchMedia before `isMobile` is true, and the
+ * observer needs the main CTA out of view. Probes must scroll, wait, then
+ * assert (same lesson as admin useIsMobile: no zero-wait assertions).
  */
 
 import { useEffect, useState } from "react";
@@ -40,14 +45,28 @@ export function StickyCtaBar({
 
   useEffect(() => {
     if (!isMobile) return;
-    const target = document.querySelector(mainCtaSelector);
-    if (!target) return;
-    const io = new IntersectionObserver(
-      (entries) => setMainCtaVisible(entries[0]?.isIntersecting ?? false),
-      { threshold: 0.15 },
-    );
-    io.observe(target);
-    return () => io.disconnect();
+    let io: IntersectionObserver | null = null;
+    // The main CTA may mount after this effect (data loads async) — retry
+    // briefly until it exists, then observe.
+    let cancelled = false;
+    const tryObserve = () => {
+      if (cancelled) return;
+      const target = document.querySelector(mainCtaSelector);
+      if (!target) {
+        setTimeout(tryObserve, 250);
+        return;
+      }
+      io = new IntersectionObserver(
+        (entries) => setMainCtaVisible(entries[0]?.isIntersecting ?? false),
+        { threshold: 0.15 },
+      );
+      io.observe(target);
+    };
+    tryObserve();
+    return () => {
+      cancelled = true;
+      io?.disconnect();
+    };
   }, [isMobile, mainCtaSelector]);
 
   if (!isMobile || mainCtaVisible) return null;
