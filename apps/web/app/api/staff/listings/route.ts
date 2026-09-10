@@ -50,6 +50,8 @@ export async function GET(req: NextRequest) {
         isFeatured: l.isFeatured,
         featuredUntil: l.featuredUntil ?? null,
         priceMinMinor: l.priceMinMinor,
+        // MONEY BAG S1: the seed marker — drives the SEED tag + hard-delete.
+        source: l.source ?? null,
       };
     }),
   );

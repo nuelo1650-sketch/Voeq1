@@ -21,7 +21,11 @@ interface ListingRow {
   isFeatured: boolean;
   featuredUntil: string | null;
   priceMinMinor: number;
+  /** MONEY BAG S1: 'seed' = founder-commissioned placeholder (hard-deletable). */
+  source?: "seed" | null;
 }
+
+type PanelAction = "remove" | "feature" | "unfeature" | "seed-delete";
 
 export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) {
   const canModerate = capabilities.includes("listing.moderate");
@@ -29,7 +33,7 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const [confirm, setConfirm] = useState<{ row: ListingRow; action: "remove" | "feature" | "unfeature" } | null>(null);
+  const [confirm, setConfirm] = useState<{ row: ListingRow; action: PanelAction } | null>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -57,6 +61,24 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
     if (!confirm) return;
     setBusy(true);
     try {
+      // MONEY BAG S1: seed-delete goes to the dedicated hard-delete route.
+      if (confirm.action === "seed-delete") {
+        const res = await fetch("/api/staff/seed-delete", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ listingId: confirm.row.id }),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          setToast({ kind: "ok", text: `Deleted forever ✓ "${data.title}" is permanently removed.` });
+          setConfirm(null);
+          setReason("");
+          void load();
+        } else {
+          setToast({ kind: "err", text: String(data.detail ?? data.error ?? `Failed (${res.status})`) });
+        }
+        return;
+      }
       const res = await fetch("/api/staff/listings", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -78,16 +100,48 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
     }
   }
 
+  const [seedFilter, setSeedFilter] = useState<"all" | "seeds" | "real">("all");
+  const visibleRows = rows.filter((r) =>
+    seedFilter === "all" ? true : seedFilter === "seeds" ? r.source === "seed" : r.source !== "seed",
+  );
+  const seedCount = rows.filter((r) => r.source === "seed").length;
+
   if (!canModerate) {
     return <p style={{ fontSize: 14, color: "var(--role-text-muted)" }}>Your staff role cannot moderate listings.</p>;
   }
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
         <p style={{ margin: 0, fontSize: 13, color: "var(--role-text-muted)" }}>
-          {loading ? "Loading…" : `${rows.length} listing${rows.length === 1 ? "" : "s"} (newest first, max 100)`}
+          {loading ? "Loading…" : `${visibleRows.length} listing${visibleRows.length === 1 ? "" : "s"} (newest first, max 100)`}
         </p>
+        {/* MONEY BAG S2: staff-only Seeds filter — seed vs real at a glance. */}
+        <div style={{ display: "flex", gap: 6 }}>
+          {([
+            ["all", `All (${rows.length})`],
+            ["seeds", `Seeds (${seedCount})`],
+            ["real", `Real (${rows.length - seedCount})`],
+          ] as const).map(([id, label]) => (
+            <button
+              key={id}
+              data-testid={`listings-filter-${id}`}
+              onClick={() => setSeedFilter(id)}
+              style={{
+                border: "1px solid " + (seedFilter === id ? "var(--color-forest, #0F2A1D)" : "var(--role-border)"),
+                background: seedFilter === id ? "var(--color-forest, #0F2A1D)" : "transparent",
+                color: seedFilter === id ? "var(--color-cream, #f6f1e6)" : "var(--role-text-muted)",
+                borderRadius: 999,
+                padding: "5px 12px",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <button onClick={() => void load()} style={{ background: "none", border: "1px solid var(--role-border)", borderRadius: 8, padding: "6px 12px", fontSize: 12, color: "var(--role-text)", cursor: "pointer", display: "flex", gap: 6, alignItems: "center" }}>
           <Search size={13} /> Refresh
         </button>
@@ -111,9 +165,31 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {visibleRows.map((r) => (
                 <tr key={r.id} style={{ borderBottom: "1px solid var(--role-border)" }}>
-                  <td style={{ padding: "10px", fontWeight: 600, color: "var(--role-text)" }}>{r.title}</td>
+                  <td style={{ padding: "10px", fontWeight: 600, color: "var(--role-text)" }}>
+                    {r.title}
+                    {/* MONEY BAG S1: SEED tag — staff-only marker, vendors see nothing. */}
+                    {r.source === "seed" && (
+                      <span
+                        data-testid="listing-seed-tag"
+                        style={{
+                          marginLeft: 8,
+                          fontSize: 9.5,
+                          fontWeight: 800,
+                          letterSpacing: "0.08em",
+                          background: "rgba(232,163,61,0.16)",
+                          color: "var(--color-amber-dark, #9a6d1f)",
+                          border: "1px solid rgba(232,163,61,0.4)",
+                          borderRadius: 4,
+                          padding: "2px 6px",
+                          verticalAlign: "middle",
+                        }}
+                      >
+                        SEED
+                      </span>
+                    )}
+                  </td>
                   <td style={{ padding: "10px", color: "var(--role-text-muted)" }}>{r.vendorName}</td>
                   <td style={{ padding: "10px" }}>
                     <span style={{ fontWeight: 600, color: r.status === "active" && r.isPublished ? "var(--color-status-open, #1a7f37)" : r.status === "removed" ? "var(--color-danger, #b91c1c)" : "var(--role-text-muted)" }}>
@@ -148,6 +224,18 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
                         <Undo2 size={13} /> Unfeature
                       </button>
                     )}
+                    {/* MONEY BAG S1: hard-delete for SEED rows only — the API
+                        refuses real listings (409), so this button is safe. */}
+                    {r.source === "seed" && (
+                      <button
+                        data-testid="listing-seed-delete"
+                        onClick={() => setConfirm({ row: r, action: "seed-delete" })}
+                        title="Delete forever — permanent, bypasses soft-delete (seeds only)"
+                        style={{ ...btn("var(--color-amber-dark, #9a6d1f)"), borderColor: "rgba(232,163,61,0.5)" }}
+                      >
+                        <Trash2 size={13} /> Delete forever
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -171,6 +259,7 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
               {confirm.action === "remove" && "Soft removal — the listing drops off Explore immediately but stays in the DB for audit/restore. The vendor is notified with your reason and appeal instructions."}
               {confirm.action === "feature" && "Featured on relevant surfaces for 30 days. The vendor is notified."}
               {confirm.action === "unfeature" && "Ends the feature placement early. No notification."}
+              {confirm.action === "seed-delete" && "PERMANENT — this seed listing and all its child rows (likes, saves, comments) are deleted forever. No restore, no vendor notification (seed vendors are platform accounts). Only possible because this row is marked SEED."}
             </p>
             {(confirm.action === "remove" || confirm.action === "feature") && (
               <label style={{ fontSize: 13, color: "var(--role-text)", display: "block", marginBottom: 12 }}>
@@ -190,7 +279,7 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
               <button
                 onClick={() => void applyAction()}
                 disabled={busy || (confirm.action === "remove" && reason.trim().length < 10)}
-                style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: confirm.action === "remove" ? "var(--color-danger, #b91c1c)" : "var(--role-accent-strong)", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: busy || (confirm.action === "remove" && reason.trim().length < 10) ? 0.5 : 1 }}
+                style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: confirm.action === "remove" || confirm.action === "seed-delete" ? "var(--color-danger, #b91c1c)" : "var(--role-accent-strong)", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: busy || (confirm.action === "remove" && reason.trim().length < 10) ? 0.5 : 1 }}
               >
                 {busy ? "Applying…" : `Confirm ${labelFor(confirm.action)}`}
               </button>
@@ -219,6 +308,6 @@ function btn(color: string): React.CSSProperties {
   };
 }
 
-function labelFor(a: "remove" | "feature" | "unfeature"): string {
-  return a === "remove" ? "Remove" : a === "feature" ? "Feature" : "Unfeature";
+function labelFor(a: PanelAction): string {
+  return a === "remove" ? "Remove" : a === "feature" ? "Feature" : a === "unfeature" ? "Unfeature" : "Delete forever";
 }
