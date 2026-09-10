@@ -120,7 +120,9 @@ const candidates = scoreRows
   .slice(0, 6);
 if (!DRY) {
   const today = now.toISOString().slice(0, 10);
-  // fetch each candidate's best listing (their highest-rated listing)
+  // F-4b (audit fix, C4): max 1 candidate/vendor/day — delete this vendor's
+  // UNCONFIRMED candidates for today before inserting, so a "best listing"
+  // flip between runs can never produce two rows for the same vendor.
   for (let i = 0; i < candidates.length; i++) {
     const c = candidates[i];
     const best = await sql`
@@ -129,6 +131,10 @@ if (!DRY) {
       WHERE l.vendor_id = ${c.vendorId} AND l.is_published = true AND l.status = 'active' AND (l.source IS NULL OR l.source <> 'seed')
       GROUP BY l.id ORDER BY count(r.id) DESC, l.created_at DESC LIMIT 1`;
     if (best.length === 0) continue;
+    await sql`
+      DELETE FROM voeq_live_picks
+      WHERE listing_id IN (SELECT id FROM listings WHERE vendor_id = ${c.vendorId})
+        AND pick_date = ${today} AND confirmed_by IS NULL`;
     await sql`
       INSERT INTO voeq_live_picks (id, listing_id, pick_date, why_line, position, confirmed_by, created_at)
       VALUES (${"cand-" + c.vendorId.slice(0, 8) + "-" + today.replace(/-/g, "")}, ${best[0].id}, ${today},

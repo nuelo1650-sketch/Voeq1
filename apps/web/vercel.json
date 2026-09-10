@@ -3,6 +3,12 @@
   "buildCommand": "cd .. && npm install && npm run build --workspace @voeq/web",
   "outputDirectory": ".next",
   "regions": ["sin1"],
+  "crons": [
+    {
+      "path": "/api/cron/nightly",
+      "schedule": "0 21 * * *"
+    }
+  ],
   "env": {
     "NEXT_PUBLIC_API_URL": "https://voeq1.onrender.com",
     "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "jq9gwigz",

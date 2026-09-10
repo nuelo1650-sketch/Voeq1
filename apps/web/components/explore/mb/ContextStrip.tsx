@@ -24,6 +24,9 @@ export function ContextStrip({
   onScopeChange,
   activeFilterCount,
   onOpenFilters,
+  /** B6: true when voeq:preferred-campus is unset (first visit) — renders the "Set your campus" chip instead of the campus name. */
+  needsCampusSetup = false,
+  onSetCampus,
 }: {
   campusName: string;
   liveCount: number;
@@ -31,6 +34,8 @@ export function ContextStrip({
   onScopeChange: (s: ExploreScope) => void;
   activeFilterCount: number;
   onOpenFilters: () => void;
+  needsCampusSetup?: boolean;
+  onSetCampus?: () => void;
 }) {
   const scopeLabel =
     scope === "campus" ? campusName : scope === "areas" ? "Near campus" : "All Nigeria";
@@ -92,9 +97,29 @@ export function ContextStrip({
           }}
         >
           <MapPin size={15} style={{ color: "var(--color-amber, #E8A33D)", flexShrink: 0 }} />
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {scopeLabel}
-          </span>
+          {needsCampusSetup ? (
+            /* B6 first visit: the Set-your-campus chip (founder-locked state). */
+            <button
+              data-testid="mb-set-campus"
+              onClick={onSetCampus}
+              style={{
+                border: "1.5px dashed rgba(15,42,29,0.35)",
+                background: "rgba(255,255,255,0.6)",
+                color: "var(--forest-deep, #0F2A1D)",
+                borderRadius: 999,
+                padding: "5px 13px",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Set your campus
+            </button>
+          ) : (
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {scopeLabel}
+            </span>
+          )}
         </span>
 
         {liveCount > 0 && (

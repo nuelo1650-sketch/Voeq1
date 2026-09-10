@@ -38,7 +38,7 @@ export function ReviewsList({
             reviews (keeps ratings honest)". Individual texts + star glyphs stay. */}
         {ratingAvg != null && ratingCount > 0 && ratingCount < UNLOCK_AT && (
           <span data-testid="reviews-unlock-note" style={{ color: "var(--role-text-muted)", fontSize: 12.5 }}>
-            {ratingCount} {ratingCount === 1 ? "review" : "reviews"} · scores unlock after {UNLOCK_AT}
+            {ratingCount} {ratingCount === 1 ? "review" : "reviews"} · scores unlock at {UNLOCK_AT} reviews
           </span>
         )}
         {ratingAvg != null && ratingCount >= UNLOCK_AT && (

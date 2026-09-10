@@ -94,11 +94,27 @@ export function productJsonLd(listing: {
 }
 
 /** Render a <script type="application/ld+json"> payload. */
+/**
+ * F-1 (audit fix, 2026-09-10): escape <, >, &, U+2028/2029 in the JSON text.
+ * JSON.stringify does NOT escape '<' — a listing title containing
+ * "</script>" would close the JSON-LD tag and open an injection vector.
+ * \u003c-style escapes are valid JSON AND safe inside <script> (HTML parses
+ * script content as raw text until the literal "</script" sequence).
+ */
+function escapeJsonForScript(json: string): string {
+  return json
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
 export function JsonLd({ data }: { data: Record<string, unknown> }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: escapeJsonForScript(JSON.stringify(data)) }}
     />
   );
 }

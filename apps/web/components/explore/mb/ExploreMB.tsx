@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { BrandLogo } from "@/components/landing/BrandLogo";
 import Link from "next/link";
 import type { ExploreFilters, ExploreListing, ExploreParams } from "@voeq/data";
 import { useExploreData } from "@/lib/useExploreData";
@@ -65,9 +66,17 @@ export function ExploreMB({
   const [campusName, setCampusName] = useState(initialCampus);
 
   // B6: campus state machine — device memory (voeq:preferred-campus).
+  // needsCampusSetup = FIRST VISIT (no stored campus): the context strip
+  // renders the "Set your campus" chip instead of a campus name.
+  const [needsCampusSetup, setNeedsCampusSetup] = useState(false);
   useEffect(() => {
     const stored = localStorage.getItem("voeq:preferred-campus");
-    if (stored && stored !== initialCampus) setCampusName(stored);
+    if (stored) {
+      setNeedsCampusSetup(false);
+      if (stored !== initialCampus) setCampusName(stored);
+    } else {
+      setNeedsCampusSetup(true);
+    }
     setIsMobile(window.matchMedia("(max-width: 767px)").matches);
   }, [initialCampus]);
 
@@ -146,9 +155,9 @@ export function ExploreMB({
         }}
       >
         <a href="/" aria-label="Voeq" data-testid="mb-wordmark" style={{ textDecoration: "none", flexShrink: 0, display: "inline-flex" }}>
-          {/* BrandLogo is a server-safe img wordmark; inline to avoid another import cycle here */}
+          {/* A24: the real BrandLogo component — never a text wordmark. */}
           <span style={{ fontFamily: "var(--role-font-display)", fontWeight: 800, fontSize: 22, color: "var(--forest-deep, #0F2A1D)" }}>
-            voeq<span style={{ color: "var(--color-amber, #E8A33D)" }}>.</span>
+            <BrandLogo width={94} />
           </span>
         </a>
         <input
@@ -179,6 +188,8 @@ export function ExploreMB({
         onScopeChange={setScope}
         activeFilterCount={activeFilterCount}
         onOpenFilters={() => setDrawerOpen(true)}
+        needsCampusSetup={needsCampusSetup}
+        onSetCampus={() => setDrawerOpen(true)}
       />
 
       <main style={{ maxWidth: 1200, margin: "0 auto", padding: "0 var(--nav-inline-pad, 16px) 60px" }}>
@@ -264,6 +275,7 @@ export function ExploreMB({
           if (c) {
             setCampusName(c);
             localStorage.setItem("voeq:preferred-campus", c);
+            setNeedsCampusSetup(false); // B6: campus chosen — chip goes away
             setScope("campus");
           } else {
             setScope("all");

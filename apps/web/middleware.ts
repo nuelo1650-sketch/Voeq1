@@ -11,9 +11,12 @@ function corsHeaders(origin: string | null): HeadersInit {
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean);
-  const allowed = origin && allowlist.includes(origin) ? origin : allowlist[0] ?? "";
+  // F-5 (audit fix, 2026-09-10): unknown origins get NO ACAO header at all —
+  // the old fallback echoed allowlist[0] (not exploitable — browsers reject
+  // cross-origin mismatches — but wrong). Absence = the correct "not allowed".
+  if (!origin || !allowlist.includes(origin)) return {};
   return {
-    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
     "Access-Control-Allow-Credentials": "true",

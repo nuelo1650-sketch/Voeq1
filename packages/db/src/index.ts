@@ -4,5 +4,6 @@ export * from "./repos";
 export * from "./seed";
 export * from "./admin-cleanup";
 export * from "./subject-export";
+export * from "./nightly";
 export * from "./listing-edits";
 export * from "./listing-integrity";

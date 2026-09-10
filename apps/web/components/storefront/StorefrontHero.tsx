@@ -152,6 +152,15 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
   }, [pendingIntent, consumeIntent]);
 
   const categoriesShown = Array.isArray(vendor.categoryIds) ? vendor.categoryIds : [];
+  // MONEY BAG D2 (A18): category pills COMPUTED from active listings when the
+  // vendor's declared categoryIds are empty (fallback, no fabrication).
+  const computedFromListings = new Set(
+    (vendor.listings ?? []).map((l) => l.categorySlug).filter((s): s is string => Boolean(s)),
+  );
+  const pillIds =
+    categoriesShown.length > 0
+      ? categoriesShown
+      : [...computedFromListings].map((slug) => slug); // slugs resolve via CAT_NAME_BY_ID fallback in the pills render
   const reviewCount = vendor.reviews.length;
 
   return (
@@ -216,10 +225,12 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
             </div>
 
             {/* S1: category pills show NAMES (the old hero rendered raw ids —
-                shoppers saw "food"). Unknown ids fall back to the id. */}
-            {categoriesShown.length > 0 && (
+                shoppers saw "food"). Unknown ids fall back to the id.
+                D2: falls back to pills COMPUTED from active listings when the
+                vendor has no declared categories. */}
+            {pillIds.length > 0 && (
               <div className="vs-cat-badges" style={{ marginTop: 8 }}>
-                {categoriesShown.slice(0, 3).map((cat) => (
+                {pillIds.slice(0, 3).map((cat) => (
                   <span key={cat} className="vs-cat-badge">{CAT_NAME_BY_ID[cat] ?? cat}</span>
                 ))}
               </div>
@@ -232,6 +243,14 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
             rides this element so the probe contract (full text present) holds. */}
         {vendor.description && (
           <p data-testid="storefront-about" className="vs-desc">{vendor.description}</p>
+        )}
+
+        {/* MONEY BAG D2 (A18): "On Voeq since {year}" — real member duration
+            from the agreement acceptance. Omitted when null (honest). */}
+        {vendor.agreementAcceptedAt && (
+          <p data-testid="storefront-member-since" style={{ margin: 0, fontSize: 12.5, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
+            On Voeq since {new Date(vendor.agreementAcceptedAt).getFullYear()}
+          </p>
         )}
 
         {/* S1: Contact + Follow side by side (Follow moved up from Trust —

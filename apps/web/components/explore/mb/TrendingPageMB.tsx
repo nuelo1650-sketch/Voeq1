@@ -18,6 +18,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { BrandLogo } from "@/components/landing/BrandLogo";
 import Link from "next/link";
 import type { ExploreListing } from "@voeq/data";
 import { cdnTransform } from "@/lib/image-upload";
@@ -56,7 +57,7 @@ export function TrendingPageMB({ campus }: { campus: string }) {
       <header style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px var(--nav-inline-pad, 16px)", borderBottom: "1px solid var(--role-border)" }}>
         <Link href="/" aria-label="Voeq" style={{ textDecoration: "none" }}>
           <span style={{ fontFamily: "var(--role-font-display)", fontWeight: 800, fontSize: 22, color: "var(--forest-deep, #0F2A1D)" }}>
-            voeq<span style={{ color: "var(--color-amber, #E8A33D)" }}>.</span>
+            <BrandLogo width={94} />
           </span>
         </Link>
         <span style={{ fontSize: 13, color: "var(--role-muted)" }}>

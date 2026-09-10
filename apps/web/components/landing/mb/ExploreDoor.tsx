@@ -179,7 +179,7 @@ function ExploreDoorInner({
                   padding: "5px 12px",
                 }}
               >
-                {areas} states &amp; areas
+                {areas} states &amp; FCT
               </span>
             )}
           </div>

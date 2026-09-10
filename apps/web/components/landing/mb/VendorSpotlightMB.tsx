@@ -68,6 +68,10 @@ export function VendorSpotlightMB({ listings }: { listings: ExploreListing[] }) 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const resumeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // F-5 (audit fix): the old deps array was [paused, idx === 0] — a boolean
+  // that flips on every wrap, tearing down/rebuilding the interval. The
+  // interval callback already reads vendors.current.length via the ref, so
+  // [paused, vendors.current.length] is the correct minimal dep set.
   useEffect(() => {
     if (paused || vendors.current.length < 2) return;
     if (typeof window !== "undefined") {
@@ -80,7 +84,7 @@ export function VendorSpotlightMB({ listings }: { listings: ExploreListing[] }) 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [paused, idx === 0]);
+  }, [paused, vendors.current.length]);
 
   useEffect(
     () => () => {

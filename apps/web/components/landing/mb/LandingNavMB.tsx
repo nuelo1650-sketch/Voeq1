@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/landing/BrandLogo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, MessageCircle, Menu, X, Search } from "lucide-react";
@@ -109,7 +110,7 @@ export function LandingNavMB() {
         >
           <Link href="/" aria-label="Voeq home" style={{ flexShrink: 0, display: "inline-flex" }}>
             <span style={{ fontFamily: "var(--role-font-display)", fontWeight: 900, fontSize: 26, color: "var(--forest-deep, #0F2A1D)", lineHeight: 1 }}>
-              voeq<span style={{ color: "var(--color-amber, #E8A33D)" }}>.</span>
+              <BrandLogo width={94} />
             </span>
           </Link>
 
@@ -201,7 +202,8 @@ export function LandingNavMB() {
         </div>
       </nav>
 
-      {/* Mobile drawer (A2): search + Saved + Messages */}
+      {/* Mobile drawer (A2): search + Saved + Messages. F-5 a11y: dialog
+          semantics + Esc-to-close (keyboard parity with the click path). */}
       {drawerOpen && (
         <div
           data-testid="mb-nav-drawer"
@@ -214,6 +216,16 @@ export function LandingNavMB() {
           onClick={() => setDrawerOpen(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+            ref={(el) => {
+              if (el) el.focus();
+            }}
+            tabIndex={-1}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setDrawerOpen(false);
+            }}
             onClick={(e) => e.stopPropagation()}
             style={{
               background: "var(--role-surface, #F5F1E8)",
@@ -227,7 +239,7 @@ export function LandingNavMB() {
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontFamily: "var(--role-font-display)", fontWeight: 900, fontSize: 20, color: "var(--forest-deep, #0F2A1D)" }}>
-                voeq<span style={{ color: "var(--color-amber, #E8A33D)" }}>.</span>
+                <BrandLogo width={94} />
               </span>
               <button
                 aria-label="Close menu"
