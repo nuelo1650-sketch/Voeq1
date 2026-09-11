@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Comment } from "@voeq/data";
+import { formatDateFixed } from "@/lib/formatDateFixed";
 
 /** Enriched comment as returned by GET /api/listings/[id]/comments (authorName resolved). */
 export type DisplayComment = Omit<Comment, "listingId" | "authorId" | "status"> & { authorName?: string; isMine?: boolean };
@@ -101,7 +102,7 @@ export function CommentsList({ comments, listingId }: { comments: DisplayComment
                       You
                     </span>
                   )}
-                  <span className="voeq-comment-time">{new Date(c.createdAt).toLocaleDateString()}</span>
+                  <span className="voeq-comment-time">{formatDateFixed(c.createdAt)}</span>
                   {c.isMine && editingId !== c.id && (
                     <span className="voeq-comment-actions" style={{ marginLeft: 12, display: "inline-flex", gap: 8 }}>
                       <button

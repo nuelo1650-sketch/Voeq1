@@ -72,16 +72,28 @@ try {
   await page.waitForSelector('[data-testid="listing-detail-imgcount"]', { timeout: 30000 });
   const counter0 = await page.$eval('[data-testid="listing-detail-imgcount"]', (el) => el.textContent ?? "");
   check("D8: ▹ counter starts 1/2", counter0.includes("1/2"));
-  // swipe the track → counter advances (dispatch a real scroll event —
-  // programmatic scrollLeft set does not fire onScroll reliably in headless;
-  // also the scroll handler ROUNDS — scrollWidth overshoots the snap point
-  // (scrollWidth = 2x clientWidth, mid-track = clientWidth exactly), so clamp
-  // to the second slide's exact offset: el.clientWidth * 1.
-  await page.$eval('[data-testid="listing-detail-track"]', (el) => { el.scrollLeft = el.clientWidth * 1; el.dispatchEvent(new Event("scroll", { bubbles: true })); });
+  // swipe the track → counter advances. Two headless realities (D9 flake
+  // root-caused 2026-09-11): (1) programmatic scrollLeft does NOT fire onScroll
+  // in headless, so we MUST dispatch a synthetic scroll; (2) the track is
+  // `scroll-snap: x mandatory`, so the browser can settle with its OWN scroll
+  // event after ours and round the index back — reading once caught the wrong
+  // side of that race. Fix: set scrollLeft to the true second-slide stride,
+  // dispatch, poll for 2/2, then RE-ASSERT (set+dispatch again) so the final
+  // read reflects a settled swipe regardless of snap timing.
+  const swipe = () =>
+    page.$eval('[data-testid="listing-detail-track"]', (el) => {
+      const kids = el.children;
+      const stride = kids.length > 1 ? kids[1].offsetLeft - kids[0].offsetLeft : el.clientWidth;
+      el.scrollLeft = stride;
+      el.dispatchEvent(new Event("scroll", { bubbles: true }));
+    });
+  await swipe();
   await page.waitForFunction(
     () => (document.querySelector('[data-testid="listing-detail-imgcount"]')?.textContent ?? "").includes("2/2"),
     { timeout: 15000 },
   ).catch(() => {});
+  await swipe(); // re-assert after any snap-settle scroll
+  await page.waitForTimeout(150);
   const counter1 = await page.$eval('[data-testid="listing-detail-imgcount"]', (el) => el.textContent ?? "");
   check("D9: counter syncs to swipe (2/2)", counter1.includes("2/2"));
 

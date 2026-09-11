@@ -1,4 +1,5 @@
 import type { Review } from "@voeq/data";
+import { formatDateFixed } from "@/lib/formatDateFixed";
 
 /**
  * ReviewsList — public-read list of a vendor's reviews (VS4.4).
@@ -104,7 +105,7 @@ export function ReviewsList({
                     <span style={{ color: "var(--role-border)" }}>{"★".repeat(5 - r.rating)}</span>
                   </span>
                   <span style={{ fontSize: 12, color: "var(--color-ink-muted, #6f6a5e)" }}>
-                    {new Date(r.createdAt ?? Date.now()).toLocaleDateString()}
+                    {formatDateFixed(r.createdAt)}
                   </span>
                 </div>
                 <p className="voeq-review-text" style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "var(--role-text)", overflowWrap: "anywhere" }}>

@@ -1,4 +1,5 @@
 "use client";
+import { formatDateFixed } from "@/lib/formatDateFixed";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -451,7 +452,7 @@ export function SettingsForms({ identity, initialPrefs, campuses, sessions }: Se
                             )}
                           </div>
                           <div style={{ fontSize: 11, color: "var(--color-ink-muted)" }}>
-                            {new Date(session.createdAt).toLocaleDateString()}
+                            {formatDateFixed(session.createdAt)}
                           </div>
                         </div>
                         <button

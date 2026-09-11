@@ -1,4 +1,5 @@
 "use client";
+import { formatDateFixed } from "@/lib/formatDateFixed";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -469,7 +470,7 @@ function formatDate(date: Date): string {
   if (days === 1) return "Yesterday";
   if (days < 7) return `${days} days ago`;
   if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-  return date.toLocaleDateString();
+  return formatDateFixed(date);
 }
 
 // Styles

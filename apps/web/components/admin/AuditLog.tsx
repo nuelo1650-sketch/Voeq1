@@ -1,4 +1,5 @@
 "use client";
+import { formatDateFixed } from "@/lib/formatDateFixed";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -279,7 +280,7 @@ function formatTimestamp(date: Date): string {
   if (hours < 1) return "Just now";
   if (hours < 24) return `${hours}h ago`;
   if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString();
+  return formatDateFixed(date);
 }
 
 const thStyle: React.CSSProperties = {

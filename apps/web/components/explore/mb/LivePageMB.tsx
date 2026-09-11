@@ -27,19 +27,23 @@ import Link from "next/link";
 import type { ExploreListing, ExploreParams } from "@voeq/data";
 import { cdnTransform } from "@/lib/image-upload";
 
+import { useClientNow } from "@/lib/useClientNow";
+
 function naira(minor: number): string {
   return `₦${(minor / 100).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 }
 
-/** Derive an honest "why it's here" line from REAL payload facts only. */
-function whyLine(l: ExploreListing): string {
+/** Derive an honest "why it's here" line from REAL payload facts only.
+ *  `now` comes from useClientNow (hydration-safe: null until mounted, so the
+ *  fresh-age branch simply doesn't render server-side — no clock mismatch). */
+function whyLine(l: ExploreListing, now: number | null): string {
   const reviews = l.vendorRatingCount ?? 0;
   const rating = l.vendorRatingAvg;
   if (typeof rating === "number" && reviews >= 5) {
     return `Rated ${rating.toFixed(1)}★ across ${reviews} real reviews — one of the strongest on the floor.`;
   }
-  if (l.createdAt) {
-    const ageH = Math.floor((Date.now() - new Date(l.createdAt).getTime()) / 3600_000);
+  if (l.createdAt && now != null) {
+    const ageH = Math.floor((now - new Date(l.createdAt).getTime()) / 3600_000);
     if (ageH < 72) return `Fresh on the market — listed ${ageH < 1 ? "in the last hour" : `${ageH}h ago`}.`;
   }
   if ((l.saveCount ?? 0) > 0) return `Shoppers are saving this one — ${l.saveCount} saves and counting.`;
@@ -97,8 +101,12 @@ export function LivePageMB({ campus }: { campus: string }) {
     return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
   }, [data]);
 
-  const nowHour = new Date().getHours();
-  const lastRefresh = `Refreshed ${nowHour >= 9 ? "today" : "yesterday"} · 9am`;
+  const nowMs = useClientNow(60_000);
+  // Hydration-safe: identical string on server + first paint until mounted.
+  const lastRefresh =
+    nowMs == null
+      ? "Refreshed daily · 9am"
+      : `Refreshed ${new Date(nowMs).getHours() >= 9 ? "today" : "yesterday"} · 9am`;
 
   return (
     <div data-testid="mb-live-page" style={{ minHeight: "100vh", background: "var(--role-surface, #fffef9)" }}>
@@ -240,7 +248,7 @@ export function LivePageMB({ campus }: { campus: string }) {
                         {l.title}
                       </h2>
                       <p data-testid="mb-live-why" style={{ margin: "10px 0 0", fontSize: 14, lineHeight: 1.6, color: "var(--role-muted)" }}>
-                        <b style={{ color: "var(--role-text)" }}>Why it&apos;s here:</b> {whyLine(l)}
+                        <b style={{ color: "var(--role-text)" }}>Why it&apos;s here:</b> {whyLine(l, nowMs)}
                       </p>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
                         <span style={{ fontFamily: "var(--role-font-display)", fontSize: 19, fontWeight: 800, color: "var(--forest-deep, #0F2A1D)" }}>

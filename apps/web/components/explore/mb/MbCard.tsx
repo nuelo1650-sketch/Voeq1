@@ -15,14 +15,18 @@ import Link from "next/link";
 import type { ExploreListing } from "@voeq/data";
 import { cdnTransform } from "@/lib/image-upload";
 
+import { useClientNow } from "@/lib/useClientNow";
+
 function naira(minor: number): string {
   return `₦${(minor / 100).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 }
 
-function isFresh(l: ExploreListing): boolean {
-  if (!l.createdAt) return false;
+function isFresh(l: ExploreListing, now: number | null): boolean {
+  // Hydration-safe: null until mounted (SSR + first client paint agree → no
+  // NEW tag), then real 72h freshness from the client clock snapshot.
+  if (!l.createdAt || now == null) return false;
   const t = new Date(l.createdAt).getTime();
-  return Date.now() - t < 72 * 3600 * 1000;
+  return now - t < 72 * 3600 * 1000;
 }
 
 export function MbCard({
@@ -36,7 +40,8 @@ export function MbCard({
 }) {
   const imgs = (l.images ?? []).filter(Boolean);
   const src = imgs[0] ?? l.image;
-  const isNew = isFresh(l) && !l.featured;
+  const now = useClientNow(60_000); // re-check freshness each minute
+  const isNew = isFresh(l, now) && !l.featured;
 
   return (
     <Link

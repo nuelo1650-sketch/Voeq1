@@ -1,4 +1,5 @@
 "use client";
+import { formatDateFixed } from "@/lib/formatDateFixed";
 
 import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -178,7 +179,7 @@ export function NotificationBell({ viewerRole = "shopper" }: { viewerRole?: Noti
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-    return created.toLocaleDateString();
+    return formatDateFixed(created);
   };
 
   const badgeCount = unread > 9 ? "9+" : unread;
