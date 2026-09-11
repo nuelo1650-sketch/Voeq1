@@ -73,8 +73,11 @@ try {
   const counter0 = await page.$eval('[data-testid="listing-detail-imgcount"]', (el) => el.textContent ?? "");
   check("D8: ▹ counter starts 1/2", counter0.includes("1/2"));
   // swipe the track → counter advances (dispatch a real scroll event —
-  // programmatic scrollLeft set does not fire onScroll reliably in headless)
-  await page.$eval('[data-testid="listing-detail-track"]', (el) => { el.scrollLeft = el.scrollWidth; el.dispatchEvent(new Event("scroll", { bubbles: true })); });
+  // programmatic scrollLeft set does not fire onScroll reliably in headless;
+  // also the scroll handler ROUNDS — scrollWidth overshoots the snap point
+  // (scrollWidth = 2x clientWidth, mid-track = clientWidth exactly), so clamp
+  // to the second slide's exact offset: el.clientWidth * 1.
+  await page.$eval('[data-testid="listing-detail-track"]', (el) => { el.scrollLeft = el.clientWidth * 1; el.dispatchEvent(new Event("scroll", { bubbles: true })); });
   await page.waitForFunction(
     () => (document.querySelector('[data-testid="listing-detail-imgcount"]')?.textContent ?? "").includes("2/2"),
     { timeout: 15000 },

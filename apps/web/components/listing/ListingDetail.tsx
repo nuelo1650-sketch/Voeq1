@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import type { ExploreListing } from "@voeq/data";
 // A2 (2026-09-06): client-safe category-name helper (pure data — no repo imports).
 import { categoryNameFromSlug } from "@voeq/data/explore-view";
+import { nicheFromListing } from "@voeq/data";
 import { ContourEdge, CampusFingerprint } from "@voeq/contour";
 import { SaveButton } from "@/components/shopper/SaveButton";
 import { LikeButton } from "@/components/shopper/LikeButton";
@@ -388,6 +389,14 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
     ? [listing.image] 
     : []).filter((u): u is string => typeof u === "string" && u.trim() !== "");
 
+  // MONEY BAG Q4 (founder, 2026-09-10): 'Other' is not a category name — the
+  // vendor's own words are. Niche (riding shortDescription for 'other' listings)
+  // wins; otherwise the normal category name.
+  const displayCategory = (() => {
+    const niche = nicheFromListing(listing);
+    return niche ?? (listing.categorySlug ? categoryNameFromSlug(listing.categorySlug) : "Listing");
+  })();
+
   return (
     <div
       data-testid="listing-detail"
@@ -723,7 +732,7 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
           <div>
             <div data-testid="listing-detail-catline" style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.1, textTransform: "uppercase", color: "#9a6d1f", fontFamily: "var(--role-font-ui)" }}>
-                {listing.categorySlug ? categoryNameFromSlug(listing.categorySlug) : "Listing"}
+                {displayCategory}
               </span>
               <span aria-hidden style={{ flex: 1, maxWidth: 60, height: 1, background: "var(--role-border)" }} />
               {listing.featured && (
@@ -753,7 +762,7 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
               </Link>
               {listing.verified && <span data-testid="listing-detail-vbadge" aria-label="Verified vendor" style={{ width: 15, height: 15, borderRadius: 999, background: "var(--color-forest)", color: "var(--color-cream)", fontSize: 9.5, display: "grid", placeItems: "center", fontWeight: 700, flexShrink: 0 }}>✓</span>}
               <span aria-hidden>·</span>
-              <span>{listing.categorySlug ? categoryNameFromSlug(listing.categorySlug) : "Listing"}</span>
+              <span>{displayCategory}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
               <span
@@ -886,7 +895,7 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
           <div data-testid="listing-detail-facts" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7 }}>
             <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 12, padding: "9px 12px" }}>
               <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: .8, textTransform: "uppercase", color: "#9a6d1f", fontFamily: "var(--role-font-ui)", marginBottom: 2 }}>CATEGORY</div>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--color-forest)", fontFamily: "var(--role-font-ui)" }}>{listing.categorySlug ? categoryNameFromSlug(listing.categorySlug) : "—"}</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--color-forest)", fontFamily: "var(--role-font-ui)" }}>{displayCategory}</div>
             </div>
             <div style={{ background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 12, padding: "9px 12px" }}>
               <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: .8, textTransform: "uppercase", color: "#9a6d1f", fontFamily: "var(--role-font-ui)", marginBottom: 2 }}>VENDOR</div>

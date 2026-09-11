@@ -227,12 +227,18 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
             {/* S1: category pills show NAMES (the old hero rendered raw ids —
                 shoppers saw "food"). Unknown ids fall back to the id.
                 D2: falls back to pills COMPUTED from active listings when the
-                vendor has no declared categories. */}
+                vendor has no declared categories.
+                Q4 (founder): a vendor with ONLY the 'Other' category but a real
+                niche shows their NICHE as the pill — 'Other' never renders. */}
             {pillIds.length > 0 && (
               <div className="vs-cat-badges" style={{ marginTop: 8 }}>
-                {pillIds.slice(0, 3).map((cat) => (
-                  <span key={cat} className="vs-cat-badge">{CAT_NAME_BY_ID[cat] ?? cat}</span>
-                ))}
+                {pillIds.slice(0, 3).map((cat) => {
+                  const label =
+                    cat === "other" && vendor.listings.some((l) => l.categorySlug === "other" && (l as { shortDescription?: string | null }).shortDescription?.startsWith("Niche:"))
+                      ? ((vendor.listings.find((l) => l.categorySlug === "other" && (l as { shortDescription?: string | null }).shortDescription?.startsWith("Niche:")) as { shortDescription?: string } | undefined)?.shortDescription ?? "").slice("Niche:".length).trim()
+                      : CAT_NAME_BY_ID[cat] ?? cat;
+                  return <span key={cat} className="vs-cat-badge">{label || cat}</span>;
+                })}
               </div>
             )}
           </div>
