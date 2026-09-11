@@ -2,7 +2,7 @@
  *  hydration mismatch. Run: npx tsx scripts/rt-mb-hydration.mts (dev :3031). */
 import { chromium } from "playwright";
 
-const BASE = "http://localhost:3031";
+const BASE = process.env.MB_BASE ?? "http://localhost:3031";
 const routes = ["/", "/explore", "/explore/live", "/explore/trending"];
 const HYD = /hydration|did not match|Text content|server rendered|regenerated on the client/i;
 
