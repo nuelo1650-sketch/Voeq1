@@ -32,12 +32,19 @@
 /* ---- MONEY BAG C1: landing nav responsive split (A1/A2) ---------------- */
 /* Mobile: hide the desktop search pill + row 2; show burger.              */
 /* Desktop (>=760): hide burger; show search pill + row 2.                 */
-.mb-nav-search-desktop { display: none; }
-.mb-nav-row2 { display: none; }
+/* Landing nav variant B (founder 2026-09-11): single row; the editorial links,
+   the quiet sell link and the auth separator collapse into the burger drawer
+   below 820px. */
+.mb-nav-links { display: none; }
+.mb-nav-signin { display: none; }
+.mb-nav-sell { display: none; }
+.mb-nav-sep { display: none; }
 .mb-nav-burger { display: inline-flex !important; }
-@media (min-width: 760px) {
-  .mb-nav-search-desktop { display: flex; }
-  .mb-nav-row2 { display: block; }
+@media (min-width: 820px) {
+  .mb-nav-links { display: flex !important; }
+  .mb-nav-signin { display: inline !important; }
+  .mb-nav-sell { display: inline-flex !important; }
+  .mb-nav-sep { display: inline !important; }
   .mb-nav-burger { display: none !important; }
 }
 

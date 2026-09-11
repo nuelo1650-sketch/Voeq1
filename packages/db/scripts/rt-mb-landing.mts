@@ -87,10 +87,18 @@ try {
     check("H15: door pill enters the market", (pillHref ?? "").includes("/explore"));
   }
 
-  // 9) old landing intact without param
+  // 9) canary semantics (flipped 2026-09-11 for founder review): in NON-PROD
+  // the new landing is the DEFAULT (previews/dev are review surfaces) and the
+  // OLD landing is the escape hatch at ?next=old. Production keeps the old
+  // default until cut-over — that branch lives in app/page.tsx VERCEL_ENV gate
+  // and is verified at prod deploy time by the 120/120 matrix.
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+  const mbDefault = await page.$('[data-testid="mb-landing"]');
+  check("H16a: non-prod default = new landing", mbDefault !== null);
+  await page.goto(`${BASE}/?next=old`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("main", { timeout: 30000 });
   const mbOnOld = await page.$('[data-testid="mb-landing"]');
-  check("H16: old landing intact without canary param", mbOnOld === null);
+  check("H16b: ?next=old escape hatch renders the old landing", mbOnOld === null);
 
   await browser.close();
 } finally {

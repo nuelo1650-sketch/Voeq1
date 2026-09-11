@@ -34,11 +34,16 @@ export default async function Landing({
 }) {
   const params = await searchParams;
 
-  if (params.next === "mb") {
+  // Canary: prod keeps the OLD landing until cut-over (?next=mb to preview).
+  // Previews/dev are review surfaces — the NEW landing is the DEFAULT there
+  // (founder tripped on this 2026-09-11: "I still see the old thing"). ?next=old
+  // forces the old surface on a preview if you ever need the comparison.
+  if (params.next === "mb" ||
+      (process.env.VERCEL_ENV !== "production" && params.next !== "old")) {
     const identity = await getCurrentIdentity();
     const verified = await mockCampusRepo.list(identity?.id);
     const campus = identity?.campus ?? verified[0]?.id ?? "NMU Okerenkoko";
-    return <LandingMB campusName={campus} />;
+    return <LandingMB campusName={campus} signedIn={!!identity} />;
   }
 
   return (

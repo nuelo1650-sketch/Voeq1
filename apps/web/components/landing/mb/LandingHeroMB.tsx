@@ -33,12 +33,15 @@ export function LandingHeroMB({ listings }: { listings: ExploreListing[] }) {
         position: "relative",
       }}
     >
-      {/* warm radial wash */}
+      {/* warm radial wash — inset stays inside the container: a negative
+         horizontal bleed (was -10%) pushed the page wider than the viewport
+         (G6 overflow found by the nav-variant screenshot, 2026-09-11:
+         99px h-scroll desktop / 39px mobile). */}
       <div
         aria-hidden
         style={{
           position: "absolute",
-          inset: "-25% -10% 25% -10%",
+          inset: "-25% 0% 25% 0%",
           pointerEvents: "none",
           background:
             "radial-gradient(45% 40% at 12% 25%, rgba(232,163,61,0.2), transparent 70%), radial-gradient(40% 35% at 90% 15%, rgba(45,90,61,0.1), transparent 70%)",

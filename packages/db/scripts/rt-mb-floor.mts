@@ -71,11 +71,16 @@ try {
   check("B7: manual ₦ min/max inputs present (no sliders)", priceMin !== null && priceMax !== null);
   await page.click('[data-testid="mb-filters-close"]');
 
-  // 5) old explore still renders WITHOUT the canary param (additive, D8)
+  // 5) canary semantics (flipped 2026-09-11): non-prod DEFAULT is the MB floor;
+  // old explore lives at ?next=old. Prod keeps old default until cut-over
+  // (VERCEL_ENV gate in app/explore/page.tsx — verified by the prod matrix).
   await page.goto(`${BASE}/explore`, { waitUntil: "domcontentloaded" });
+  const mbDefault = await page.waitForSelector('[data-testid="mb-explore"]', { timeout: 30000 });
+  check("B8a: non-prod default = MB floor", mbDefault !== null);
+  await page.goto(`${BASE}/explore?next=old`, { waitUntil: "domcontentloaded" });
   await page.waitForSelector('[data-testid="explore-grid"]', { timeout: 30000 });
   const mbOnOld = await page.$('[data-testid="mb-explore"]');
-  check("B8: old explore intact without canary param", mbOnOld === null);
+  check("B8b: ?next=old escape hatch renders the old explore", mbOnOld === null);
 
   // 6) API still returns sections payload
   const res = await fetch(`${BASE}/api/explore?campus=nmu-okerenkoko&sections=1`);

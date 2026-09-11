@@ -49,7 +49,7 @@ const EXPLAIN_ROWS = [
   },
 ];
 
-export function LandingMB({ campusName }: { campusName: string }) {
+export function LandingMB({ campusName, signedIn = false }: { campusName: string; signedIn?: boolean }) {
   const [listings, setListings] = useState<ExploreListing[]>([]);
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 
@@ -74,7 +74,7 @@ export function LandingMB({ campusName }: { campusName: string }) {
 
   return (
     <div data-testid="mb-landing" style={{ minHeight: "100vh", background: "var(--role-surface, #F5F1E8)" }}>
-      <LandingNavMB />
+      <LandingNavMB signedIn={signedIn} />
 
       <main className="landing-page">
         <LandingHeroMB listings={status === "success" ? listings : []} />
