@@ -37,12 +37,15 @@ export function TrustBandMB({ campusName }: { campusName: string }) {
     return () => clearInterval(t);
   }, []);
 
+  // Founder polish (2026-09-11): no raw campus slug in the pill — keep the
+  // REAL time-based open/closed state, generic wording. (campusName stays in
+  // the signature for other uses; the pill deliberately stopped showing it.)
   const marketLine =
     openState === "open"
-      ? `Market open — ${campusName}`
+      ? "Market open — students are browsing now"
       : openState === "pre"
-        ? `Opens today ${opensAt}:00 — ${campusName}`
-        : `Opens 7:00 — ${campusName}`;
+        ? `Opens ${opensAt}:00 — market's waking up`
+        : "Opens 7:00 — see you in the morning";
 
   return (
     <div

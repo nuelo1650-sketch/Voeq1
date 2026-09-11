@@ -28,6 +28,24 @@ function naira(minor: number): string {
   return `₦${(minor / 100).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 }
 
+/** Short real label for a campus name/ID — raw slugs never render (founder
+ *  polish 2026-09-11). "Nigeria Maritime University (Okerenkoko)" ->
+ *  "NMU Okerenkoko"; slug-shaped values prettify to "NMU Okerenkoko". */
+export function campusDisplay(nameOrId: string): string {
+  if (!nameOrId) return "";
+  const paren = nameOrId.match(/\(([^)]+)\)/);
+  const core = nameOrId.replace(/\s*\([^)]+\)\s*/g, " ").trim();
+  if (/^[a-z0-9-]+$/.test(nameOrId) && !core.includes(" ")) {
+    return nameOrId
+      .split(/[-\s]+/)
+      .map((w) => (w.length <= 3 ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)))
+      .join(" ");
+  }
+  const acronym = core.split(/\s+/).filter((w) => w.length > 2).map((w) => w[0]).join("").toUpperCase();
+  if (paren) return `${acronym || core} ${paren[1]}`;
+  return core.length > 24 && acronym ? acronym : core;
+}
+
 export function ExploreMB({
   campus: initialCampus,
   initialQuery,
@@ -65,17 +83,42 @@ export function ExploreMB({
   const [isMobile, setIsMobile] = useState(false);
   const [campusName, setCampusName] = useState(initialCampus);
 
+  // Founder polish (2026-09-11): raw slugs must never render — resolve campus
+  // IDs to REAL names via the same /api/campuses/list the picker uses.
+  const [campusList, setCampusList] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    let active = true;
+    fetch("/api/campuses/list")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { campuses?: { id: string; name: string }[] } | null) => {
+        if (active && Array.isArray(d?.campuses)) setCampusList(d.campuses);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+  // resolved from the real DB list when loaded; prettified otherwise (never a
+  // raw slug on screen — CampusSelector's friendlyFallback was the precedent).
+  const campusLabel = campusName
+    ? campusDisplay(campusList.find((c) => c.id === campusName)?.name ?? campusName)
+    : "";
+
   // B6: campus state machine — device memory (voeq:preferred-campus).
-  // needsCampusSetup = FIRST VISIT (no stored campus): the context strip
-  // renders the "Set your campus" chip instead of a campus name.
+  // needsCampusSetup = FIRST VISIT (no stored campus): context strip sits at
+  // All-Nigeria with the "Set your campus" chip (B8b polish: first visit used
+  // to scope=campus on the server's hardcoded fallback — spec says all).
   const [needsCampusSetup, setNeedsCampusSetup] = useState(false);
   useEffect(() => {
     const stored = localStorage.getItem("voeq:preferred-campus");
     if (stored) {
       setNeedsCampusSetup(false);
-      if (stored !== initialCampus) setCampusName(stored);
+      setCampusName(stored);
+      setScope("campus");
     } else {
       setNeedsCampusSetup(true);
+      setCampusName("");
+      setScope("all");
     }
     setIsMobile(window.matchMedia("(max-width: 767px)").matches);
   }, [initialCampus]);
@@ -165,7 +208,7 @@ export function ExploreMB({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search the market…"
+          placeholder={campusName ? `Search ${campusLabel}…` : "Search the market…"}
           aria-label="Search listings"
           style={{
             flex: 1,
@@ -182,10 +225,18 @@ export function ExploreMB({
       </header>
 
       <ContextStrip
-        campusName={campusName}
+        campusName={campusLabel}
         liveCount={data.length}
         scope={scope}
-        onScopeChange={setScope}
+        onScopeChange={(s) => {
+          // polished state: choosing "Campus" with none set still opens the
+          // picker (first-visit machine) instead of scoping to nothing.
+          if (s === "campus" && !campusName) {
+            setDrawerOpen(true);
+            return;
+          }
+          setScope(s);
+        }}
         activeFilterCount={activeFilterCount}
         onOpenFilters={() => setDrawerOpen(true)}
         needsCampusSetup={needsCampusSetup}
@@ -281,7 +332,13 @@ export function ExploreMB({
             setScope("all");
           }
         }}
-        campusOptions={[{ id: campusName, name: campusName }]}
+        campusOptions={
+          campusList.length > 0
+            ? campusList.map((c) => ({ id: c.id, name: c.name }))
+            : campusName
+              ? [{ id: campusName, name: campusDisplay(campusName) }]
+              : []
+        }
         categoryOptions={categoryOptions}
         sort={sort}
         onSortChange={setSort}
