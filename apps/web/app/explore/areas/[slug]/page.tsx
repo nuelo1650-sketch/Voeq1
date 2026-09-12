@@ -7,7 +7,7 @@ import { AreaPageMB } from "@/components/explore/mb/AreaPageMB";
  */
 export const metadata: Metadata = {
   title: "Area — Voeq market",
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true }, // cut-over: public surface
 };
 
 export default async function AreaPage() {

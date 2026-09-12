@@ -43,12 +43,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Category pages — static taxonomy, all real public pages.
-  const categoryEntries: MetadataRoute.Sitemap = categories.map((c) => ({
-    url: `${SITE_URL}/c/${c.slug}`,
-    lastModified: now,
-    changeFrequency: "daily" as const,
-    priority: 0.7,
-  }));
+  // Cut-over (2026-09-11): MB category pages (/explore/c/[slug]) join the
+  // classic /c/[slug]; the two Money Bag section pages (Live, Trending) are
+  // now indexable public surfaces. Area pages stay out until a public areas
+  // list helper exists (honest — no fabricated URLs).
+  const categoryEntries: MetadataRoute.Sitemap = [
+    ...categories.map((c) => ({
+      url: `${SITE_URL}/c/${c.slug}`,
+      lastModified: now,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    })),
+    ...categories.map((c) => ({
+      url: `${SITE_URL}/explore/c/${c.slug}`,
+      lastModified: now,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    })),
+    { url: `${SITE_URL}/explore/live`, lastModified: now, changeFrequency: "daily" as const, priority: 0.8 },
+    { url: `${SITE_URL}/explore/trending`, lastModified: now, changeFrequency: "hourly" as const, priority: 0.8 },
+  ];
 
   // Live vendor storefronts + published active listings — real data,
   // publicOnly (same visibility filter as Explore: live vendors only).

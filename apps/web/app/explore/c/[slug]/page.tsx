@@ -9,7 +9,7 @@ import { mockCampusRepo } from "@voeq/data";
  */
 export const metadata: Metadata = {
   title: "Category — Voeq market",
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true }, // cut-over: public surface
 };
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
