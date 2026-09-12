@@ -5482,6 +5482,14 @@ header.AppShell,
   display: flex; flex-direction: column; gap: 14px;
   padding: 14px 0 6px; max-width: 1100px; margin: 0 auto;
 }
+/* Desktop alignment (founder audit 2026-09-11): every storefront section shares
+   the hero's 1100px container — one grid, no more competing left margins
+   (the grid heading sat at x≈13 while hero copy sat at 93/190). */
+.vs-section { max-width: 1100px; margin: 0 auto var(--space-6); }
+.vs-section-head {
+  font-family: var(--role-font-display); font-size: 24px;
+  margin: 0 0 var(--space-3); color: var(--role-text);
+}
 /* S1: the hero-top is now a COLUMN (idrow → description → CTA row → socials →
    statbar). The avatar/meta side-by-side lives in .vs-idrow inside it. */
 .vs-hero-top {
@@ -5544,7 +5552,10 @@ header.AppShell,
 .vs-idmeta { flex: 1; min-width: 0; }
 .vs-namerow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .vs-ctarow { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
-.vs-ctarow .vs-cta { flex: 1 1 240px; align-self: auto; }
+/* Desktop alignment (founder audit 2026-09-11): the CTA row no longer stretches
+   the primary pill across the whole 1100px column with a hollow right side —
+   the buttons share a tight, centered-on-their-own-line band. */
+.vs-ctarow .vs-cta { flex: 1 1 240px; max-width: 420px; align-self: auto; justify-content: center; }
 .vs-follow {
   flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   font-family: var(--role-font-ui); font-weight: 600; font-size: 14px;

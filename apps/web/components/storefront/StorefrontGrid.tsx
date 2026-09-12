@@ -54,16 +54,9 @@ export function StorefrontGrid({ listings }: { listings: ExploreListing[] }) {
     <section
       data-testid="storefront-grid"
       aria-label="Listings from this vendor"
-      style={{
-        marginBottom: "var(--space-6)",
-      }}
+      className="vs-section"
     >
-      <h2 style={{
-        fontFamily: "var(--role-font-display)",
-        fontSize: "24px",
-        marginBottom: "var(--space-3)",
-        color: "var(--role-text)",
-      }}>
+      <h2 className="vs-section-head">
         Listings ({shown.length})
       </h2>
       <div className="vs-grid" style={{ gap: "var(--space-3)" }}>

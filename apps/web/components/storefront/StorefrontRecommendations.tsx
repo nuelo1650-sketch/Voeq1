@@ -34,7 +34,7 @@ export function StorefrontRecommendations({ otherListings, relatedVendors, vendo
   }
 
   return (
-    <div style={{ marginBottom: "var(--space-6)" }}>
+    <div className="vs-section" style={{ marginBottom: 0 }}>
       {/* Explore more listings (K2.5 #2) */}
       {hasOtherListings && (
         <section style={{ marginBottom: "var(--space-6)" }}>

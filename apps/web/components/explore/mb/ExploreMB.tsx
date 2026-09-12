@@ -142,7 +142,10 @@ export function ExploreMB({
   const grid = sections?.grid ?? data;
 
   const trending = useMemo(() => data.filter((l) => l.trending), [data]);
-  const under5k = useMemo(() => data.filter((l) => l.priceMinor <= 500000).slice(0, 8), [data]);
+  // "Budget finds" (founder 2026-09-11: 'Under ₦5,000' was an arbitrary line
+  // nobody chose). Honest rule: the 8 CHEAPEST real listings on the grid —
+  // no threshold, no fabricated cut, always populated while the market is.
+  const budgetFinds = useMemo(() => [...data].sort((a, b) => a.priceMinor - b.priceMinor).slice(0, 8), [data]);
 
   const activeFilterCount =
     (filters.category ? 1 : 0) +
@@ -265,7 +268,7 @@ export function ExploreMB({
             <FreshDrops drops={drops} />
             <LiveShelf picks={live} />
             <Rail title="Trending this week" sub="What the market loves — real attention, measured" items={trending} testid="mb-trending" />
-            <Rail title="Under ₦5,000" sub="Small prices, real finds" items={under5k} testid="mb-under5k" />
+            <Rail title="Budget finds" sub="The cheapest on the grid right now" items={budgetFinds} testid="mb-budget" />
 
             <section data-testid="mb-grid" className="mb-sec">
               <h2 style={{ margin: "0 0 14px", fontFamily: "var(--role-font-display)", fontSize: 24, color: "var(--forest-deep, #0F2A1D)" }}>

@@ -10,6 +10,7 @@ import { categories } from "@voeq/data/explore-view";
 import type { AuthStatusResponse } from "@/lib/authStatus";
 import { trackEvent } from "@/lib/track";
 import { OpenNowBadge } from "@/components/vendor/OpenNowBadge";
+import { formatMonthYearFixed } from "@/lib/formatDateFixed";
 import { ContextBack } from "@/components/shopper/ContextBack";
 import { FollowButton } from "@/components/shopper/FollowButton";
 import { BrandBanner } from "@/components/storefront/BrandBanner";
@@ -161,8 +162,6 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
     categoriesShown.length > 0
       ? categoriesShown
       : [...computedFromListings].map((slug) => slug); // slugs resolve via CAT_NAME_BY_ID fallback in the pills render
-  const reviewCount = vendor.reviews.length;
-
   return (
     <div className="vs-hero">
       {/* MONEY BAG D2a (A17 hybrid banner): the banner slot ABOVE the identity
@@ -251,14 +250,6 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
           <p data-testid="storefront-about" className="vs-desc">{vendor.description}</p>
         )}
 
-        {/* MONEY BAG D2 (A18): "On Voeq since {year}" — real member duration
-            from the agreement acceptance. Omitted when null (honest). */}
-        {vendor.agreementAcceptedAt && (
-          <p data-testid="storefront-member-since" style={{ margin: 0, fontSize: 12.5, color: "var(--role-text-muted)", fontFamily: "var(--role-font-ui)" }}>
-            On Voeq since {new Date(vendor.agreementAcceptedAt).getFullYear()}
-          </p>
-        )}
-
         {/* S1: Contact + Follow side by side (Follow moved up from Trust —
             one place per action). */}
         <div className="vs-ctarow">
@@ -300,8 +291,10 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
           </div>
         )}
 
-        {/* S1 stat bar: LISTINGS / RATING / REVIEWS — honest numbers only
-            (rating shows — until real reviews exist; never invented). */}
+        {/* S1 stat bar — founder 2026-09-11: reviews are a SUPPORTING role,
+            not hero furniture. Front row = LISTINGS / RATING only (honest:
+            rating shows — until real reviews exist). The review count +
+            block lives in StorefrontTrust below the goods. */}
         <div data-testid="storefront-stats" className="vs-statbar">
           <div className="vs-stat">
             <b>{vendor.listingCount}</b>
@@ -311,10 +304,12 @@ export function StorefrontHero({ vendor }: { vendor: VendorStorefrontView }) {
             <b>{hasRating ? `${vendor.ratingAvg!.toFixed(1)}★` : "—"}</b>
             <span>RATING</span>
           </div>
-          <div className="vs-stat">
-            <b>{reviewCount}</b>
-            <span>{reviewCount === 1 ? "REVIEW" : "REVIEWS"}</span>
-          </div>
+          {vendor.agreementAcceptedAt && (
+            <div className="vs-stat">
+              <b>{formatMonthYearFixed(vendor.agreementAcceptedAt)}</b>
+              <span>ON VOEQ SINCE</span>
+            </div>
+          )}
         </div>
       </header>
     </div>

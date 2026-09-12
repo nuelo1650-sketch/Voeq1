@@ -36,8 +36,12 @@ export function StorefrontTrust({ vendor }: { vendor: VendorStorefrontView }) {
     <section
       data-testid="storefront-trust"
       aria-label="Reviews and contact"
+      className="vs-section"
       style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}
     >
+      {/* Founder 2026-09-11: reviews are a SUPPORTING role — ReviewsList's
+          own heading + honest empty/count states carry this block BELOW the
+          goods; the hero stat bar no longer leads with REVIEWS. */}
       <ReviewsList reviews={vendor.reviews} ratingAvg={ratingAvg} ratingCount={rated.length} />
 
       {/* Auth-to-act: unauthed shoppers see the form behind a /login?next= gate. */}

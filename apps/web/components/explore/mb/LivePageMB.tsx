@@ -300,7 +300,7 @@ export function LivePageMB({ campus }: { campus: string }) {
                 [
                   ["trending", "Trending now"],
                   ["fresh", "Freshest"],
-                  ["cheap", "Under ₦5,000"],
+                  ["cheap", "Budget finds"],
                   ["food", "Food & Drinks"],
                 ] as [XTab, string][]
               ).map(([id, label]) => (

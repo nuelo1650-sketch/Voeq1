@@ -1,0 +1,12 @@
+import { chromium } from "playwright";
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+page.on("console", (m) => { if (m.type() === "error") console.log("CONSOLE:", m.text().slice(0, 140)); });
+page.on("requestfailed", (r) => console.log("REQFAIL:", r.url().slice(0, 80)));
+page.on("response", (r) => { if (r.url().includes("/api/explore") && r.status() !== 200) console.log("BAD RESP:", r.status(), r.url().slice(0, 80)); });
+await page.goto("http://localhost:3031/listing/vis-ankara-cmpmtymm8pg", { waitUntil: "domcontentloaded" });
+await page.waitForSelector('[data-testid="listing-detail"]', { timeout: 30000 });
+await page.waitForTimeout(6000);
+console.log("h2s:", await page.evaluate(`(() => [...document.querySelectorAll('h2')].map(h=>h.textContent?.trim().slice(0,35)).join(' | '))()`));
+console.log("more-section:", await page.evaluate(`(() => !![...document.querySelectorAll('h2')].find(h=>/More from/i.test(h.textContent||'')))()`));
+await browser.close();

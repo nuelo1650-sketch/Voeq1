@@ -20,6 +20,13 @@ export function formatDateFixed(input: string | number | Date | null | undefined
   return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
+/** "Sep 2025" — member-since style (founder 2026-09-11: month AND year). */
+export function formatMonthYearFixed(input: string | number | Date | null | undefined): string {
+  const d = input instanceof Date ? input : new Date(input ?? NaN);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+}
+
 /** "12 Sep" — same pattern without the year (for recent items). */
 export function formatDayMonthFixed(input: string | number | Date | null | undefined): string {
   const d = input instanceof Date ? input : new Date(input ?? NaN);

@@ -1,0 +1,21 @@
+import { neon } from "@neondatabase/serverless";
+import { readFileSync } from "node:fs";
+const envText = readFileSync("C:/Users/Legacy/Documents/voeq/apps/web/.env.local", "utf8");
+const dbUrl = envText.match(/^DATABASE_URL=(.+)$/m)![1].replace(/^"|"$/g, "").replace("/neondb?", "/neondb_test?");
+const sql = neon(dbUrl);
+// leftovers from _visshots-seedonly (cmp runs): vendors vis-vv*-cmp*, listings vis-*
+const before = await sql`SELECT count(*)::int AS n FROM listings WHERE id LIKE 'vis-%' OR id LIKE 'cmp%'`;
+const vBefore = await sql`SELECT count(*)::int AS n FROM vendors WHERE id LIKE 'vis-%'`;
+console.log("before: listings", before[0].n, "vendors", vBefore[0].n);
+await sql`DELETE FROM comments WHERE listing_id IN (SELECT id FROM listings WHERE id LIKE 'vis-%')`.catch(() => {});
+await sql`DELETE FROM likes WHERE target_id IN (SELECT id FROM listings WHERE id LIKE 'vis-%')`.catch(() => {});
+await sql`DELETE FROM wishlist_items WHERE listing_id IN (SELECT id FROM listings WHERE id LIKE 'vis-%')`.catch(() => {});
+await sql`DELETE FROM listing_fairness WHERE listing_id IN (SELECT id FROM listings WHERE id LIKE 'vis-%')`.catch(() => {});
+await sql`DELETE FROM voeq_live_picks WHERE listing_id IN (SELECT id FROM listings WHERE id LIKE 'vis-%')`.catch(() => {});
+await sql`DELETE FROM conversations WHERE vendor_id IN (SELECT id FROM vendors WHERE id LIKE 'vis-%')`.catch(() => {});
+await sql`DELETE FROM listings WHERE id LIKE 'vis-%'`;
+await sql`DELETE FROM sessions WHERE identity_id LIKE 'vis-i-%'`;
+await sql`DELETE FROM vendors WHERE id LIKE 'vis-%'`;
+await sql`DELETE FROM identities WHERE id LIKE 'vis-i-%'`;
+const after = await sql`SELECT count(*)::int AS n FROM listings WHERE id LIKE 'vis-%'`;
+console.log("after:", after[0].n);

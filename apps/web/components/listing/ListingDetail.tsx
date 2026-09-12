@@ -538,12 +538,14 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
 
           {/* Action buttons (K2.3 #3, K2.10 enhanced with social share) */}
           <div className="listing-detail-actions" style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-1)", position: "relative" }}>
-            <div style={{ position: "relative", flex: 1 }}>
+            {/* Desktop alignment (founder audit 2026-09-11): the share button
+                was flex:1 + width:100% — a 408px hollow pill next to compact
+                actions. Auto width; the row keeps its own rhythm. */}
+            <div style={{ position: "relative" }}>
               <button 
                 data-testid="listing-detail-share" 
                 onClick={handleShare} 
                 style={{
-                  width: "100%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

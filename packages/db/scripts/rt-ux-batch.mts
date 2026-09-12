@@ -33,8 +33,8 @@ try {
   const desc = "Hot jollof rice served fresh every evening. We also do party packs and small chops for birthdays and hostel events.";
   await sql`INSERT INTO identities (id, email, name, role, staff_role, vendor_id, campus, account_status, email_verified, consent, created_at, updated_at)
     VALUES (${idId}, ${"ux-" + stamp + "@voeq-test.example"}, 'UX Vendor', 'vendor', NULL, ${vendorId}, 'nmu-okerenkoko', 'active', true, '[]'::jsonb, now(), now())`;
-  await sql`INSERT INTO vendors (id, identity_id, name, handle, slug, campus, category_ids, status, verified, description)
-    VALUES (${vendorId}, ${idId}, 'UX Vendor', ${"ux" + stamp}, ${"ux-" + stamp}, 'nmu-okerenkoko', '["food"]'::jsonb, 'live', true, ${desc})`;
+  await sql`INSERT INTO vendors (id, identity_id, name, handle, slug, campus, category_ids, status, verified, description, agreement_accepted_at)
+    VALUES (${vendorId}, ${idId}, 'UX Vendor', ${"ux" + stamp}, ${"ux-" + stamp}, 'nmu-okerenkoko', '["food"]'::jsonb, 'live', true, ${desc}, ${"2025-07-15T12:00:00.000Z"})`;
   await sql`INSERT INTO listings (id, vendor_id, title, description, category_id, price_minor, price_min_minor, is_published, is_featured, status, images)
     VALUES (${hotId}, ${vendorId}, 'Hot Jollof Plate', 'Best on campus.', 'food', 150000, 150000, true, false, 'published', '[]'::jsonb)`;
   await sql`INSERT INTO listings (id, vendor_id, title, description, category_id, price_minor, price_min_minor, is_published, is_featured, status, images)
@@ -71,7 +71,13 @@ try {
   const catPill = (await page.locator(".vs-cat-badge").first().textContent()) ?? "";
   check("A4: category pill shows NAME not id", catPill.length > 0 && catPill !== catPill.toLowerCase(), catPill);
   const statCells = await page.locator("[data-testid='storefront-stats'] .vs-stat").count();
-  check("A5: statbar = listings/rating/reviews", statCells === 3, `cells: ${statCells}`);
+  // founder 2026-09-11: REVIEWS demoted from the hero statbar (supporting
+  // role lives in the Trust block); cells = LISTINGS / RATING (+ ON VOEQ
+  // SINCE month-year when the agreement date exists).
+  const statText = (await page.locator("[data-testid='storefront-stats']").textContent()) ?? "";
+  check("A5: statbar = listings/rating, no REVIEWS cell", statCells >= 2 && !/REVIEWS/.test(statText), `cells: ${statCells}`);
+  const sinceCell = await page.locator("[data-testid='storefront-stats']").locator("text=ON VOEQ SINCE").count();
+  check("A5b: member-since cell present", sinceCell === 1, `count: ${sinceCell}`);
 
   // ---- B: preview banner v2 ----
   await page.goto(`${BASE}/vendor/preview`, { waitUntil: "domcontentloaded", timeout: 60000 });
