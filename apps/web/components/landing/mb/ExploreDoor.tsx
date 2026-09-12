@@ -96,6 +96,7 @@ function ExploreDoorInner({
 
         {/* Quick-entry cards */}
         <div
+          className="mb-door-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr",

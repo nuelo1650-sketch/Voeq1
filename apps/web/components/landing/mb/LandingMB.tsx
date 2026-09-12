@@ -101,7 +101,7 @@ export function LandingMB({ campusName, signedIn = false }: { campusName: string
                 More →
               </Link>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 13 }}>
+            <div className="mb-grid">
               {grid.map((l, i) => (
                 <MbCard key={l.id} listing={l} revealDelay={(i % 4) * 100} eager={i < 2} />
               ))}

@@ -26,6 +26,7 @@ export function LandingHeroMB({ listings }: { listings: ExploreListing[] }) {
   return (
     <header
       data-testid="mb-hero"
+      className="mb-hero"
       style={{
         maxWidth: 1200,
         margin: "0 auto",
@@ -47,7 +48,7 @@ export function LandingHeroMB({ listings }: { listings: ExploreListing[] }) {
             "radial-gradient(45% 40% at 12% 25%, rgba(232,163,61,0.2), transparent 70%), radial-gradient(40% 35% at 90% 15%, rgba(45,90,61,0.1), transparent 70%)",
         }}
       />
-      <div style={{ position: "relative", zIndex: 2, textAlign: "center", maxWidth: 560, margin: "0 auto" }}>
+      <div className="mb-hero-copy" style={{ position: "relative", zIndex: 2, textAlign: "center", maxWidth: 560, margin: "0 auto" }}>
         <p
           style={{
             fontSize: 11,
@@ -82,10 +83,10 @@ export function LandingHeroMB({ listings }: { listings: ExploreListing[] }) {
           <br />
           <em style={{ color: "var(--amber-dark, #D4922A)" }}>Get it.</em>
         </h1>
-        <p style={{ color: "var(--role-muted, #4A4A4A)", fontSize: 15, maxWidth: "36ch", lineHeight: 1.6, margin: "0 auto" }}>
+        <p className="mb-hero-sub" style={{ color: "var(--role-muted, #4A4A4A)", fontSize: 15, maxWidth: "36ch", lineHeight: 1.6, margin: "0 auto" }}>
           The trusted voice of your campus market — who sells what, around you, right now.
         </p>
-        <div style={{ marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
+        <div className="mb-hero-cta" style={{ marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
           {/* Crawlable <a>, NOT router.push (B4) */}
           <Link
             href="/explore?next=mb"
@@ -118,6 +119,7 @@ export function LandingHeroMB({ listings }: { listings: ExploreListing[] }) {
         <div style={{ position: "relative", zIndex: 2 }}>
           <div
             data-testid="mb-hero-collage"
+            className="mb-collage"
             style={{
               margin: "22px -16px 4px",
               padding: "8px 16px 24px",

@@ -59,7 +59,7 @@ export function MbCard({
         animation: `mbReveal 1.1s cubic-bezier(.2,.6,.2,1) ${revealDelay}ms both`,
       }}
     >
-      <div style={{ position: "relative", aspectRatio: "4 / 3", background: "rgba(15,42,29,0.05)" }}>
+      <div className="mb-gimg" style={{ position: "relative", background: "rgba(15,42,29,0.05)" }}>
         {src && (
           <img
             src={cdnTransform(src, 600)}

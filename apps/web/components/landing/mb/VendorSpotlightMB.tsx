@@ -127,7 +127,7 @@ export function VendorSpotlightMB({ listings }: { listings: ExploreListing[] }) 
           background: "var(--forest-deep, #0B211A)",
         }}
       >
-        <div style={{ position: "relative", aspectRatio: "4 / 4.4" }}>
+        <div className="mb-spot-stage" style={{ position: "relative" }}>
           {src && (
             <img
               key={v.listing.id}

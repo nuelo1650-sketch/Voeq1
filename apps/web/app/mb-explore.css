@@ -63,3 +63,113 @@
 @media (prefers-reduced-motion: reduce) {
   .mb-crossfade-guard { animation: none !important; }
 }
+
+/* ---- MONEY BAG VISUAL FIX (founder audit 2026-09-11) --------------------- */
+/* The mock contract: money-bag/mocks/explore-v1.html + home-v7.html carry a
+   760px breakpoint that turns mobile shapes into desktop shapes. The build
+   froze every layout at its mobile shape — cards measured 578px at 1280.
+   These classes are the mock's numbers VERBATIM (grid2/gcard/gimg/rail/
+   bigcard/stage-card/spot-stage/hero/pick/hs-card/cat-grid/tcard).        */
+
+/* GRID — mock .grid2: 2-up mobile → 4-up desktop */
+.mb-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+@media (min-width: 760px) {
+  .mb-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+}
+
+/* RAIL — mock .rail: horizontal scroll track, snap cards 44% → 4.15-up */
+.mb-rail {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 6px 0 8px;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+}
+.mb-rail::-webkit-scrollbar { display: none; }
+.mb-rail > .mb-gcard {
+  flex: 0 0 44%;
+  max-width: 44%;
+  scroll-snap-align: start;
+}
+@media (min-width: 760px) {
+  .mb-rail > .mb-gcard { flex: 0 0 calc((100% - 48px) / 4.15); max-width: calc((100% - 48px) / 4.15); }
+}
+
+/* CARD IMAGE — mock .gimg: square (1/1.02), not 4:3 */
+.mb-gimg { aspect-ratio: 1 / 1.02; }
+
+/* FRESH DROPS — mock .bigcard: 82% mobile → 2.16-up desktop, aspect 4/4.5 */
+.mb-bigcard { flex: 0 0 82%; max-width: 82%; scroll-snap-align: start; aspect-ratio: 4 / 4.5; }
+@media (min-width: 760px) {
+  .mb-bigcard { flex: 0 0 calc((100% - 42px) / 2.16); max-width: calc((100% - 42px) / 2.16); }
+}
+
+/* LIVE SHELF — mock .stage2: 1-col → 2-col ≥760; .stage-card 16/10 → 16/8.4 */
+.mb-stage2 { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.mb-stage-card { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
+@media (min-width: 760px) {
+  .mb-stage2 { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .mb-stage-card { aspect-ratio: 16 / 8.4; }
+}
+
+/* VENDOR SPOTLIGHT — mock .spot-stage: 4/3.8 mobile → 16/7.4 desktop */
+.mb-spot-stage { aspect-ratio: 4 / 3.8; }
+@media (min-width: 760px) {
+  .mb-spot-stage { aspect-ratio: 16 / 7.4; }
+}
+
+/* LANDING HERO — mock .hero: stacked → 1.02fr/1fr split ≥760, copy left.
+   !important: the components carry the mobile defaults as INLINE styles
+   (textAlign center, margin auto, negative collage margin) which would
+   otherwise beat these class rules. */
+@media (min-width: 760px) {
+  .mb-hero { display: grid !important; grid-template-columns: 1.02fr 1fr; gap: 34px; align-items: center; padding-top: 46px; }
+  .mb-hero-copy { text-align: left !important; margin: 0 !important; max-width: none !important; }
+  .mb-hero-sub { margin: 18px 0 0 !important; }
+  .mb-hero-cta { justify-content: flex-start !important; }
+  .mb-collage { margin: 0 !important; padding: 10px 0 30px !important; overflow: visible !important; gap: 16px !important; }
+  .mb-collage .mb-pol { flex: 1 !important; max-width: none !important; }
+}
+
+/* LIVE PAGE PICK — mock .pick: stacked → 1.15fr/1fr side-by-side ≥760 */
+.mb-pick { display: grid; grid-template-columns: 1fr; gap: 0; }
+@media (min-width: 760px) {
+  .mb-pick { grid-template-columns: 1.15fr 1fr; min-height: 340px; }
+  .mb-pick-img { aspect-ratio: auto; height: 100%; }
+  .mb-pick-body { padding: 30px 30px 28px; display: flex; flex-direction: column; justify-content: center; }
+}
+
+/* L2 HERO STAGE CARDS — mock .hs-card: 42% → 3-up ≥760 */
+.mb-hs-card { flex: 0 0 42%; max-width: 42%; scroll-snap-align: center; aspect-ratio: 3 / 3.6; }
+@media (min-width: 760px) {
+  .mb-hs-card { flex: 0 0 calc((100% - 24px) / 3); max-width: calc((100% - 24px) / 3); }
+}
+
+/* CATEGORY GRID — mock .cat-grid: 2-up → 6-up ≥760 */
+.mb-cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (min-width: 760px) {
+  .mb-cat-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* TRENDING ROW — mock .tcard thumb: 112px mobile → 150px ≥760 (build keeps
+   its rank column: 44px + thumb + content) */
+@media (min-width: 760px) {
+  .mb-trend-row { grid-template-columns: 44px 150px 1fr !important; }
+}
+
+/* EXPLORE DOOR — quick-entry cards: stacked → 3-up ≥760 */
+@media (min-width: 760px) {
+  .mb-door-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+}
+
+/* SECTION SPACING — mock .sec: 28px → 34px desktop */
+.mb-sec { padding: 28px 0 4px; }
+@media (min-width: 760px) {
+  .mb-sec { padding: 34px 0 4px; }
+}

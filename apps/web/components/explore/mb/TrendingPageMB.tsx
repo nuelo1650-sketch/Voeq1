@@ -128,9 +128,10 @@ export function TrendingPageMB({ campus }: { campus: string }) {
                   <Link
                     href={`/listing/${l.id}`}
                     data-testid="mb-trend-row"
+                    className="mb-trend-row"
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "44px 76px 1fr",
+                      gridTemplateColumns: "44px 112px 1fr",
                       gap: 12,
                       alignItems: "center",
                       padding: "10px 12px",

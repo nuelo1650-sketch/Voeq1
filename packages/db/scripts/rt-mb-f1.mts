@@ -44,14 +44,23 @@ try {
   check("X3: no dialog fired on the listing page", !dialogFired);
   check("X4: injection marker never set", await page.evaluate(() => (window as { __xss?: boolean }).__xss !== true));
 
-  // JSON still parses as valid JSON after escaping
-  const parsed = await page.evaluate(() => {
-    const el = document.querySelector('script[type="application/ld+json"]:last-of-type');
-    if (!el) return null;
-    try { return JSON.parse(el.textContent ?? "") as { name?: string }; } catch { return "PARSE_FAIL"; }
-  });
-  check("X5: escaped JSON-LD still parses as valid JSON", parsed !== null && parsed !== "PARSE_FAIL");
-  check("X6: parsed name round-trips the hostile title", (parsed as { name?: string } | null)?.name === HOSTILE);
+  // JSON still parses as valid JSON after escaping — parse EVERY ld+json
+  // block (":last-of-type" once matched a hoisted EMPTY script → false fail).
+  const parsedAll = await page.evaluate(`(() => {
+    const els = [...document.querySelectorAll('script[type="application/ld+json"]')];
+    const parsed = [];
+    for (const el of els) {
+      try { parsed.push(JSON.parse(el.textContent ?? "")); }
+      catch { return { fail: (el.textContent ?? "").slice(0, 40), total: els.length }; }
+    }
+    return { parsed, total: els.length };
+  })()`);
+  const okParse = !parsedAll.fail && parsedAll.total > 0;
+  check("X5: every ld+json block parses after escaping", okParse, JSON.stringify(parsedAll).slice(0, 80));
+  const hostile = Array.isArray(parsedAll.parsed)
+    ? parsedAll.parsed.some((p: { name?: string }) => p?.name === HOSTILE)
+    : false;
+  check("X6: parsed JSON round-trips the hostile title", hostile, `blocks=${parsedAll.total}`);
 
   await browser.close();
 } finally {

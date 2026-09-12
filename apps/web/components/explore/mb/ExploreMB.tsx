@@ -165,15 +165,17 @@ export function ExploreMB({
   }) => {
     if (items.length === 0) return null; // B7 collapse
     return (
-      <section data-testid={testid} style={{ padding: "26px 0 4px" }}>
+      <section data-testid={testid} className="mb-sec">
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
           <h2 style={{ margin: 0, fontFamily: "var(--role-font-display)", fontSize: 24, color: "var(--forest-deep, #0F2A1D)", lineHeight: 1.1 }}>
             {title}
             <span style={{ display: "block", fontSize: 13.5, fontWeight: 400, color: "var(--role-muted)", marginTop: 4 }}>{sub}</span>
           </h2>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-          {items.slice(0, 4).map((l, i) => (
+        {/* VISUAL FIX (founder audit 2026-09-11): mock .rail = horizontal
+            scroll track, cards 44% mobile / 4.15-up desktop — not a grid. */}
+        <div className="mb-rail">
+          {items.slice(0, 8).map((l, i) => (
             <MbCard key={l.id} listing={l} revealDelay={i * 100} eager={eager && i < 2} />
           ))}
         </div>
@@ -265,7 +267,7 @@ export function ExploreMB({
             <Rail title="Trending this week" sub="What the market loves — real attention, measured" items={trending} testid="mb-trending" />
             <Rail title="Under ₦5,000" sub="Small prices, real finds" items={under5k} testid="mb-under5k" />
 
-            <section data-testid="mb-grid" style={{ padding: "26px 0 4px" }}>
+            <section data-testid="mb-grid" className="mb-sec">
               <h2 style={{ margin: "0 0 14px", fontFamily: "var(--role-font-display)", fontSize: 24, color: "var(--forest-deep, #0F2A1D)" }}>
                 On the grid today
                 <span style={{ display: "block", fontSize: 13.5, fontWeight: 400, color: "var(--role-muted)", marginTop: 4 }}>
@@ -282,7 +284,7 @@ export function ExploreMB({
                   </p>
                 </div>
               ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+                <div className="mb-grid">
                   {grid.map((l, i) => (
                     <MbCard key={l.id} listing={l} revealDelay={(i % 4) * 100} eager={i < 2} />
                   ))}

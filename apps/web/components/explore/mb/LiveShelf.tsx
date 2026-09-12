@@ -42,14 +42,9 @@ export function LiveShelf({ picks }: { picks: ExploreListing[] }) {
         </Link>
       </div>
 
-      <div
-        data-testid="mb-live-stage"
-        style={{
-          display: "grid",
-          gap: 16,
-          gridTemplateColumns: "1fr",
-        }}
-      >
+      {/* VISUAL FIX (founder audit): mock .stage2 = 1-col mobile → 2-col ≥760;
+          .stage-card = dark full-bleed image, id overlaid bottom. */}
+      <div data-testid="mb-live-stage" className="mb-stage2">
         {picks.map((l, i) => {
           const imgs = (l.images ?? []).filter(Boolean);
           const src = imgs[0] ?? l.image;
@@ -58,26 +53,32 @@ export function LiveShelf({ picks }: { picks: ExploreListing[] }) {
               key={l.id}
               href={`/listing/${l.id}`}
               data-testid="mb-live-card"
+              className="mb-stage-card"
               style={{
-                position: "relative",
                 display: "block",
                 borderRadius: 20,
-                overflow: "hidden",
                 textDecoration: "none",
                 color: "inherit",
-                border: "1px solid var(--role-border)",
-                background: "var(--role-surface)",
+                background: "#123524",
+                boxShadow: "0 12px 30px rgba(15,42,29,0.35)",
               }}
             >
-              <div style={{ position: "relative", aspectRatio: "16 / 9", background: "rgba(15,42,29,0.06)" }}>
                 {src && (
                   <img
                     src={cdnTransform(src, 1000)}
                     alt={l.title}
                     loading={i === 0 ? "eager" : "lazy"}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                   />
                 )}
+                <div
+                  aria-hidden
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "linear-gradient(180deg, rgba(11,33,26,0.14) 0%, transparent 32%, transparent 40%, rgba(11,33,26,0.93) 90%)",
+                  }}
+                />
                 <span
                   data-testid="mb-live-seal"
                   style={{
@@ -99,20 +100,20 @@ export function LiveShelf({ picks }: { picks: ExploreListing[] }) {
                 >
                   ✦ Voeq Live
                 </span>
-              </div>
-              <div style={{ padding: "12px 16px 16px" }}>
-                <span style={{ fontSize: 11.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--role-muted)", fontWeight: 700 }}>
+              {/* mock .stage-id — overlaid bottom, cream on scrim */}
+              <div style={{ position: "absolute", left: 16, right: 16, bottom: 14, zIndex: 2 }}>
+                <span style={{ fontSize: 11.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(246,241,230,0.72)", fontWeight: 700 }}>
                   {String(i + 1).padStart(2, "0")} · {l.vendorName}
                 </span>
-                <h3 style={{ margin: "4px 0 0", fontFamily: "var(--role-font-display)", fontSize: 19, color: "var(--forest-deep, #0F2A1D)" }}>
+                <h3 style={{ margin: "4px 0 0", fontFamily: "var(--role-font-display)", fontSize: 19, color: "#f6f1e6", lineHeight: 1.25 }}>
                   {l.title}
                 </h3>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
-                  <span style={{ fontFamily: "var(--role-font-display)", fontSize: 16, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)" }}>
+                  <span style={{ fontFamily: "var(--role-font-display)", fontSize: 16, fontWeight: 700, color: "var(--color-amber, #E8A33D)" }}>
                     {naira(l.priceMinor)}
                   </span>
                   {typeof l.vendorRatingAvg === "number" && (l.vendorRatingCount ?? 0) > 0 ? (
-                    <span style={{ fontSize: 13, color: "var(--role-muted)", fontWeight: 600 }}>
+                    <span style={{ fontSize: 13, color: "rgba(246,241,230,0.75)", fontWeight: 600 }}>
                       ★ {l.vendorRatingAvg.toFixed(1)} ({l.vendorRatingCount})
                     </span>
                   ) : null}

@@ -179,7 +179,7 @@ export function AreaPageMB() {
           </div>
         )}
         {listings.length > 0 && (
-          <div data-testid="mb-area-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+          <div data-testid="mb-area-grid" className="mb-grid">
             {listings.map((l, i) => (
               <MbCard key={l.id} listing={l} revealDelay={(i % 4) * 100} eager={i < 2} />
             ))}

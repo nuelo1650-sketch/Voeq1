@@ -181,41 +181,41 @@ export function FreshDrops({ drops }: { drops: ExploreListing[] }) {
               key={l.id}
               href={`/listing/${l.id}`}
               data-mb-drop-card
+              className="mb-bigcard"
               style={{
-                flex: "0 0 84%",
-                scrollSnapAlign: "start",
                 textDecoration: "none",
                 color: "inherit",
                 borderRadius: 18,
                 overflow: "hidden",
                 position: "relative",
-                background: "rgba(246,241,230,0.06)",
-                border: "1px solid rgba(246,241,230,0.14)",
-                minHeight: 300,
+                background: "#123524",
+                outline: "1px solid rgba(250,246,236,0.08)",
+                outlineOffset: "-1px",
                 display: "block",
               }}
             >
-              <div style={{ position: "relative", aspectRatio: "4 / 3", background: "rgba(246,241,230,0.08)" }}>
-                {(() => {
-                  const imgs = (l.images ?? []).filter(Boolean);
-                  const src = imgs[0] ?? l.image;
-                  return src ? (
-                    <img
-                      src={cdnTransform(src, 900)}
-                      alt={l.title}
-                      loading={i === 0 ? "eager" : "lazy"}
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                    />
-                  ) : null;
-                })()}
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "linear-gradient(to top, rgba(15,42,29,0.85) 0%, rgba(15,42,29,0.1) 45%, transparent 70%)",
-                  }}
-                />
+              {/* VISUAL FIX (founder audit): mock .bigcard = full-bleed image,
+                  scrim, overlaid info — aspect 4/4.5 mobile, 2.16-up desktop. */}
+              {(() => {
+                const imgs = (l.images ?? []).filter(Boolean);
+                const src = imgs[0] ?? l.image;
+                return src ? (
+                  <img
+                    src={cdnTransform(src, 900)}
+                    alt={l.title}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  />
+                ) : null;
+              })()}
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "linear-gradient(to top, rgba(15,42,29,0.9) 0%, rgba(15,42,29,0.1) 45%, transparent 70%)",
+                }}
+              />
                 {typeof l.vendorRatingAvg === "number" && (l.vendorRatingCount ?? 0) > 0 && (
                   <span
                     style={{
@@ -233,8 +233,8 @@ export function FreshDrops({ drops }: { drops: ExploreListing[] }) {
                     ★ {l.vendorRatingAvg.toFixed(1)}
                   </span>
                 )}
-              </div>
-              <div style={{ padding: "12px 14px 16px" }}>
+              {/* mock .binfo — overlaid at the bottom of the full-bleed card */}
+              <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "12px 14px 16px", zIndex: 2 }}>
                 <span style={{ fontSize: 11.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(246,241,230,0.65)", fontWeight: 600 }}>
                   {l.vendorName}
                 </span>

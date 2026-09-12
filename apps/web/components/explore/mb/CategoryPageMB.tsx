@@ -12,6 +12,7 @@ import { BrandLogo } from "@/components/landing/BrandLogo";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ExploreListing } from "@voeq/data";
+import { CATEGORY_SLUG_TO_ID, CATEGORY_ID_TO_SLUG } from "@voeq/data/explore-view";
 import { MbCard } from "./MbCard";
 
 const CAT_NAMES: Record<string, string> = {
@@ -46,7 +47,12 @@ const CAT_NAMES: Record<string, string> = {
 
 export function CategoryPageMB({ campus }: { campus: string }) {
   const params = useParams<{ slug: string }>();
-  const slug = params?.slug ?? "";
+  const rawSlug = params?.slug ?? "";
+  // canonical-slug guard: listings carry the derived SLUG ('food-drinks'), but
+  // some entry points historically passed the id ('food') — /c/food rendered
+  // "Nothing here yet" while the hero counted "0 of 25" (contradiction found
+  // in the visual audit). Accept both: normalize to the canonical slug.
+  const slug = rawSlug in CATEGORY_SLUG_TO_ID ? rawSlug : CATEGORY_ID_TO_SLUG[rawSlug] ?? rawSlug;
   const name = CAT_NAMES[slug] ?? slug;
 
   const [data, setData] = useState<ExploreListing[] | null>(null);
@@ -135,7 +141,7 @@ export function CategoryPageMB({ campus }: { campus: string }) {
           </div>
         )}
         {listings.length > 0 && (
-          <div data-testid="mb-cat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+          <div data-testid="mb-cat-grid" className="mb-grid">
             {listings.map((l, i) => (
               <MbCard key={l.id} listing={l} revealDelay={(i % 4) * 100} eager={i < 2} />
             ))}

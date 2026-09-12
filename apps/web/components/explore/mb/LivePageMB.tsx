@@ -56,7 +56,10 @@ export function LivePageMB({ campus }: { campus: string }) {
   const [data, setData] = useState<ExploreListing[]>([]);
   const [live, setLive] = useState<ExploreListing[]>([]);
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  const [tab, setTab] = useState<XTab>("trending");
+  // Default tab: "fresh" — createdAt is real data that always exists. The old
+  // default "trending" filters on l.trending: legitimately empty on a young
+  // platform, which collapsed the whole cross-sell section on launch.
+  const [tab, setTab] = useState<XTab>("fresh");
 
   useEffect(() => {
     const q = new URLSearchParams({ campus, sections: "1" });
@@ -217,17 +220,16 @@ export function LivePageMB({ campus }: { campus: string }) {
                   <article
                     key={l.id}
                     data-testid="mb-live-pick"
-                    className="mb-gcard"
+                    className="mb-pick"
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr",
                       borderRadius: 22,
                       overflow: "hidden",
                       border: "1px solid var(--role-border)",
                       background: "var(--role-surface)",
                     }}
                   >
-                    <div style={{ position: "relative", aspectRatio: "16 / 10", background: "rgba(15,42,29,0.05)" }}>
+                    <div className="mb-pick-img" style={{ position: "relative", aspectRatio: "16 / 10", background: "rgba(15,42,29,0.05)" }}>
                       {src && (
                         <img src={cdnTransform(src, 1100)} alt={l.title} loading={i === 0 ? "eager" : "lazy"} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                       )}
@@ -324,9 +326,9 @@ export function LivePageMB({ campus }: { campus: string }) {
                 </button>
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-              {xrail.slice(0, 4).map((l) => (
-                <Link key={l.id} href={`/listing/${l.id}`} data-testid="mb-xcard" style={{ display: "block", textDecoration: "none", color: "inherit", borderRadius: 16, overflow: "hidden", border: "1px solid var(--role-border)", background: "var(--role-surface)" }}>
+            <div className="mb-rail">
+              {xrail.slice(0, 8).map((l) => (
+                <Link key={l.id} href={`/listing/${l.id}`} data-testid="mb-xcard" className="mb-gcard" style={{ display: "block", textDecoration: "none", color: "inherit", borderRadius: 16, overflow: "hidden", border: "1px solid var(--role-border)", background: "var(--role-surface)" }}>
                   <div style={{ position: "relative", aspectRatio: "1 / 1.02", background: "rgba(15,42,29,0.05)" }}>
                     {(() => {
                       const imgs = (l.images ?? []).filter(Boolean);
@@ -356,7 +358,7 @@ export function LivePageMB({ campus }: { campus: string }) {
                 Every stall in the market, one tap away
               </span>
             </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
+            <div className="mb-cat-grid">
               {catCounts.map(([slug, n]) => (
                 <Link key={slug} href={`/explore/c/${slug}`} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--role-surface)", border: "1px solid var(--role-border)", borderRadius: 14, padding: "13px 14px", fontSize: 13.5, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none" }}>
                   <span style={{ textTransform: "capitalize" }}>{slug.replace(/-/g, " ")}</span>

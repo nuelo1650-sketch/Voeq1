@@ -60,10 +60,17 @@ try {
   const xrail = await page.$('[data-testid="mb-live-xrail"]');
   if (xrail) {
     const before = await page.$$eval('[data-testid="mb-xcard"]', (els) => els.map((e) => e.textContent?.slice(0, 30)));
-    await page.click('[data-testid="mb-xtab-fresh"]');
-    await page.waitForTimeout(300);
+    // click the first tab that ISN'T the active one (default flipped to "fresh"
+    // 2026-09-11 — clicking the default would be a no-op false-negative).
+    const other = await page.evaluate(`(() => {
+      const tabs = [...document.querySelectorAll('[data-testid^="mb-xtab"]')];
+      const inactive = tabs.find((b) => b.getAttribute('aria-pressed') !== 'true');
+      if (inactive) { inactive.click(); return inactive.getAttribute('data-testid'); }
+      return null;
+    })()`);
+    await page.waitForTimeout(400);
     const after = await page.$$eval('[data-testid="mb-xcard"]', (els) => els.map((e) => e.textContent?.slice(0, 30)));
-    check("L7: x-tab click re-ranks rail (order or set changed)", JSON.stringify(before) !== JSON.stringify(after));
+    check("L7: x-tab click re-ranks rail (order or set changed)", other !== null && JSON.stringify(before) !== JSON.stringify(after), `clicked=${other}`);
   } else {
     check("L7: x-tab click re-ranks rail", true, "rail collapsed (no non-pick data) — honest collapse");
   }
