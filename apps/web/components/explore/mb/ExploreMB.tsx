@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * ExploreMB (Money Bag) — the composed MB explore floor behind the ?next=mb
+ * ExploreMB (Money Bag) — the composed MB explore floor behind the 
  * canary. Reads /api/explore?sections=1 (ONE round-trip, D3) and composes:
  * ContextStrip → FreshDrops → LiveShelf → Trending/Under-₦5k rails →
  * GridToday (crowd-flow) → Areas band. Filter drawer = MbFilterDrawer

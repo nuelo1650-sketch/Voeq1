@@ -32,19 +32,19 @@ function ExploreDoorInner({
 
   const quick = [
     {
-      href: "/explore?next=mb",
+      href: "/explore",
       title: "The full market",
       sub: `${listings.length} listing${listings.length === 1 ? "" : "s"} live right now`,
       testid: "mb-door-market",
     },
     {
-      href: "/explore/live?next=mb",
+      href: "/explore/live",
       title: "✦ Voeq Live",
       sub: "Today's hand-picked shelf",
       testid: "mb-door-live",
     },
     {
-      href: "/explore?next=mb&sort=newest",
+      href: "/explore&sort=newest",
       title: "Fresh drops",
       sub: freshCount > 0 ? `${freshCount} listed in the last 72h` : "New arrivals, as they land",
       testid: "mb-door-fresh",
@@ -188,7 +188,7 @@ function ExploreDoorInner({
 
         {/* The dashed pill — kept, as the final invitation */}
         <Link
-          href="/explore?next=mb"
+          href="/explore"
           data-testid="mb-door-pill"
           className="mb-door-pill"
           style={{

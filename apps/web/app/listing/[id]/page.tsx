@@ -27,12 +27,15 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
 
   const title = `${listing.title} — Voeq`;
   const description = (listing.description || listing.title).slice(0, 160);
-  const image = listing.images?.[0] || '/og-default.png';
+  // og-default.png NEVER EXISTED (found in cut-over SEO pass) — a listing
+  // without images shipped a 404 share image. Brand plate is the fallback.
+  const image = listing.images?.[0] || '/og-voeq.png';
   const url = `https://voeq.ng/listing/${listing.id}`;
 
   return {
     title,
     description,
+    alternates: { canonical: url },
     openGraph: {
       title,
       description,

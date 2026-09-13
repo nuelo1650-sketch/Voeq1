@@ -2,7 +2,7 @@
 
 /**
  * LandingMB (Money Bag C1) — the composed advertisement landing behind
- * ?next=mb. Sections (home-v7): Nav v7 → Hero + polaroid collage → sand
+ * . Sections (home-v7): Nav v7 → Hero + polaroid collage → sand
  * trust band → Fresh drops (B1 component reuse) → Vendor Spotlight →
  * On the grid today → What is Voeq? + vendor panel → Areas band (B3 links)
  * → ExploreDoor (upgraded A10) → existing footer (SmartFooter handles).
@@ -97,7 +97,7 @@ export function LandingMB({ campusName, signedIn = false }: { campusName: string
                   A fair rotation — every listing gets time on the floor
                 </span>
               </h2>
-              <Link href="/explore?next=mb" style={{ fontSize: 13, fontWeight: 700, color: "var(--amber-dark, #D4922A)", whiteSpace: "nowrap", textDecoration: "none" }}>
+              <Link href="/explore" style={{ fontSize: 13, fontWeight: 700, color: "var(--amber-dark, #D4922A)", whiteSpace: "nowrap", textDecoration: "none" }}>
                 More →
               </Link>
             </div>
@@ -223,7 +223,7 @@ export function LandingMB({ campusName, signedIn = false }: { campusName: string
                 </Link>
               ))}
               <Link
-                href="/explore?next=mb"
+                href="/explore"
                 style={{ border: "1px dashed rgba(15,42,29,0.3)", borderRadius: 999, padding: "9px 16px", fontSize: 13.5, fontWeight: 800, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none", background: "rgba(255,255,255,0.5)" }}
               >
                 All 36 states →

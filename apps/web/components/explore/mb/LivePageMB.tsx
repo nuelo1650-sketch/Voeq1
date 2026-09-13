@@ -124,7 +124,7 @@ export function LivePageMB({ campus }: { campus: string }) {
           Explore <span aria-hidden style={{ opacity: 0.5 }}>/</span> <b style={{ color: "var(--role-text)" }}>Live</b>
         </span>
         <span style={{ flex: 1 }} />
-        <Link href="/explore?next=mb" style={{ fontSize: 13.5, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none" }}>
+        <Link href="/explore" style={{ fontSize: 13.5, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none" }}>
           Full market →
         </Link>
       </header>
@@ -365,7 +365,7 @@ export function LivePageMB({ campus }: { campus: string }) {
                   <small style={{ marginLeft: "auto", fontFamily: "var(--role-font-mono, monospace)", fontSize: 11, color: "var(--role-muted)" }}>{n}</small>
                 </Link>
               ))}
-              <Link href="/explore?next=mb" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "var(--forest-deep, #0F2A1D)", color: "#f6f1e6", borderRadius: 14, padding: "13px 14px", fontSize: 13.5, fontWeight: 700, textDecoration: "none" }}>
+              <Link href="/explore" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "var(--forest-deep, #0F2A1D)", color: "#f6f1e6", borderRadius: 14, padding: "13px 14px", fontSize: 13.5, fontWeight: 700, textDecoration: "none" }}>
                 All categories →
               </Link>
             </div>
@@ -373,7 +373,7 @@ export function LivePageMB({ campus }: { campus: string }) {
         )}
 
         <div style={{ display: "flex", justifyContent: "center", padding: "30px 0 10px" }}>
-          <Link href="/explore?next=mb" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 26px", borderRadius: 999, border: "1.5px dashed rgba(15,42,29,0.3)", color: "var(--forest-deep, #0F2A1D)", fontWeight: 700, fontSize: 13.5, textDecoration: "none", background: "rgba(255,255,255,0.5)" }}>
+          <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 26px", borderRadius: 999, border: "1.5px dashed rgba(15,42,29,0.3)", color: "var(--forest-deep, #0F2A1D)", fontWeight: 700, fontSize: 13.5, textDecoration: "none", background: "rgba(255,255,255,0.5)" }}>
             ← Back to the full market
           </Link>
         </div>

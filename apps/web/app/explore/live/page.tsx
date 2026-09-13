@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   description: "The best of the Voeq market, chosen from real ratings and saves. Earned, never paid.",
   // cut-over 2026-09-11: public surface now — indexable (was noindex in canary)
   robots: { index: true, follow: true },
+  alternates: { canonical: "https://voeq.ng/explore/live" },
 };
 
 export default async function LivePage() {

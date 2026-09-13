@@ -1,0 +1,11 @@
+import { chromium } from "playwright";
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+const r = await page.request.get("https://voeq.ng/api/explore?sections=1");
+const j = await r.json();
+const l = (j.data ?? [])[0];
+await page.goto("https://voeq.ng/vendor/" + l.vendorId, { waitUntil: "domcontentloaded" });
+await page.waitForSelector('[data-testid="storefront-stats"]', { timeout: 30000 }).catch(() => {});
+await page.waitForTimeout(2000);
+console.log("statbar:", await page.evaluate(`(() => document.querySelector('[data-testid="storefront-stats"]')?.textContent?.replace(/\\s+/g,' ').trim().slice(0,80))()`));
+await browser.close();
