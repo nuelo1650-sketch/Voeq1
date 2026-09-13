@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { ExploreListing } from "@voeq/data";
+import { nicheFromListing } from "@voeq/data";
 import { CampusFingerprint } from "@voeq/contour";
 import { Heart } from "lucide-react";
 import { cdnTransform } from "@/lib/image-upload";
@@ -92,7 +93,12 @@ export function ListingCard({
   };
   // P-A round 65: delivery transforms (f_auto,q_auto,w=400) + lazy — the
   // raw full-size Cloudinary file was the "slow, page shrinks" culprit.
-  const categoryName = listing.categorySlug ? SLUG_TO_NAME[listing.categorySlug] ?? listing.categorySlug : null;
+  // FIX (founder check 2026-09-13): 'Other' is not a name — the vendor's own
+  // niche (76046aa, riding shortDescription) shows instead. Same rule as the
+  // listing detail + storefront pill; never shows 'Other' when a niche exists.
+  const categoryName =
+    nicheFromListing(listing) ??
+    (listing.categorySlug ? SLUG_TO_NAME[listing.categorySlug] ?? listing.categorySlug : null);
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.preventDefault();

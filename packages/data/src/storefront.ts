@@ -14,6 +14,7 @@ import type { Listing, Vendor, Review } from "./interfaces";
 import { mockVendorRepo, mockListingsRepo, vendorName, type MockListingExtra } from "./mock";
 import type { ExploreListing } from "./explore";
 import { mockReviewRepo } from "./shopper";
+import { CATEGORY_ID_TO_SLUG } from "./explore-view";
 
 // Local mapper mirroring `toExploreListing` in explore.ts so this module stays
 // independent of that file. Reads the mock-only extras already attached to each listing.
@@ -24,7 +25,11 @@ function toExploreListingLocal(l: Listing & MockListingExtra, vendorDisplayName:
     verified: l.verified,
     soldOut: l.soldOut,
     availability: l.availability,
-    categorySlug: l.categorySlug,
+    // FIX (founder check 2026-09-13): real Neon listings carry categoryId only —
+    // this local mapper copied l.categorySlug (undefined), so the storefront's
+    // 'Other'→vendor-niche rule never matched and the pill rendered "Other".
+    // Mirror the derivation explore.ts does.
+    categorySlug: l.categorySlug ?? CATEGORY_ID_TO_SLUG[l.categoryId],
     image: l.image ?? (Array.isArray(l.images) ? l.images[0] : undefined),
     trending: l.isFeatured || l.trending,
   };
