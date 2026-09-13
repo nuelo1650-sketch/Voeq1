@@ -401,7 +401,17 @@ export function ListingDetail({ id, initialListing }: { id: string; initialListi
     <div
       data-testid="listing-detail"
       className="explore-entrance"
-      style={{ minHeight: "100vh", padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)", paddingBottom: "calc(var(--space-8) + env(safe-area-inset-bottom))" }}
+      // BUG FIX (founder rollback note, 2026-09-13): the sticky mobile CTA
+      // bar (Message/save/share, ~70px) overlays the bottom of the page — the
+      // last comment / the comment box sat UNDERNEATH it at 390px. Reserve the
+      // bar height on phones so the page can always scroll clear of it.
+      style={{
+        minHeight: "100vh",
+        padding: "var(--space-3) var(--nav-inline-pad) var(--space-8)",
+        paddingBottom: isMobile
+          ? "calc(96px + env(safe-area-inset-bottom))"
+          : "calc(var(--space-8) + env(safe-area-inset-bottom))",
+      }}
     >
       {/* Contour whisper */}
       <div data-testid="listing-detail-contour" style={{ marginBottom: "var(--space-2)" }}>
