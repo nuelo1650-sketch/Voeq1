@@ -43,16 +43,12 @@ export const metadata: Metadata = {
     title: "Voeq — Find it. Chat it. Get it.",
     description:
       "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
-    // Cut-over SEO (2026-09-11): a share image existed for NOTHING before —
-    // WhatsApp/X/Facebook links rendered text-only. Now: 1200x630 brand plate.
-    images: [{ url: "/og-voeq.png", width: 1200, height: 630, alt: "Voeq — Find it. Chat it. Get it." }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Voeq — Find it. Chat it. Get it.",
     description:
       "The campus marketplace for Nigerian students. Discover verified vendors, services, and opportunities at your university.",
-    images: ["/og-voeq.png"],
   },
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   alternates: {

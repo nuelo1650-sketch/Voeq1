@@ -89,7 +89,7 @@ export function LandingHeroMB({ listings }: { listings: ExploreListing[] }) {
         <div className="mb-hero-cta" style={{ marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
           {/* Crawlable <a>, NOT router.push (B4) */}
           <Link
-            href="/explore"
+            href="/explore?next=mb"
             data-testid="mb-hero-cta"
             style={{
               background: "var(--forest-deep, #0F2A1D)",

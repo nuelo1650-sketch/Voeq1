@@ -11,7 +11,6 @@ export const metadata: Metadata = {
   title: "Trending — what the market loves",
   description: "Ranked by real attention — saves, messages and views. Not guesses. Not ads.",
   robots: { index: true, follow: true }, // cut-over: public surface
-  alternates: { canonical: "https://voeq.ng/explore/trending" },
 };
 
 export default async function TrendingPage() {

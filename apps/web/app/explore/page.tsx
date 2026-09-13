@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Explore } from "@/components/explore/Explore";
 import { ExploreMB } from "@/components/explore/mb/ExploreMB";
 import { getCurrentIdentity } from "@/lib/session";
@@ -11,16 +10,6 @@ import { mockCampusRepo, resolvePublicCategories } from "@voeq/data";
  * public default (first verified campus). VS4.9 — no hardcoded campus; no duplicated grid.
  *
  * Reads URL params: ?q= (search query) and ?category= (category slug).
- */
-// Cut-over SEO (2026-09-11): the market is the page — canonical + richer
-// description for the page Google should rank for "campus marketplace Nigeria".
-export const metadata: Metadata = {
-  title: "Explore the market — Voeq",
-  description:
-    "Browse every listing on the Voeq campus market: food, fashion, gadgets, services from verified student vendors. Chat before you buy, pay when you're happy.",
-  alternates: { canonical: "https://voeq.ng/explore" },
-};
-/*
  *
  * MONEY BAG CANARY (D8): ?next=mb renders the rebuilt MB floor (ExploreMB)
  * side-by-side with the existing explore — old path untouched until the 48h

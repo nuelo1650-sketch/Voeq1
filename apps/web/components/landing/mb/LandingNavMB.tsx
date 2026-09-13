@@ -93,7 +93,7 @@ export function LandingNavMB({ signedIn = false }: { signedIn?: boolean }) {
 
           {/* editorial links — desktop only (drawer carries them on mobile) */}
           <div className="mb-nav-links" style={{ alignItems: "center", gap: 22 }}>
-            {qLink("/explore", "Explore", "mb-nav-explore")}
+            {qLink("/explore?next=mb", "Explore", "mb-nav-explore")}
             {qLink("/how-it-works", "How it works", "mb-nav-how")}
             {qLink("/explore/live", "✦ Voeq Live", "mb-nav-live", true)}
           </div>
@@ -215,7 +215,7 @@ export function LandingNavMB({ signedIn = false }: { signedIn?: boolean }) {
             </div>
             {(
               [
-                ["/explore", "Explore", "mb-drawer-explore", false],
+                ["/explore?next=mb", "Explore", "mb-drawer-explore", false],
                 ["/how-it-works", "How it works", "mb-drawer-how", false],
                 ["/explore/live", "✦ Voeq Live", "mb-drawer-live", true],
                 ["/become-vendor?intent=vendor", "Sell on Voeq", "mb-drawer-sell", false],
@@ -248,7 +248,7 @@ export function LandingNavMB({ signedIn = false }: { signedIn?: boolean }) {
               </Link>
             ))}
             <Link
-              href="/explore"
+              href="/explore?next=mb"
               data-testid="mb-drawer-cta"
               onClick={() => setDrawerOpen(false)}
               style={{ marginTop: 16, background: forest, color: "#f6f1e6", fontSize: 15, fontWeight: 700, borderRadius: 999, padding: "13px 20px", textDecoration: "none", textAlign: "center" }}

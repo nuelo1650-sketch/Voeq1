@@ -103,7 +103,7 @@ export function AreaPageMB() {
       <div style={{ minHeight: "60vh", display: "grid", placeItems: "center", padding: 24 }}>
         <div style={{ textAlign: "center" }}>
           <p style={{ fontFamily: "var(--role-font-display)", fontSize: 20, color: "var(--forest-deep, #0F2A1D)" }}>Area not found</p>
-          <Link href="/explore" style={{ color: "var(--forest-deep, #0F2A1D)", fontWeight: 700, fontSize: 14 }}>
+          <Link href="/explore?next=mb" style={{ color: "var(--forest-deep, #0F2A1D)", fontWeight: 700, fontSize: 14 }}>
             ← Back to the full market
           </Link>
         </div>
@@ -126,7 +126,7 @@ export function AreaPageMB() {
           Explore <span aria-hidden style={{ opacity: 0.5 }}>/</span> <b style={{ color: "var(--role-text)" }}>{area.name}</b>
         </span>
         <span style={{ flex: 1 }} />
-        <Link href="/explore" style={{ fontSize: 13.5, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none", whiteSpace: "nowrap" }}>
+        <Link href="/explore?next=mb" style={{ fontSize: 13.5, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none", whiteSpace: "nowrap" }}>
           Full market →
         </Link>
       </header>
@@ -199,7 +199,7 @@ export function AreaPageMB() {
                   {a.name}
                 </Link>
               ))}
-            <Link href="/explore" style={{ border: "1px solid rgba(15,42,29,0.3)", borderRadius: 999, padding: "7px 14px", fontSize: 13, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none" }}>
+            <Link href="/explore?next=mb" style={{ border: "1px solid rgba(15,42,29,0.3)", borderRadius: 999, padding: "7px 14px", fontSize: 13, fontWeight: 700, color: "var(--forest-deep, #0F2A1D)", textDecoration: "none" }}>
               All 36 states →
             </Link>
           </div>
