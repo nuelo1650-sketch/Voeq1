@@ -11,8 +11,7 @@ import { mockCampusRepo } from "@voeq/data";
 export const metadata: Metadata = {
   title: "Voeq Live — today's shelf, hand-picked",
   description: "The best of the Voeq market, chosen from real ratings and saves. Earned, never paid.",
-  // cut-over 2026-09-11: public surface now — indexable (was noindex in canary)
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export default async function LivePage() {

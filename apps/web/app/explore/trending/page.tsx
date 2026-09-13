@@ -10,7 +10,7 @@ import { mockCampusRepo } from "@voeq/data";
 export const metadata: Metadata = {
   title: "Trending — what the market loves",
   description: "Ranked by real attention — saves, messages and views. Not guesses. Not ads.",
-  robots: { index: true, follow: true }, // cut-over: public surface
+  robots: { index: false, follow: false },
 };
 
 export default async function TrendingPage() {

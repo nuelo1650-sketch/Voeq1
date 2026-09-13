@@ -29,9 +29,10 @@ export default async function ExplorePage({
   const cats = await resolvePublicCategories();
   const categoryOptions = cats.map((c) => ({ slug: c.slug, label: c.name }));
 
-  // ★ CUT-OVER (2026-09-11): MB floor is the default everywhere (?next=old
-  // = rollback hatch, same contract as the landing — see app/page.tsx).
-  if (params.next !== "old") {
+  // Canary: prod keeps the OLD explore until cut-over; previews/dev default
+  // to the MB floor (same rule as the landing — see app/page.tsx).
+  if (params.next === "mb" ||
+      (process.env.VERCEL_ENV !== "production" && params.next !== "old")) {
     return (
       <div className="explore-page">
         <ExploreMB
