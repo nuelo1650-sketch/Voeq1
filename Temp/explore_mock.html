@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explore page: old pills vs new dropdown-only</title>
+<style>
+  :root{
+    --forest:#0F2A1D; --amber:#E8A33D; --cream:#F9F6F0;
+    --ink:#111; --muted:#6B7280; --surface:#fff; --border:#D1D5DB;
+    --font-display:'Fraunces',serif; --font-ui:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--cream);font-family:var(--font-ui);color:var(--ink)}
+  .demo{display:flex;gap:2px;min-height:100dvh}
+  .pan{background:#fff;border-right:1px solid var(--border);padding:12px;overflow:auto}
+  .phone{width:390px;margin:0 auto;padding-top:12px}
+  .label{font-size:12px;font-weight:600;text-align:center;marginBottom:12px;color:var(--muted)}
+  .old .label{background:#fee;border-bottom:1px solid var(--border)}
+  .new .label{background:#ecfdf5;border-bottom:1px solid var(--border)}
+  .topbar{height:48px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:8px;position:sticky;top:0;z-index:10;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px)}
+  .topbar .logo{font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--forest)}
+  .topbar .search{flex:1;height:36px;border:1px solid var(--border);border-radius:8px;background:#f9fafb;padding:0 10px;font-size:13px;outline:none}
+  .hero{background:var(--forest);color:var(--cream);padding:28px 16px;text-align:center}
+  .hero h1{font-family:var(--font-display);font-size:22px;font-weight:600;margin:0 0 4px}
+  .hero p{font-size:13px;opacity:0.8;margin:0}
+  .content{padding:12px 14px}
+  .row{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+  .row span{font-size:12px;color:var(--muted)}
+  /* PILLS (old) */
+  .pills{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;overscroll-behavior-x:contain}
+  .pills button{flex:0 0 auto;min-width:72px;height:36px;border:1px solid var(--border);background:var(--surface);border-radius:18px;font-size:13px;font-family:var(--font-ui);cursor:pointer}
+  .pills button.active{background:var(--forest);color:#fff}
+  /* results info */
+  .results{font-size:12px;color:var(--muted);margin-bottom:8px}
+  /* grid (same in both) */
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .img{position:relative;padding-top:100%;background:#e5e7eb}
+  .img::after{content:'IMG';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted)}
+  .card-body{padding:8px}
+  .card-title{font-size:13px;font-weight:500;margin:0 0 2px;font-family:var(--font-ui)}
+  .card-vendor{font-size:11px;color:var(--muted);margin:0}
+  .pill-mini{display:inline-block;font-size:10px;background:#f3f4f6;border-radius:4px;padding:1px 5px;margin-left:4px;color:var(--muted)}
+  /* DROPDOWN (new) */
+  .select-wrap{position:relative;margin-bottom:14px}
+  .select{width:100%;height:44px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:0 10px;font-size:13px;font-family:var(--font-ui);appearance:none;cursor:pointer}
+  .chevy{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted)}
+  .filters-row{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+  .filters-row button{height:36px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:12px;font-family:var(--font-ui);padding:0 10px;cursor:pointer}
+  /* active filter chip (new) */
+  .active-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;background:#f3f4f6;border-radius:14px;padding:4px 8px}
+</style>
+</head>
+<body>
+<div class="demo">
+
+  <!-- OLD -->
+  <div class="pan old">
+    <div class="phone">
+      <div class="label">OLD — pills above grid</div>
+      <div class="topbar">
+        <div class="logo">voeq</div>
+        <input class="search" placeholder="Search listings, vendors...">
+      </div>
+      <div class="hero">
+        <h1>Find it. Chat it. Get it.</h1>
+        <p>Discover vendors, services, and products on campus</p>
+      </div>
+      <div class="content">
+        <div class="row"><span>Filters</span><span style="margin-left:auto;font-size:11px">0 active</span></div>
+
+        <!-- THE PILLS -->
+        <div class="pills">
+          <button class="active">All</button>
+          <button>Food & Drinks</button>
+          <button>Hair</button>
+          <button>Cleaning</button>
+          <button>Notes</button>
+          <button>Tutoring</button>
+          <button>Gadgets</button>
+          <button>Transport</button>
+          <button>Skincare</button>
+          <button>Pastries</button>
+          <button>Fitness</button>
+          <button>Art</button>
+          <button>Crafts</button>
+          <button>Music</button>
+          <button>Vehicles</button>
+          <button>Books</button>
+          <button>Services</button>
+          <button>Other</button>
+        </div>
+
+        <div class="results">34 results on your campus · sorted by Most popular</div>
+
+        <div class="grid">
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Jollof rice pack <span class="pill-mini">Food</span></p><p class="card-vendor">Mary's Kitchen</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Campus shuttle</p><p class="card-vendor">Speedy Moves</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Handmade bracelet</p><p class="card-vendor">Zoe Collection</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Python notes HND</p><p class="card-vendor">NoteMaster</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Hair braiding</p><p class="card-vendor">Tayo's Touch</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Laptop repair</p><p class="card-vendor">TechFix</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW -->
+  <div class="pan new">
+    <div class="phone">
+      <div class="label">NEW — no pills, dropdown in Filters only</div>
+      <div class="topbar">
+        <div class="logo">voeq</div>
+        <input class="search" placeholder="Search listings, vendors...">
+      </div>
+      <div class="hero">
+        <h1>Find it. Chat it. Get it.</h1>
+        <p>Discover vendors, services, and products on campus</p>
+      </div>
+      <div class="content">
+        <div class="row"><span>Filters</span><button class="select-wrap" style="display:inline-block;width:auto;margin:0;padding:0;border:'none'"><select class="select" style="width:90px;font-size:11px;padding:0 6px">
+          <option>Relevance</option><option>Newest</option><option>Price low-high</option><option>Price high-low</option>
+        </select><span class="chevy">▼</span></button></div>
+
+        <!-- DROPDOWN REPLACES PILLS -->
+        <div class="select-wrap">
+          <select class="select">
+            <option>All categories</option>
+            <option>Food & Drinks</option>
+            <option>Hair</option>
+            <option>Cleaning</option>
+            <option>Notes</option>
+            <option>Tutoring</option>
+            <option>Gadgets</option>
+            <option>Transport</option>
+            <option>Skincare</option>
+            <option>Pastries</option>
+            <option>Fitness</option>
+            <option>Art</option>
+            <option>Crafts</option>
+            <option>Music</option>
+            <option>Vehicles</option>
+            <option>Books</option>
+            <option>Services</option>
+            <option>Other</option>
+          </select>
+          <span class="chevy">▼</span>
+        </div>
+
+        <div class="filters-row">
+          <input type="text" class="select" placeholder="Min ₦" style="width:70px;font-size:12px">
+          <input type="text" class="select" placeholder="Max ₦" style="width:70px;font-size:12px">
+          <button>Verified only</button>
+          <button>Has photos</button>
+        </div>
+
+        <div class="results" style="margin-top:6px">34 results · sorted by Most popular</div>
+
+        <div class="grid">
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Jollof rice pack <span class="pill-mini">Food</span></p><p class="card-vendor">Mary's Kitchen</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Campus shuttle</p><p class="card-vendor">Speedy Moves</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Handmade bracelet</p><p class="card-vendor">Zoe Collection</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Python notes HND</p><p class="card-vendor">NoteMaster</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Hair braiding</p><p class="card-vendor">Tayo's Touch</p></div></div>
+          <div class="card"><div class="img"></div><div class="card-body"><p class="card-title">Laptop repair</p><p class="card-vendor">TechFix</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -46,6 +46,10 @@ export function OnboardingWizard({ initialStep, initial, categories: categoryRow
   const [campusResults, setCampusResults] = useState<Campus[]>([]);
   const [selectedCampus, setSelectedCampus] = useState<Campus | null>(null);
   const [subArea, setSubArea] = useState(initial.subArea);
+  const [mode, setMode] = useState<"campus" | "area">(initial.campusId ? "campus" : "campus");
+  const [areas, setAreas] = useState<Array<{ id: string; name: string; state: string }>>([]);
+  const [areaQuery, setAreaQuery] = useState("");
+  const [selectedArea, setSelectedArea] = useState<{ id: string; name: string; state: string } | null>(null);
 
   // Load campus list via server route (real Neon; D-1 verified visibility)
   useEffect(() => {
@@ -59,6 +63,16 @@ export function OnboardingWizard({ initialStep, initial, categories: categoryRow
       })
       .catch(() => {});
   }, [initial.campusId]);
+
+  // Load areas taxonomy for off-campus vendors
+  useEffect(() => {
+    fetch("/api/areas")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { areas?: Array<{ id: string; name: string; state: string }> } | null) => {
+        if (d?.areas) setAreas(d.areas);
+      })
+      .catch(() => {});
+  }, []);
 
   // Step 3: Agreement
   const [agreed, setAgreed] = useState(false);
@@ -181,15 +195,20 @@ export function OnboardingWizard({ initialStep, initial, categories: categoryRow
     e.preventDefault();
     setError(null);
     
-    if (!selectedCampus) {
+    if (mode === "campus" && !selectedCampus) {
       setError("Please choose your campus.");
+      return;
+    }
+    if (mode === "area" && !selectedArea) {
+      setError("Please choose your area.");
       return;
     }
 
     setSubmitting(true);
     try {
       const { res, data } = await post("/api/onboarding/vendor/step-2", {
-        campus: selectedCampus.id,
+        campus: mode === "campus" ? selectedCampus!.id : null,
+        areaId: mode === "area" ? selectedArea!.id : null,
         subArea,
       });
       if (!res.ok) {
@@ -415,11 +434,23 @@ export function OnboardingWizard({ initialStep, initial, categories: categoryRow
                 </h2>
               </div>
               <p style={{ fontSize: 14, color: "var(--color-ink-muted)", margin: 0 }}>
-                Help students on your campus find you.
+                Help students find you.
               </p>
             </div>
 
+            {/* Campus / Area toggle */}
+            <div style={{ display: "flex", gap: 8, marginBottom: "var(--space-3)" }}>
+              <button type="button" onClick={() => setMode("campus")} data-testid="mode-campus" style={{ flex: 1, padding: "10px 16px", borderRadius: 10, border: mode === "campus" ? "2px solid var(--color-forest)" : "1px solid var(--color-ink-subtle)", background: mode === "campus" ? "var(--color-forest)" : "transparent", color: mode === "campus" ? "var(--color-cream)" : "var(--color-ink)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                🎓 On campus
+              </button>
+              <button type="button" onClick={() => setMode("area")} data-testid="mode-area" style={{ flex: 1, padding: "10px 16px", borderRadius: 10, border: mode === "area" ? "2px solid var(--color-forest)" : "1px solid var(--color-ink-subtle)", background: mode === "area" ? "var(--color-forest)" : "transparent", color: mode === "area" ? "var(--color-cream)" : "var(--color-ink)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                📍 Off campus
+              </button>
+            </div>
+
             <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+              {mode === "campus" ? (
+              <>
               <Field label="Campus" required>
                 <input
                   type="text"
@@ -492,12 +523,41 @@ export function OnboardingWizard({ initialStep, initial, categories: categoryRow
                   data-testid="vendor-subarea"
                 />
               </Field>
+              </>
+              ) : (
+              <Field label="Area" required>
+                <input
+                  type="text"
+                  value={areaQuery}
+                  onChange={(e) => setAreaQuery(e.target.value)}
+                  placeholder="Search your area (e.g. Lekki, Asokoro)"
+                  style={inputStyle}
+                  autoComplete="off"
+                  data-testid="vendor-area-search"
+                />
+                {areaQuery.trim().length > 0 && areas.filter((a) => a.name.toLowerCase().includes(areaQuery.trim().toLowerCase())).length > 0 && (
+                  <div style={{ marginTop: 8, maxHeight: 200, overflowY: "auto", border: "1px solid var(--color-ink-subtle)", borderRadius: 8 }}>
+                    {areas.filter((a) => a.name.toLowerCase().includes(areaQuery.trim().toLowerCase())).map((a) => (
+                      <button key={a.id} type="button" onClick={() => { setSelectedArea(a); setAreaQuery(a.name); }} style={{ width: "100%", padding: 12, textAlign: "left", background: selectedArea?.id === a.id ? "var(--color-forest-light)" : "transparent", color: selectedArea?.id === a.id ? "var(--color-cream)" : "var(--color-forest)", border: "none", borderBottom: "1px solid var(--color-ink-subtle)", cursor: "pointer" }}>
+                        <div style={{ fontWeight: 500 }}>{a.name}</div>
+                        <div style={{ fontSize: 12, opacity: 0.8 }}>{a.state}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {selectedArea && (
+                  <div style={{ marginTop: 8, padding: 12, background: "var(--color-forest)", color: "var(--color-cream)", borderRadius: 8 }}>
+                    <strong>Selected:</strong> {selectedArea.name}, {selectedArea.state}
+                  </div>
+                )}
+              </Field>
+              )}
             </div>
 
             {error && <ErrorMessage>{error}</ErrorMessage>}
             <div style={{ display: "flex", gap: 12, marginTop: "var(--space-3)" }}>
               <BackButton onClick={goBack} />
-              <NextButton disabled={submitting || !selectedCampus}>Next</NextButton>
+              <NextButton disabled={submitting || (mode === "campus" ? !selectedCampus : !selectedArea)}>Next</NextButton>
             </div>
           </form>
         )}

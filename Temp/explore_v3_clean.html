@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voeq Explore — clean direction v3 (final)</title>
+<style>
+  :root{
+    --forest:#0F2A1D; --forest-mid:#2C5240; --forest-light:#4A7C5C;
+    --cream:#F9F6F0; --cream-warm:#F4EFE6;
+    --amber:#E8A33D; --amber-dark:#C8831F;
+    --ink:#1A1A1A; --ink-muted:#6B6B6B; --ink-subtle:#B0AFA8;
+    --surface:#fff; --border:rgba(31,56,43,.1);
+    --radius:14px; --radius-lg:20px;
+    --display:'Fraunces',Georgia,serif;
+    --ui:'Inter','Segoe UI',sans-serif;
+    --d-fast:100ms; --d-base:200ms; --d-slow:350ms;
+    --ease-out:cubic-bezier(0.16,1,0.3,1);
+    --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:0.01ms !important;transition-duration:0.01ms !important}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--cream);font-family:var(--ui);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+
+  /* Phone frame */
+  .frame{
+    width:390px;height:844px;border-radius:36px;overflow:hidden;
+    background:var(--surface);position:relative;
+    box-shadow:0 24px 60px rgba(0,0,0,0.12);
+    border:8px solid #1a1a1a;margin:0 auto;
+  }
+
+  /* TOPBAR — identical to AppShell: logo [gap] bell + signout */
+  .topbar{
+    height:56px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;border-bottom:1px solid var(--border);
+    background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);
+    position:sticky;top:0;z-index:50;
+  }
+  .topbar .logo{font-family:var(--display);font-weight:700;font-size:18px;color:var(--forest)}
+  .topbar .actions{display:flex;align-items:center;gap:8px}
+  .topbar .icon-btn{
+    width:38px;height:38px;border-radius:50%;border:1px solid var(--border);
+    background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    color:var(--forest);
+  }
+
+  /* HERO — search lives here, single entry */
+  .hero{
+    background:var(--forest);color:var(--cream);padding:32px 18px 24px;
+    position:relative;overflow:hidden;
+  }
+  .hero h2{font-family:var(--display);font-size:26px;font-weight:600;margin:0 0 6px;line-height:1.15}
+  .hero p{font-size:13px;opacity:0.7;margin:0 0 20px}
+  .hero .search{
+    height:48px;background:var(--surface);border-radius:14px;
+    display:flex;align-items:center;padding:0 16px;gap:10px;
+    color:var(--ink-muted);font-size:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  }
+
+  .content{padding:16px 16px 80px;overflow:auto;height:calc(100% - 56px - 170px)}
+
+  /* Entry chips — max 3, no scroll */
+  .chips{display:flex;gap:8px;margin-bottom:14px;flex-wrap:nowrap}
+  .chip{
+    height:32px;padding:0 14px;border-radius:16px;
+    font-size:11.5px;font-family:var(--ui);font-weight:600;
+    cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+    border:1px solid var(--border);background:var(--surface);color:var(--ink);
+    transition:background var(--d-base) var(--ease-out),transform var(--d-fast) var(--ease-out);
+    flex:0 0 auto;white-space:nowrap;
+  }
+  .chip:active{transform:scale(0.95)}
+  .chip.active{background:var(--forest);color:var(--cream);border-color:var(--forest)}
+
+  /* Grid */
+  .grid-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .grid-header .count{font-size:12px;color:var(--ink-muted);font-weight:500}
+  .filter-btn{
+    height:30px;padding:0 12px;border:1px solid var(--border);border-radius:15px;
+    background:var(--surface);font-size:11.5px;font-family:var(--ui);font-weight:600;
+    color:var(--forest);cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    transition:background var(--d-base) var(--ease-out),transform var(--d-fast) var(--ease-out);
+  }
+  .filter-btn:active{background:var(--cream-warm);transform:scale(0.96)}
+  .filter-btn .dot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;cursor:pointer;
+    transition:transform var(--d-base) var(--ease-out),box-shadow var(--d-base) var(--ease-out);
+    opacity:0;transform:translateY(8px);
+    animation:cardIn var(--d-slow) var(--ease-out) forwards;
+  }
+  .card:nth-child(1){animation-delay:0ms}
+  .card:nth-child(2){animation-delay:60ms}
+  .card:nth-child(3){animation-delay:120ms}
+  .card:nth-child(4){animation-delay:180ms}
+  @keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+  .card:active{transform:scale(0.97)}
+  .card .img-wrap{position:relative;padding-top:100%;background:linear-gradient(135deg,#e8e5dd,#dcd8ce)}
+  .card .img-wrap::after{
+    content:'IMG';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:600;color:var(--ink-muted);
+  }
+  .card .body{padding:10px 10px 12px}
+  .card .title{font-size:13px;font-weight:600;color:var(--ink);margin:0 0 2px;line-height:1.3}
+  .card .vendor{font-size:11px;color:var(--ink-muted);margin:0}
+  .card .price{font-size:13.5px;font-weight:700;color:var(--forest);margin:5px 0 0;font-family:var(--display)}
+
+  /* Bottom nav — SAME as home/dashboard, always visible */
+  .bottom-nav{
+    position:absolute;bottom:0;left:0;right:0;height:56px;
+    border-top:1px solid var(--border);background:var(--surface);
+    display:flex;align-items:center;justify-content:space-around;
+    padding-bottom:env(safe-area-inset-bottom,0);
+  }
+  .bottom-nav a{
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-size:10px;font-family:var(--ui);font-weight:500;color:var(--ink-muted);
+    text-decoration:none;padding:6px 12px;border-radius:8px;
+    transition:color var(--d-base) var(--ease-out);
+  }
+  .bottom-nav a.active{color:var(--forest)}
+  .bottom-nav a:active{background:var(--cream-warm)}
+
+  /* Desktop */
+  .desktop{
+    width:1280px;height:800px;border-radius:16px;overflow:hidden;
+    background:var(--surface);display:flex;
+    box-shadow:0 24px 60px rgba(0,0,0,0.12);margin:0 auto;
+  }
+  .desktop .sidebar{
+    width:240px;flex-shrink:0;border-right:1px solid var(--border);
+    padding:20px;display:flex;flex-direction:column;gap:6px;
+    background:#fffdf8;
+  }
+  .desktop .sidebar .nav-item{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+    font-size:13px;font-weight:500;color:var(--ink-muted);text-decoration:none;
+    transition:background var(--d-base) var(--ease-out),color var(--d-base) var(--ease-out);
+  }
+  .desktop .sidebar .nav-item:active{background:var(--cream-warm)}
+  .desktop .sidebar .nav-item.active{background:var(--forest);color:var(--cream)}
+  .desktop .sidebar .filters-title{
+    font-family:var(--display);font-size:18px;font-weight:700;color:var(--forest);
+    margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--border);
+  }
+  .desktop .main{flex:1;overflow-y:auto}
+  .desktop .topbar-desktop{
+    height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;
+    padding:0 24px;gap:16px;background:var(--surface);
+  }
+  .desktop .center-nav{display:flex;gap:4px;align-items:center}
+  .desktop .center-nav a{
+    display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;
+    color:var(--ink-muted);text-decoration:none;font-size:13.5px;font-weight:500;
+    transition:background var(--d-base) var(--ease-out),color var(--d-base) var(--ease-out);
+  }
+  .desktop .center-nav a:active{background:var(--cream-warm)}
+  .desktop .center-nav a.active{background:var(--cream);color:var(--forest)}
+  .d-hero{
+    background:var(--forest);color:var(--cream);padding:40px 32px;
+    border-radius:var(--radius-lg);margin:24px;position:relative;overflow:hidden;
+  }
+  .d-hero h2{font-family:var(--display);font-size:32px;font-weight:600;margin:0 0 6px}
+  .d-hero p{font-size:14px;opacity:0.75;margin:0 0 20px}
+  .d-hero .search{
+    height:48px;background:var(--surface);border-radius:14px;
+    display:flex;align-items:center;padding:0 16px;gap:10px;
+    color:var(--ink-muted);font-size:14px;max-width:480px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  }
+  .d-content{padding:0 24px 40px}
+  .d-chips{display:flex;gap:10px;margin-bottom:20px}
+  .d-chip{
+    height:34px;padding:0 16px;border-radius:17px;
+    font-size:12.5px;font-family:var(--ui);font-weight:600;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--border);background:var(--surface);color:var(--ink);
+    transition:background var(--d-base) var(--ease-out),transform var(--d-fast) var(--ease-out);
+  }
+  .d-chip:active{transform:scale(0.95)}
+  .d-chip.active{background:var(--forest);color:var(--cream);border-color:var(--forest)}
+  .filter-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .filter-row .results{font-size:13px;color:var(--ink-muted)}
+  .d-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+
+  .annotation{
+    background:var(--cream-warm);border:1px solid var(--border);border-radius:var(--radius);
+    padding:14px 18px;margin-top:20px;font-size:13px;color:var(--ink);
+    max-width:700px;
+  }
+  .annotation strong{color:var(--forest)}
+  .annotation ul{margin:6px 0 0;padding-left:18px}
+  .annotation li{margin:3px 0}
+</style>
+</head>
+<body>
+<div class="wrap" style="max-width:1400px;margin:0 auto;padding:32px 24px">
+
+  <h1 style="font-family:var(--display);font-size:36px;margin:0 0 6px">Explore — clean direction v3</h1>
+  <p style="font-size:14px;color:var(--ink-muted);margin:0 0 24px">Single search bar · No pills · No back arrow · No duplicate nav · Bottom tab handles all navigation</p>
+
+  <!-- Mobile -->
+  <h2 style="font-family:var(--display);margin:24px 0 12px">Mobile — 390px</h2>
+  <div class="frame">
+    <!-- SAME topbar as home/dashboard: logo + bell + signout. NO back arrow, NO search. -->
+    <div class="topbar">
+      <div class="logo">voeq</div>
+      <div class="actions">
+        <button class="icon-btn" aria-label="Notifications">🔔</button>
+        <button class="icon-btn" aria-label="Sign out">⎋</button>
+      </div>
+    </div>
+
+    <!-- Hero — search lives here -->
+    <div class="hero">
+      <h2>Find it. Chat it. Get it.</h2>
+      <p>Discover vendors, services, and products on campus</p>
+      <div class="search">🔍 Search listings, vendors…</div>
+    </div>
+
+    <div class="content">
+      <!-- Sort chips (max 3, no scroll) -->
+      <div class="chips">
+        <div class="chip active">🔥 Trending</div>
+        <div class="chip">⭐ Top rated</div>
+        <div class="chip">🆕 Newest</div>
+      </div>
+
+      <div class="grid-header">
+        <span class="count">34 results</span>
+        <button class="filter-btn"><span class="dot"></span> Filters</button>
+      </div>
+
+      <div class="grid">
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Jollof rice pack</p><p class="vendor">Mary's Kitchen</p><p class="price">₦1,500</p></div></div>
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Campus shuttle</p><p class="vendor">Speedy Moves</p><p class="price">₦800</p></div></div>
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Handmade bracelet</p><p class="vendor">Zoe Collection</p><p class="price">₦2,200</p></div></div>
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Python notes HND</p><p class="vendor">NoteMaster</p><p class="price">₦3,500</p></div></div>
+      </div>
+    </div>
+
+    <!-- Bottom nav — SAME as home/dashboard -->
+    <nav class="bottom-nav">
+      <a href="#"><span>🏠</span> Home</a>
+      <a href="#" class="active"><span>🔍</span> Explore</a>
+      <a href="#"><span>🔖</span> Saved</a>
+      <a href="#"><span>💬</span> Chat</a>
+      <a href="#"><span>👤</span> You</a>
+    </nav>
+  </div>
+
+  <!-- Desktop -->
+  <h2 style="font-family:var(--display);margin:40px 0 12px">Desktop — 1280px</h2>
+  <div class="desktop">
+    <!-- Sidebar: nav + filters (same structure as vendor/shopper) -->
+    <aside class="sidebar">
+      <div class="filters-title">Filters</div>
+      <select style="width:100%;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:0 10px;font-size:12px;font-family:var(--ui);color:var(--forest);cursor:pointer;margin-bottom:12px">
+        <option>All universities</option><option>NMU Okerenkoko</option>
+      </select>
+      <select style="width:100%;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:0 10px;font-size:12px;font-family:var(--ui);color:var(--forest);cursor:pointer;margin-bottom:12px">
+        <option>All categories</option><option>Food & Drinks</option><option>Hair</option>
+      </select>
+      <select style="width:100%;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:0 10px;font-size:12px;font-family:var(--ui);color:var(--forest);cursor:pointer;margin-bottom:16px">
+        <option>Most popular</option><option>Newest</option><option>Top rated</option><option>Price ↑</option><option>Price ↓</option>
+      </select>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button style="height:26px;padding:0 10px;border:1px solid var(--border);border-radius:13px;background:var(--surface);font-size:10.5px;font-family:var(--ui);color:var(--forest);cursor:pointer">✓ Verified</button>
+        <button style="height:26px;padding:0 10px;border:1px solid var(--border);border-radius:13px;background:var(--surface);font-size:10.5px;font-family:var(--ui);color:var(--forest);cursor:pointer">📷 Has photos</button>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+      <a class="nav-item" href="#">🏠 Home</a>
+      <a class="nav-item active" href="#">🔍 Explore</a>
+      <a class="nav-item" href="#">🔖 Saved</a>
+      <a class="nav-item" href="#">💬 Messages</a>
+      <a class="nav-item" href="#">👤 You</a>
+    </aside>
+
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div class="topbar-desktop">
+        <div style="font-family:var(--display);font-size:18px;font-weight:700;color:var(--forest)">voeq</div>
+        <nav class="center-nav">
+          <a href="#">🏠 Home</a>
+          <a href="#" class="active">🔍 Explore</a>
+          <a href="#">💬 Messages</a>
+        </nav>
+        <div style="flex:1"></div>
+        <button class="icon-btn" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center">🔔</button>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--cream-warm)"></div>
+      </div>
+
+      <div class="main">
+        <div class="d-hero">
+          <h2>Find it. Chat it. Get it.</h2>
+          <p>Discover vendors, services, and products on campus</p>
+          <div class="search">🔍 Search listings, vendors…</div>
+        </div>
+        <div class="d-content">
+          <div class="d-chips">
+            <div class="d-chip active">🔥 Trending</div>
+            <div class="d-chip">⭐ Top rated</div>
+            <div class="d-chip">🆕 Newest</div>
+          </div>
+          <div class="filter-row">
+            <span class="results">34 results</span>
+            <div style="flex:1"></div>
+            <span style="font-size:12px;color:var(--ink-muted)">Sorted by Trending</span>
+          </div>
+          <div class="d-grid">
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Jollof rice pack</p><p class="vendor">Mary's Kitchen</p><p class="price">₦1,500</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Campus shuttle</p><p class="vendor">Speedy Moves</p><p class="price">₦800</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Handmade bracelet</p><p class="vendor">Zoe Collection</p><p class="price">₦2,200</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Python notes HND</p><p class="vendor">NoteMaster</p><p class="price">₦3,500</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Hair braiding</p><p class="vendor">Tayo's Touch</p><p class="price">₦1,800</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Laptop repair</p><p class="vendor">TechFix</p><p class="price">₦5,000</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Aso oke fabric</p><p class="vendor">Aunty B's Shop</p><p class="price">₦4,500</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Math tutoring</p><p class="vendor">Prof. Kay</p><p class="price">₦2,000</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Annotation -->
+  <div class="annotation">
+    <strong>What changed vs. the current explore page:</strong>
+    <ul>
+      <li><strong>Back arrow GONE</strong> — Topbar is identical to home/dashboard (logo + bell + signout). No custom header. Navigation between Home ↔ Explore is via bottom tab or sidebar — both always visible.</li>
+      <li><strong>Search bar = 1, in hero</strong> — Topbar has no search input. Hero owns the single search. No duplication.</li>
+      <li><strong>Pills GONE</strong> — No 18 category pills. 3 inline sort chips (Trending / Top rated / Newest) sit above the grid. Category filter lives inside the Filters sheet only.</li>
+      <li><strong>Bottom nav persists</strong> — Same as home/dashboard: Home, Explore, Saved, Chat, You. Always visible on mobile. Sidebar equivalent on desktop.</li>
+      <li><strong>Card press feedback</strong> — scale(0.97) on :active (emil-design-eng).</li>
+      <li><strong>Stagger entrance</strong> — 60ms fade + translateY per card.</li>
+      <li><strong>No cat tags</strong> — Title, vendor, price. Category is discoverable via filter, not shouted on every card.</li>
+      <li><strong>prefers-reduced-motion</strong> — global collapse to 0.01ms.</li>
+    </ul>
+  </div>
+
+  <div class="annotation" style="border-color:#6EE7B7;background:linear-gradient(135deg,#D1FAE5,#A7F3D0);color:#065F46;margin-top:12px">
+    <strong>Before I build, two choices:</strong>
+    <ul>
+      <li><strong>Category dropdown:</strong> pre-selects last choice, or resets to "All categories"?</li>
+      <li><strong>Sort chips:</strong> Trending/Top rated/Newest OK, or different set (e.g. "Near me", "Fresh deals", "Verified first")?</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

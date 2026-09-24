@@ -168,6 +168,26 @@ const mockAgreementRepoImpl: AgreementRepo = {
   },
 };
 
+// ---- Areas (for off-campus vendors) ------------------------------------
+const mockAreasRepoImpl = {
+  async list(_opts?: { q?: string; limit?: number }): Promise<Array<{ id: string; name: string; state: string }>> {
+    // Fallback data for dev mode (no DATABASE_URL)
+    const all = [
+      { id: "lagos-lekki", name: "Lekki", state: "Lagos" },
+      { id: "lagos-ikeja", name: "Ikeja", state: "Lagos" },
+      { id: "abuja-asokoro", name: "Asokoro", state: "Abuja" },
+      { id: "abuja-wuse", name: "Wuse", state: "Abuja" },
+      { id: "delta-warri", name: "Warri", state: "Delta" },
+      { id: "rivers-port-harcourt", name: "Port Harcourt", state: "Rivers" },
+    ];
+    if (_opts?.q) {
+      const q = _opts.q.trim().toLowerCase();
+      return all.filter((a) => `${a.name} ${a.state}`.toLowerCase().includes(q));
+    }
+    return all;
+  },
+};
+
 // D.2/D.3 — Factory (EOF): real Neon-backed repos when DATABASE_URL is set.
 // P0 (config console): the `as unknown as` casts are GONE — realCategoryRepo
 // was missing create/setActive and tsc couldn't see it (prod POST/PATCH would
@@ -175,5 +195,6 @@ const mockAgreementRepoImpl: AgreementRepo = {
 // if a method is missing, typecheck fails at build time, not at runtime.
 const USE_REAL = !!process.env.DATABASE_URL;
 export const mockCategoryRepo: CategoryRepo = USE_REAL ? realCategoryRepo : mockCategoryRepoImpl;
+export const mockAreasRepo = mockAreasRepoImpl;
 export const mockCampusRepo: CampusRepo = USE_REAL ? realCampusRepo : mockCampusRepoImpl;
 export const mockAgreementRepo: AgreementRepo = USE_REAL ? realAgreementRepo : mockAgreementRepoImpl;

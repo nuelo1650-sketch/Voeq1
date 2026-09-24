@@ -1,3 +1,32 @@
 {
-  "bad": []
+  "bad": [
+    "landing",
+    "explore",
+    "categories",
+    "listing-detail",
+    "storefront",
+    "how-it-works",
+    "for-vendors",
+    "about",
+    "help",
+    "terms",
+    "privacy",
+    "login",
+    "signup",
+    "settings",
+    "onboarding-shopper",
+    "vendor-dashboard",
+    "vendor-listings",
+    "vendor-create-listing",
+    "vendor-analytics",
+    "vendor-storefront-settings",
+    "vendor-reviews",
+    "vendor-edit-listing",
+    "admin-moderation",
+    "admin-users",
+    "admin-listings",
+    "admin-audit",
+    "admin-team",
+    "admin-home"
+  ]
 }

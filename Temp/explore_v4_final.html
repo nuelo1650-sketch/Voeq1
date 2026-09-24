@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voeq Explore — v4 final</title>
+<style>
+  :root{
+    --forest:#0F2A1D; --forest-mid:#2C5240; --forest-light:#4A7C5C;
+    --cream:#F9F6F0; --cream-warm:#F4EFE6;
+    --amber:#E8A33D; --amber-dark:#C8831F;
+    --ink:#1A1A1A; --ink-muted:#6B6B6B; --ink-subtle:#B0AFA8;
+    --surface:#fff; --border:rgba(31,56,43,.1);
+    --radius:14px; --radius-lg:20px;
+    --display:'Fraunces',Georgia,serif; --ui:'Inter','Segoe UI',sans-serif;
+    --d-fast:100ms; --d-base:200ms; --d-slow:350ms;
+    --ease-out:cubic-bezier(0.16,1,0.3,1);
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:0.01ms !important;transition-duration:0.01ms !important}
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--cream);font-family:var(--ui);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  svg{display:block}
+
+  .frame{
+    width:390px;height:844px;border-radius:36px;overflow:hidden;
+    background:var(--surface);position:relative;
+    box-shadow:0 24px 60px rgba(0,0,0.12);
+    border:8px solid #1a1a1a;margin:0 auto;
+  }
+
+  /* TOPBAR */
+  .topbar{
+    height:56px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;border-bottom:1px solid var(--border);
+    background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);
+    position:sticky;top:0;z-index:50;
+  }
+  .topbar .logo{font-family:var(--display);font-weight:700;font-size:18px;color:var(--forest)}
+  .topbar .actions{display:flex;align-items:center;gap:8px}
+  .icon-btn{
+    width:38px;height:38px;border-radius:50%;border:1px solid var(--border);
+    background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    color:var(--forest);
+  }
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--cream-warm);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--forest)}
+  .btn-signin{
+    height:34px;padding:0 14px;border:1px solid var(--border);border-radius:17px;
+    background:transparent;font-size:12.5px;font-weight:600;color:var(--forest);cursor:pointer;font-family:var(--ui);
+  }
+  .btn-getstarted{
+    height:34px;padding:0 14px;border:none;border-radius:17px;
+    background:var(--forest);font-size:12.5px;font-weight:600;color:var(--cream);cursor:pointer;font-family:var(--ui);
+  }
+
+  /* HERO */
+  .hero{
+    background:var(--forest);color:var(--cream);padding:28px 18px 22px;
+    position:relative;overflow:hidden;
+  }
+  .hero h2{font-family:var(--display);font-size:24px;font-weight:600;margin:0 0 4px;line-height:1.15}
+  .hero p{font-size:12.5px;opacity:0.7;margin:0 0 18px}
+  .hero .search{
+    height:48px;background:var(--surface);border-radius:14px;
+    display:flex;align-items:center;padding:0 16px;gap:10px;
+    color:var(--ink-muted);font-size:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  }
+
+  .content{padding:14px 14px 80px;overflow:auto;height:calc(100% - 56px - 150px)}
+
+  /* SORT CHIPS */
+  .chips{display:flex;gap:8px;margin-bottom:14px}
+  .chip{
+    height:34px;padding:0 12px;border-radius:17px;
+    font-size:11.5px;font-family:var(--ui);font-weight:600;
+    cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+    border:1px solid var(--border);background:var(--surface);color:var(--ink);
+    transition:all var(--d-base) var(--ease-out);
+    flex:0 0 auto;white-space:nowrap;
+  }
+  .chip:active{transform:scale(0.95)}
+  .chip.active{background:var(--forest);color:var(--cream);border-color:var(--forest)}
+  .chip svg{width:14px;height:14px}
+
+  .grid-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .grid-header .count{font-size:12px;color:var(--ink-muted);font-weight:500}
+  .filter-btn{
+    height:32px;padding:0 12px;border:1px solid var(--border);border-radius:16px;
+    background:var(--surface);font-size:11.5px;font-family:var(--ui);font-weight:600;
+    color:var(--forest);cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .filter-btn:active{background:var(--cream-warm)}
+  .filter-btn .dot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+
+  /* CARDS */
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;cursor:pointer;
+    transition:transform var(--d-base) var(--ease-out);
+    opacity:0;transform:translateY(8px);
+    animation:cardIn var(--d-slow) var(--ease-out) forwards;
+  }
+  .card:nth-child(1){animation-delay:0ms}
+  .card:nth-child(2){animation-delay:60ms}
+  .card:nth-child(3){animation-delay:120ms}
+  .card:nth-child(4){animation-delay:180ms}
+  @keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+  .card:active{transform:scale(0.97)}
+  .img-wrap{position:relative;padding-top:100%;background:linear-gradient(135deg,#e8e5dd,#dcd8ce)}
+  .img-wrap::after{
+    content:'IMG';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:600;color:var(--ink-muted);letter-spacing:0.05em;
+  }
+  .body{padding:10px}
+  .title{font-size:13px;font-weight:600;color:var(--ink);margin:0 0 2px;line-height:1.3}
+  .vendor{font-size:11px;color:var(--ink-muted);margin:0}
+  .price{font-size:13.5px;font-weight:700;color:var(--forest);margin:5px 0 0;font-family:var(--display)}
+
+  /* BOTTOM NAV */
+  .bottom-nav{
+    position:absolute;bottom:0;left:0;right:0;height:56px;
+    border-top:1px solid var(--border);background:var(--surface);
+    display:flex;align-items:center;justify-content:space-around;
+    padding-bottom:env(safe-area-inset-bottom,0);
+  }
+  .bottom-nav a{
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-size:10px;font-weight:500;color:var(--ink-muted);
+    text-decoration:none;padding:6px 12px;border-radius:8px;
+  }
+  .bottom-nav a.active{color:var(--forest)}
+  .bottom-nav a:active{background:var(--cream-warm)}
+  .bottom-nav svg{width:20px;height:20px}
+
+  /* DESKTOP */
+  .desktop{
+    width:1280px;height:800px;border-radius:16px;overflow:hidden;
+    background:var(--surface);display:flex;
+    box-shadow:0 24px 60px rgba(0,0,0,0.12);margin:0 auto;
+  }
+  .sidebar{
+    width:240px;flex-shrink:0;border-right:1px solid var(--border);
+    padding:20px;display:flex;flex-direction:column;gap:6px;background:#fffdf8;
+  }
+  .sidebar .nav-item{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+    font-size:13px;font-weight:500;color:var(--ink-muted);text-decoration:none;
+  }
+  .sidebar .nav-item:active{background:var(--cream-warm)}
+  .sidebar .nav-item.active{background:var(--cream);color:var(--forest);font-weight:600}
+  .filters-title{font-family:var(--display);font-size:18px;font-weight:700;color:var(--forest);margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  .main{flex:1;overflow-y:auto}
+  .d-topbar{
+    height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;
+    padding:0 24px;gap:16px;background:var(--surface);
+  }
+  .center-nav{display:flex;gap:4px;align-items:center}
+  .center-nav a{
+    display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;
+    color:var(--ink-muted);text-decoration:none;font-size:13.5px;font-weight:500;
+  }
+  .center-nav a:active{background:var(--cream-warm)}
+  .center-nav a.active{background:var(--cream);color:var(--forest)}
+  .d-hero{
+    background:var(--forest);color:var(--cream);padding:40px 32px;
+    border-radius:var(--radius-lg);margin:24px;position:relative;overflow:hidden;
+  }
+  .d-hero h2{font-family:var(--display);font-size:32px;font-weight:600;margin:0 0 6px}
+  .d-hero p{font-size:14px;opacity:0.75;margin:0 0 20px}
+  .d-hero .search{
+    height:48px;background:var(--surface);border-radius:14px;
+    display:flex;align-items:center;padding:0 16px;gap:10px;
+    color:var(--ink-muted);font-size:14px;max-width:480px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  }
+  .d-content{padding:0 24px 40px}
+  .d-chips{display:flex;gap:10px;margin-bottom:20px}
+  .d-chip{
+    height:36px;padding:0 16px;border-radius:18px;
+    font-size:12.5px;font-weight:600;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--border);background:var(--surface);color:var(--ink);
+  }
+  .d-chip:active{transform:scale(0.95)}
+  .d-chip.active{background:var(--forest);color:var(--cream);border-color:var(--forest)}
+  .d-chip svg{width:16px;height:16px}
+  .filter-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .filter-row .results{font-size:13px;color:var(--ink-muted)}
+  .d-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+</style>
+</head>
+<body>
+<div style="max-width:1400px;margin:0 auto;padding:32px 24px">
+
+  <h1 style="font-family:var(--display);font-size:36px;margin:0 0 6px">Explore — v4 final</h1>
+  <p style="font-size:14px;color:var(--ink-muted);margin:0 0 24px">Search at top · No pills · No hamburger · Sort chips with real icons · Bottom tab nav · Pre-selecting dropdown</p>
+
+  <!-- Mobile ANON -->
+  <h2 style="font-family:var(--display);font-size:20px;margin:24px 0 12px">Mobile — Anonymous</h2>
+  <div class="frame">
+    <div class="topbar">
+      <div class="logo">voeq</div>
+      <div class="actions">
+        <button class="btn-signin">Sign in</button>
+        <button class="btn-getstarted">Get started</button>
+      </div>
+    </div>
+    <div class="hero">
+      <h2>Find it. Chat it. Get it.</h2>
+      <p>Discover vendors, services, and products on campus</p>
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search listings, vendors…</span>
+      </div>
+    </div>
+    <div class="content">
+      <div class="chips">
+        <div class="chip active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          Most popular
+        </div>
+        <div class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Top rated
+        </div>
+        <div class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
+          Fresh drops
+        </div>
+        <div class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          Verified
+        </div>
+      </div>
+      <div class="grid-header">
+        <span class="count">34 results</span>
+        <button class="filter-btn"><span class="dot"></span> Filters</button>
+      </div>
+      <div class="grid">
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Jollof rice pack</p><p class="vendor">Mary's Kitchen</p><p class="price">₦1,500</p></div></div>
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Campus shuttle</p><p class="vendor">Speedy Moves</p><p class="price">₦800</p></div></div>
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Handmade bracelet</p><p class="vendor">Zoe Collection</p><p class="price">₦2,200</p></div></div>
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Python notes HND</p><p class="vendor">NoteMaster</p><p class="price">₦3,500</p></div></div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <a href="#" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Explore</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg> How it works</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> For vendors</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> Help</a>
+    </nav>
+  </div>
+
+  <!-- Mobile AUTHED -->
+  <h2 style="font-family:var(--display);font-size:20px;margin:32px 0 12px">Mobile — Logged in</h2>
+  <div class="frame">
+    <div class="topbar">
+      <div class="logo">voeq</div>
+      <div class="actions">
+        <button class="icon-btn" aria-label="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </button>
+        <div class="avatar">D</div>
+      </div>
+    </div>
+    <div class="hero">
+      <h2>Find it. Chat it. Get it.</h2>
+      <p>Discover vendors, services, and products on campus</p>
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search listings, vendors…</span>
+      </div>
+    </div>
+    <div class="content">
+      <div class="chips">
+        <div class="chip active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          Most popular
+        </div>
+        <div class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Top rated
+        </div>
+        <div class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
+          Fresh drops
+        </div>
+        <div class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          Verified
+        </div>
+      </div>
+      <div class="grid-header">
+        <span class="count">34 results</span>
+        <button class="filter-btn"><span class="dot"></span> Filters</button>
+      </div>
+      <div class="grid">
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Jollof rice pack</p><p class="vendor">Mary's Kitchen</p><p class="price">₦1,500</p></div></div>
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Campus shuttle</p><p class="vendor">Speedy Moves</p><p class="price">₦800</p></div></div>
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Handmade bracelet</p><p class="vendor">Zoe Collection</p><p class="price">₦2,200</p></div></div>
+        <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Python notes HND</p><p class="vendor">NoteMaster</p><p class="price">₦3,500</p></div></div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home</a>
+      <a href="#" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Explore</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg> Saved</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg> Chat</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> You</a>
+    </nav>
+  </div>
+
+  <!-- Desktop -->
+  <h2 style="font-family:var(--display);font-size:20px;margin:40px 0 12px">Desktop — 1280px</h2>
+  <div class="desktop">
+    <aside class="sidebar">
+      <div class="filters-title">Filters</div>
+      <select style="width:100%;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:0 10px;font-size:12px;font-family:var(--ui);color:var(--forest);cursor:pointer;margin-bottom:12px">
+        <option>All universities</option><option>NMU Okerenkoko</option>
+      </select>
+      <select style="width:100%;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:0 10px;font-size:12px;font-family:var(--ui);color:var(--forest);cursor:pointer;margin-bottom:12px">
+        <option>All categories</option><option>Food & Drinks</option><option>Hair</option>
+      </select>
+      <select style="width:100%;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:0 10px;font-size:12px;font-family:var(--ui);color:var(--forest);cursor:pointer;margin-bottom:16px">
+        <option>Most popular</option><option>Fresh drops</option><option>Top rated</option>
+      </select>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button style="height:26px;padding:0 10px;border:1px solid var(--border);border-radius:13px;background:var(--surface);font-size:10.5px;font-family:var(--ui);color:var(--forest);cursor:pointer;display:flex;align-items:center;gap:4px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          Verified
+        </button>
+        <button style="height:26px;padding:0 10px;border:1px solid var(--border);border-radius:13px;background:var(--surface);font-size:10.5px;font-family:var(--ui);color:var(--forest);cursor:pointer;display:flex;align-items:center;gap:4px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><path d="m21 15-5-5L5 21"/></svg>
+          Has photos
+        </button>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+      <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home</a>
+      <a class="nav-item active" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Explore</a>
+      <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg> Saved</a>
+      <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Messages</a>
+      <a class="nav-item" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> You</a>
+    </aside>
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div class="d-topbar">
+        <div style="font-family:var(--display);font-size:18px;font-weight:700;color:var(--forest)">voeq</div>
+        <nav class="center-nav">
+          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home</a>
+          <a href="#" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Explore</a>
+          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Messages</a>
+        </nav>
+        <div style="flex:1"></div>
+        <button class="icon-btn" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </button>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--cream-warm);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--forest)">D</div>
+      </div>
+      <div class="main">
+        <div class="d-hero">
+          <h2>Find it. Chat it. Get it.</h2>
+          <p>Discover vendors, services, and products on campus</p>
+          <div class="search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span>Search listings, vendors…</span>
+          </div>
+        </div>
+        <div class="d-content">
+          <div class="d-chips">
+            <div class="d-chip active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              Most popular
+            </div>
+            <div class="d-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Top rated
+            </div>
+            <div class="d-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
+              Fresh drops
+            </div>
+            <div class="d-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              Verified
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="results">34 results</span>
+            <div style="flex:1"></div>
+            <span style="font-size:12px;color:var(--ink-muted)">Sorted by Most popular</span>
+          </div>
+          <div class="d-grid">
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Jollof rice pack</p><p class="vendor">Mary's Kitchen</p><p class="price">₦1,500</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Campus shuttle</p><p class="vendor">Speedy Moves</p><p class="price">₦800</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Handmade bracelet</p><p class="vendor">Zoe Collection</p><p class="price">₦2,200</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Python notes HND</p><p class="vendor">NoteMaster</p><p class="price">₦3,500</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Hair braiding</p><p class="vendor">Tayo's Touch</p><p class="price">₦1,800</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Laptop repair</p><p class="vendor">TechFix</p><p class="price">₦5,000</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Aso oke fabric</p><p class="vendor">Aunty B's Shop</p><p class="price">₦4,500</p></div></div>
+            <div class="card"><div class="img-wrap"></div><div class="body"><p class="title">Math tutoring</p><p class="vendor">Prof. Kay</p><p class="price">₦2,000</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div style="background:var(--cream-warm);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-top:24px;max-width:700px">
+    <strong style="color:var(--forest)">What this gives you:</strong>
+    <ul style="margin:8px 0 0;padding-left:18px;font-size:13px">
+      <li>✅ Search bar = 1, in hero. Topbar has no search input.</li>
+      <li>✅ No hamburger — bottom tab + sidebar handle nav on both sizes.</li>
+      <li>✅ Anon state: Sign in + Get started buttons. Authed: bell + avatar.</li>
+      <li>✅ No pills ever — 4 sort chips with real Lucide SVG icons (Flame, Star, Sparkles, CheckCircle).</li>
+      <li>✅ Card press = scale(0.97) on :active.</li>
+      <li>✅ 60ms stagger entrance per card.</li>
+      <li>✅ Category dropdown inside Filters pre-selects last choice.</li>
+      <li>✅ prefers-reduced-motion collapses all transitions.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

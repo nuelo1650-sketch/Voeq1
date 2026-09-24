@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voeq Explore — sort chips proposal</title>
+<style>
+  :root{
+    --forest:#0F2A1D; --cream:#F9F6F0; --cream-warm:#F4EFE6;
+    --amber:#E8A33D; --ink:#1A1A1A; --ink-muted:#6B6B6B;
+    --surface:#fff; --border:rgba(31,56,43,.1);
+    --radius:14px; --display:'Fraunces',Georgia,serif; --ui:'Inter','Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--cream);font-family:var(--ui);color:var(--ink);padding:40px 24px}
+  h1{font-family:var(--display);color:var(--forest);font-size:28px;margin:0 0 12px}
+  .set{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+  .chip{
+    height:36px;padding:0 16px;border-radius:18px;
+    font-size:13px;font-family:var(--ui);font-weight:600;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--border);background:var(--surface);color:var(--ink);
+    transition:all 150ms ease;
+  }
+  .chip.active{background:var(--forest);color:var(--cream);border-color:var(--forest)}
+  .chip:active{transform:scale(0.95)}
+  .chip:hover{background:var(--cream-warm)}
+  .chip.active:hover{background:var(--forest-mid, #2C5240)}
+  .q{background:var(--cream-warm);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:24px;max-width:500px}
+  .q strong{color:var(--forest)}
+  .sel{margin-top:24px;font-size:14px;color:var(--ink-muted)}
+</style>
+</head>
+<body>
+
+<h1>Explore — sort chip options</h1>
+<p style="color:var(--ink-muted);margin:0 0 8px">Students on campus care about: <strong>what's popular</strong> (social proof), <strong>what's trustworthy</strong> (reviews), <strong>what's new</strong> (fresh drops), <strong>who's legit</strong> (verified).</p>
+
+<div class="set">
+  <div class="chip active">🔥 Most popular</div>
+  <div class="chip">⭐ Top rated</div>
+  <div class="chip">✨ Fresh drops</div>
+  <div class="chip">✓ Verified</div>
+</div>
+
+<div class="q">
+  <strong>Confirm this set or suggest different:</strong>
+  <ul style="margin:8px 0 0;padding-left:18px">
+    <li>"Most popular" — default, engagement-weighted (saves, follows, chats)</li>
+    <li>"Top rated" — highest-rated vendors first</li>
+    <li>"Fresh drops" — newest listings first</li>
+    <li>"Verified" — verified vendors only</li>
+  </ul>
+</div>
+
+<p class="sel">Click a chip to see the active state:</p>
+
+<script>
+  document.querySelectorAll('.chip').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
