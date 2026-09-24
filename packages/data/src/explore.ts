@@ -49,6 +49,7 @@ export interface ExploreFilters {
   hasPhotos?: boolean; // Filter 7: vendors with ≥1 listing image
   recentlyActive?: boolean; // Filter 8: vendors with activity in last 7 days
   sort?: "relevance" | "price-asc" | "price-desc" | "rating-desc" | "newest" | "near-me";
+  query?: string; // SEARCH-01: search query (title, vendor, category, description)
 }
 
 export interface ExploreParams extends ExploreFilters {
@@ -139,6 +140,17 @@ async function computeVendorRatings(vendorIds: string[]): Promise<Map<string, { 
 /** PURE: apply filters. Unit-tested independently of the repo. */
 export function applyFilters(items: ExploreListing[], f: ExploreFilters): ExploreListing[] {
   let out = items;
+  // SEARCH-01: query matches title, vendor, category, description (case-insensitive)
+  if (f.query) {
+    const q = f.query.toLowerCase().trim();
+    out = out.filter((i) =>
+      i.title.toLowerCase().includes(q) ||
+      i.vendorName.toLowerCase().includes(q) ||
+      (i.categorySlug ?? "").toLowerCase().includes(q) ||
+      (i.description ?? "").toLowerCase().includes(q) ||
+      (i.shortDescription ?? "").toLowerCase().includes(q)
+    );
+  }
   if (f.category) out = out.filter((i) => i.categorySlug === f.category);
   if (typeof f.minPrice === "number") out = out.filter((i) => i.priceMinor >= f.minPrice!);
   if (typeof f.maxPrice === "number") out = out.filter((i) => i.priceMinor <= f.maxPrice!);
