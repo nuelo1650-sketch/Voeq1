@@ -596,15 +596,18 @@ function NotificationItem({
         <p style={{ fontSize: 14, color: "var(--color-ink-muted)", margin: "0 0 8px" }}>
           {notification.body}
         </p>
-        {notification.refId && (
-          <Link
-            href={notification.refId}
-            style={{ fontSize: 13, color: "var(--color-forest-mid)", fontWeight: 500, textDecoration: "none" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            View →
-          </Link>
-        )}
+        {notification.refId && (() => {
+          const viewHref = notificationHref(notification.type, notification.refId, "shopper");
+          return viewHref ? (
+            <Link
+              href={viewHref}
+              style={{ fontSize: 13, color: "var(--color-forest-mid)", fontWeight: 500, textDecoration: "none" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              View →
+            </Link>
+          ) : null;
+        })()}
       </div>
     </div>
   );

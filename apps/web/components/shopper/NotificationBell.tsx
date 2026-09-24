@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Bell, MessageCircle, Heart, UserPlus, AlertCircle } from "lucide-react";
 import { notificationGroup, notificationHref, type NotificationViewerRole } from "@/lib/notification-href";
+import { subscribeToUserEvents } from "@/lib/sse-client";
 
 interface Notification {
   id: string;
@@ -69,17 +70,25 @@ export function NotificationBell({ viewerRole = "shopper" }: { viewerRole?: Noti
     return () => { cancelled = true; };
   }, []);
 
-  // SSE integration ready - to enable, add event listener here:
-  // useEffect(() => {
-  //   if (!isAuthed) return;
-  //   const unsubscribe = subscribeToNotifications({
-  //     onNotification: (notif) => {
-  //       setItems((prev) => [notif, ...prev].slice(0, 10));
-  //       if (!notif.read) setUnread((u) => u + 1);
-  //     },
-  //   });
-  //   return unsubscribe;
-  // }, [isAuthed]);
+  // SSE: live notification push (T4) — on push, re-fetch the bell from
+  // the API so .read/.body/.createdAt populate correctly. The SSE payload is
+  // a lightweight signal (no full row); refetch keeps the two shapes in sync.
+  useEffect(() => {
+    if (!isAuthed) return;
+    const unsubscribe = subscribeToUserEvents({
+      onNotification: () => {
+        fetch("/api/notifications")
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            if (!d) return;
+            setItems(d.notifications?.slice(0, 10) || []);
+            setUnread(d.unread || 0);
+          })
+          .catch(() => {});
+      },
+    });
+    return unsubscribe;
+  }, [isAuthed]);
 
   // Close dropdown on outside click
   useEffect(() => {
