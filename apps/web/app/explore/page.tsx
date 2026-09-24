@@ -52,6 +52,7 @@ export default async function ExplorePage({
         initialQuery={params.q}
         categoryPreset={params.category}
         viewerIdentityId={identity?.id}
+        userName={identity?.name}
         categoryOptions={categoryOptions}
       />
     </div>

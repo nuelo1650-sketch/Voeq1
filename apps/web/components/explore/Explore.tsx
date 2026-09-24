@@ -12,11 +12,12 @@ import { BrandLogo } from "../landing/BrandLogo";
 import { ListingCard } from "./ListingCard";
 import { Filters, CATEGORIES } from "./Filters";
 import { SearchBar } from "./SearchBar";
+import { NotificationBell } from "@/components/shopper/NotificationBell";
 import { OnboardingBanner } from "./OnboardingBanner";
 import { RecentlyViewedRail, useRecentlyViewed } from "./RecentlyViewedRail";
 import { ExploreSkeleton } from "./ExploreSkeleton";
 import { EmptyState } from "./EmptyState";
-import { RefreshCw, ChevronDown, ChevronLeft } from "lucide-react";
+import { RefreshCw, ChevronDown, ChevronLeft, Flame, Star, Sparkles, CheckCircle } from "lucide-react";
 
 /**
  * Explore — PG-PUB-002 (Doc 04). The core discovery surface.
@@ -55,12 +56,14 @@ export function Explore({
   campus: initialCampus = DEFAULT_CAMPUS,
   initialQuery,
   viewerIdentityId,
+  userName,
   categoryOptions,
 }: { 
   categoryPreset?: string; 
   campus?: string;
   initialQuery?: string;
   viewerIdentityId?: string;
+  userName?: string;
   /** CHIPS SEAM: resolved taxonomy from the server (seed ∪ config-console
    *  DB rows, deactivated excluded). Falls back to static CATEGORIES. */
   categoryOptions?: { slug: string; label: string }[];
@@ -247,31 +250,33 @@ export function Explore({
         data-testid="explore-topbar"
         className="voeq-topbar"
       >
-        {/* P-A round 64 (root fix): explicit Back affordance — the wordmark
-            looked like branding, not navigation, so Explore felt entry-less.
-            The arrow survives on all sizes; navigates history (or home). */}
-        <button
-          aria-label="Back"
-          data-testid="explore-back"
-          onClick={() => {
-            if (window.history.length > 1) window.history.back();
-            else window.location.href = "/";
-          }}
-          style={{
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            width: 40, height: 40, borderRadius: 999, flexShrink: 0, order: 0,
-            border: "1px solid var(--role-border)", background: "var(--role-surface)",
-            color: "var(--role-text)", cursor: "pointer",
-          }}
-        >
-          <ChevronLeft size={20} />
-        </button>
+        {/* Topbar: logo + single search + auth buttons (no back arrow, no hamburger) */}
         <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" className="voeq-topbar-wordmark" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0, order: 0 }}>
           <BrandLogo width={94} />
         </Link>
 
         <div className="voeq-topbar-search" style={{ order: 1 }}>
           <SearchBar initial={query} onSearch={setQuery} listings={data} categoryOptions={cats} />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {viewerIdentityId ? (
+            <>
+              <NotificationBell viewerRole="shopper" />
+              <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--color-cream-warm)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, color: 'var(--color-forest)' }}>
+                {(userName || 'U').slice(0, 1).toUpperCase()}
+              </div>
+            </>
+          ) : (
+            <>
+              <button data-testid="explore-signin" className="voeq-btn voeq-btn--ghost" style={{ height: 34, padding: '0 14px', fontSize: 12.5, fontWeight: 600 }} onClick={() => window.location.href = '/login?next=/explore'}>
+                Sign in
+              </button>
+              <button data-testid="explore-getstarted" className="voeq-btn voeq-btn--primary" style={{ height: 34, padding: '0 14px', fontSize: 12.5, fontWeight: 600 }} onClick={() => window.location.href = '/signup?next=/explore'}>
+                Get started
+              </button>
+            </>
+          )}
         </div>
       </header>
 
@@ -306,26 +311,10 @@ export function Explore({
           </button>
         </div>
 
-        {/* Category quick-pills - horizontal scroll */}
+        {/* Sort chips (no pills) */}
         {!categoryPreset && (
-          <div style={{ marginBlock: "var(--space-3)", display: "flex", flexWrap: "wrap", paddingInline: "var(--nav-inline-pad)", gap: "var(--space-2)" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
-              <button
-                onClick={() => removeFilter('category')}
-                className={`voeq-pill${filters.category ? "" : " is-active"}`}
-              >
-                All
-              </button>
-              {cats.map((cat) => (
-                <button
-                  key={cat.slug}
-                  onClick={() => setFilters((prev) => ({ ...prev, category: cat.slug }))}
-                  className={`voeq-pill${filters.category === cat.slug ? " is-active" : ""}`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
+          <div style={{ marginBlock: "var(--space-3)", paddingInline: "var(--nav-inline-pad)", display: "flex", gap: "var(--space-2)" }}>
+            <SortChips value={filters.sort ?? "relevance"} onChange={(sort) => setFilters((prev) => ({ ...prev, sort: sort as ExploreFilters["sort"] }))} />
           </div>
         )}
 
@@ -658,6 +647,42 @@ const filterBadgeStyle: React.CSSProperties = {
   minWidth: 18,
   textAlign: "center",
 };
+
+// Sort chips — inline, no pills, no scroll
+const SORT_CHIPS = [
+  { value: "relevance", label: "Most popular", Icon: Flame },
+  { value: "rating-desc", label: "Top rated", Icon: Star },
+  { value: "newest", label: "Fresh drops", Icon: Sparkles },
+  { value: "near-me", label: "Near me", Icon: CheckCircle },
+];
+
+function SortChips({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div style={{ display: "flex", gap: 8 }}>
+      {SORT_CHIPS.map((c) => {
+        const active = value === c.value;
+        return (
+          <button
+            key={c.value}
+            onClick={() => onChange(c.value)}
+            className={`voeq-chip${active ? " is-active" : ""}`}
+            style={{
+              height: 34, padding: "0 12px", borderRadius: 17, display: "inline-flex",
+              alignItems: "center", gap: 5, fontSize: 11.5, fontWeight: 600,
+              fontFamily: "var(--role-font-ui)", cursor: "pointer", whiteSpace: "nowrap",
+              border: "1px solid var(--role-border, rgba(31,56,43,.1))",
+              background: active ? "var(--color-forest)" : "var(--color-cream-warm, #fff)",
+              color: active ? "var(--color-cream)" : "var(--color-ink)",
+            }}
+          >
+            <c.Icon size={14} />
+            {c.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 // Filter chip component
 function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
