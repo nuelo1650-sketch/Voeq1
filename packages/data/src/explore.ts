@@ -138,19 +138,60 @@ async function computeVendorRatings(vendorIds: string[]): Promise<Map<string, { 
 }
 
 /** PURE: apply filters. Unit-tested independently of the repo. */
+// Keyword aliases for category search (e.g. "gadget" → "tech", "clothes" → "fashion")
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  "tech-repairs": ["tech", "gadget", "phone", "laptop", "repair", "computer", "electronics", "mobile", "tablet", "charger", "screen", "broken", "fix"],
+  "fashion": ["fashion", "clothes", "clothing", "wear", "outfit", "dress", "shirt", "pants", "shoes", "sneakers", "bag", "accessories", "style", "tailor"],
+  "beauty-care": ["beauty", "skincare", "makeup", "cosmetics", "lotion", "cream", "spa", "facial", "haircare"],
+  "hair-services": ["hair", "braiding", "styling", "barber", "saloon", "weave", "relaxer", "dye", "cut"],
+  "food-drinks": ["food", "meal", "catering", "restaurant", "snack", "drink", "rice", "jollof", "cook", "kitchen", "eat"],
+  "pastries-bakes": ["pastry", "cake", "bread", "bakery", "bake", "cupcake", "dessert", "snack"],
+  "drinks-smoothies": ["drink", "smoothie", "juice", "coffee", "tea", "shake", "water", "chapman"],
+  "gadgets-accessories": ["gadget", "phone", "laptop", "tablet", "electronics", "accessory", "charger", "cable", "headphones", "speaker"],
+  "books-study-materials": ["book", "textbook", "novel", "study", "note", "past", "question", "tutorial"],
+  "academic-services": ["academic", "tutor", "assignment", "exam", "waec", "jamb", "course", "lesson", "homework"],
+  "printing": ["print", "copy", "photocopy", "scan", "lamination", "binding", "document"],
+  "photography": ["photo", "camera", "shoot", "portrait", "wedding", "event", "editing", "video"],
+  "tailoring": ["tailor", "sew", "stitch", "fabric", "cloth", "alteration", "measure", "fashion"],
+  "logistics": ["logistics", "delivery", "ride", "courier", "dispatch", "transport", "bike", "move"],
+  "home-essentials": ["home", "furniture", "kitchen", "decor", "appliance", "pillow", "broom", "cleaning", "soap"],
+  "health-wellness": ["health", "wellness", "pharmacy", "drug", "supplement", "vitamin", "fitness", "gym", "exercise"],
+  "groceries": ["grocery", "foodstuffs", "rice", "beans", "palm", "vegetable", "fruit", "meat", "fish"],
+  "events-parties": ["event", "party", "planner", "dj", "sound", "decoration", "catering", "wedding", "birthday"],
+  "travel-transport": ["travel", "transport", "flight", "hotel", "trip", "booking", "visa", "logistics"],
+  "student-support": ["student", "support", "guidance", "counsel", "career", "internship", "scholarship"],
+  "rentals": ["rent", "apartment", "house", "room", "space", "event", "chair", "canopy", "equipment"],
+  "crafts-handmade": ["craft", "handmade", "art", "jewelry", "bead", "bag", "soap", "candle", "knit"],
+  "music-services": ["music", "dj", "song", "album", "beat", "producer", "sound", "instrument"],
+  "laundry": ["laundry", "wash", "iron", "dry", "clean", "fold", "stain"],
+  "fitness-gains": ["fitness", "gym", "workout", "exercise", "protein", "supplement", "muscle", "gains"],
+  "other": ["other", "misc", "various", "general", "uncategorized"],
+};
+
+export function matchesCategoryKeyword(categoryId: string | null | undefined, query: string): boolean {
+  if (!categoryId) return false;
+  const keywords = CATEGORY_KEYWORDS[categoryId.toLowerCase()] ?? [];
+  return keywords.some((kw) => kw.includes(query.toLowerCase()) || query.toLowerCase().includes(kw));
+}
+
 export function applyFilters(items: ExploreListing[], f: ExploreFilters): ExploreListing[] {
   let out = items;
-  // SEARCH-01: query matches title, vendor, category, description (case-insensitive)
+  // SEARCH: query matches title, vendor, category, description + keyword aliases
   if (f.query) {
     const q = f.query.toLowerCase().trim();
-    out = out.filter((i) =>
-            i.title.toLowerCase().includes(q) ||
-            i.vendorName.toLowerCase().includes(q) ||
-            (i.categorySlug ?? "").toLowerCase().includes(q) ||
-            (i.categoryId ?? "").toLowerCase().includes(q) ||
-            (i.description ?? "").toLowerCase().includes(q) ||
-            (i.shortDescription ?? "").toLowerCase().includes(q)
-    );
+    out = out.filter((i) => {
+      const haystack = [
+        i.title,
+        i.vendorName,
+        i.categorySlug ?? "",
+        i.categoryId ?? "",
+        i.description ?? "",
+        i.shortDescription ?? "",
+      ].map((s) => s.toLowerCase());
+      if (haystack.some((h) => h.includes(q))) return true;
+      // Keyword aliases for categories
+      return matchesCategoryKeyword(i.categoryId, q) || matchesCategoryKeyword(i.categorySlug, q);
+    });
   }
   if (f.category) out = out.filter((i) => i.categorySlug === f.category);
   if (typeof f.minPrice === "number") out = out.filter((i) => i.priceMinor >= f.minPrice!);
