@@ -3,29 +3,20 @@
 /**
  * Config Console (P2, 2026-09-05) — the client control plane for /staff/config.
  * Four sections, each wired to its real config.write-gated API:
- *   Categories  → /api/staff/categories        (create, rename, activate/deactivate)
+ *   Categories  → /api/staff/categories        (create, rename, activate/deactivate, reorder)
  *   Campuses    → /api/staff/campuses          (create, verify/unverify)
  *   Agreements  → /api/staff/agreements        (publish version, promote to current)
  *   Flags       → /api/staff/feature-flags     (create, toggle)
  *
- * Conventions (matches UsersPanel/ListingsPanel):
- *   - var(--role-*) tokens, 40px tap targets, inline confirm for destructive
- *     or high-blast-radius actions, errors surfaced from real API responses.
- *   - Every mutation notes the actor + timestamp result inline.
- *
- * Honest seams surfaced in the UI (not hidden):
- *   - Categories created here do NOT appear on Explore until the chips seam
- *     is wired (Explore reads the static seed array — separate batch).
- *   - Feature flags are NOT read by any runtime path yet — toggling stores
- *     state for the future; nothing enforces it today.
+ * ADMIN-09: Categories section adds reorder (move up/down) buttons + sortOrder display.
  */
 
 import { useState } from "react";
-import { Plus, Check, X, AlertTriangle, ChevronDown } from "lucide-react";
+import { Plus, Check, X, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
 
 // ---- types -------------------------------------------------------------------
 
-export interface CategoryRow { id: string; slug: string; name: string; color: string; icon: string; vendorCount: number; isActive?: boolean }
+export interface CategoryRow { id: string; slug: string; name: string; color: string; icon: string; vendorCount: number; isActive?: boolean; sortOrder?: number }
 interface CampusRow { id: string; slug: string; name: string; city: string | null; state: string | null; status: "verified" | "unverified" }
 interface AgreementRow { id: string; kind: "terms" | "privacy" | "vendor"; version: string; body: string; effectiveAt: string; isCurrent: boolean }
 interface FlagRow { key: string; value: boolean; description: string }
@@ -179,6 +170,15 @@ function CategoriesPanel({ initial }: { initial: CategoryRow[] }) {
     setRows((rs) => rs.map((r2) => (r2.slug === slug ? { ...r2, isActive } : r2)));
     flash(isActive ? "✓ Category reactivated." : "✓ Category deactivated (hidden from future Explore wiring).");
   }
+  // ADMIN-09: reorder — swap sort_order with adjacent category
+  async function reorder(slugA: string, slugB: string) {
+    setBusy(true);
+    const r = await api("/api/staff/categories", "PATCH", { slug: slugA, slugB, action: "reorder" });
+    setBusy(false);
+    if (!r.ok) { flash(`✗ ${r.data.error ?? "Failed."}`); return; }
+    setRows(r.data.categories ?? await refreshCats());
+    flash("✓ Reordered.");
+  }
   async function refreshCats(): Promise<CategoryRow[]> {
     const r = await api("/api/staff/categories", "GET");
     return r.ok ? (r.data.categories ?? []) : initial;
@@ -187,7 +187,7 @@ function CategoriesPanel({ initial }: { initial: CategoryRow[] }) {
   return (
     <SectionCard title="Categories" count={rows.length} note="Created categories are stored in the DB but do not yet appear on Explore — the chips seam (Explore reads the static seed) is a separate batch.">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <span style={{ fontSize: 13, color: "var(--role-text-muted)" }}>Marketplace taxonomy</span>
+        <span style={{ fontSize: 13, color: "var(--role-text-muted)" }}>Marketscape taxonomy (drag-free reordering)</span>
         <button style={btn()} onClick={() => { setShowCreate(!showCreate); setEditingSlug(null); }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Plus size={14} /> New category</span>
         </button>
@@ -205,7 +205,7 @@ function CategoriesPanel({ initial }: { initial: CategoryRow[] }) {
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {rows.map((c) => (
+        {rows.map((c, idx) => (
           <div key={c.slug} style={{ padding: 12, border: "1px solid var(--role-border)", borderRadius: 6 }}>
             {editingSlug === c.slug ? (
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
@@ -220,10 +220,18 @@ function CategoriesPanel({ initial }: { initial: CategoryRow[] }) {
                     <span style={{ width: 10, height: 10, borderRadius: "50%", background: c.color, display: "inline-block", flexShrink: 0 }} />
                     {c.name}
                     {c.isActive === false && <span style={pill(false)}>Deactivated</span>}
+                    {c.slug === "other" && <span style={{ ...pill(true), background: "rgba(122,122,122,0.15)", color: "#666" }}>Pinned last</span>}
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--role-text-muted)", marginTop: 2 }}>{c.slug}</div>
+                  <div style={{ fontSize: 12, color: "var(--role-text-muted)", marginTop: 2 }}>{c.slug} · sort {c.sortOrder ?? 0}</div>
                 </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                  {/* ADMIN-09: Move up/down buttons */}
+                  <button style={btn({ padding: "6px 10px", minHeight: 32 })} disabled={busy || idx === 0 || rows[idx - 1]?.slug === "other"} title="Move up" onClick={() => reorder(c.slug, rows[idx - 1].slug)}>
+                    <ChevronUp size={14} />
+                  </button>
+                  <button style={btn({ padding: "6px 10px", minHeight: 32 })} disabled={busy || idx >= rows.length - 1 || c.slug === "other"} title="Move down" onClick={() => reorder(c.slug, rows[idx + 1].slug)}>
+                    <ChevronDown size={14} />
+                  </button>
                   <button style={btn()} onClick={() => { setEditingSlug(c.slug); setEditName(c.name); disarm(); }}>Edit</button>
                   {c.isActive === false ? (
                     <button style={btn()} disabled={busy} onClick={wrap(`cat-on-${c.slug}`, () => setActive(c.slug, true))}>Reactivate</button>
@@ -358,7 +366,6 @@ function AgreementsPanel({ initial }: { initial: AgreementRow[] }) {
     const r = await api("/api/staff/agreements", "PATCH", { id: a.id });
     setBusy(false);
     if (!r.ok) { flash(`✗ ${r.data.error ?? "Failed."}`); return; }
-    // kind-scoped current: only the same kind loses current
     setRows((rs) => rs.map((r2) => (r2.kind === a.kind ? { ...r2, isCurrent: r2.id === a.id } : r2)));
     flash(`✓ ${a.kind} v${a.version} is now current. Users with older acceptances will be asked to re-consent at next login.`);
   }

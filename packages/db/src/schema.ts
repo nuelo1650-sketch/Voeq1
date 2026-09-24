@@ -378,6 +378,18 @@ export const nominatimThrottle = pgTable("nominatim_throttle", {
   lastRequestBy: text("last_request_by"),
 });
 
+// MONEY BAG F1 twin (2026-09-13): the areas table was created by
+// money-bag-phase-a.sql but NEVER declared here — repo code couldn't touch it.
+// National taxonomy: 36 states + FCT, state -> area -> subarea.
+export const areas = pgTable("areas", {
+  id: text("id").primaryKey(),
+  stateName: text("state_name").notNull(),
+  areaName: text("area_name").notNull(),
+  subareaName: text("subarea_name"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const categories = pgTable("categories", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -385,4 +397,6 @@ export const categories = pgTable("categories", {
   /** P0 (config console): staff can deactivate a category; list() must be
    *  able to distinguish active from inactive. Additive, default active. */
   isActive: boolean("is_active").notNull().default(true),
+  /** ADMIN-09: manual sort order. "Other" always pinned last (highest value). */
+  sortOrder: integer("sort_order").notNull().default(0),
 });

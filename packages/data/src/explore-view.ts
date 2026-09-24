@@ -51,6 +51,8 @@ export interface Category {
   /** P0 (config console): false when a staff member deactivated this category.
    *  Absent = active (seeded categories have no DB row state). */
   isActive?: boolean;
+  /** ADMIN-09: manual sort order. "Other" always pinned last (highest value). */
+  sortOrder?: number;
 }
 
 export interface Campus {

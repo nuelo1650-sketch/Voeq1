@@ -4,6 +4,7 @@ import {
   mockVendorRepo,
   mockListingsRepo,
   mockIdentityRepo,
+  mockStaffRepo,
   computePlatformAnalytics,
   ROLE_CAPABILITIES,
   type StaffRole,
@@ -24,17 +25,19 @@ export default async function StaffDashboardPage() {
   const caps = ROLE_CAPABILITIES[staff.staffRole as StaffRole];
 
   // Fetch real platform data (no fake numbers).
-  const [allVendors, allListings, allIdentities, platform] = await Promise.all([
+  const [allVendors, allListings, allIdentities, platform, verificationCases] = await Promise.all([
     mockVendorRepo.listVendors(),
     mockListingsRepo.list({}),
     mockIdentityRepo.list(),
     computePlatformAnalytics(),
+    // ADMIN-04: count OPEN verification cases, not all unverified vendors.
+    mockStaffRepo.listCases("verifications"),
   ]);
 
   const totalUsers = allIdentities.length;
   const totalVendors = allVendors.length;
   const totalListings = allListings.length;
-  const pendingVerifications = allVendors.filter((v) => !v.verified).length;
+  const pendingVerifications = verificationCases.filter((c) => c.status === "open" || c.status === "triaged").length;
   const suspendedAccounts = allVendors.filter((v) => v.status === "suspended").length;
 
   return (

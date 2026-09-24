@@ -667,6 +667,33 @@ function mapListing(r: typeof s.listings.$inferSelect): Listing {
     createdAt: r.createdAt ?? null,
   };
 }
+/** MONEY BAG F1 (2026-09-13): national areas taxonomy (36 states + FCT).
+ *  The wizard's "Not on a campus? Pick your area" path and the storefront
+ *  label ("Warri, Delta") both read through here. */
+export interface AreaRow {
+  id: string;
+  stateName: string;
+  areaName: string;
+  subareaName: string | null;
+}
+function mapArea(r: { id: string; stateName: string; areaName: string; subareaName: string | null }): AreaRow {
+  return { id: r.id, stateName: r.stateName, areaName: r.areaName, subareaName: r.subareaName };
+}
+export const realAreasRepo = {
+  async list(opts?: { q?: string; state?: string; limit?: number }): Promise<AreaRow[]> {
+    let rows = await getDb().select().from(s.areas).where(eq(s.areas.isActive, true));
+    const q = opts?.q?.trim().toLowerCase();
+    if (q) {
+      rows = rows.filter((r) => `${r.areaName} ${r.stateName}`.toLowerCase().includes(q));
+    }
+    if (opts?.state) {
+      rows = rows.filter((r) => r.stateName.toLowerCase() === opts.state!.toLowerCase());
+    }
+    const limit = opts?.limit ?? 50;
+    return rows.map(mapArea).slice(0, limit);
+  },
+};
+
 export const realListingsRepo = {
   async list(params?: { campus?: string; area?: string; category?: string; publicOnly?: boolean }): Promise<Listing[]> {
     const rows = await getDb().select().from(s.listings);
@@ -1368,6 +1395,7 @@ export const realCategoryRepo: CategoryRepo = {
       icon: CATEGORY_SEED_META[row.slug]?.icon ?? "tag",
       vendorCount: 0,
       ...(row.isActive === false ? { isActive: false } : {}),
+      sortOrder: row.sortOrder ?? 0,
     }));
   },
   // (getBySlug intentionally not in the interface: no consumers; the config
@@ -1396,5 +1424,15 @@ export const realCategoryRepo: CategoryRepo = {
     if (existing.length === 0) return null;
     await getDb().update(s.categories).set({ name: name.trim() }).where(eq(s.categories.slug, slug));
     return { ...existing[0], name: name.trim() } as Category;
+  },
+  /** ADMIN-09: reorder — swap sort_order of two categories. */
+  async reorder(slugA: string, slugB: string): Promise<Category[]> {
+    const a = await getDb().select().from(s.categories).where(eq(s.categories.slug, slugA)).limit(1);
+    const b = await getDb().select().from(s.categories).where(eq(s.categories.slug, slugB)).limit(1);
+    if (!a[0] || !b[0]) return this.list();
+    const tmp = a[0].sortOrder ?? 0;
+    await getDb().update(s.categories).set({ sortOrder: b[0].sortOrder ?? 0 }).where(eq(s.categories.slug, slugA));
+    await getDb().update(s.categories).set({ sortOrder: tmp }).where(eq(s.categories.slug, slugB));
+    return this.list();
   },
 };

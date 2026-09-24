@@ -70,7 +70,13 @@ export async function resolvePublicCategories(): Promise<ResolvedCategory[]> {
         source: "db",
       });
     }
-    return merged;
+    // ADMIN-09: sort by sortOrder, 'other' always last.
+    return merged.sort((a, b) => {
+      const aOther = a.slug === "other" ? 1 : 0;
+      const bOther = b.slug === "other" ? 1 : 0;
+      if (aOther !== bOther) return aOther - bOther;
+      return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+    });
   } catch {
     return seedFallback();
   }

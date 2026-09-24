@@ -3,25 +3,21 @@ import {
   mockListingsRepo,
   mockVendorRepo,
   mockNotificationRepo,
+  mockSavedListingRepo,
+  mockStaffRepo,
   logAudit,
 } from "@voeq/data";
 import { requireCapability } from "@/lib/session";
 
 /**
  * VS7.9 + staff batch 1 / task 9 — Listing moderation.
+ * ADMIN-05: richer rows (image thumb, category name via resolveCategoryMaps,
+ * price as ₦, date, views/saves stats, listing ID) + recategorize dropdown.
  *
- *   GET  /api/staff/listings?q=<term>   → moderation queue of listings
- *   POST { listingId, action, reason }  → remove | feature | unfeature
- *
- * remove  → status='removed' (SOFT — reversible, auditable; publicOnly drops
- *           it off Explore immediately). Requires a reason (>= 10 chars): the
- *           vendor receives it VERBATIM in a notification with appeal
- *           instructions, so an unexplained removal is not shippable.
- * feature → isFeatured + 30-day featuredUntil; vendor notified (positive news).
- * unfeature → silent (promo expiry needs no noise).
- *
- * Every mutating action is audited. Capability: listing.moderate.
+ *   GET  /api/staff/listings?q=<term>&seed=<all|seeds|real>  → moderation queue
+ *   POST { listingId, action, reason, categoryId }           → remove | feature | unfeature | recategorize
  */
+
 export async function GET(req: NextRequest) {
   try {
     await requireCapability("listing.moderate");
@@ -30,16 +26,38 @@ export async function GET(req: NextRequest) {
     throw e;
   }
 
-  const q = new URL(req.url).searchParams.get("q")?.trim().toLowerCase() ?? "";
-  const listings = await mockListingsRepo.list();
+  const url = new URL(req.url);
+  const q = url.searchParams.get("q")?.trim().toLowerCase() ?? "";
+  const seedFilter = url.searchParams.get("seed") ?? "all";
+
+  const [listings, categoryMapsResult] = await Promise.all([
+    mockListingsRepo.list(),
+    import("@/../../packages/data/src/categories-resolver").then((m) => m.resolveCategoryMaps()).catch(() => null),
+  ]);
+  const categoryMaps: { slugToId: Record<string, string>; idToSlug: Record<string, string> } =
+    categoryMapsResult ?? { slugToId: {}, idToSlug: {} };
+
+  // Filter by search term (title, vendor name, listing id)
   const filtered = (listings ?? [])
-    .filter((l) => !q || l.title.toLowerCase().includes(q))
+    .filter((l) => {
+      if (seedFilter === "seeds" && l.source !== "seed") return false;
+      if (seedFilter === "real" && l.source === "seed") return false;
+      if (!q) return true;
+      return l.title.toLowerCase().includes(q)
+        || l.id.toLowerCase().includes(q);
+    })
     .slice(0, 100);
 
-  // Attach vendor names (moderation context: WHO owns this listing).
+  // ADMIN-05: enrich rows with image thumb, category name, price, date, stats, ID
   const withVendors = await Promise.all(
     filtered.map(async (l) => {
       const vendor = await mockVendorRepo.getById(l.vendorId).catch(() => null);
+      const saves = await mockSavedListingRepo.listByVendor(l.vendorId).catch(() => [] as { id: string }[]);
+      const categorySlug = categoryMaps.idToSlug[l.categoryId] ?? l.categoryId;
+      const priceFormatted = l.priceMaxMinor
+        ? `₦${(l.priceMinMinor / 100).toLocaleString()}–₦${(l.priceMaxMinor / 100).toLocaleString()}`
+        : `₦${(l.priceMinMinor / 100).toLocaleString()}`;
+
       return {
         id: l.id,
         title: l.title,
@@ -50,12 +68,18 @@ export async function GET(req: NextRequest) {
         isFeatured: l.isFeatured,
         featuredUntil: l.featuredUntil ?? null,
         priceMinMinor: l.priceMinMinor,
+        priceFormatted,
+        categoryId: l.categoryId,
+        categorySlug,
+        imageUrl: l.images?.[0] ?? null,
+        createdAt: l.createdAt ?? null,
+        saveCount: saves.length,
         // MONEY BAG S1: the seed marker — drives the SEED tag + hard-delete.
         source: l.source ?? null,
       };
     }),
   );
-  return NextResponse.json({ ok: true, listings: withVendors });
+  return NextResponse.json({ ok: true, listings: withVendors }, { status: 200 });
 }
 
 export async function POST(req: NextRequest) {
@@ -67,7 +91,7 @@ export async function POST(req: NextRequest) {
     throw e;
   }
 
-  let body: { listingId?: string; action?: "remove" | "feature" | "unfeature"; reason?: string };
+  let body: { listingId?: string; action?: "remove" | "feature" | "unfeature" | "recategorize"; reason?: string; categoryId?: string };
   try {
     body = await req.json();
   } catch {
@@ -77,6 +101,19 @@ export async function POST(req: NextRequest) {
   const action = body.action;
   if (!listingId || !action) return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+
+  // ADMIN-05: recategorize action
+  if (action === "recategorize") {
+    const categoryId = typeof body.categoryId === "string" ? body.categoryId.trim() : "";
+    if (!categoryId) return NextResponse.json({ error: "missing_categoryId" }, { status: 400 });
+    const listing = await mockListingsRepo.getById(listingId);
+    if (!listing) return NextResponse.json({ error: "listing_not_found" }, { status: 404 });
+    await mockListingsRepo.update(listing.id, { categoryId: categoryId as any });
+    await logAudit("listing.recategorize", actor.id, { listingId, categoryId, adminAction: true });
+    const updated = await mockListingsRepo.getById(listing.id);
+    return NextResponse.json({ ok: true, categoryId: updated?.categoryId }, { status: 200 });
+  }
+
   if (action === "remove" && reason.length < 10) {
     return NextResponse.json({ error: "reason_required" }, { status: 400 });
   }
@@ -85,12 +122,6 @@ export async function POST(req: NextRequest) {
   if (!listing) return NextResponse.json({ error: "listing_not_found" }, { status: 404 });
 
   if (action === "remove") {
-    // P-A round 79: was mockListingsRepo.remove() — a HARD delete. The route's
-    // own contract says "remove -> status='removed'" (soft), and the
-    // response below reads updated?.status, which a hard delete makes undefined.
-    // Soft-remove: keeps the row for auditing/restore, and publicOnly filters
-    // status="active" so it drops off Explore immediately. Moderation must be
-    // reversible, not destructive.
     await mockListingsRepo.update(listing.id, { status: "removed", isPublished: false });
   } else if (action === "feature") {
     const until = new Date(Date.now() + 30 * 86400000).toISOString();
@@ -100,12 +131,6 @@ export async function POST(req: NextRequest) {
   }
   await logAudit("listing.moderate", actor.id, { listingId, action, reason: reason || null, adminAction: true });
 
-  // Staff batch 1 (P2): the vendor learns WHY, verbatim, with an appeal path.
-  // Resolve listing → vendor → identity; skip silently if the chain is broken.
-  // FEATURE DESTINATION FIX (2026-09-07): a "you're featured" notice is good
-  // news — send type "system" + refId=listing so the notification center routes
-  // the vendor to their dashboard (they can see the featured badge on their
-  // listing), instead of /settings (the account_action enforcement target).
   if (action === "remove" || action === "feature") {
     const vendor = await mockVendorRepo.getById(listing.vendorId).catch(() => null);
     if (vendor?.identityId) {

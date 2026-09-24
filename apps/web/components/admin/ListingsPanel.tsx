@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Star, Trash2, Undo2, Search } from "lucide-react";
+import { Star, Trash2, Undo2, Search, Tag } from "lucide-react";
 import type { Capability } from "@voeq/data";
 
 /**
  * Staff batch 1 / task 9 — listing moderation queue.
- * The /api/staff/listings POST existed with zero UI callers; this is the
- * caller. Remove requires a reason (>= 10 chars) because the vendor receives
+ * ADMIN-05: richer rows (image thumb, category name, price formatted as ₦,
+ * date, save stats, listing ID) + recategorize dropdown (PATCH to /api/staff/listings).
+ * Remove requires a reason (>= 10 chars) because the vendor receives
  * it verbatim in a notification with appeal instructions.
  */
 
@@ -21,7 +22,12 @@ interface ListingRow {
   isFeatured: boolean;
   featuredUntil: string | null;
   priceMinMinor: number;
-  /** MONEY BAG S1: 'seed' = founder-commissioned placeholder (hard-deletable). */
+  priceFormatted: string;
+  categoryId: string;
+  categorySlug: string;
+  imageUrl: string | null;
+  createdAt: string | null;
+  saveCount: number;
   source?: "seed" | null;
 }
 
@@ -36,12 +42,16 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
   const [confirm, setConfirm] = useState<{ row: ListingRow; action: PanelAction } | null>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState("");
+  const [categories, setCategories] = useState<{ id: string; slug: string; name: string }[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/staff/listings");
+      const params = new URLSearchParams();
+      if (search.trim()) params.set("q", search.trim());
+      const res = await fetch(`/api/staff/listings?${params}`);
       const data = await res.json();
       if (res.ok && data.ok) setRows(data.listings as ListingRow[]);
       else setError(String(data.error ?? `Failed (${res.status})`));
@@ -50,7 +60,18 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [search]);
+
+  // Load categories for recategorize dropdown
+  useEffect(() => {
+    if (!canModerate) return;
+    fetch("/api/staff/categories")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.ok) setCategories(d.categories ?? []);
+      })
+      .catch(() => {});
+  }, [canModerate]);
 
   useEffect(() => {
     if (canModerate) void load();
@@ -61,7 +82,6 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
     if (!confirm) return;
     setBusy(true);
     try {
-      // MONEY BAG S1: seed-delete goes to the dedicated hard-delete route.
       if (confirm.action === "seed-delete") {
         const res = await fetch("/api/staff/seed-delete", {
           method: "POST",
@@ -71,8 +91,7 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
         const data = await res.json();
         if (res.ok && data.ok) {
           setToast({ kind: "ok", text: `Deleted forever ✓ "${data.title}" is permanently removed.` });
-          setConfirm(null);
-          setReason("");
+          setConfirm(null); setReason("");
           void load();
         } else {
           setToast({ kind: "err", text: String(data.detail ?? data.error ?? `Failed (${res.status})`) });
@@ -87,14 +106,37 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
       const data = await res.json();
       if (res.ok && data.ok) {
         setToast({ kind: "ok", text: `${labelFor(confirm.action)} applied ✓${confirm.action === "remove" ? " — vendor notified" : confirm.action === "feature" ? " — vendor notified" : ""}` });
-        setConfirm(null);
-        setReason("");
+        setConfirm(null); setReason("");
         void load();
       } else {
         setToast({ kind: "err", text: String(data.error ?? `Failed (${res.status})`) });
       }
     } catch {
       setToast({ kind: "err", text: "Network error — action not applied." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // ADMIN-05: recategorize
+  async function recategorize(listingId: string, categoryId: string) {
+    if (!categoryId) return;
+    setBusy(true);
+    try {
+      const res = await fetch("/api/staff/listings", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ listingId, action: "recategorize", categoryId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setToast({ kind: "ok", text: "✓ Recategorized." });
+        void load();
+      } else {
+        setToast({ kind: "err", text: String(data.error ?? `Failed (${res.status})`) });
+      }
+    } catch {
+      setToast({ kind: "err", text: "Network error." });
     } finally {
       setBusy(false);
     }
@@ -114,9 +156,8 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
         <p style={{ margin: 0, fontSize: 13, color: "var(--role-text-muted)" }}>
-          {loading ? "Loading…" : `${visibleRows.length} listing${visibleRows.length === 1 ? "" : "s"} (newest first, max 100)`}
+          {loading ? "Loading…" : `${visibleRows.length} listing${visibleRows.length === 1 ? "" : "s"} (max 100)`}
         </p>
-        {/* MONEY BAG S2: staff-only Seeds filter — seed vs real at a glance. */}
         <div style={{ display: "flex", gap: 6 }}>
           {([
             ["all", `All (${rows.length})`],
@@ -142,9 +183,17 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
             </button>
           ))}
         </div>
-        <button onClick={() => void load()} style={{ background: "none", border: "1px solid var(--role-border)", borderRadius: 8, padding: "6px 12px", fontSize: 12, color: "var(--role-text)", cursor: "pointer", display: "flex", gap: 6, alignItems: "center" }}>
-          <Search size={13} /> Refresh
-        </button>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <input
+            style={{ padding: "6px 10px", fontSize: 12, borderRadius: 8, border: "1px solid var(--role-border)", background: "var(--role-surface)", color: "var(--role-text)", width: 180 }}
+            placeholder="Search title, ID…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button onClick={() => void load()} style={{ background: "none", border: "1px solid var(--role-border)", borderRadius: 8, padding: "6px 12px", fontSize: 12, color: "var(--role-text)", cursor: "pointer", display: "flex", gap: 6, alignItems: "center" }}>
+            <Search size={13} /> Refresh
+          </button>
+        </div>
       </div>
 
       {error && <p style={{ color: "var(--color-danger, #b91c1c)", fontSize: 13 }}>{error}</p>}
@@ -157,8 +206,13 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr style={{ textAlign: "left", color: "var(--role-text-muted)", borderBottom: "1px solid var(--role-border)" }}>
+                <th style={{ padding: "8px 10px" }}>Image</th>
                 <th style={{ padding: "8px 10px" }}>Listing</th>
                 <th style={{ padding: "8px 10px" }}>Vendor</th>
+                <th style={{ padding: "8px 10px" }}>Category</th>
+                <th style={{ padding: "8px 10px" }}>Price</th>
+                <th style={{ padding: "8px 10px" }}>Date</th>
+                <th style={{ padding: "8px 10px" }}>Saves</th>
                 <th style={{ padding: "8px 10px" }}>Status</th>
                 <th style={{ padding: "8px 10px" }}>Featured</th>
                 <th style={{ padding: "8px 10px", textAlign: "right" }}>Actions</th>
@@ -167,30 +221,36 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
             <tbody>
               {visibleRows.map((r) => (
                 <tr key={r.id} style={{ borderBottom: "1px solid var(--role-border)" }}>
-                  <td style={{ padding: "10px", fontWeight: 600, color: "var(--role-text)" }}>
-                    {r.title}
-                    {/* MONEY BAG S1: SEED tag — staff-only marker, vendors see nothing. */}
+                  <td style={{ padding: "10px" }}>
+                    {r.imageUrl ? (
+                      <img src={r.imageUrl} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6, border: "1px solid var(--role-border)" }} />
+                    ) : (
+                      <div style={{ width: 48, height: 48, background: "var(--role-surface-sunken)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--role-text-muted)", fontSize: 10 }}>—</div>
+                    )}
+                  </td>
+                  <td style={{ padding: "10px", fontWeight: 600, color: "var(--role-text)", minWidth: 140 }}>
+                    <div>{r.title}</div>
+                    <div style={{ fontSize: 11, color: "var(--role-text-muted)", fontFamily: "var(--font-mono, monospace)", marginTop: 2 }}>{r.id}</div>
                     {r.source === "seed" && (
-                      <span
-                        data-testid="listing-seed-tag"
-                        style={{
-                          marginLeft: 8,
-                          fontSize: 9.5,
-                          fontWeight: 800,
-                          letterSpacing: "0.08em",
-                          background: "rgba(232,163,61,0.16)",
-                          color: "var(--color-amber-dark, #9a6d1f)",
-                          border: "1px solid rgba(232,163,61,0.4)",
-                          borderRadius: 4,
-                          padding: "2px 6px",
-                          verticalAlign: "middle",
-                        }}
-                      >
-                        SEED
-                      </span>
+                      <span data-testid="listing-seed-tag" style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: "0.08em", background: "rgba(232,163,61,0.16)", color: "var(--color-amber-dark, #9a6d1f)", border: "1px solid rgba(232,163,61,0.4)", borderRadius: 4, padding: "2px 6px" }}>SEED</span>
                     )}
                   </td>
                   <td style={{ padding: "10px", color: "var(--role-text-muted)" }}>{r.vendorName}</td>
+                  <td style={{ padding: "10px" }}>
+                    <select
+                      value={r.categoryId}
+                      onChange={(e) => recategorize(r.id, e.target.value)}
+                      style={{ fontSize: 12, padding: "4px 8px", borderRadius: 6, border: "1px solid var(--role-border)", background: "var(--role-surface)", color: "var(--role-text)", cursor: "pointer" }}
+                      aria-label="Recategorize listing"
+                    >
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>{c.slug}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td style={{ padding: "10px", color: "var(--role-text)", fontWeight: 500 }}>{r.priceFormatted}</td>
+                  <td style={{ padding: "10px", color: "var(--role-text-muted)" }}>{r.createdAt ? r.createdAt.slice(0, 10) : "—"}</td>
+                  <td style={{ padding: "10px", color: "var(--role-text-muted)" }}>{r.saveCount}</td>
                   <td style={{ padding: "10px" }}>
                     <span style={{ fontWeight: 600, color: r.status === "active" && r.isPublished ? "var(--color-status-open, #1a7f37)" : r.status === "removed" ? "var(--color-danger, #b91c1c)" : "var(--role-text-muted)" }}>
                       {r.status === "removed" ? "removed" : r.isPublished ? "live" : "draft"}
@@ -201,17 +261,11 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
                       <span style={{ color: "var(--role-accent-strong)", fontWeight: 600 }}>
                         ★{r.featuredUntil ? ` until ${new Date(r.featuredUntil).toISOString().slice(0, 10)}` : ""}
                       </span>
-                    ) : (
-                      "—"
-                    )}
+                    ) : ("—")}
                   </td>
                   <td style={{ padding: "10px", textAlign: "right", whiteSpace: "nowrap" }}>
                     {r.status === "active" && (
-                      <button
-                        onClick={() => setConfirm({ row: r, action: "remove" })}
-                        title="Remove from platform (soft — reversible, vendor notified)"
-                        style={btn("var(--color-danger, #b91c1c)")}
-                      >
+                      <button onClick={() => setConfirm({ row: r, action: "remove" })} title="Remove from platform (soft — reversible, vendor notified)" style={btn("var(--color-danger, #b91c1c)")}>
                         <Trash2 size={13} /> Remove
                       </button>
                     )}
@@ -224,15 +278,8 @@ export function ListingsPanel({ capabilities }: { capabilities: Capability[] }) 
                         <Undo2 size={13} /> Unfeature
                       </button>
                     )}
-                    {/* MONEY BAG S1: hard-delete for SEED rows only — the API
-                        refuses real listings (409), so this button is safe. */}
                     {r.source === "seed" && (
-                      <button
-                        data-testid="listing-seed-delete"
-                        onClick={() => setConfirm({ row: r, action: "seed-delete" })}
-                        title="Delete forever — permanent, bypasses soft-delete (seeds only)"
-                        style={{ ...btn("var(--color-amber-dark, #9a6d1f)"), borderColor: "rgba(232,163,61,0.5)" }}
-                      >
+                      <button data-testid="listing-seed-delete" onClick={() => setConfirm({ row: r, action: "seed-delete" })} title="Delete forever — permanent, bypasses soft-delete (seeds only)" style={{ ...btn("var(--color-amber-dark, #9a6d1f)"), borderColor: "rgba(232,163,61,0.5)" }}>
                         <Trash2 size={13} /> Delete forever
                       </button>
                     )}

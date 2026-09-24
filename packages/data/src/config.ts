@@ -15,6 +15,8 @@ export interface CategoryRepo {
   /** P2 (config console): rename display name; slug is the stable key. */
   rename(slug: string, name: string): Promise<Category | null>;
   setActive(slug: string, isActive: boolean): Promise<Category | null>;
+  /** ADMIN-09: reorder — swap sort_order of two adjacent categories. */
+  reorder(slugA: string, slugB: string): Promise<Category[]>;
 }
 
 export interface CampusRepo {
@@ -65,6 +67,15 @@ const mockCategoryRepoImpl: CategoryRepo = {
     if (!c) return null;
     c.name = name.trim();
     return c;
+  },
+  async reorder(slugA: string, slugB: string) {
+    const a = categories.find((x) => x.slug === slugA);
+    const b = categories.find((x) => x.slug === slugB);
+    if (!a || !b) return categories;
+    const tmp = a.sortOrder ?? 0;
+    a.sortOrder = b.sortOrder ?? 0;
+    b.sortOrder = tmp;
+    return categories;
   },
 };
 
