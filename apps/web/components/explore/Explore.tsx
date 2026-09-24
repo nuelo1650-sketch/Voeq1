@@ -249,6 +249,7 @@ export function Explore({
       <header
         data-testid="explore-topbar"
         className="voeq-topbar"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 var(--nav-inline-pad, 16px)', height: 56 }}
       >
         {/* Topbar: logo + single search + auth buttons (no back arrow, no hamburger) */}
         <Link href="/" data-testid="explore-wordmark" aria-label="Voeq" className="voeq-topbar-wordmark" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0, order: 0 }}>
