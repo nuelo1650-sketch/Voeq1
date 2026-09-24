@@ -144,11 +144,12 @@ export function applyFilters(items: ExploreListing[], f: ExploreFilters): Explor
   if (f.query) {
     const q = f.query.toLowerCase().trim();
     out = out.filter((i) =>
-      i.title.toLowerCase().includes(q) ||
-      i.vendorName.toLowerCase().includes(q) ||
-      (i.categorySlug ?? "").toLowerCase().includes(q) ||
-      (i.description ?? "").toLowerCase().includes(q) ||
-      (i.shortDescription ?? "").toLowerCase().includes(q)
+      ]      i.title.toLowerCase().includes(q) ||
+            i.vendorName.toLowerCase().includes(q) ||
+            (i.categorySlug ?? "").toLowerCase().includes(q) ||
+            (i.categoryId ?? "").toLowerCase().includes(q) ||
+            (i.description ?? "").toLowerCase().includes(q) ||
+            (i.shortDescription ?? "").toLowerCase().includes(q)
     );
   }
   if (f.category) out = out.filter((i) => i.categorySlug === f.category);
