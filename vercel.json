@@ -1,6 +1,8 @@
 {
   "buildCommand": "npm install && npm run build --workspace @voeq/web",
+  "devCommand": null,
+  "framework": "nextjs",
   "installCommand": "npm install",
-  "outputDirectory": "apps/web/.next",
-  "regions": ["sin1"]
+  "nodeVersion": "24.x",
+  "outputDirectory": "apps/web/.next"
 }
