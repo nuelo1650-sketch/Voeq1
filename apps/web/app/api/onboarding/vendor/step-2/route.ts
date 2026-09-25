@@ -8,9 +8,9 @@ import { SESSION_COOKIE } from "@/lib/session";
  * VS3.2 — Vendor Phase A, Step 2: campus & sub-area.
  */
 const schema = z.object({
-  campus: z.string().min(1).optional(),
-  areaId: z.string().min(1).optional(),
-  subArea: z.string().trim().optional(),
+  campus: z.string().min(1).nullable().optional(),
+  areaId: z.string().min(1).nullable().optional(),
+  subArea: z.string().trim().nullable().optional(),
 });
 
 export async function POST(req: NextRequest) {
