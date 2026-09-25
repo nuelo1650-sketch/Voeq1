@@ -27,9 +27,11 @@ import type {
   CommentRepo,
   ReportRepo as IReportRepo,
   NotificationRepo as INotificationRepo,
+  PushSubscription,
+  PushSubscriptionRepo,
 } from "./interfaces";
 import { mockStaffRepo, mockListingsRepo } from "./mock";
-import { realSavedListingRepo, realFollowRepo, realLikeRepo, realReviewRepo, realCommentRepo, realReportRepo, realNotificationRepo } from "@voeq/db";
+import { realSavedListingRepo, realFollowRepo, realLikeRepo, realReviewRepo, realCommentRepo, realReportRepo, realNotificationRepo, realPushSubscriptionRepo } from "@voeq/db";
 
 const nowIso = () => new Date().toISOString();
 const id = (p: string) => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -322,3 +324,23 @@ export const mockReviewRepo: ReviewRepo = USE_REAL ? realReviewRepo : mockReview
 export const mockCommentRepo: CommentRepo = USE_REAL ? realCommentRepo : mockCommentRepoImpl;
 export const mockReportRepo: IReportRepo = USE_REAL ? realReportRepo : mockReportRepoImpl;
 export const mockNotificationRepo: INotificationRepo = USE_REAL ? realNotificationRepo : mockNotificationRepoImpl;
+
+// NOT-10: push subscriptions — in-memory mock (dev) or real Neon (prod).
+const mockPushSubscriptionRepoImpl: PushSubscriptionRepo = {
+  async create(input) {
+    const sub: PushSubscription = {
+      id: `sub-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      endpoint: input.endpoint,
+      p256dh: input.p256dh,
+      auth: input.auth,
+      identityId: input.identityId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    return sub;
+  },
+  async listForIdentity(identityId: string) { return []; },
+  async deleteForIdentity(identityId: string, endpoint: string) { return true; },
+};
+
+export const mockPushSubscriptionRepo: PushSubscriptionRepo = USE_REAL ? realPushSubscriptionRepo : mockPushSubscriptionRepoImpl;

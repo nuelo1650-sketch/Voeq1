@@ -19,12 +19,14 @@ export type OAuthIntent = "shopper" | "vendor";
 
 export function startGoogleOAuth(intent?: OAuthIntent) {
   const state = crypto.randomUUID().replace(/-/g, "") + Date.now().toString(36);
+  const isProd = window.location.protocol === "https:";
+  const secureFlag = isProd ? "; Secure" : "";
   // Set on the root domain; readable by the callback (same origin voeq.ng).
-  document.cookie = `${GOOGLE_STATE_COOKIE}=${state}; path=/; max-age=600; samesite=lax`;
+  document.cookie = `${GOOGLE_STATE_COOKIE}=${state}; path=/; max-age=600; samesite=lax${secureFlag}`;
   if (intent === "shopper" || intent === "vendor") {
-    document.cookie = `${GOOGLE_INTENT_COOKIE}=${intent}; path=/; max-age=600; samesite=lax`;
+    document.cookie = `${GOOGLE_INTENT_COOKIE}=${intent}; path=/; max-age=600; samesite=lax${secureFlag}`;
   } else {
-    document.cookie = `${GOOGLE_INTENT_COOKIE}=; path=/; max-age=0; samesite=lax`;
+    document.cookie = `${GOOGLE_INTENT_COOKIE}=; path=/; max-age=0; samesite=lax${secureFlag}`;
   }
   // Intent also rides in the redirect URL — the callback cross-checks it
   // against the cookie (mismatch = tampering = intent dropped, CSRF intact).

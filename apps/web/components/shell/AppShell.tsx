@@ -7,6 +7,7 @@ import { Menu, Bell, LogOut, X, ShieldCheck } from "lucide-react";
 import { AppRole, PRIMARY_NAV, CENTER_NAV, STAFF_SIDE_NAV, SIDE_NAV, NavItem } from "./navItems";
 import { BrandLogo } from "@/components/landing/BrandLogo";
 import { NotificationBell } from "@/components/shopper/NotificationBell";
+import { PushProvider } from "@/components/shopper/PushProvider";
 
 const SHELL_CSS = {
   root: {
@@ -247,6 +248,7 @@ export function AppShell({
               with an unread notification saw nothing. Round 79: pass the
               viewer role so new_message/new_review deep-links route correctly. */}
           <NotificationBell viewerRole={staffRole ? "staff" : role === "vendor" ? "vendor" : "shopper"} />
+          <PushProvider role={staffRole ? "staff" : role === "vendor" ? "vendor" : "shopper"} />
           <button aria-label="Sign out" style={SHELL_CSS.iconBtn} onClick={logout}>
             <LogOut size={18} />
           </button>

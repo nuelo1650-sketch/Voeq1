@@ -44,6 +44,8 @@ import type {
   CampusRepo,
   Category,
   CategoryRepo,
+  PushSubscription,
+  VendorResponseTime,
 } from "@voeq/data";
 
 const now = () => new Date().toISOString();
@@ -917,6 +919,20 @@ export const realConversationRepo = {
       WHERE id = ${cid}
     `);
   },
+  // MSG-08: set buyer_message_at idempotently (only if not already set).
+  async setBuyerMessageAt(cid: string, ts: string): Promise<void> {
+    await getDb()
+      .update(s.conversations)
+      .set({ buyerMessageAt: ts })
+      .where(and(eq(s.conversations.id, cid), sql`${s.conversations.buyerMessageAt} IS NULL`));
+  },
+  // MSG-08: set vendor_reply_at idempotently (only if not already set).
+  async setVendorReplyAt(cid: string, ts: string): Promise<void> {
+    await getDb()
+      .update(s.conversations)
+      .set({ vendorReplyAt: ts })
+      .where(and(eq(s.conversations.id, cid), sql`${s.conversations.vendorReplyAt} IS NULL`));
+  },
 };
 
 export const realMessageRepo = {
@@ -1436,3 +1452,67 @@ export const realCategoryRepo: CategoryRepo = {
     return this.list();
   },
 };
+
+// ---- NOT-10: Push Subscription Repo (real Neon) ---------------------------
+function mapPushSubscription(r: typeof s.pushSubscriptions.$inferSelect): PushSubscription {
+  return {
+    id: r.id,
+    endpoint: r.endpoint,
+    p256dh: r.p256dh,
+    auth: r.auth,
+    identityId: r.identityId,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+  };
+}
+
+export const realPushSubscriptionRepo = {
+  async create(input: { endpoint: string; p256dh: string; auth: string; identityId: string }): Promise<PushSubscription> {
+    const rec: PushSubscription = {
+      id: id(),
+      endpoint: input.endpoint,
+      p256dh: input.p256dh,
+      auth: input.auth,
+      identityId: input.identityId,
+      createdAt: now(),
+      updatedAt: now(),
+    };
+    await getDb().insert(s.pushSubscriptions).values(rec).onConflictDoNothing();
+    return rec;
+  },
+  async listForIdentity(identityId: string): Promise<PushSubscription[]> {
+    const rows = await getDb().select().from(s.pushSubscriptions).where(eq(s.pushSubscriptions.identityId, identityId));
+    return rows.map(mapPushSubscription);
+  },
+  async deleteForIdentity(identityId: string, endpoint: string): Promise<boolean> {
+    const deleted = await getDb()
+      .delete(s.pushSubscriptions)
+      .where(and(eq(s.pushSubscriptions.identityId, identityId), eq(s.pushSubscriptions.endpoint, endpoint)))
+      .returning({ id: s.pushSubscriptions.id });
+    return deleted.length > 0;
+  },
+};
+
+// ---- MSG-08: computeVendorResponseTime --------------------------------------
+/**
+ * Compute average vendor response time across all conversations where a vendor
+ * is a participant AND both buyer_message_at AND vendor_replyAt are non-null.
+ * Returns { avgMs, conversationCount }. avgMs = 0 when no matching conversations.
+ */
+export async function computeVendorResponseTime(vendorId: string): Promise<VendorResponseTime> {
+  // Find all conversations where vendor is a participant.
+  const allConvs = await realConversationRepo.listForIdentity(vendorId);
+  // Filter to those with both timestamps set (valid response-time data).
+  const valid = allConvs.filter((c) => c.buyerMessageAt && c.vendorReplyAt);
+  if (valid.length === 0) {
+    return { vendorId, avgMs: 0, conversationCount: 0 };
+  }
+  let totalMs = 0;
+  for (const c of valid) {
+    const buyer = new Date(c.buyerMessageAt!).getTime();
+    const vendor = new Date(c.vendorReplyAt!).getTime();
+    totalMs += vendor - buyer;
+  }
+  const avgMs = Math.round(totalMs / valid.length);
+  return { vendorId, avgMs, conversationCount: valid.length };
+}

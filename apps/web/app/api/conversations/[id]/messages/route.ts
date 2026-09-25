@@ -5,6 +5,7 @@ import {
   mockVendorRepo,
   mockConversationRepo,
   mockMessageRepo,
+  mockPushSubscriptionRepo,
   checkRateLimit,
   logAudit,
 } from "@voeq/data";
@@ -120,6 +121,21 @@ export async function POST(
     const { mockNotificationRepo } = await import("@voeq/data");
     const { mockIdentityRepo } = await import("@voeq/data");
     const other = await mockIdentityRepo.getById(otherId);
+
+    // MSG-08: track buyer/vendor message timing on the conversation.
+    // The FIRST message by a buyer sets buyerMessageAt; the first reply by a
+    // vendor (after buyer messaged) sets vendorReplyAt. Idempotent.
+    const senderIsVendor = Boolean(identity.vendorId) && vendor?.status === "live";
+    if (senderIsVendor) {
+      // Vendor sending — set vendorReplyAt (only if buyer already messaged).
+      if (conv.buyerMessageAt) {
+        await mockConversationRepo.setVendorReplyAt(convId, new Date().toISOString());
+      }
+    } else {
+      // Buyer sending — set buyerMessageAt.
+      await mockConversationRepo.setBuyerMessageAt(convId, new Date().toISOString());
+    }
+
     const notification = await mockNotificationRepo.create({
       recipientId: otherId,
       type: "new_message",
@@ -129,6 +145,34 @@ export async function POST(
     });
     // T4 — push to the recipient's user stream if connected.
     pushNotification(notification);
+
+    // NOT-10: send a web push notification to the recipient's device(s).
+    // Only fires if the recipient has an active push subscription.
+    if (process.env.VAPID_PRIVATE_KEY && process.env.VAPID_PUBLIC_KEY) {
+      const { default: webpush } = await import("web-push");
+      webpush.setVapidDetails(
+        "https://voeq.ng",
+        process.env.VAPID_PUBLIC_KEY,
+        process.env.VAPID_PRIVATE_KEY,
+      );
+      const subs = await mockPushSubscriptionRepo.listForIdentity(otherId);
+      for (const sub of subs) {
+        const pushPayload = JSON.stringify({
+          title: notification.title,
+          body: notification.body,
+          url: `/messages/${convId}`,
+        });
+        try {
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dh, auth: sub.auth },
+          }, pushPayload);
+        } catch {
+          // Dead subscription — clean it up.
+          await mockPushSubscriptionRepo.deleteByEndpoint(sub.endpoint);
+        }
+      }
+    }
   }
 
   return NextResponse.json({ ok: true, message }, { status: 200 });

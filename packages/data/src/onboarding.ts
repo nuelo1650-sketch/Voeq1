@@ -12,6 +12,7 @@
 
 import { mockIdentityRepo } from "./auth";
 import { mockVendorRepo, mockListingsRepo, listListingsByVendor } from "./mock";
+import { CURRENT_VENDOR_AGREEMENT_VERSION } from "./client";
 
 export interface CanGoLiveResult {
   ok: boolean;
@@ -26,12 +27,19 @@ export async function canGoLive(vendor: {
   id: string;
   campus: string;
   agreementAcceptedAt: string | null;
+  agreementVersion: string | null;
   profilePhotoUrl: string | null;
   status: "pending_listings" | "live" | "suspended";
 }): Promise<CanGoLiveResult> {
   const reasons: string[] = [];
   const notes: string[] = [];
-  if (!vendor.agreementAcceptedAt) reasons.push("phase_a_incomplete");
+  if (!vendor.agreementAcceptedAt) {
+    reasons.push("phase_a_incomplete");
+  } else if (vendor.agreementVersion !== CURRENT_VENDOR_AGREEMENT_VERSION) {
+    // Agreement version mismatch — vendor accepted an old revision.
+    // Block go-live; the vendor must re-accept the current terms.
+    reasons.push("agreement_version_outdated");
+  }
   // Real listings live in Neon (mockListingsRepo switches to realListingsRepo on
   // USE_REAL). listListingsByVendor only checks the in-memory dev dataset, so it
   // returns [] for real vendors and would falsely block go-live. Count real

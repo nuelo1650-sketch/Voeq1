@@ -33,11 +33,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Choose your campus or area." }, { status: 400 });
   }
 
-  // Update vendor: set campus OR area_id (not both)
-  const vendor = await mockVendorRepo.patch(identity.vendorId, { 
-    campus: campus ?? null as unknown as string, 
-    areaId: areaId ?? null as unknown as string,
-    subArea: subArea ?? null 
+  // Update vendor: campus is NOT NULL in the DB (schema.ts:168), so we never
+  // send null — clearing campus mode sets it to "" (empty = no campus).
+  const vendor = await mockVendorRepo.patch(identity.vendorId, {
+    campus: campus ?? "",
+    areaId: areaId ?? null,
+    subArea: subArea ?? null,
   });
   if (!vendor) return NextResponse.json({ error: "Vendor not found." }, { status: 404 });
 

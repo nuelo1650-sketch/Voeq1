@@ -1,0 +1,11 @@
+import { neon } from "@neondatabase/serverless";
+import { readFileSync } from "node:fs";
+const t = readFileSync("apps/web/.env.local", "utf8");
+const m = t.match(/^DATABASE_URL=(.*)$/m);
+const url = m![1];
+const sql = neon(url);
+await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS buyer_message_at text`;
+await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS vendor_reply_at text`;
+await sql`CREATE TABLE IF NOT EXISTS push_subscriptions (id text PRIMARY KEY, endpoint text NOT NULL UNIQUE, p256dh text NOT NULL, auth text NOT NULL, identity_id text NOT NULL, created_at text NOT NULL DEFAULT '', updated_at text NOT NULL DEFAULT '')`;
+await sql`CREATE INDEX IF NOT EXISTS push_subscriptions_identity_idx ON push_subscriptions (identity_id)`;
+console.log("PROD migration applied");

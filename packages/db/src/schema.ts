@@ -235,6 +235,9 @@ export const conversations = pgTable("conversations", {
   lastSeen: jsonb("last_seen").$type<Record<string, string>>().notNull().default({}),
   // P-A round 45: listing the conversation is about (opened from a listing).
   listingId: text("listing_id"),
+  // MSG-08: Vendor response-time tracking.
+  buyerMessageAt: text("buyer_message_at"),
+  vendorReplyAt: text("vendor_reply_at"),
 });
 
 export const messages = pgTable("messages", {
@@ -399,4 +402,17 @@ export const categories = pgTable("categories", {
   isActive: boolean("is_active").notNull().default(true),
   /** ADMIN-09: manual sort order. "Other" always pinned last (highest value). */
   sortOrder: integer("sort_order").notNull().default(0),
+});
+
+// ---- NOT-10: Push notification subscriptions (Web Push Protocol) -----------
+// One row per push subscription endpoint. A single identity may have multiple
+// devices, so endpoint is the unique key (not identity_id).
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: text("id").primaryKey(),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  identityId: text("identity_id").notNull(),
+  createdAt: text("created_at").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default(""),
 });

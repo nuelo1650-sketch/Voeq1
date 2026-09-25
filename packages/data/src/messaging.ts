@@ -76,6 +76,16 @@ const mockConversationRepoImpl = {
     const c = conversations.get(convId);
     if (c) c.lastSeen = { ...c.lastSeen, [identityId]: new Date().toISOString() };
   },
+  // MSG-08: set buyer_message_at idempotently.
+  async setBuyerMessageAt(convId: string, ts: string): Promise<void> {
+    const c = conversations.get(convId);
+    if (c && !c.buyerMessageAt) c.buyerMessageAt = ts;
+  },
+  // MSG-08: set vendor_reply_at idempotently.
+  async setVendorReplyAt(convId: string, ts: string): Promise<void> {
+    const c = conversations.get(convId);
+    if (c && !c.vendorReplyAt) c.vendorReplyAt = ts;
+  },
 };
 
 const mockMessageRepoImpl = {

@@ -118,6 +118,10 @@ export interface Conversation {
   lastSeen: Record<string, string>;
   /** The listing this chat is about (opened from a listing), if any. */
   listingId?: string | null;
+  /** MSG-08: when the buyer sent the first message (ISO). null if no buyer message yet. */
+  buyerMessageAt?: string | null;
+  /** MSG-08: when the vendor first replied (ISO). null if no vendor reply yet. */
+  vendorReplyAt?: string | null;
 }
 
 export interface Message {
@@ -573,3 +577,28 @@ export type ImageContext = "vendor_photo" | "listing_photo" | "message_attachmen
 export type UploadResult =
   | { ok: true; url: string; publicId: string; context: ImageContext }
   | { ok: false; reason: string; retryable: boolean };
+
+// ---- NOT-10: Push notification subscriptions (Web Push Protocol) -----------
+
+export interface PushSubscription {
+  id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  identityId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PushSubscriptionRepo {
+  create(input: { endpoint: string; p256dh: string; auth: string; identityId: string }): Promise<PushSubscription>;
+  listForIdentity(identityId: string): Promise<PushSubscription[]>;
+  deleteForIdentity(identityId: string, endpoint: string): Promise<boolean>;
+}
+
+/** MSG-08: vendor response-time analytics. */
+export interface VendorResponseTime {
+  vendorId: string;
+  avgMs: number;
+  conversationCount: number;
+}
