@@ -355,18 +355,6 @@ export async function loadExplore(params: ExploreParams): Promise<ExploreResult>
       return { ...base, saveCount: eng?.saves ?? 0, followerCount: eng?.follows ?? 0 };
     });
 
-    if (params.query) {
-      const q = params.query.trim().toLowerCase();
-      // P-A round 57 (C6): real search matched listing TITLES only — a shopper
-      // searching a VENDOR's name ("Glam", "Legacy", "Mama Nkechi") got the
-      // "campus is waking up" empty state. Now match vendor name too.
-      mapped = mapped.filter((m) => {
-        const title = (m.title ?? "").toLowerCase();
-        const vendor = (m.vendorName ?? "").toLowerCase();
-        return title.includes(q) || vendor.includes(q);
-      });
-    }
-
     const filtered = applySort(applyFilters(mapped, { ...params, category: categorySlug }), params.sort);
     const trending = mapped.filter((m) => m.trending);
 
