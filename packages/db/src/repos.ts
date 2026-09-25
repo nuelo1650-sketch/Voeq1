@@ -1491,6 +1491,13 @@ export const realPushSubscriptionRepo = {
       .returning({ id: s.pushSubscriptions.id });
     return deleted.length > 0;
   },
+  async deleteByEndpoint(endpoint: string): Promise<boolean> {
+    const deleted = await getDb()
+      .delete(s.pushSubscriptions)
+      .where(eq(s.pushSubscriptions.endpoint, endpoint))
+      .returning({ id: s.pushSubscriptions.id });
+    return deleted.length > 0;
+  },
 };
 
 // ---- MSG-08: computeVendorResponseTime --------------------------------------

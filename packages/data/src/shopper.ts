@@ -341,6 +341,7 @@ const mockPushSubscriptionRepoImpl: PushSubscriptionRepo = {
   },
   async listForIdentity(identityId: string) { return []; },
   async deleteForIdentity(identityId: string, endpoint: string) { return true; },
+  async deleteByEndpoint(endpoint: string) { return true; },
 };
 
 export const mockPushSubscriptionRepo: PushSubscriptionRepo = USE_REAL ? realPushSubscriptionRepo : mockPushSubscriptionRepoImpl;

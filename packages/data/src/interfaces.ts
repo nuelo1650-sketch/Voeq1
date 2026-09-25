@@ -594,6 +594,7 @@ export interface PushSubscriptionRepo {
   create(input: { endpoint: string; p256dh: string; auth: string; identityId: string }): Promise<PushSubscription>;
   listForIdentity(identityId: string): Promise<PushSubscription[]>;
   deleteForIdentity(identityId: string, endpoint: string): Promise<boolean>;
+  deleteByEndpoint(endpoint: string): Promise<boolean>;
 }
 
 /** MSG-08: vendor response-time analytics. */
