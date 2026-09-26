@@ -3,7 +3,5 @@
   "devCommand": null,
   "framework": "nextjs",
   "installCommand": "npm install",
-  "nodeVersion": "24.x",
-  "outputDirectory": "apps/web/.next",
-  "rootDirectory": "."
+  "outputDirectory": "apps/web/.next"
 }
